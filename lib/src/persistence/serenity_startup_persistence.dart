@@ -1,0 +1,192 @@
+// ignore_for_file: invalid_use_of_protected_member
+
+part of '../../main.dart';
+
+extension _SerenityShellStartupPersistence on _SerenityShellState {
+  Future<Directory> _thumbnailDirectory() async {
+    final environmentPath = _currentEnvironmentPath ?? 'startup';
+    final cacheKey = md5.convert(utf8.encode(environmentPath)).toString();
+    final thumbnails = Directory('${Directory.systemTemp.path}/serenity-workspace-thumbnails/$cacheKey');
+    await thumbnails.create(recursive: true);
+    return thumbnails;
+  }
+
+  Future<void> _restoreSession() async {
+    if (_isRunningInWidgetTest) {
+      setState(() {
+        _session = _seedSession();
+        _isLoading = false;
+      });
+      _refreshWorkspaceViewTracking();
+      return;
+    }
+
+    try {
+      final lastEnvironmentPath = await _loadLastEnvironmentPath();
+      if (lastEnvironmentPath != null && lastEnvironmentPath.isNotEmpty && await File(lastEnvironmentPath).exists()) {
+        await _loadEnvironmentFromPath(lastEnvironmentPath, showSuccessMessage: false, persistAsLastOpened: true);
+        return;
+      }
+      await _storeLastEnvironmentPath(null);
+    } catch (_) {
+      await _storeLastEnvironmentPath(null);
+    }
+
+    setState(() {
+      _session = null;
+      _currentEnvironmentPath = null;
+      _isLoading = false;
+    });
+
+    _refreshWorkspaceViewTracking();
+    unawaited(_syncWindowTitle());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_promptForStartupEnvironment());
+    });
+  }
+
+  void _queueSave() {
+    final shouldSyncTitle = !_hasUnsavedChanges;
+    _hasUnsavedChanges = true;
+    if (shouldSyncTitle) {
+      unawaited(_syncWindowTitle());
+    }
+  }
+
+  Future<SerenitySessionState> _sessionWithRefreshedBookmarks(SerenitySessionState session) async {
+    if (_isRunningInWidgetTest || !Platform.isMacOS) {
+      return session;
+    }
+
+    var changed = false;
+    final nextWorkspaces = <WorkspaceState>[];
+    for (final workspace in session.workspaces) {
+      final nextWindows = <AssetWindowState>[];
+      for (final window in workspace.windows) {
+        final asset = window.asset;
+        final path = asset.filePath;
+        if (path == null || path.isEmpty || asset.fileBookmark != null && asset.fileBookmark!.isNotEmpty) {
+          nextWindows.add(window);
+          continue;
+        }
+
+        if (!await File(path).exists()) {
+          nextWindows.add(window);
+          continue;
+        }
+
+        final bookmark = await _createFileBookmark(path);
+        if (bookmark == null || bookmark.isEmpty) {
+          nextWindows.add(window);
+          continue;
+        }
+
+        changed = true;
+        nextWindows.add(window.copyWith(asset: asset.copyWith(fileBookmark: bookmark)));
+      }
+      nextWorkspaces.add(changed ? workspace.copyWith(windows: nextWindows) : workspace);
+    }
+
+    if (!changed) {
+      return session;
+    }
+
+    return session.copyWith(workspaces: nextWorkspaces);
+  }
+
+  Future<void> _saveSession({bool force = false}) async {
+    final session = _session;
+    final environmentPath = _currentEnvironmentPath;
+    if (session == null || environmentPath == null || environmentPath.isEmpty) {
+      return;
+    }
+    if (!force && !_hasUnsavedChanges) {
+      return;
+    }
+
+    try {
+      final sessionToSave = await _sessionWithRefreshedBookmarks(session);
+      if (mounted) {
+        setState(() {
+          if (!identical(sessionToSave, session)) {
+            _session = sessionToSave;
+          }
+          _hasUnsavedChanges = false;
+        });
+      } else {
+        if (!identical(sessionToSave, session)) {
+          _session = sessionToSave;
+        }
+        _hasUnsavedChanges = false;
+      }
+      await _saveEnvironmentToPath(environmentPath, sessionOverride: sessionToSave, showMessageOnFailure: false);
+      await _syncWindowTitle();
+    } catch (_) {
+      // Widget tests and unsupported platforms can skip local persistence.
+    }
+  }
+
+  Future<String?> _createFileBookmark(String path) async {
+    if (_isRunningInWidgetTest || !Platform.isMacOS) {
+      return null;
+    }
+
+    try {
+      return await _bookmarkChannel.invokeMethod<String>('createBookmark', {'path': path});
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<String?> _resolveFileBookmark(String bookmark) async {
+    if (_isRunningInWidgetTest || !Platform.isMacOS) {
+      return null;
+    }
+
+    try {
+      return await _bookmarkChannel.invokeMethod<String>('resolveBookmark', {'bookmark': bookmark});
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _syncWindowTitle() async {
+    if (_isRunningInWidgetTest || !Platform.isMacOS) {
+      return;
+    }
+
+    try {
+      await _windowChannel.invokeMethod<void>('setWindowTitle', {'title': _windowTitle});
+    } catch (_) {
+      // Ignore title updates if the platform hook is unavailable.
+    }
+  }
+
+  Future<String?> _loadLastEnvironmentPath() async {
+    if (_isRunningInWidgetTest || !Platform.isMacOS) {
+      return null;
+    }
+
+    try {
+      return await _preferencesChannel.invokeMethod<String>('getLastEnvironmentPath');
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _storeLastEnvironmentPath(String? path) async {
+    if (_isRunningInWidgetTest || !Platform.isMacOS) {
+      return;
+    }
+
+    try {
+      if (path == null || path.isEmpty) {
+        await _preferencesChannel.invokeMethod<void>('clearLastEnvironmentPath');
+      } else {
+        await _preferencesChannel.invokeMethod<void>('setLastEnvironmentPath', {'path': path});
+      }
+    } catch (_) {
+      // Ignore preferences persistence failures.
+    }
+  }
+}
