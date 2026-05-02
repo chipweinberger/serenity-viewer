@@ -6,10 +6,10 @@ const MethodChannel _fileActionsChannel = MethodChannel('serenity/file_actions')
 const MethodChannel _preferencesChannel = MethodChannel('serenity/preferences');
 const MethodChannel _videoToolsChannel = MethodChannel('serenity/video_tools');
 const MethodChannel _windowChannel = MethodChannel('serenity/window');
-const double _workspaceExtent = 3000;
+const double _workspaceExtent = 1500;
 const double _workspaceMinCoordinate = -_workspaceExtent;
 const double _workspaceMaxCoordinate = _workspaceExtent;
-const double _workspaceMinZoom = 0.16;
+const double _workspaceMinZoom = 0.64;
 const double _workspaceMaxZoom = 4;
 const Offset _defaultWorkspaceCenter = Offset.zero;
 

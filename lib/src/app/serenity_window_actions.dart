@@ -5,6 +5,11 @@ part of '../../main.dart';
 extension _SerenityShellWindowActions on _SerenityShellState {
   static const List<double> _videoPlaybackSpeeds = [0.25, 0.5, 0.75, 1.0];
 
+  bool get _isCommandPressedForContentGesture {
+    final pressedKeys = HardwareKeyboard.instance.logicalKeysPressed;
+    return pressedKeys.contains(LogicalKeyboardKey.metaLeft) || pressedKeys.contains(LogicalKeyboardKey.metaRight);
+  }
+
   void _focusWindow(String windowId) {
     final workspace = _activeWorkspace;
     final matchingWindow = workspace.windows.where((window) => window.asset.id == windowId);
@@ -226,12 +231,12 @@ extension _SerenityShellWindowActions on _SerenityShellState {
     );
   }
 
-  void _handleWorkspacePanZoomStart(PointerPanZoomStartEvent event, WorkspaceState workspace, Size viewportSize) {
+  void _handleWorkspacePanZoomStart(PointerPanZoomStartEvent event, WorkspaceState workspace) {
     if (_screen != SerenityScreen.workspace || _workspaceLayoutMode == WorkspaceLayoutMode.expose) {
       _isWorkspaceGestureActive = false;
       return;
     }
-    if (_isPointOverWorkspaceWindow(event.localPosition, workspace, viewportSize)) {
+    if (_isCommandPressedForContentGesture) {
       _isWorkspaceGestureActive = false;
       return;
     }

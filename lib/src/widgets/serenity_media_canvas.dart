@@ -103,6 +103,11 @@ class _SerenityMediaCanvasState extends State<SerenityMediaCanvas> {
     return focalPoint - center - (vector * ratio);
   }
 
+  bool get _isCommandPressed {
+    final pressedKeys = HardwareKeyboard.instance.logicalKeysPressed;
+    return pressedKeys.contains(LogicalKeyboardKey.metaLeft) || pressedKeys.contains(LogicalKeyboardKey.metaRight);
+  }
+
   void _applyZoomFromPoint({
     required Size viewportSize,
     required Offset focalPoint,
@@ -133,7 +138,7 @@ class _SerenityMediaCanvasState extends State<SerenityMediaCanvas> {
   }
 
   void _handlePointerSignal(PointerSignalEvent event) {
-    if (event is! PointerScrollEvent) {
+    if (event is! PointerScrollEvent || !_isCommandPressed) {
       return;
     }
 
@@ -144,6 +149,10 @@ class _SerenityMediaCanvasState extends State<SerenityMediaCanvas> {
   }
 
   void _handlePointerPanZoomStart(PointerPanZoomStartEvent event) {
+    if (!_isCommandPressed) {
+      return;
+    }
+
     final renderBox = context.findRenderObject() as RenderBox?;
     _gestureStartFitSize = _fitSizeForViewport(renderBox?.size ?? Size.zero);
     _gestureStartZoom = widget.window.zoom;
@@ -152,6 +161,10 @@ class _SerenityMediaCanvasState extends State<SerenityMediaCanvas> {
   }
 
   void _handlePointerPanZoomUpdate(PointerPanZoomUpdateEvent event) {
+    if (!_isCommandPressed) {
+      return;
+    }
+
     final renderBox = context.findRenderObject() as RenderBox?;
     final viewportSize = renderBox?.size ?? Size.zero;
     _gestureAccumulatedPan += event.panDelta;

@@ -58,7 +58,7 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
 
           return Listener(
             behavior: HitTestBehavior.translucent,
-            onPointerPanZoomStart: (event) => _handleWorkspacePanZoomStart(event, workspace, viewportSize),
+            onPointerPanZoomStart: (event) => _handleWorkspacePanZoomStart(event, workspace),
             onPointerPanZoomUpdate: (event) => _handleWorkspacePanZoomUpdate(event, workspace, viewportSize),
             onPointerPanZoomEnd: (_) => _handleWorkspacePanZoomEnd(),
             child: Stack(

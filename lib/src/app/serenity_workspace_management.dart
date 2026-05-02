@@ -393,10 +393,4 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
 
     return filtered;
   }
-
-  List<AssetWindowState> _windowsForDisplay() {
-    final windows = [..._activeWorkspace.windows];
-    windows.sort((a, b) => a.zIndex.compareTo(b.zIndex));
-    return windows;
-  }
 }

@@ -47,25 +47,6 @@ extension _SerenityShellWorkspaceGeometry on _SerenityShellState {
     );
   }
 
-  Rect _workspaceScreenRectForWindow(WorkspaceState workspace, AssetWindowState window, Size viewportSize) {
-    final offset = _workspaceScreenOffsetForWindow(workspace, window, viewportSize);
-    return Rect.fromLTWH(
-      offset.dx,
-      offset.dy,
-      window.size.width * workspace.viewportZoom,
-      window.size.height * workspace.viewportZoom,
-    );
-  }
-
-  bool _isPointOverWorkspaceWindow(Offset localPosition, WorkspaceState workspace, Size viewportSize) {
-    for (final window in _windowsForDisplay().reversed) {
-      if (_workspaceScreenRectForWindow(workspace, window, viewportSize).contains(localPosition)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   void _setWorkspaceViewport({required String workspaceId, Offset? center, double? zoom, bool queueThumbnail = false}) {
     final session = _session;
     if (session == null) {
