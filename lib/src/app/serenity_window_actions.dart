@@ -317,6 +317,7 @@ extension _SerenityShellWindowActions on _SerenityShellState {
             .map((window) => window.asset.id == windowId ? window.copyWith(videoPositionMs: positionMs) : window)
             .toList(),
       ),
+      queueThumbnail: false,
     );
   }
 
@@ -345,6 +346,7 @@ extension _SerenityShellWindowActions on _SerenityShellState {
             .map((window) => window.asset.id == windowId ? window.copyWith(videoPlaybackSpeed: nextSpeed) : window)
             .toList(),
       ),
+      queueThumbnail: false,
     );
   }
 

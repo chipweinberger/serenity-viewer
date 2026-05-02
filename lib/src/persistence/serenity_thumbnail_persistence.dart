@@ -4,12 +4,21 @@ part of '../../main.dart';
 
 extension _SerenityShellThumbnailPersistence on _SerenityShellState {
   Future<void> _refreshActiveWorkspaceThumbnailIfNeeded() async {
-    final workspaceId = _activeWorkspaceOrNull?.id;
+    if (_screen != SerenityScreen.workspace) {
+      return;
+    }
+
+    final workspace = _activeWorkspaceOrNull;
+    final workspaceId = workspace?.id;
     if (workspaceId == null || !_thumbnailDirtyWorkspaces.contains(workspaceId)) {
       return;
     }
 
-    _queueThumbnailRefresh(workspaceId, delay: Duration.zero);
+    if (_workspaceViewportSize.width <= 0 || _workspaceViewportSize.height <= 0) {
+      return;
+    }
+
+    await _renderAndPersistWorkspaceThumbnail(workspaceId);
   }
 
   Future<File> _thumbnailFileForWorkspace(String workspaceId) async {
@@ -69,11 +78,6 @@ extension _SerenityShellThumbnailPersistence on _SerenityShellState {
 
   void _queueThumbnailRefresh(String workspaceId, {Duration delay = const Duration(milliseconds: 300)}) {
     _thumbnailDirtyWorkspaces.add(workspaceId);
-    _thumbnailDebounces.remove(workspaceId)?.cancel();
-    _thumbnailDebounces[workspaceId] = Timer(delay, () async {
-      _thumbnailDebounces.remove(workspaceId);
-      await _renderAndPersistWorkspaceThumbnail(workspaceId);
-    });
   }
 
   Future<void> _renderAndPersistWorkspaceThumbnail(String workspaceId) async {
@@ -180,10 +184,7 @@ extension _SerenityShellThumbnailPersistence on _SerenityShellState {
       canvas.drawRect(const Rect.fromLTWH(0, 0, canvasWidth, canvasHeight), emptyPaint);
     } else {
       final sortedWindows = [...workspace.windows]..sort((a, b) => a.zIndex.compareTo(b.zIndex));
-      final sourceViewportSize =
-          workspace.id == _activeWorkspaceOrNull?.id &&
-              _workspaceViewportSize.width > 0 &&
-              _workspaceViewportSize.height > 0
+      final sourceViewportSize = _workspaceViewportSize.width > 0 && _workspaceViewportSize.height > 0
           ? _workspaceViewportSize
           : const Size(canvasWidth, canvasHeight);
       final sourceScale = math.min(canvasWidth / sourceViewportSize.width, canvasHeight / sourceViewportSize.height);

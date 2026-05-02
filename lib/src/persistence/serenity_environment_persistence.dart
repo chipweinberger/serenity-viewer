@@ -26,9 +26,7 @@ extension _SerenityShellEnvironmentPersistence on _SerenityShellState {
 
     _currentEnvironmentPath = path;
     try {
-      for (final workspace in session.workspaces) {
-        await _renderAndPersistWorkspaceThumbnail(workspace.id);
-      }
+      await _refreshActiveWorkspaceThumbnailIfNeeded();
 
       final archive = Archive()
         ..addFile(
@@ -296,7 +294,6 @@ extension _SerenityShellEnvironmentPersistence on _SerenityShellState {
       final entry = archive.findFile('thumbnails/${workspace.id}.jpg');
       if (entry == null) {
         nextWorkspaces.add(workspace);
-        _queueThumbnailRefresh(workspace.id, delay: Duration.zero);
         continue;
       }
 
@@ -305,7 +302,6 @@ extension _SerenityShellEnvironmentPersistence on _SerenityShellState {
       await FileImage(file).evict();
       nextWorkspaces.add(workspace.copyWith(thumbnailPath: file.path));
       updated = true;
-      _queueThumbnailRefresh(workspace.id, delay: Duration.zero);
     }
 
     if (updated && mounted && _session != null) {

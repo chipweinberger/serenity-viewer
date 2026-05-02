@@ -22,7 +22,7 @@ extension _SerenityShellSessionActions on _SerenityShellState {
       ),
     );
     if (queueThumbnail) {
-      _queueThumbnailRefresh(nextWorkspace.id);
+      _thumbnailDirtyWorkspaces.add(nextWorkspace.id);
     }
   }
 
