@@ -12,6 +12,7 @@ class ExposeWindowCard extends StatefulWidget {
     required this.editMode,
     required this.onOpen,
     required this.onToggleSelected,
+    this.onShowInFinder,
     required this.onRemove,
   });
 
@@ -24,6 +25,7 @@ class ExposeWindowCard extends StatefulWidget {
   final bool editMode;
   final VoidCallback onOpen;
   final VoidCallback onToggleSelected;
+  final VoidCallback? onShowInFinder;
   final VoidCallback onRemove;
 
   @override
@@ -32,6 +34,29 @@ class ExposeWindowCard extends StatefulWidget {
 
 class _ExposeWindowCardState extends State<ExposeWindowCard> {
   bool _isHovered = false;
+  bool _isCommandPressed = false;
+
+  bool _handleHardwareKey(KeyEvent event) {
+    final pressedKeys = HardwareKeyboard.instance.logicalKeysPressed;
+    final nextIsCommandPressed =
+        pressedKeys.contains(LogicalKeyboardKey.metaLeft) || pressedKeys.contains(LogicalKeyboardKey.metaRight);
+    if (nextIsCommandPressed == _isCommandPressed || !mounted) {
+      return false;
+    }
+    setState(() {
+      _isCommandPressed = nextIsCommandPressed;
+    });
+    return false;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    HardwareKeyboard.instance.addHandler(_handleHardwareKey);
+    final pressedKeys = HardwareKeyboard.instance.logicalKeysPressed;
+    _isCommandPressed =
+        pressedKeys.contains(LogicalKeyboardKey.metaLeft) || pressedKeys.contains(LogicalKeyboardKey.metaRight);
+  }
 
   AssetWindowState _windowForPreview(Size previewSize) {
     if (previewSize.width <= 0 || previewSize.height <= 0) {
@@ -77,7 +102,7 @@ class _ExposeWindowCardState extends State<ExposeWindowCard> {
   }
 
   Widget _buildHoverOverlay(BuildContext context) {
-    if (!_isHovered && !widget.isSelected) {
+    if (!_isCommandPressed || (!_isHovered && !widget.isSelected)) {
       return const SizedBox.shrink();
     }
 
@@ -136,12 +161,23 @@ class _ExposeWindowCardState extends State<ExposeWindowCard> {
               child: Row(
                 children: [
                   Expanded(
-                    child: Text(
-                      widget.window.asset.filename,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.labelLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
+                    child: Material(
+                      color: Colors.black.withValues(alpha: 0.42),
+                      borderRadius: BorderRadius.circular(999),
+                      child: InkWell(
+                        onTap: widget.onShowInFinder,
+                        borderRadius: BorderRadius.circular(999),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                          child: Text(
+                            widget.window.asset.filename,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.labelLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                   if (!widget.isLoaded)
@@ -181,5 +217,11 @@ class _ExposeWindowCardState extends State<ExposeWindowCard> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    HardwareKeyboard.instance.removeHandler(_handleHardwareKey);
+    super.dispose();
   }
 }

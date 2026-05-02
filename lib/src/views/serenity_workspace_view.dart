@@ -58,6 +58,7 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
 
           return Listener(
             behavior: HitTestBehavior.translucent,
+            onPointerHover: (event) => _handleOptionGestureHover(event, workspace),
             onPointerPanZoomStart: (event) => _handleWorkspacePanZoomStart(event, workspace),
             onPointerPanZoomUpdate: (event) => _handleWorkspacePanZoomUpdate(event, workspace, viewportSize),
             onPointerPanZoomEnd: (_) => _handleWorkspacePanZoomEnd(),
@@ -90,6 +91,11 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
                               onTap: () => _focusWindow(window.asset.id),
                               onToggleSelected: () => _toggleExposeWindowSelected(window.asset.id),
                               onPanUpdate: (delta) => _moveWindow(window.asset.id, delta / workspace.viewportZoom),
+                              onTrackpadWindowScale: (scaleDelta, localFocalPoint) => _transformWindowFromTrackpad(
+                                window.asset.id,
+                                scaleDelta,
+                                localFocalPoint / workspace.viewportZoom,
+                              ),
                               onResizeUpdate: (handle, delta) =>
                                   _resizeWindow(window.asset.id, handle, delta / workspace.viewportZoom),
                               onZoomChanged: (update) => _setWindowZoom(window.asset.id, update),
@@ -106,6 +112,9 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
                                   ? () => _restorePreviousWindowZOrder(window.asset.id)
                                   : null,
                               onClose: () => _removeWindow(_session!.activeWorkspaceId, window.asset.id),
+                              isOptionGestureTarget: _optionGestureWindowId == window.asset.id,
+                              onOptionGestureWindowRequested: () => _setOptionGestureWindowId(window.asset.id),
+                              onOptionGestureReleased: () => _setOptionGestureWindowId(null),
                             ),
                           ),
                         ),
@@ -253,6 +262,9 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
                                         _toggleExpose();
                                       },
                                       onToggleSelected: () => _toggleExposeWindowSelected(window.asset.id),
+                                      onShowInFinder: window.asset.filePath == null
+                                          ? null
+                                          : () => unawaited(_revealAssetInFinder(window.asset)),
                                       onRemove: () => _removeWindow(_session!.activeWorkspaceId, window.asset.id),
                                     ),
                                   );

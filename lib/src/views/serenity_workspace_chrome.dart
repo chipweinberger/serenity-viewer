@@ -3,6 +3,16 @@
 part of '../../main.dart';
 
 extension _SerenityShellWorkspaceChrome on _SerenityShellState {
+  Widget _buildTopChromeHitBlock() {
+    return const Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      height: 84,
+      child: AbsorbPointer(absorbing: true, child: ColoredBox(color: Colors.transparent)),
+    );
+  }
+
   Widget _buildWindowTitleLabel(BuildContext context) {
     return IgnorePointer(
       child: ConstrainedBox(

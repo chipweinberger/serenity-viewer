@@ -239,6 +239,7 @@ extension _SerenityShellLibraryView on _SerenityShellState {
             children: [_buildWorkspaceScreen(context), _buildWorkspaceOverview(context)],
           ),
         ),
+        _buildTopChromeHitBlock(),
         Positioned(left: 18, right: 18, top: 28, child: _buildWorkspaceTabBar(context)),
         Positioned(top: 10, left: 120, right: 120, child: Center(child: _buildWindowTitleLabel(context))),
       ],

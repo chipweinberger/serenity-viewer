@@ -125,6 +125,7 @@ class _SerenityShellState extends State<SerenityShell> {
   final Map<String, int> _previousWindowZOrders = {};
   final Set<String> _selectedExposeWindowIds = {};
   final Map<String, _SharedVideoControllerEntry> _sharedVideoControllers = {};
+  String? _optionGestureWindowId;
 
   // Persistence helpers
   Timer? _autosaveTimer;

@@ -10,6 +10,35 @@ extension _SerenityShellWindowActions on _SerenityShellState {
     return pressedKeys.contains(LogicalKeyboardKey.metaLeft) || pressedKeys.contains(LogicalKeyboardKey.metaRight);
   }
 
+  bool get _isOptionPressedForWindowGesture {
+    final pressedKeys = HardwareKeyboard.instance.logicalKeysPressed;
+    return pressedKeys.contains(LogicalKeyboardKey.altLeft) || pressedKeys.contains(LogicalKeyboardKey.altRight);
+  }
+
+  void _setOptionGestureWindowId(String? windowId) {
+    if (_optionGestureWindowId == windowId) {
+      return;
+    }
+    setState(() {
+      _optionGestureWindowId = windowId;
+    });
+  }
+
+  void _handleOptionGestureHover(PointerHoverEvent event, WorkspaceState workspace) {
+    final targetWindowId = _optionGestureWindowId;
+    if (_screen != SerenityScreen.workspace || _workspaceLayoutMode == WorkspaceLayoutMode.expose) {
+      return;
+    }
+    if (_isCommandPressedForContentGesture || !_isOptionPressedForWindowGesture || targetWindowId == null) {
+      return;
+    }
+    if (event.delta == Offset.zero) {
+      return;
+    }
+
+    _moveWindow(targetWindowId, event.delta / workspace.viewportZoom);
+  }
+
   void _focusWindow(String windowId) {
     final workspace = _activeWorkspace;
     final matchingWindow = workspace.windows.where((window) => window.asset.id == windowId);
@@ -160,6 +189,51 @@ extension _SerenityShellWindowActions on _SerenityShellState {
     );
   }
 
+  void _transformWindowFromTrackpad(String windowId, double scaleDelta, Offset localFocalPoint) {
+    final workspace = _activeWorkspace;
+    _replaceWorkspace(
+      workspace.copyWith(
+        windows: workspace.windows.map((window) {
+          if (window.asset.id != windowId) {
+            return window;
+          }
+
+          const minWidth = 96.0;
+          const minHeight = 72.0;
+          const maxContentZoom = 30.0;
+          final clampedScaleDelta = scaleDelta.clamp(0.5, 2.0);
+          final focalWorldPoint = Offset(
+            window.position.dx + (window.size.width / 2),
+            window.position.dy + (window.size.height / 2),
+          );
+          final nextWidth = (window.size.width * clampedScaleDelta).clamp(minWidth, _workspaceExtent * 2).toDouble();
+          final nextHeight = (window.size.height * clampedScaleDelta).clamp(minHeight, _workspaceExtent * 2).toDouble();
+          final nextSize = Size(nextWidth, nextHeight);
+          final nextPosition = _clampWindowPosition(
+            Offset(focalWorldPoint.dx - (nextWidth / 2), focalWorldPoint.dy - (nextHeight / 2)),
+            nextSize,
+          );
+          final shouldScaleContentZoom = window.zoom > 1.0 || window.zoomBaseSize != null;
+          final nextZoom = shouldScaleContentZoom
+              ? (window.zoom * clampedScaleDelta).clamp(1.0, maxContentZoom).toDouble()
+              : window.zoom;
+          final snappedZoom = (nextZoom - 1).abs() < 0.02 ? 1.0 : nextZoom;
+          final nextContentOffset = snappedZoom > 1.0 ? window.contentOffset * clampedScaleDelta : Offset.zero;
+
+          return window.copyWith(
+            position: nextPosition,
+            size: nextSize,
+            zoom: snappedZoom,
+            contentOffsetDx: nextContentOffset.dx,
+            contentOffsetDy: nextContentOffset.dy,
+            clearZoomBase: snappedZoom <= 1.0,
+            clearContentOffset: snappedZoom <= 1.0,
+          );
+        }).toList(),
+      ),
+    );
+  }
+
   void _fitWindowToContent(String windowId) {
     final workspace = _activeWorkspaceOrNull;
     if (workspace == null) {
@@ -236,7 +310,7 @@ extension _SerenityShellWindowActions on _SerenityShellState {
       _isWorkspaceGestureActive = false;
       return;
     }
-    if (_isCommandPressedForContentGesture) {
+    if (_isCommandPressedForContentGesture || _isOptionPressedForWindowGesture) {
       _isWorkspaceGestureActive = false;
       return;
     }

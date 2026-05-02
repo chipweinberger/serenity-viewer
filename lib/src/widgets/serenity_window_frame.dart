@@ -13,6 +13,7 @@ class SerenityWindowFrame extends StatefulWidget {
     required this.onTap,
     required this.onToggleSelected,
     required this.onPanUpdate,
+    required this.onTrackpadWindowScale,
     required this.onResizeUpdate,
     required this.onZoomChanged,
     required this.onIntrinsicSizeResolved,
@@ -24,6 +25,9 @@ class SerenityWindowFrame extends StatefulWidget {
     this.onShowInFinder,
     this.onRestorePreviousZOrder,
     required this.onClose,
+    required this.isOptionGestureTarget,
+    required this.onOptionGestureWindowRequested,
+    required this.onOptionGestureReleased,
   });
 
   final AssetWindowState window;
@@ -36,6 +40,7 @@ class SerenityWindowFrame extends StatefulWidget {
   final VoidCallback onTap;
   final VoidCallback onToggleSelected;
   final ValueChanged<Offset> onPanUpdate;
+  final void Function(double scaleDelta, Offset localFocalPoint) onTrackpadWindowScale;
   final void Function(WindowResizeHandle handle, Offset delta) onResizeUpdate;
   final ValueChanged<WindowZoomUpdate> onZoomChanged;
   final ValueChanged<Size> onIntrinsicSizeResolved;
@@ -47,6 +52,9 @@ class SerenityWindowFrame extends StatefulWidget {
   final VoidCallback? onShowInFinder;
   final VoidCallback? onRestorePreviousZOrder;
   final VoidCallback onClose;
+  final bool isOptionGestureTarget;
+  final VoidCallback onOptionGestureWindowRequested;
+  final VoidCallback onOptionGestureReleased;
 
   @override
   State<SerenityWindowFrame> createState() => _SerenityWindowFrameState();
@@ -58,9 +66,57 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> {
   bool _isHovered = false;
   bool _isResizing = false;
   bool _isInteractingWithVideoControls = false;
+  bool _isCommandPressed = false;
+  bool _isOptionPressed = false;
+  bool _isTrackpadWindowGestureActive = false;
+  bool _claimedOptionGestureTarget = false;
+  double _lastTrackpadScale = 1.0;
   Offset? _hoverPosition;
   WindowResizeHandle? _activeResizeHandle;
   String? _lastNativeCursorKind;
+
+  bool _handleHardwareKey(KeyEvent event) {
+    final pressedKeys = HardwareKeyboard.instance.logicalKeysPressed;
+    final nextIsCommandPressed =
+        pressedKeys.contains(LogicalKeyboardKey.metaLeft) || pressedKeys.contains(LogicalKeyboardKey.metaRight);
+    final nextIsOptionPressed =
+        pressedKeys.contains(LogicalKeyboardKey.altLeft) || pressedKeys.contains(LogicalKeyboardKey.altRight);
+    if ((nextIsCommandPressed == _isCommandPressed && nextIsOptionPressed == _isOptionPressed) || !mounted) {
+      return false;
+    }
+    final wasOptionPressed = _isOptionPressed;
+    setState(() {
+      _isCommandPressed = nextIsCommandPressed;
+      _isOptionPressed = nextIsOptionPressed;
+      if (!nextIsOptionPressed) {
+        _claimedOptionGestureTarget = false;
+      }
+    });
+    if (!wasOptionPressed && nextIsOptionPressed && _isHovered) {
+      _claimedOptionGestureTarget = true;
+      widget.onOptionGestureWindowRequested();
+    } else if (wasOptionPressed && !nextIsOptionPressed) {
+      _isTrackpadWindowGestureActive = false;
+      _lastTrackpadScale = 1.0;
+      widget.onOptionGestureReleased();
+    }
+    return false;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    HardwareKeyboard.instance.addHandler(_handleHardwareKey);
+    final pressedKeys = HardwareKeyboard.instance.logicalKeysPressed;
+    _isCommandPressed =
+        pressedKeys.contains(LogicalKeyboardKey.metaLeft) || pressedKeys.contains(LogicalKeyboardKey.metaRight);
+    _isOptionPressed =
+        pressedKeys.contains(LogicalKeyboardKey.altLeft) || pressedKeys.contains(LogicalKeyboardKey.altRight);
+  }
+
+  bool get _isOptionGestureTargetActive {
+    return _isOptionPressed && !_isCommandPressed && (widget.isOptionGestureTarget || _claimedOptionGestureTarget);
+  }
 
   Widget _buildContent() {
     return Positioned.fill(
@@ -77,7 +133,7 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> {
           onIntrinsicSizeResolved: widget.onIntrinsicSizeResolved,
           isVideoPaused: widget.isVideoPaused,
           onTogglePlayback: widget.onTogglePlayback,
-          showVideoControls: _isHovered || _isResizing,
+          showVideoControls: _isCommandPressed && (_isHovered || _isResizing),
           onVideoControlInteractionChanged: (isInteracting) {
             if (_isInteractingWithVideoControls == isInteracting) {
               return;
@@ -97,7 +153,7 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> {
   }
 
   Widget _buildOverlay() {
-    if (!_isHovered && !_isResizing && !widget.isSelected) {
+    if (!_isCommandPressed || (!_isHovered && !_isResizing && !widget.isSelected)) {
       return const SizedBox.shrink();
     }
 
@@ -175,6 +231,7 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> {
     if (_isResizing) {
       _anyWindowResizing = false;
     }
+    HardwareKeyboard.instance.removeHandler(_handleHardwareKey);
     _syncNativeCursor(null);
     super.dispose();
   }
@@ -272,6 +329,22 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> {
         },
         onPointerUp: (_) => _clearResizeState(preserveHover: true),
         onPointerCancel: (_) => _clearResizeState(preserveHover: false),
+        onPointerPanZoomStart: (_) {
+          _isTrackpadWindowGestureActive = _isOptionGestureTargetActive;
+          _lastTrackpadScale = 1.0;
+        },
+        onPointerPanZoomUpdate: (event) {
+          if (!_isTrackpadWindowGestureActive) {
+            return;
+          }
+          final scaleDelta = event.scale / _lastTrackpadScale;
+          _lastTrackpadScale = event.scale;
+          widget.onTrackpadWindowScale(scaleDelta, event.localPosition);
+        },
+        onPointerPanZoomEnd: (_) {
+          _isTrackpadWindowGestureActive = false;
+          _lastTrackpadScale = 1.0;
+        },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 160),
           curve: Curves.easeOutCubic,
