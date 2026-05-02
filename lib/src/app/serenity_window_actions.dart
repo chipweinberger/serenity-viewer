@@ -27,9 +27,6 @@ extension _SerenityShellWindowActions on _SerenityShellState {
             .toList(),
       ),
     );
-    if (_screen == SerenityScreen.workspace) {
-      _workspaceLayoutMode = WorkspaceLayoutMode.freeform;
-    }
   }
 
   void _restorePreviousWindowZOrder(String windowId) {
