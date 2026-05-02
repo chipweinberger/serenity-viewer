@@ -109,6 +109,7 @@ extension _SerenityShellLibraryView on _SerenityShellState {
                             height: thumbnailHeight,
                             child: WorkspaceThumbnailCard(
                               workspace: workspace,
+                              mediaCounts: _mediaCountsForWorkspace(workspace),
                               unloadedCount: _unloadedCountForWorkspace(workspace, loadPlan),
                               isRefreshing: _thumbnailRefreshInFlight.contains(workspace.id),
                               hoverActions: [

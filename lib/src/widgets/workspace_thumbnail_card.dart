@@ -4,6 +4,7 @@ class WorkspaceThumbnailCard extends StatefulWidget {
   const WorkspaceThumbnailCard({
     super.key,
     required this.workspace,
+    required this.mediaCounts,
     required this.unloadedCount,
     required this.hoverActions,
     required this.onTap,
@@ -11,6 +12,7 @@ class WorkspaceThumbnailCard extends StatefulWidget {
   });
 
   final WorkspaceState workspace;
+  final WorkspaceMediaCounts mediaCounts;
   final int unloadedCount;
   final List<Widget> hoverActions;
   final VoidCallback onTap;
@@ -38,12 +40,33 @@ class _WorkspaceThumbnailCardState extends State<WorkspaceThumbnailCard> {
     );
   }
 
+  Widget _buildFooterMetric(BuildContext context, IconData icon, String value) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Transform.translate(
+          offset: const Offset(0, 1),
+          child: Icon(icon, size: 13, color: SerenityTheme.textMuted),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(color: SerenityTheme.textMuted, height: 1.0),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final workspace = widget.workspace;
     final previewColors = workspace.windows.take(3).map((window) => window.asset.color.withValues(alpha: 0.8)).toList();
     final thumbnailPath = workspace.thumbnailPath;
     final hasThumbnail = thumbnailPath != null && File(thumbnailPath).existsSync();
+    final mediaCounts = widget.mediaCounts;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
@@ -135,7 +158,7 @@ class _WorkspaceThumbnailCardState extends State<WorkspaceThumbnailCard> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(10, 6, 8, 6),
+                    padding: const EdgeInsets.fromLTRB(10, 5, 8, 4),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
@@ -149,18 +172,32 @@ class _WorkspaceThumbnailCardState extends State<WorkspaceThumbnailCard> {
                             fontWeight: FontWeight.w800,
                           ),
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          [
-                            '${workspace.views} ${workspace.views == 1 ? 'view' : 'views'}',
-                            '${workspace.windows.length} assets',
-                            if (widget.unloadedCount > 0) '${widget.unloadedCount} unloaded',
-                          ].join(' • '),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        const SizedBox(height: 1),
+                        DefaultTextStyle(
                           style: Theme.of(
                             context,
-                          ).textTheme.labelSmall?.copyWith(color: SerenityTheme.textMuted, height: 1.05),
+                          ).textTheme.labelMedium!.copyWith(color: SerenityTheme.textMuted, height: 1.0),
+                          child: Row(
+                            children: [
+                              _buildFooterMetric(context, Icons.visibility_outlined, '${workspace.views}'),
+                              const SizedBox(width: 8),
+                              _buildFooterMetric(context, Icons.image_outlined, '${mediaCounts.images}'),
+                              const SizedBox(width: 8),
+                              _buildFooterMetric(context, Icons.videocam_outlined, '${mediaCounts.videos}'),
+                              const SizedBox(width: 8),
+                              _buildFooterMetric(context, Icons.link_rounded, '${mediaCounts.links}'),
+                              if (widget.unloadedCount > 0) ...[
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  child: _buildFooterMetric(
+                                    context,
+                                    Icons.cloud_off_outlined,
+                                    '${widget.unloadedCount}',
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
                         ),
                       ],
                     ),

@@ -88,6 +88,7 @@ extension _SerenityShellImportAndLoadPlan on _SerenityShellState {
       longVideos: workspace.windows
           .where((window) => window.asset.videoLengthCategory == VideoLengthCategory.long)
           .length,
+      links: workspace.links.length,
     );
   }
 

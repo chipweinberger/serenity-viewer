@@ -30,6 +30,7 @@ class WorkspaceState {
     required this.createdAt,
     required this.lastViewedAt,
     required this.views,
+    required this.links,
     required this.windows,
     required this.isOpen,
     required this.viewportCenterDx,
@@ -44,6 +45,7 @@ class WorkspaceState {
   final DateTime createdAt;
   final DateTime lastViewedAt;
   final int views;
+  final List<WorkspaceLink> links;
   final List<AssetWindowState> windows;
   final bool isOpen;
   final double viewportCenterDx;
@@ -60,6 +62,7 @@ class WorkspaceState {
     DateTime? createdAt,
     DateTime? lastViewedAt,
     int? views,
+    List<WorkspaceLink>? links,
     List<AssetWindowState>? windows,
     bool? isOpen,
     double? viewportCenterDx,
@@ -74,6 +77,7 @@ class WorkspaceState {
       createdAt: createdAt ?? this.createdAt,
       lastViewedAt: lastViewedAt ?? this.lastViewedAt,
       views: views ?? this.views,
+      links: links ?? this.links,
       windows: windows ?? this.windows,
       isOpen: isOpen ?? this.isOpen,
       viewportCenterDx: viewportCenterDx ?? this.viewportCenterDx,
@@ -91,6 +95,7 @@ class WorkspaceState {
       'createdAt': createdAt.toIso8601String(),
       'lastViewedAt': lastViewedAt.toIso8601String(),
       'views': views,
+      'links': links.map((link) => link.toJson()).toList(),
       'windows': windows.map((window) => window.toJson()).toList(),
       'isOpen': isOpen,
       'viewportCenterDx': viewportCenterDx,
@@ -102,6 +107,9 @@ class WorkspaceState {
   }
 
   factory WorkspaceState.fromJson(Map<String, dynamic> json) {
+    final links = (json['links'] as List<dynamic>? ?? const [])
+        .map((entry) => WorkspaceLink.fromJson(entry as Map<String, dynamic>))
+        .toList();
     final windows = (json['windows'] as List<dynamic>)
         .map((entry) => AssetWindowState.fromJson(entry as Map<String, dynamic>))
         .toList();
@@ -112,6 +120,7 @@ class WorkspaceState {
       createdAt: DateTime.parse(json['createdAt'] as String),
       lastViewedAt: DateTime.parse(json['lastViewedAt'] as String),
       views: json['views'] as int? ?? 0,
+      links: links,
       windows: windows,
       isOpen: json['isOpen'] as bool,
       viewportCenterDx: (json['viewportCenterDx'] as num?)?.toDouble() ?? fallbackCenter.dx,

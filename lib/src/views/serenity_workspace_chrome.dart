@@ -162,6 +162,7 @@ extension _SerenityShellWorkspaceChrome on _SerenityShellState {
     final mediaCounts = _mediaCountsForWorkspace(_activeWorkspace);
     final imageLabel = '${mediaCounts.images} image${mediaCounts.images == 1 ? '' : 's'}';
     final videoLabel = '${mediaCounts.videos} video${mediaCounts.videos == 1 ? '' : 's'}';
+    final linkLabel = '${mediaCounts.links} link${mediaCounts.links == 1 ? '' : 's'}';
     final showExposeSelectionHud = _screen == SerenityScreen.workspace && _selectedExposeWindowIds.isNotEmpty;
     final selectedCount = _selectedExposeWindowIds.length;
 
@@ -219,7 +220,24 @@ extension _SerenityShellWorkspaceChrome on _SerenityShellState {
               ),
               child: DefaultTextStyle(
                 style: Theme.of(context).textTheme.bodySmall!.copyWith(color: SerenityTheme.textMuted, height: 1.1),
-                child: Text('$imageLabel, $videoLabel'),
+                child: Text('$imageLabel, $videoLabel, $linkLabel'),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        ClipOval(
+          child: BackdropFilter(
+            filter: ui.ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+            child: Material(
+              color: Colors.white.withValues(alpha: 0.52),
+              child: InkWell(
+                onTap: () => unawaited(_openWorkspaceLinksDialog(_activeWorkspace)),
+                child: const SizedBox(
+                  width: 38,
+                  height: 38,
+                  child: Icon(Icons.menu_rounded, size: 18, color: SerenityTheme.textPrimary),
+                ),
               ),
             ),
           ),

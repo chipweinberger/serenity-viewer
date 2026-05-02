@@ -9,6 +9,6 @@ void main() {
 
     expect(find.text('Story Moodboard'), findsOneWidget);
     expect(find.text('View All'), findsOneWidget);
-    expect(find.text('2 images, 1 video'), findsOneWidget);
+    expect(find.text('2 images, 1 video, 0 links'), findsOneWidget);
   });
 }

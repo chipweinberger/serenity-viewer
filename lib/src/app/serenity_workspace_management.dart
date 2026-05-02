@@ -106,6 +106,7 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
         createdAt: now,
         lastViewedAt: now,
         views: 0,
+        links: const [],
         windows: const [],
         isOpen: true,
         viewportCenterDx: _defaultWorkspaceCenter.dx,
@@ -288,6 +289,7 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
       createdAt: now,
       lastViewedAt: now,
       views: 0,
+      links: const [],
       isOpen: true,
       viewportCenterDx: _defaultWorkspaceCenter.dx,
       viewportCenterDy: _defaultWorkspaceCenter.dy,
@@ -343,6 +345,11 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
   KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent) {
       return KeyEventResult.ignored;
+    }
+
+    if (_shouldHandlePasteLinksShortcut(event)) {
+      unawaited(_pasteLinksFromClipboard());
+      return KeyEventResult.handled;
     }
 
     final key = event.logicalKey;
