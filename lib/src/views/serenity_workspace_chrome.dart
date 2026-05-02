@@ -18,7 +18,7 @@ extension _SerenityShellWorkspaceChrome on _SerenityShellState {
   }
 
   Widget _buildWorkspaceTabBar(BuildContext context) {
-    final pinnedWorkspaces = _pinnedWorkspaces;
+    final openWorkspaces = _openWorkspaces;
 
     return Align(
       alignment: Alignment.topLeft,
@@ -36,12 +36,12 @@ extension _SerenityShellWorkspaceChrome on _SerenityShellState {
                 children: [Icon(Icons.dashboard_outlined, size: 15), SizedBox(width: 6), Text('View All')],
               ),
             ),
-            for (final workspace in pinnedWorkspaces)
+            for (final workspace in openWorkspaces)
               Padding(
                 padding: const EdgeInsets.only(left: 10),
                 child: DragTarget<String>(
                   onWillAcceptWithDetails: (details) => details.data != workspace.id,
-                  onAcceptWithDetails: (details) => _reorderPinnedWorkspace(details.data, workspace.id),
+                  onAcceptWithDetails: (details) => _reorderOpenWorkspace(details.data, workspace.id),
                   builder: (context, candidateData, rejectedData) {
                     final isDropTarget = candidateData.isNotEmpty;
                     return Draggable<String>(

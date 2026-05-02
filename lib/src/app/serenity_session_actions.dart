@@ -70,15 +70,15 @@ extension _SerenityShellSessionActions on _SerenityShellState {
   }
 
   Future<void> _switchWorkspace(int direction) async {
-    final pinnedWorkspaces = _pinnedWorkspaces;
-    final tabCount = pinnedWorkspaces.length + 1;
+    final openWorkspaces = _openWorkspaces;
+    final tabCount = openWorkspaces.length + 1;
     if (tabCount == 0) {
       return;
     }
 
     final currentIndex = _screen == SerenityScreen.library
         ? 0
-        : pinnedWorkspaces.indexWhere((workspace) => workspace.id == _session!.activeWorkspaceId) + 1;
+        : openWorkspaces.indexWhere((workspace) => workspace.id == _session!.activeWorkspaceId) + 1;
     final nextIndex = (currentIndex + direction) % tabCount;
     final safeIndex = nextIndex < 0 ? tabCount - 1 : nextIndex;
 
@@ -87,7 +87,7 @@ extension _SerenityShellSessionActions on _SerenityShellState {
       return;
     }
 
-    final nextWorkspace = pinnedWorkspaces[safeIndex - 1];
+    final nextWorkspace = openWorkspaces[safeIndex - 1];
     unawaited(_setActiveWorkspace(nextWorkspace.id));
   }
 

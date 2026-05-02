@@ -21,7 +21,7 @@ enum AssetType { image, video }
 
 enum VideoLengthCategory { short, long }
 
-enum WorkspaceSort { pinned, views, recentlyViewed, recentlyCreated, name }
+enum WorkspaceSort { views, recentlyViewed, recentlyCreated, name }
 
 const List<Color> _assetColorPalette = [
   Color(0xFFD5A37A),

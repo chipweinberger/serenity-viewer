@@ -10,12 +10,12 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
         .toList();
 
     var nextActiveId = session.activeWorkspaceId;
-    final pinnedWorkspaces = nextWorkspaces.where((workspace) => workspace.isOpen).toList();
-    if (pinnedWorkspaces.isEmpty) {
+    final openWorkspaces = nextWorkspaces.where((workspace) => workspace.isOpen).toList();
+    if (openWorkspaces.isEmpty) {
       nextWorkspaces[0] = nextWorkspaces[0].copyWith(isOpen: true);
       nextActiveId = nextWorkspaces[0].id;
-    } else if (!pinnedWorkspaces.any((workspace) => workspace.id == nextActiveId)) {
-      nextActiveId = pinnedWorkspaces.first.id;
+    } else if (!openWorkspaces.any((workspace) => workspace.id == nextActiveId)) {
+      nextActiveId = openWorkspaces.first.id;
     }
 
     _updateSession(session.copyWith(workspaces: nextWorkspaces, activeWorkspaceId: nextActiveId));
@@ -235,7 +235,7 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
       builder: (context) {
         return AlertDialog(
           title: const Text('Close Tab?'),
-          content: Text('This will unpin "${workspace.name}" from the tab bar.'),
+          content: Text('This will close "${workspace.name}" in the tab bar.'),
           actions: [
             TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
             FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Close Tab')),
@@ -249,31 +249,31 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
     }
   }
 
-  void _reorderPinnedWorkspace(String sourceWorkspaceId, String targetWorkspaceId) {
+  void _reorderOpenWorkspace(String sourceWorkspaceId, String targetWorkspaceId) {
     if (_session == null || sourceWorkspaceId == targetWorkspaceId) {
       return;
     }
 
-    final pinned = [..._pinnedWorkspaces];
-    final sourceIndex = pinned.indexWhere((workspace) => workspace.id == sourceWorkspaceId);
-    final targetIndex = pinned.indexWhere((workspace) => workspace.id == targetWorkspaceId);
+    final openWorkspaces = [..._openWorkspaces];
+    final sourceIndex = openWorkspaces.indexWhere((workspace) => workspace.id == sourceWorkspaceId);
+    final targetIndex = openWorkspaces.indexWhere((workspace) => workspace.id == targetWorkspaceId);
     if (sourceIndex == -1 || targetIndex == -1) {
       return;
     }
 
-    final moved = pinned.removeAt(sourceIndex);
-    pinned.insert(targetIndex, moved);
+    final moved = openWorkspaces.removeAt(sourceIndex);
+    openWorkspaces.insert(targetIndex, moved);
 
-    final pinnedIds = pinned.map((workspace) => workspace.id).toList();
-    final pinnedById = {for (final workspace in pinned) workspace.id: workspace};
-    var pinnedCursor = 0;
+    final openWorkspaceIds = openWorkspaces.map((workspace) => workspace.id).toList();
+    final openWorkspaceById = {for (final workspace in openWorkspaces) workspace.id: workspace};
+    var openWorkspaceCursor = 0;
     final nextWorkspaces = _workspaces.map((workspace) {
       if (!workspace.isOpen) {
         return workspace;
       }
 
-      final nextWorkspaceId = pinnedIds[pinnedCursor++];
-      return pinnedById[nextWorkspaceId]!;
+      final nextWorkspaceId = openWorkspaceIds[openWorkspaceCursor++];
+      return openWorkspaceById[nextWorkspaceId]!;
     }).toList();
 
     _updateSession(_session!.copyWith(workspaces: nextWorkspaces));
@@ -367,7 +367,7 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
     return KeyEventResult.ignored;
   }
 
-  List<WorkspaceState> _sortedClosedWorkspaces() {
+  List<WorkspaceState> _sortedKnownWorkspaces() {
     final query = _searchController.text.trim().toLowerCase();
     final filtered = _workspaces.where((workspace) {
       if (query.isEmpty) {
@@ -377,9 +377,6 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
     }).toList();
 
     switch (_workspaceSort) {
-      case WorkspaceSort.pinned:
-        filtered.retainWhere((workspace) => workspace.isOpen);
-        break;
       case WorkspaceSort.views:
         filtered.sort((a, b) => b.views.compareTo(a.views));
         break;

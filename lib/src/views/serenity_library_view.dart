@@ -4,11 +4,12 @@ part of '../../main.dart';
 
 extension _SerenityShellLibraryView on _SerenityShellState {
   Widget _buildWorkspaceOverview(BuildContext context) {
-    final closedWorkspaces = _sortedClosedWorkspaces();
+    final visibleOpenWorkspaces = _openWorkspaces.where(_matchesWorkspaceSearch).toList();
+    final knownWorkspaces = _sortedKnownWorkspaces();
     final loadPlan = _buildLoadPlan();
     const thumbnailWidth = 224.0;
     const thumbnailHeight = 192.0;
-    final workspaceCount = closedWorkspaces.length;
+    final knownWorkspaceCount = knownWorkspaces.length;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -28,13 +29,63 @@ extension _SerenityShellLibraryView on _SerenityShellState {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Text(
+                      'Open Now • ${visibleOpenWorkspaces.length}',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        color: SerenityTheme.textPrimary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 16,
+                      runSpacing: 16,
+                      children: [
+                        for (final workspace in visibleOpenWorkspaces)
+                          SizedBox(
+                            width: thumbnailWidth,
+                            height: thumbnailHeight,
+                            child: WorkspaceThumbnailCard(
+                              workspace: workspace,
+                              mediaCounts: _mediaCountsForWorkspace(workspace),
+                              unloadedCount: _unloadedCountForWorkspace(workspace, loadPlan),
+                              isRefreshing: _thumbnailRefreshInFlight.contains(workspace.id),
+                              hoverActions: [
+                                _buildWorkspaceCardAction(
+                                  tooltip: 'Close workspace',
+                                  onTap: () => _toggleWorkspaceOpen(workspace.id),
+                                  icon: Icons.close_rounded,
+                                ),
+                                _buildWorkspaceCardAction(
+                                  tooltip: 'Rename workspace',
+                                  onTap: () => unawaited(_renameWorkspace(workspace.id)),
+                                  icon: Icons.edit_outlined,
+                                ),
+                                _buildWorkspaceCardAction(
+                                  tooltip: 'Delete workspace',
+                                  onTap: () => unawaited(_confirmDeleteWorkspace(workspace.id)),
+                                  icon: Icons.delete_outline_rounded,
+                                ),
+                              ],
+                              onTap: () {
+                                if (!workspace.isOpen) {
+                                  _toggleWorkspaceOpen(workspace.id);
+                                }
+                                unawaited(_setActiveWorkspace(workspace.id));
+                              },
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 28),
+                    const SizedBox(height: 20),
                     Wrap(
                       spacing: 12,
                       runSpacing: 12,
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text(
-                          '$workspaceCount Workspace${workspaceCount == 1 ? '' : 's'}',
+                          'All Workspaces • $knownWorkspaceCount',
                           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                             color: SerenityTheme.textPrimary,
                             fontWeight: FontWeight.w800,
@@ -68,24 +119,6 @@ extension _SerenityShellLibraryView on _SerenityShellState {
                       children: [
                         _buildGlassChip(
                           context: context,
-                          selected: _workspaceSort == WorkspaceSort.pinned,
-                          onTap: () => setState(() => _workspaceSort = WorkspaceSort.pinned),
-                          child: const Text('Pinned'),
-                        ),
-                        _buildGlassChip(
-                          context: context,
-                          selected: _workspaceSort == WorkspaceSort.views,
-                          onTap: () => setState(() => _workspaceSort = WorkspaceSort.views),
-                          child: const Text('Views'),
-                        ),
-                        _buildGlassChip(
-                          context: context,
-                          selected: _workspaceSort == WorkspaceSort.recentlyViewed,
-                          onTap: () => setState(() => _workspaceSort = WorkspaceSort.recentlyViewed),
-                          child: const Text('Recently viewed'),
-                        ),
-                        _buildGlassChip(
-                          context: context,
                           selected: _workspaceSort == WorkspaceSort.recentlyCreated,
                           onTap: () => setState(() => _workspaceSort = WorkspaceSort.recentlyCreated),
                           child: const Text('Date created'),
@@ -94,7 +127,19 @@ extension _SerenityShellLibraryView on _SerenityShellState {
                           context: context,
                           selected: _workspaceSort == WorkspaceSort.name,
                           onTap: () => setState(() => _workspaceSort = WorkspaceSort.name),
-                          child: const Text('By name'),
+                          child: const Text('Alphabetical'),
+                        ),
+                        _buildGlassChip(
+                          context: context,
+                          selected: _workspaceSort == WorkspaceSort.views,
+                          onTap: () => setState(() => _workspaceSort = WorkspaceSort.views),
+                          child: const Text('Most views'),
+                        ),
+                        _buildGlassChip(
+                          context: context,
+                          selected: _workspaceSort == WorkspaceSort.recentlyViewed,
+                          onTap: () => setState(() => _workspaceSort = WorkspaceSort.recentlyViewed),
+                          child: const Text('Recently viewed'),
                         ),
                       ],
                     ),
@@ -103,7 +148,7 @@ extension _SerenityShellLibraryView on _SerenityShellState {
                       spacing: 16,
                       runSpacing: 16,
                       children: [
-                        for (final workspace in closedWorkspaces)
+                        for (final workspace in knownWorkspaces)
                           SizedBox(
                             width: thumbnailWidth,
                             height: thumbnailHeight,
@@ -112,12 +157,9 @@ extension _SerenityShellLibraryView on _SerenityShellState {
                               mediaCounts: _mediaCountsForWorkspace(workspace),
                               unloadedCount: _unloadedCountForWorkspace(workspace, loadPlan),
                               isRefreshing: _thumbnailRefreshInFlight.contains(workspace.id),
+                              isDimmed: workspace.isOpen,
+                              statusLabel: workspace.isOpen ? 'Open' : null,
                               hoverActions: [
-                                _buildWorkspaceCardAction(
-                                  tooltip: workspace.isOpen ? 'Unpin workspace' : 'Pin workspace',
-                                  onTap: () => _toggleWorkspaceOpen(workspace.id),
-                                  icon: workspace.isOpen ? Icons.push_pin_rounded : Icons.push_pin_outlined,
-                                ),
                                 _buildWorkspaceCardAction(
                                   tooltip: 'Rename workspace',
                                   onTap: () => unawaited(_renameWorkspace(workspace.id)),
@@ -129,12 +171,12 @@ extension _SerenityShellLibraryView on _SerenityShellState {
                                   icon: Icons.delete_outline_rounded,
                                 ),
                               ],
-                              onTap: () {
-                                if (!workspace.isOpen) {
-                                  _toggleWorkspaceOpen(workspace.id);
-                                }
-                                unawaited(_setActiveWorkspace(workspace.id));
-                              },
+                              onTap: workspace.isOpen
+                                  ? null
+                                  : () {
+                                      _toggleWorkspaceOpen(workspace.id);
+                                      unawaited(_setActiveWorkspace(workspace.id));
+                                    },
                             ),
                           ),
                       ],
@@ -147,6 +189,11 @@ extension _SerenityShellLibraryView on _SerenityShellState {
         );
       },
     );
+  }
+
+  bool _matchesWorkspaceSearch(WorkspaceState workspace) {
+    final query = _searchController.text.trim().toLowerCase();
+    return query.isEmpty || workspace.name.toLowerCase().contains(query);
   }
 
   Widget _buildWorkspaceCardAction({required String tooltip, required VoidCallback onTap, required IconData icon}) {

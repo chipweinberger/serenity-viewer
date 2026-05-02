@@ -3,6 +3,46 @@
 part of '../../main.dart';
 
 extension _SerenityShellWorkspaceView on _SerenityShellState {
+  Widget _buildEmptyWorkspaceCanvasState(BuildContext context) {
+    return IgnorePointer(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 320),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.add_photo_alternate_outlined,
+                  size: 40,
+                  color: SerenityTheme.textMuted.withValues(alpha: 0.8),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Empty workspace',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: SerenityTheme.textPrimary.withValues(alpha: 0.9),
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Drag and drop media here',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(color: SerenityTheme.textMuted, fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildFreeformWorkspaceViewport(
     BuildContext context,
     WorkspaceState workspace,
@@ -228,6 +268,7 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
             )
           else
             _buildFreeformWorkspaceViewport(context, workspace, windows, loadPlan, focusedWindowId),
+          if (!isExposeMode && windows.isEmpty) Positioned.fill(child: _buildEmptyWorkspaceCanvasState(context)),
           if (_isDropTargetActive)
             Positioned.fill(
               child: IgnorePointer(
@@ -252,7 +293,7 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
   }
 
   Widget _buildWorkspaceScreen(BuildContext context) {
-    final openWorkspaces = _pinnedWorkspaces;
+    final openWorkspaces = _openWorkspaces;
     if (openWorkspaces.isEmpty) {
       return const SizedBox.shrink();
     }

@@ -154,7 +154,7 @@ class _SerenityShellState extends State<SerenityShell> {
 
   List<WorkspaceState> get _workspaces => _session?.workspaces ?? const [];
 
-  List<WorkspaceState> get _pinnedWorkspaces => _workspaces.where((workspace) => workspace.isOpen).toList();
+  List<WorkspaceState> get _openWorkspaces => _workspaces.where((workspace) => workspace.isOpen).toList();
 
   WorkspaceState? get _activeWorkspaceOrNull {
     final session = _session;
