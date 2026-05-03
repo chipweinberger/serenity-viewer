@@ -7,7 +7,6 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:image/image.dart' as img;
 
 import 'package:serenity_viewer/src/settings/behavior/chrome_controller.dart';
 import 'package:serenity_viewer/src/environments/environment_coordinator.dart';
@@ -17,14 +16,15 @@ import 'package:serenity_viewer/src/media/playback/media_bridge.dart';
 import 'package:serenity_viewer/src/app/shell_dependencies.dart';
 import 'package:serenity_viewer/src/environments/session/session_controller.dart';
 import 'package:serenity_viewer/src/environments/persistence/session_persistence_bridge.dart';
+import 'package:serenity_viewer/src/environments/persistence/workspace_thumbnail_refresher.dart';
+import 'package:serenity_viewer/src/environments/persistence/workspace_thumbnail_renderer.dart';
+import 'package:serenity_viewer/src/environments/persistence/workspace_thumbnail_store.dart';
 import 'package:serenity_viewer/src/media/conversion/video_conversion_coordinator.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.dart';
 import 'package:serenity_viewer/src/workspace/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/workspace_mutations.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/foundation/keyboard_modifiers.dart';
-import 'package:serenity_viewer/src/settings/appearance/theme.dart';
-import 'package:serenity_viewer/src/workspace/viewport/workspace_projection.dart';
 import 'package:serenity_viewer/src/workspace/windows/workspace_window_state.dart';
 import 'package:serenity_viewer/src/workspace/windows/recently_closed_window_entry.dart';
 import 'package:serenity_viewer/src/environments/session/session_state.dart';
@@ -40,7 +40,6 @@ import 'package:serenity_viewer/src/environments/persistence/thumbnail_refresh_s
 import 'package:serenity_viewer/src/workspace/windows/window_interaction_state.dart';
 import 'package:serenity_viewer/src/workspace/workspace_view_tracking_state.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
-import 'package:serenity_viewer/src/media/assets/media_zoom_utils.dart';
 import 'package:serenity_viewer/src/settings/behavior/settings_dialog.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_resize_helpers.dart';
 import 'package:serenity_viewer/src/library/library_screen.dart';
@@ -60,7 +59,6 @@ part '../environments/startup/app_shell_startup_seed_and_settings.dart';
 part '../workspace/app_shell_workspace_view_tracking_actions.dart';
 part '../workspace/viewport/app_shell_workspace_geometry.dart';
 part '../app/app_shell_content.dart';
-part '../environments/persistence/app_shell_thumbnail_persistence.dart';
 part '../media/importing/app_shell_media_import_actions.dart';
 
 class AppShell extends StatefulWidget {
@@ -86,6 +84,9 @@ class _AppShellState extends State<AppShell> {
   late final WorkspaceLinksController _workspaceLinksController;
   late final SessionController _sessionController;
   late final SessionPersistenceBridge _sessionPersistenceBridge;
+  late final WorkspaceThumbnailRenderer _workspaceThumbnailRenderer;
+  late final WorkspaceThumbnailStore _workspaceThumbnailStore;
+  late final WorkspaceThumbnailRefresher _workspaceThumbnailRefresher;
   late final VideoConversionCoordinator _videoConversionCoordinator;
 
   ShellHandles get _handles => _dependencies.handles;
@@ -128,6 +129,57 @@ class _AppShellState extends State<AppShell> {
     return '${path.split(Platform.pathSeparator).last}$suffix';
   }
 
+  Future<void> _refreshActiveWorkspaceThumbnailIfNeeded() async {
+    if (_uiState.screen != SerenityScreen.workspace) {
+      return;
+    }
+
+    final workspaceId = _activeWorkspaceOrNull?.id;
+    if (workspaceId == null || !_thumbnailRefreshState.dirtyWorkspaces.contains(workspaceId)) {
+      return;
+    }
+
+    final viewportSize = _workspaceViewportState.viewportSize;
+    if (viewportSize.width <= 0 || viewportSize.height <= 0) {
+      return;
+    }
+
+    if (_thumbnailRefreshState.refreshInFlight.contains(workspaceId)) {
+      return;
+    }
+
+    if (mounted) {
+      setState(() {
+        _thumbnailRefreshState.refreshInFlight.add(workspaceId);
+      });
+    } else {
+      _thumbnailRefreshState.refreshInFlight.add(workspaceId);
+    }
+
+    try {
+      await _workspaceThumbnailRefresher.refreshWorkspace(workspaceId, viewportSize: viewportSize);
+    } finally {
+      if (!mounted) {
+        _thumbnailRefreshState.dirtyWorkspaces.remove(workspaceId);
+        _thumbnailRefreshState.refreshInFlight.remove(workspaceId);
+      } else {
+        setState(() {
+          _thumbnailRefreshState.dirtyWorkspaces.remove(workspaceId);
+          _thumbnailRefreshState.refreshInFlight.remove(workspaceId);
+        });
+      }
+    }
+  }
+
+  void _queueThumbnailRefresh(String workspaceId, {Duration delay = const Duration(milliseconds: 300)}) {
+    _thumbnailRefreshState.debounces[workspaceId]?.cancel();
+    _thumbnailRefreshState.debounces[workspaceId] = Timer(delay, () {
+      _thumbnailRefreshState.dirtyWorkspaces.add(workspaceId);
+      _thumbnailRefreshState.debounces.remove(workspaceId);
+      unawaited(_refreshActiveWorkspaceThumbnailIfNeeded());
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -158,6 +210,16 @@ class _AppShellState extends State<AppShell> {
       seedSession: _seedSession,
       environmentCoordinator: () => _environmentCoordinator,
       windowTitle: () => _windowTitle,
+    );
+    _workspaceThumbnailRenderer = WorkspaceThumbnailRenderer(isRunningInWidgetTest: _isRunningInWidgetTest);
+    _workspaceThumbnailStore = WorkspaceThumbnailStore(
+      thumbnailDirectory: _sessionPersistenceBridge.thumbnailDirectory,
+    );
+    _workspaceThumbnailRefresher = WorkspaceThumbnailRefresher(
+      persistenceState: _persistenceState,
+      sessionController: _sessionController,
+      renderer: _workspaceThumbnailRenderer,
+      store: _workspaceThumbnailStore,
     );
     _environmentCoordinator = EnvironmentCoordinator(
       persistenceState: _persistenceState,
