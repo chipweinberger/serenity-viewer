@@ -1,16 +1,14 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/settings/behavior/chrome_controller.dart';
-import 'package:serenity_viewer/src/asset_import/import_coordinator.dart';
-import 'package:serenity_viewer/src/asset_import/import_result.dart';
 import 'package:serenity_viewer/src/app/dependencies/shell_dependencies.dart';
 import 'package:serenity_viewer/src/app/environment/app_environment_bookmark_synchronizer.dart';
 import 'package:serenity_viewer/src/app/environment/app_environment_controller.dart';
 import 'package:serenity_viewer/src/app/environment/app_environment_state.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_content_builder.dart';
+import 'package:serenity_viewer/src/app/app_shell/app_shell_media_import_controller.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_menu_builder.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_window_controller.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_window_history_controller.dart';
@@ -37,7 +35,6 @@ import 'package:serenity_viewer/src/thumbnails/thumbnail_controller.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 
 part 'app_shell_environment_actions.dart';
-part 'app_shell_media_import_actions.dart';
 part 'app_shell_navigation_actions.dart';
 part 'app_shell_startup_seed_and_settings.dart';
 
@@ -200,6 +197,23 @@ class _AppShellState extends State<AppShell> {
     );
   }
 
+  AppShellMediaImportController get _mediaImportController {
+    return AppShellMediaImportController(
+      imageExtensions: _AppShellState._imageExtensions,
+      videoExtensions: _AppShellState._videoExtensions,
+      persistenceState: _persistenceState,
+      activeWorkspace: () => _activeWorkspace,
+      videoConversionCoordinator: _videoConversionCoordinator,
+      createFileBookmark: _appShellPlatformBridge.createFileBookmark,
+      mediaBridge: _mediaBridge,
+      newId: _workspaceGeometryController.newId,
+      colorFromDigest: _workspaceGeometryController.colorFromDigest,
+      updateEnvironment: _updateEnvironment,
+      thumbnailController: _thumbnailController,
+      showMessage: _showMessage,
+    );
+  }
+
   List<PlatformMenuItem> _buildMenus() {
     final focusedWindow = _windowHistoryController.focusedWindowOrNull();
     final focusedWindowIsSelected =
@@ -210,7 +224,7 @@ class _AppShellState extends State<AppShell> {
       openSettings: _openSettings,
       createEnvironment: _sryDocumentCoordinator.createDocument,
       openEnvironment: _sryDocumentCoordinator.openDocument,
-      openAssets: _pickAndImportAssets,
+      openAssets: _mediaImportController.pickAndImportAssets,
       saveEnvironment: _sryDocumentCoordinator.saveDocument,
       saveEnvironmentAs: _sryDocumentCoordinator.saveDocumentAs,
       revealAssetInFinder: _mediaBridge.revealAssetInFinder,
@@ -265,7 +279,7 @@ class _AppShellState extends State<AppShell> {
       searchController: _handles.searchController,
       tabScrollController: _handles.tabScrollController,
       commitStateChange: setState,
-      importFiles: _importFiles,
+      importFiles: _mediaImportController.importFiles,
       handleOptionGestureHover: _windowController.handleOptionGestureHover,
       handleWorkspacePanZoomStart: _windowController.handleWorkspacePanZoomStart,
       handleWorkspacePanZoomUpdate: _windowController.handleWorkspacePanZoomUpdate,
