@@ -336,7 +336,7 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
           _editMode = false;
         });
         _refreshWorkspaceViewTracking();
-      } else if (_screen == SerenityScreen.workspace) {
+      } else if (_screen == SerenityScreen.workspace && _workspaceLayoutMode != WorkspaceLayoutMode.expose) {
         _toggleExpose();
       }
     } else if (key == LogicalKeyboardKey.arrowDown) {

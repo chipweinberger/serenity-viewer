@@ -10,6 +10,7 @@ class SerenityWindowFrame extends StatefulWidget {
     required this.isFocused,
     required this.isSelected,
     required this.isEditing,
+    required this.flashNonce,
     required this.onTap,
     required this.onToggleSelected,
     required this.onPanUpdate,
@@ -37,6 +38,7 @@ class SerenityWindowFrame extends StatefulWidget {
   final bool isFocused;
   final bool isSelected;
   final bool isEditing;
+  final int flashNonce;
   final VoidCallback onTap;
   final VoidCallback onToggleSelected;
   final ValueChanged<Offset> onPanUpdate;
@@ -60,7 +62,7 @@ class SerenityWindowFrame extends StatefulWidget {
   State<SerenityWindowFrame> createState() => _SerenityWindowFrameState();
 }
 
-class _SerenityWindowFrameState extends State<SerenityWindowFrame> {
+class _SerenityWindowFrameState extends State<SerenityWindowFrame> with SingleTickerProviderStateMixin {
   static bool _anyWindowResizing = false;
 
   bool _isHovered = false;
@@ -75,6 +77,8 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> {
   Offset? _hoverPosition;
   WindowResizeHandle? _activeResizeHandle;
   String? _lastNativeCursorKind;
+  late final AnimationController _flashController;
+  late final Animation<double> _flashAnimation;
 
   bool _handleHardwareKey(KeyEvent event) {
     final pressedKeys = HardwareKeyboard.instance.logicalKeysPressed;
@@ -107,12 +111,36 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> {
   @override
   void initState() {
     super.initState();
+    _flashController = AnimationController(vsync: this, duration: const Duration(milliseconds: 250));
+    _flashAnimation = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 0, end: 1).chain(CurveTween(curve: Curves.easeOutCubic)),
+        weight: 1,
+      ),
+      TweenSequenceItem(tween: Tween<double>(begin: 1, end: 0).chain(CurveTween(curve: Curves.easeInCubic)), weight: 1),
+    ]).animate(_flashController);
     HardwareKeyboard.instance.addHandler(_handleHardwareKey);
     final pressedKeys = HardwareKeyboard.instance.logicalKeysPressed;
     _isCommandPressed =
         pressedKeys.contains(LogicalKeyboardKey.metaLeft) || pressedKeys.contains(LogicalKeyboardKey.metaRight);
     _isOptionPressed =
         pressedKeys.contains(LogicalKeyboardKey.altLeft) || pressedKeys.contains(LogicalKeyboardKey.altRight);
+    if (widget.flashNonce != 0) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) {
+          return;
+        }
+        unawaited(_flashController.forward(from: 0));
+      });
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant SerenityWindowFrame oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.flashNonce != 0 && widget.flashNonce != oldWidget.flashNonce) {
+      unawaited(_flashController.forward(from: 0));
+    }
   }
 
   bool get _isOptionGestureTargetActive {
@@ -154,7 +182,8 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> {
   }
 
   Widget _buildOverlay() {
-    if (!_isCommandPressed || (!_isHovered && !_isResizing && !widget.isSelected)) {
+    final shouldShowCommandOverlay = _isCommandPressed && (_isHovered || _isResizing || widget.isSelected);
+    if (!shouldShowCommandOverlay) {
       return const SizedBox.shrink();
     }
 
@@ -235,6 +264,7 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> {
     }
     HardwareKeyboard.instance.removeHandler(_handleHardwareKey);
     _syncNativeCursor(null);
+    _flashController.dispose();
     super.dispose();
   }
 
@@ -351,20 +381,34 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> {
           _isTrackpadWindowGestureActive = false;
           _lastTrackpadScale = 1.0;
         },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 160),
-          curve: Curves.easeOutCubic,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: widget.isFocused ? 0.26 : 0.18),
-                blurRadius: widget.isFocused ? 34 : 22,
-                offset: const Offset(0, 14),
+        child: AnimatedBuilder(
+          animation: _flashAnimation,
+          builder: (context, child) {
+            final flashValue = _flashAnimation.value;
+            final focusShadowAlpha = widget.isFocused ? 0.26 : 0.18;
+            final focusBlurRadius = widget.isFocused ? 34.0 : 22.0;
+            final flashScale = 1 + (0.035 * flashValue);
+
+            return Transform.scale(
+              scale: flashScale,
+              alignment: Alignment.center,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 160),
+                curve: Curves.easeOutCubic,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: focusShadowAlpha + (0.08 * flashValue)),
+                      blurRadius: focusBlurRadius + (12 * flashValue),
+                      offset: const Offset(0, 14),
+                    ),
+                  ],
+                ),
+                child: Stack(children: [_buildContent(), _buildOverlay()]),
               ),
-            ],
-          ),
-          child: Stack(children: [_buildContent(), _buildOverlay()]),
+            );
+          },
         ),
       ),
     );

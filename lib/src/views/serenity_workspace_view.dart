@@ -181,6 +181,7 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
                               isEditing: false,
                               onTap: () => _focusWindow(window.asset.id),
                               onToggleSelected: () => _toggleExposeWindowSelected(window.asset.id),
+                              flashNonce: window.asset.id == _flashedWindowId ? _windowFlashNonce : 0,
                               onPanUpdate: (delta) => _moveWindow(window.asset.id, delta / workspace.viewportZoom),
                               onTrackpadWindowScale: (scaleDelta, localFocalPoint) => _transformWindowFromTrackpad(
                                 window.asset.id,
@@ -298,6 +299,7 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
                                 onOpen: () {
                                   _focusWindow(window.asset.id);
                                   _toggleExpose();
+                                  _flashWindow(window.asset.id);
                                 },
                                 onToggleSelected: () => _toggleExposeWindowSelected(window.asset.id),
                                 onShowInFinder: window.asset.filePath == null

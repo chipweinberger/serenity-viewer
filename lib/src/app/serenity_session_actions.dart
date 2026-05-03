@@ -42,6 +42,22 @@ extension _SerenityShellSessionActions on _SerenityShellState {
     _refreshWorkspaceViewTracking();
   }
 
+  void _flashWindow(String windowId) {
+    _windowFlashTimer?.cancel();
+    setState(() {
+      _flashedWindowId = windowId;
+      _windowFlashNonce += 1;
+    });
+    _windowFlashTimer = Timer(const Duration(milliseconds: 300), () {
+      if (!mounted || _flashedWindowId != windowId) {
+        return;
+      }
+      setState(() {
+        _flashedWindowId = null;
+      });
+    });
+  }
+
   void _applyExposeGridToWorkspace() {
     final workspace = _activeWorkspaceOrNull;
     if (workspace == null ||

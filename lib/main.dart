@@ -126,6 +126,9 @@ class _SerenityShellState extends State<SerenityShell> {
   final Set<String> _selectedExposeWindowIds = {};
   final Map<String, _SharedVideoControllerEntry> _sharedVideoControllers = {};
   String? _optionGestureWindowId;
+  String? _flashedWindowId;
+  int _windowFlashNonce = 0;
+  Timer? _windowFlashTimer;
 
   // Persistence helpers
   Timer? _autosaveTimer;
@@ -203,6 +206,7 @@ class _SerenityShellState extends State<SerenityShell> {
     _autosaveTimer?.cancel();
     _appLifecycleListener?.dispose();
     _workspaceViewTimer?.cancel();
+    _windowFlashTimer?.cancel();
     for (final timer in _thumbnailDebounces.values) {
       timer.cancel();
     }
