@@ -32,6 +32,6 @@ class WorkspaceViewportApi {
   }
 
   void fitToContent(Workspace? workspace) {
-    _controller.fitWorkspaceViewportToContent(workspace);
+    _controller.viewportController.fitWorkspaceViewportToContent(workspace);
   }
 }

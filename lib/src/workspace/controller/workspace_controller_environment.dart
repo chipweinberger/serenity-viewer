@@ -1,4 +1,8 @@
-part of 'workspace_controller.dart';
+import 'package:flutter/material.dart';
+
+import 'package:serenity_viewer/src/environment/environment.dart';
+import 'package:serenity_viewer/src/environment/workspace.dart';
+import 'package:serenity_viewer/src/workspace/operations/workspace_environment_operations.dart';
 
 class WorkspaceEnvironmentControllerState {
   bool canMoveSelectedWindowsToWorkspace({

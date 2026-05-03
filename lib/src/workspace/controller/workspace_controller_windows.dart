@@ -1,4 +1,22 @@
-part of 'workspace_controller.dart';
+import 'dart:async';
+
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+
+import 'package:serenity_viewer/src/asset_window/frame/asset_window_resize_helpers.dart';
+import 'package:serenity_viewer/src/asset_window/interaction/asset_window_interaction_state.dart';
+import 'package:serenity_viewer/src/asset_window/interaction/asset_window_zoom_update.dart';
+import 'package:serenity_viewer/src/environment/window.dart';
+import 'package:serenity_viewer/src/environment/workspace.dart';
+import 'package:serenity_viewer/src/foundation/app_constants.dart';
+import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
+import 'package:serenity_viewer/src/workspace/layout/workspace_layout.dart';
+import 'package:serenity_viewer/src/workspace/operations/workspace_stacking_operations.dart';
+import 'package:serenity_viewer/src/workspace/session/recently_closed_window_entry.dart';
+
+import 'workspace_controller.dart';
+
+const Size workspaceCollateTargetBox = Size(700, 700);
 
 class WorkspaceWindowControllerState {
   WorkspaceWindowControllerState({
@@ -143,5 +161,24 @@ class WorkspaceWindowControllerState {
     if (recentlyClosedWindows.length > maxRecentlyClosedWindows) {
       recentlyClosedWindows.removeRange(maxRecentlyClosedWindows, recentlyClosedWindows.length);
     }
+  }
+
+  bool canCollateWorkspaceWindows(Workspace? workspace) {
+    return workspace != null &&
+        chromeState.workspaceLayoutMode != WorkspaceLayoutMode.expose &&
+        workspace.windows.any((window) => window.asset.type == AssetType.image || window.asset.type == AssetType.video);
+  }
+
+  int collatableWindowCount(Workspace workspace) {
+    return workspace.windows
+        .where((window) => window.asset.type == AssetType.image || window.asset.type == AssetType.video)
+        .length;
+  }
+
+  void collateWorkspaceWindows(Workspace workspace) {
+    replaceWorkspace(
+      WorkspaceLayout.collateWorkspaceWindows(workspace, targetBox: workspaceCollateTargetBox),
+      queueThumbnail: true,
+    );
   }
 }

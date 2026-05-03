@@ -13,6 +13,7 @@ import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/foundation/keyboard_modifiers.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
 import 'package:serenity_viewer/src/workspace/controller/workspace_controller.dart';
+import 'package:serenity_viewer/src/workspace/controller/workspace_controller_windows.dart';
 
 class AppShellWindowController {
   const AppShellWindowController({

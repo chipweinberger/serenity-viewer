@@ -86,14 +86,14 @@ class WorkspaceWindowApi {
   }
 
   bool canCollate(Workspace? workspace) {
-    return _controller.canCollateWorkspaceWindows(workspace);
+    return _controller.windowController.canCollateWorkspaceWindows(workspace);
   }
 
   int collatableCount(Workspace workspace) {
-    return _controller.collatableWindowCount(workspace);
+    return _controller.windowController.collatableWindowCount(workspace);
   }
 
   void collate(Workspace workspace) {
-    _controller.collateWorkspaceWindows(workspace);
+    _controller.windowController.collateWorkspaceWindows(workspace);
   }
 }
