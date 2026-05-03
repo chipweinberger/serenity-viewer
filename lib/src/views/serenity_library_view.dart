@@ -97,7 +97,7 @@ extension _SerenityShellLibraryView on _SerenityShellState {
                         SizedBox(
                           width: 280,
                           child: TextField(
-                            controller: _searchController,
+                            controller: _handles.searchController,
                             onChanged: (_) => setState(() {}),
                             decoration: InputDecoration(
                               prefixIcon: const Icon(Icons.search_rounded),
@@ -195,7 +195,7 @@ extension _SerenityShellLibraryView on _SerenityShellState {
   }
 
   bool _matchesWorkspaceSearch(WorkspaceState workspace) {
-    final query = _searchController.text.trim().toLowerCase();
+    final query = _handles.searchController.text.trim().toLowerCase();
     return query.isEmpty || workspace.name.toLowerCase().contains(query);
   }
 

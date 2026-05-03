@@ -68,3 +68,15 @@ class _SerenityShellUiFields {
   bool isDropTargetActive = false;
   String? draggingTabWorkspaceId;
 }
+
+class _SerenityShellHandles {
+  final FocusNode focusNode = FocusNode();
+  final TextEditingController searchController = TextEditingController();
+  final ScrollController tabScrollController = ScrollController();
+
+  void dispose() {
+    tabScrollController.dispose();
+    focusNode.dispose();
+    searchController.dispose();
+  }
+}

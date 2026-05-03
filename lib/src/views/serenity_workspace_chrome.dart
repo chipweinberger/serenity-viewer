@@ -51,7 +51,7 @@ extension _SerenityShellWorkspaceChrome on _SerenityShellState {
     return Align(
       alignment: Alignment.topLeft,
       child: SingleChildScrollView(
-        controller: _tabScrollController,
+        controller: _handles.tabScrollController,
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [

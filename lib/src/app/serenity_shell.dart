@@ -99,10 +99,7 @@ class _SerenityShellState extends State<SerenityShell> {
   static const List<String> _imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tif', 'tiff'];
   static const List<String> _videoExtensions = ['mp4', 'mov', 'm4v', 'avi', 'mkv', 'webm'];
 
-  final FocusNode _focusNode = FocusNode();
-  final TextEditingController _searchController = TextEditingController();
-  final ScrollController _tabScrollController = ScrollController();
-
+  final _SerenityShellHandles _handles = _SerenityShellHandles();
   final _SerenityShellPersistenceState _persistenceState = _SerenityShellPersistenceState();
   final _SerenityShellUiFields _uiState = _SerenityShellUiFields();
 
@@ -175,9 +172,7 @@ class _SerenityShellState extends State<SerenityShell> {
     for (final entry in _windowInteractionState.sharedVideoControllers.values) {
       unawaited(entry.controller.dispose());
     }
-    _tabScrollController.dispose();
-    _focusNode.dispose();
-    _searchController.dispose();
+    _handles.dispose();
     super.dispose();
   }
 
@@ -186,7 +181,7 @@ class _SerenityShellState extends State<SerenityShell> {
     return PlatformMenuBar(
       menus: _buildMenus(),
       child: Focus(
-        focusNode: _focusNode,
+        focusNode: _handles.focusNode,
         autofocus: true,
         onKeyEvent: _onKeyEvent,
         child: Scaffold(body: SafeArea(top: false, child: _buildBody(context))),

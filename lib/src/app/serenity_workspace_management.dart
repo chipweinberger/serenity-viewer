@@ -325,7 +325,7 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
   }
 
   List<WorkspaceState> _sortedKnownWorkspaces() {
-    final query = _searchController.text.trim().toLowerCase();
+    final query = _handles.searchController.text.trim().toLowerCase();
     final filtered = _workspaces.where((workspace) {
       if (query.isEmpty) {
         return true;
