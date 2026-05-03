@@ -1,7 +1,13 @@
-part of 'workspace_shell_controller.dart';
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import 'package:serenity_viewer/src/foundation/app_constants.dart';
+import 'package:serenity_viewer/src/workspace/shell/workspace_shell_controller.dart';
 
 class WorkspaceShellShortcutsApi {
-  WorkspaceShellShortcutsApi._(this._controller);
+  WorkspaceShellShortcutsApi(this._controller);
 
   final WorkspaceShellController _controller;
 

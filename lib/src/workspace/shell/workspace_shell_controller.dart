@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import 'package:serenity_viewer/src/app/environment/app_environment_state.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
@@ -14,10 +13,10 @@ import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
 import 'package:serenity_viewer/src/workspace/controller/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/shell/workspace_shell_management.dart';
 import 'package:serenity_viewer/src/workspace/shell/workspace_shell_navigation.dart';
+import 'package:serenity_viewer/src/workspace/shell/workspace_shell_shortcuts.dart';
 import 'package:serenity_viewer/src/workspace/session/workspace_view_tracking_state.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 
-part 'workspace_shell_shortcuts.dart';
 part 'workspace_shell_tracking.dart';
 
 typedef SerenityShowWorkspaceScreen =
@@ -65,7 +64,7 @@ class WorkspaceShellController {
   }) {
     navigation = WorkspaceShellNavigationApi(this);
     management = WorkspaceShellManagementApi(this);
-    shortcuts = WorkspaceShellShortcutsApi._(this);
+    shortcuts = WorkspaceShellShortcutsApi(this);
     tracking = WorkspaceShellTrackingApi._(this);
   }
 
