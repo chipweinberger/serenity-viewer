@@ -58,7 +58,7 @@ extension _SerenityShellWorkspaceGeometry on _SerenityShellState {
 
     _replaceWorkspace(nextWorkspace, queueThumbnail: queueThumbnail);
     if (!queueThumbnail) {
-      _thumbnailDirtyWorkspaces.add(workspaceId);
+      _thumbnailRefreshState.dirtyWorkspaces.add(workspaceId);
     }
   }
 

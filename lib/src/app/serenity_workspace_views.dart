@@ -6,7 +6,9 @@ extension _SerenityShellWorkspaceViews on _SerenityShellState {
   static const Duration _workspaceViewThreshold = Duration(seconds: 30);
 
   bool get _shouldTrackWorkspaceViewSession {
-    return _isAppForeground && _screen == SerenityScreen.workspace && _activeWorkspaceOrNull != null;
+    return _workspaceViewTrackingState.isAppForeground &&
+        _screen == SerenityScreen.workspace &&
+        _activeWorkspaceOrNull != null;
   }
 
   String? _currentWorkspaceViewCandidateId() {
@@ -24,11 +26,11 @@ extension _SerenityShellWorkspaceViews on _SerenityShellState {
       AppLifecycleState.paused ||
       AppLifecycleState.detached => false,
     };
-    if (_isAppForeground == nextForeground) {
+    if (_workspaceViewTrackingState.isAppForeground == nextForeground) {
       return;
     }
 
-    _isAppForeground = nextForeground;
+    _workspaceViewTrackingState.isAppForeground = nextForeground;
     _refreshWorkspaceViewTracking();
   }
 
@@ -39,38 +41,38 @@ extension _SerenityShellWorkspaceViews on _SerenityShellState {
       return;
     }
 
-    if (_workspaceViewCandidateId != candidateId) {
-      _workspaceViewTimer?.cancel();
-      _workspaceViewTimer = null;
-      _workspaceViewCandidateId = candidateId;
-      _workspaceViewCountedForCurrentContext = false;
+    if (_workspaceViewTrackingState.candidateWorkspaceId != candidateId) {
+      _workspaceViewTrackingState.timer?.cancel();
+      _workspaceViewTrackingState.timer = null;
+      _workspaceViewTrackingState.candidateWorkspaceId = candidateId;
+      _workspaceViewTrackingState.countedForCurrentContext = false;
     }
 
-    if (_workspaceViewCountedForCurrentContext || _workspaceViewTimer != null) {
+    if (_workspaceViewTrackingState.countedForCurrentContext || _workspaceViewTrackingState.timer != null) {
       return;
     }
 
-    _workspaceViewTimer = Timer(_workspaceViewThreshold, () {
-      _workspaceViewTimer = null;
+    _workspaceViewTrackingState.timer = Timer(_workspaceViewThreshold, () {
+      _workspaceViewTrackingState.timer = null;
       if (!mounted) {
         return;
       }
 
       final currentCandidateId = _currentWorkspaceViewCandidateId();
-      if (currentCandidateId != candidateId || _workspaceViewCountedForCurrentContext) {
+      if (currentCandidateId != candidateId || _workspaceViewTrackingState.countedForCurrentContext) {
         return;
       }
 
-      _workspaceViewCountedForCurrentContext = true;
+      _workspaceViewTrackingState.countedForCurrentContext = true;
       _incrementWorkspaceViews(candidateId);
     });
   }
 
   void _cancelWorkspaceViewTracking() {
-    _workspaceViewTimer?.cancel();
-    _workspaceViewTimer = null;
-    _workspaceViewCandidateId = null;
-    _workspaceViewCountedForCurrentContext = false;
+    _workspaceViewTrackingState.timer?.cancel();
+    _workspaceViewTrackingState.timer = null;
+    _workspaceViewTrackingState.candidateWorkspaceId = null;
+    _workspaceViewTrackingState.countedForCurrentContext = false;
   }
 
   void _incrementWorkspaceViews(String workspaceId) {

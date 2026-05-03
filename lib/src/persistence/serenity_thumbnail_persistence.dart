@@ -30,7 +30,7 @@ extension _SerenityShellThumbnailPersistence on _SerenityShellState {
 
     final workspace = _activeWorkspaceOrNull;
     final workspaceId = workspace?.id;
-    if (workspaceId == null || !_thumbnailDirtyWorkspaces.contains(workspaceId)) {
+    if (workspaceId == null || !_thumbnailRefreshState.dirtyWorkspaces.contains(workspaceId)) {
       return;
     }
 
@@ -97,31 +97,31 @@ extension _SerenityShellThumbnailPersistence on _SerenityShellState {
   }
 
   void _queueThumbnailRefresh(String workspaceId, {Duration delay = const Duration(milliseconds: 300)}) {
-    _thumbnailDirtyWorkspaces.add(workspaceId);
+    _thumbnailRefreshState.dirtyWorkspaces.add(workspaceId);
   }
 
   Future<void> _renderAndPersistWorkspaceThumbnail(String workspaceId) async {
-    if (_thumbnailRefreshInFlight.contains(workspaceId)) {
+    if (_thumbnailRefreshState.refreshInFlight.contains(workspaceId)) {
       return;
     }
 
-    if (!_thumbnailRefreshInFlight.contains(workspaceId) && mounted) {
+    if (!_thumbnailRefreshState.refreshInFlight.contains(workspaceId) && mounted) {
       setState(() {
-        _thumbnailRefreshInFlight.add(workspaceId);
+        _thumbnailRefreshState.refreshInFlight.add(workspaceId);
       });
     } else {
-      _thumbnailRefreshInFlight.add(workspaceId);
+      _thumbnailRefreshState.refreshInFlight.add(workspaceId);
     }
 
     final session = _session;
     if (session == null) {
-      _thumbnailRefreshInFlight.remove(workspaceId);
+      _thumbnailRefreshState.refreshInFlight.remove(workspaceId);
       return;
     }
 
     final matchingWorkspaces = session.workspaces.where((entry) => entry.id == workspaceId);
     if (matchingWorkspaces.isEmpty) {
-      _thumbnailRefreshInFlight.remove(workspaceId);
+      _thumbnailRefreshState.refreshInFlight.remove(workspaceId);
       return;
     }
     final workspace = matchingWorkspaces.first;
@@ -131,10 +131,10 @@ extension _SerenityShellThumbnailPersistence on _SerenityShellState {
     if (bytes == null) {
       if (mounted) {
         setState(() {
-          _thumbnailRefreshInFlight.remove(workspaceId);
+          _thumbnailRefreshState.refreshInFlight.remove(workspaceId);
         });
       } else {
-        _thumbnailRefreshInFlight.remove(workspaceId);
+        _thumbnailRefreshState.refreshInFlight.remove(workspaceId);
       }
       return;
     }
@@ -142,16 +142,16 @@ extension _SerenityShellThumbnailPersistence on _SerenityShellState {
     await thumbnailFile.writeAsBytes(bytes, flush: true);
     await FileImage(thumbnailFile).evict();
     if (!mounted) {
-      _thumbnailDirtyWorkspaces.remove(workspaceId);
-      _thumbnailRefreshInFlight.remove(workspaceId);
+      _thumbnailRefreshState.dirtyWorkspaces.remove(workspaceId);
+      _thumbnailRefreshState.refreshInFlight.remove(workspaceId);
       return;
     }
 
     final freshSession = _session;
     if (freshSession == null) {
       setState(() {
-        _thumbnailDirtyWorkspaces.remove(workspaceId);
-        _thumbnailRefreshInFlight.remove(workspaceId);
+        _thumbnailRefreshState.dirtyWorkspaces.remove(workspaceId);
+        _thumbnailRefreshState.refreshInFlight.remove(workspaceId);
       });
       return;
     }
@@ -159,8 +159,8 @@ extension _SerenityShellThumbnailPersistence on _SerenityShellState {
     final currentMatching = freshSession.workspaces.where((entry) => entry.id == workspaceId);
     if (currentMatching.isEmpty) {
       setState(() {
-        _thumbnailDirtyWorkspaces.remove(workspaceId);
-        _thumbnailRefreshInFlight.remove(workspaceId);
+        _thumbnailRefreshState.dirtyWorkspaces.remove(workspaceId);
+        _thumbnailRefreshState.refreshInFlight.remove(workspaceId);
       });
       return;
     }
@@ -181,12 +181,12 @@ extension _SerenityShellThumbnailPersistence on _SerenityShellState {
     _updateSession(nextSession);
     if (mounted) {
       setState(() {
-        _thumbnailDirtyWorkspaces.remove(workspaceId);
-        _thumbnailRefreshInFlight.remove(workspaceId);
+        _thumbnailRefreshState.dirtyWorkspaces.remove(workspaceId);
+        _thumbnailRefreshState.refreshInFlight.remove(workspaceId);
       });
     } else {
-      _thumbnailDirtyWorkspaces.remove(workspaceId);
-      _thumbnailRefreshInFlight.remove(workspaceId);
+      _thumbnailRefreshState.dirtyWorkspaces.remove(workspaceId);
+      _thumbnailRefreshState.refreshInFlight.remove(workspaceId);
     }
   }
 

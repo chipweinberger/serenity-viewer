@@ -49,7 +49,7 @@ extension _SerenityShellLibraryView on _SerenityShellState {
                               workspace: workspace,
                               mediaCounts: _mediaCountsForWorkspace(workspace),
                               unloadedCount: _unloadedCountForWorkspace(workspace, loadPlan),
-                              isRefreshing: _thumbnailRefreshInFlight.contains(workspace.id),
+                              isRefreshing: _thumbnailRefreshState.refreshInFlight.contains(workspace.id),
                               hoverActions: [
                                 _buildWorkspaceCardAction(
                                   tooltip: 'Close workspace',
@@ -156,7 +156,7 @@ extension _SerenityShellLibraryView on _SerenityShellState {
                               workspace: workspace,
                               mediaCounts: _mediaCountsForWorkspace(workspace),
                               unloadedCount: _unloadedCountForWorkspace(workspace, loadPlan),
-                              isRefreshing: _thumbnailRefreshInFlight.contains(workspace.id),
+                              isRefreshing: _thumbnailRefreshState.refreshInFlight.contains(workspace.id),
                               isDimmed: workspace.isOpen,
                               statusLabel: workspace.isOpen ? 'Open' : null,
                               hoverActions: [

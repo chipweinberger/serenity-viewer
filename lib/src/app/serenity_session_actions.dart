@@ -18,7 +18,7 @@ extension _SerenityShellSessionActions on _SerenityShellState {
     final session = _session!;
     _updateSession(SerenityWorkspaceMutations.replaceWorkspace(session, nextWorkspace));
     if (queueThumbnail) {
-      _thumbnailDirtyWorkspaces.add(nextWorkspace.id);
+      _thumbnailRefreshState.dirtyWorkspaces.add(nextWorkspace.id);
     }
   }
 

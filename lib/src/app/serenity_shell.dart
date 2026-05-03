@@ -40,6 +40,7 @@ import 'package:serenity_viewer/src/widgets/workspace_thumbnail_card.dart';
 import 'package:serenity_viewer/src/views/serenity_workspace_layouts.dart';
 
 part '../app/serenity_session_actions.dart';
+part '../app/serenity_shell_state_buckets.dart';
 part '../app/serenity_shell_ui_state.dart';
 part '../app/serenity_window_actions.dart';
 part '../app/serenity_window_history_actions.dart';
@@ -126,11 +127,9 @@ class _SerenityShellState extends State<SerenityShell> {
   Timer? _windowFlashTimer;
 
   Timer? _autosaveTimer;
-  final Map<String, Timer> _thumbnailDebounces = {};
-  final Set<String> _thumbnailRefreshInFlight = {};
-  final Set<String> _thumbnailDirtyWorkspaces = {};
+  final _SerenityThumbnailRefreshState _thumbnailRefreshState = _SerenityThumbnailRefreshState();
   AppLifecycleListener? _appLifecycleListener;
-  Timer? _workspaceViewTimer;
+  final _SerenityWorkspaceViewTrackingState _workspaceViewTrackingState = _SerenityWorkspaceViewTrackingState();
 
   Size _workspaceViewportSize = Size.zero;
   bool _isWorkspaceGestureActive = false;
@@ -138,10 +137,6 @@ class _SerenityShellState extends State<SerenityShell> {
   double _workspaceGestureStartZoom = 1;
   Offset _workspaceGestureStartLocalFocalPoint = Offset.zero;
   Offset _workspaceGestureAccumulatedPan = Offset.zero;
-
-  bool _isAppForeground = true;
-  String? _workspaceViewCandidateId;
-  bool _workspaceViewCountedForCurrentContext = false;
 
   bool get _isRunningInWidgetTest {
     return Platform.environment.containsKey('FLUTTER_TEST') ||
@@ -197,11 +192,9 @@ class _SerenityShellState extends State<SerenityShell> {
   void dispose() {
     _autosaveTimer?.cancel();
     _appLifecycleListener?.dispose();
-    _workspaceViewTimer?.cancel();
+    _workspaceViewTrackingState.dispose();
     _windowFlashTimer?.cancel();
-    for (final timer in _thumbnailDebounces.values) {
-      timer.cancel();
-    }
+    _thumbnailRefreshState.dispose();
     for (final entry in _sharedVideoControllers.values) {
       unawaited(entry.controller.dispose());
     }
