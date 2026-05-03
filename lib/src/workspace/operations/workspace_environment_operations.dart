@@ -1,11 +1,11 @@
 import 'dart:math' as math;
 
 import 'package:serenity_viewer/src/environment/environment.dart';
-import 'package:serenity_viewer/src/environment/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/workspace/workspace_state_helpers.dart';
 
 class WorkspaceEnvironmentOperations {
-  static Environment replaceWorkspace(Environment environment, WorkspaceState nextWorkspace) {
+  static Environment replaceWorkspace(Environment environment, Workspace nextWorkspace) {
     return environment.copyWith(
       workspaces: environment.workspaces
           .map((workspace) => workspace.id == nextWorkspace.id ? nextWorkspace : workspace)
@@ -30,8 +30,8 @@ class WorkspaceEnvironmentOperations {
     return environment.copyWith(workspaces: nextWorkspaces, activeWorkspaceId: nextActiveId);
   }
 
-  static List<WorkspaceState> reorderOpenWorkspaces(
-    List<WorkspaceState> workspaces, {
+  static List<Workspace> reorderOpenWorkspaces(
+    List<Workspace> workspaces, {
     required String sourceWorkspaceId,
     required String targetWorkspaceId,
   }) {
@@ -72,8 +72,8 @@ class WorkspaceEnvironmentOperations {
       return environment;
     }
 
-    final sourceWorkspace = WorkspaceStateHelpers.workspaceById(environment, sourceWorkspaceId);
-    final destinationWorkspace = WorkspaceStateHelpers.workspaceById(environment, destinationWorkspaceId);
+    final sourceWorkspace = WorkspaceHelpers.workspaceById(environment, sourceWorkspaceId);
+    final destinationWorkspace = WorkspaceHelpers.workspaceById(environment, destinationWorkspaceId);
     if (sourceWorkspace == null || destinationWorkspace == null) {
       return environment;
     }

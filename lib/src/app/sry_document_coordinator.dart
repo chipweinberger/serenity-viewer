@@ -10,7 +10,7 @@ import 'package:serenity_viewer/src/app/app_environment_state.dart';
 import 'package:serenity_viewer/src/file_resolution/missing_asset_resolution.dart';
 import 'package:serenity_viewer/src/video_tools/settings_and_video_models.dart';
 import 'package:serenity_viewer/src/sry_document/sry_document_codec.dart';
-import 'package:serenity_viewer/src/environment/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/workspace.dart';
 
 class SryDocumentCoordinator {
   SryDocumentCoordinator({
@@ -256,7 +256,7 @@ class SryDocumentCoordinator {
     Environment environment,
   ) async {
     final thumbnailDir = await thumbnailDirectory();
-    final nextWorkspaces = <WorkspaceState>[];
+    final nextWorkspaces = <Workspace>[];
     var updated = false;
 
     for (final workspace in environment.workspaces) {

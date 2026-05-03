@@ -1,7 +1,7 @@
 part of 'workspace_controller.dart';
 
 extension WorkspaceControllerZoomToFit on WorkspaceController {
-  void fitWorkspaceViewportToContent(WorkspaceState? workspace) {
+  void fitWorkspaceViewportToContent(Workspace? workspace) {
     if (workspace == null) {
       return;
     }

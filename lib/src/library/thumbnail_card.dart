@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/environment/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
 import 'package:serenity_viewer/src/workspace_loading/workspace_media_counts.dart';
 
@@ -19,7 +19,7 @@ class ThumbnailCard extends StatefulWidget {
     this.statusLabel,
   });
 
-  final WorkspaceState workspace;
+  final Workspace workspace;
   final WorkspaceMediaCounts mediaCounts;
   final int unloadedCount;
   final List<Widget> hoverActions;
@@ -35,7 +35,7 @@ class ThumbnailCard extends StatefulWidget {
 class _ThumbnailCardState extends State<ThumbnailCard> {
   bool _isHovered = false;
 
-  Widget _buildEmptyWorkspaceState(BuildContext context) {
+  Widget _buildEmptyWorkspace(BuildContext context) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -62,10 +62,10 @@ class _ThumbnailCardState extends State<ThumbnailCard> {
     List<Color> previewColors,
     bool hasThumbnail,
     String? thumbnailPath,
-    WorkspaceState workspace,
+    Workspace workspace,
   ) {
     if (workspace.windows.isEmpty) {
-      return _buildEmptyWorkspaceState(context);
+      return _buildEmptyWorkspace(context);
     }
 
     if (hasThumbnail) {

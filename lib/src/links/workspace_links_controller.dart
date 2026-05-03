@@ -3,11 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/environment/workspace_link.dart';
-import 'package:serenity_viewer/src/environment/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/link.dart';
+import 'package:serenity_viewer/src/environment/workspace.dart';
 
-class WorkspaceLinksController {
-  WorkspaceLinksController({
+class LinksController {
+  LinksController({
     required this.screen,
     required this.hasSession,
     required this.activeWorkspace,
@@ -23,9 +23,9 @@ class WorkspaceLinksController {
 
   final SerenityScreen Function() screen;
   final bool Function() hasSession;
-  final WorkspaceState? Function() activeWorkspace;
-  final List<WorkspaceState> Function() workspaces;
-  final ValueChanged<WorkspaceState> replaceWorkspace;
+  final Workspace? Function() activeWorkspace;
+  final List<Workspace> Function() workspaces;
+  final ValueChanged<Workspace> replaceWorkspace;
   final String Function(String prefix) newId;
   final ValueChanged<String> showMessage;
   final BuildContext Function() context;
@@ -83,7 +83,7 @@ class WorkspaceLinksController {
         continue;
       }
       existingUrls.add(url);
-      nextLinks.add(WorkspaceLink(id: newId('link'), url: url));
+      nextLinks.add(Link(id: newId('link'), url: url));
       addedCount += 1;
     }
 
@@ -96,7 +96,7 @@ class WorkspaceLinksController {
     return addedCount;
   }
 
-  Future<void> openWorkspaceLink(WorkspaceLink link) async {
+  Future<void> openLink(Link link) async {
     final uri = Uri.tryParse(link.url);
     if (uri == null) {
       showMessage('That link is invalid.');
@@ -109,7 +109,7 @@ class WorkspaceLinksController {
     }
   }
 
-  Future<void> openAllWorkspaceLinks(WorkspaceState workspace) async {
+  Future<void> openAllLinks(Workspace workspace) async {
     if (workspace.links.isEmpty) {
       showMessage('There are no links to open.');
       return;
@@ -144,7 +144,7 @@ class WorkspaceLinksController {
     showMessage('Opened all ${workspace.links.length} links.');
   }
 
-  WorkspaceState? removeWorkspaceLink(String workspaceId, String linkId) {
+  Workspace? removeLink(String workspaceId, String linkId) {
     final workspace = workspaceForId(workspaceId);
     if (workspace == null) {
       return null;
@@ -160,7 +160,7 @@ class WorkspaceLinksController {
     return nextWorkspace;
   }
 
-  Future<bool> confirmRemoveWorkspaceLink(WorkspaceLink link) async {
+  Future<bool> confirmRemoveLink(Link link) async {
     final shouldRemove = await showDialog<bool>(
       context: context(),
       builder: (context) {
@@ -178,7 +178,7 @@ class WorkspaceLinksController {
     return shouldRemove == true;
   }
 
-  WorkspaceState? renameWorkspaceLink(String workspaceId, String linkId, String customName) {
+  Workspace? renameLink(String workspaceId, String linkId, String customName) {
     final workspace = workspaceForId(workspaceId);
     if (workspace == null) {
       return null;
@@ -203,7 +203,7 @@ class WorkspaceLinksController {
     return nextWorkspace;
   }
 
-  Future<String?> promptForWorkspaceLinkName(WorkspaceLink link) async {
+  Future<String?> promptForLinkName(Link link) async {
     final controller = TextEditingController(text: link.customName);
     final result = await showDialog<String>(
       context: context(),
@@ -227,7 +227,7 @@ class WorkspaceLinksController {
     return result;
   }
 
-  WorkspaceState? workspaceForId(String workspaceId) {
+  Workspace? workspaceForId(String workspaceId) {
     return workspaces().where((entry) => entry.id == workspaceId).firstOrNull;
   }
 

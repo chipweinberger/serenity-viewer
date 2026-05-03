@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
+import 'package:serenity_viewer/src/environment/window.dart';
 
 @immutable
 class RecentlyClosedWindowEntry {
@@ -13,6 +13,6 @@ class RecentlyClosedWindowEntry {
 
   final String workspaceId;
   final String workspaceName;
-  final WorkspaceWindowState window;
+  final Window window;
   final DateTime closedAt;
 }

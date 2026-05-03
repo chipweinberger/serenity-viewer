@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/environment/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/workspace.dart';
 
 @immutable
 class Environment {
@@ -14,7 +14,7 @@ class Environment {
     required this.longVideoLoadLimit,
   });
 
-  final List<WorkspaceState> workspaces;
+  final List<Workspace> workspaces;
   final String activeWorkspaceId;
   final List<String> knownFolders;
   final Map<String, int> folderPopularity;
@@ -23,7 +23,7 @@ class Environment {
   final int longVideoLoadLimit;
 
   Environment copyWith({
-    List<WorkspaceState>? workspaces,
+    List<Workspace>? workspaces,
     String? activeWorkspaceId,
     List<String>? knownFolders,
     Map<String, int>? folderPopularity,
@@ -69,7 +69,7 @@ class Environment {
   factory Environment.fromJson(Map<String, dynamic> json) {
     return Environment(
       workspaces: (json['workspaces'] as List<dynamic>)
-          .map((entry) => WorkspaceState.fromJson(entry as Map<String, dynamic>))
+          .map((entry) => Workspace.fromJson(entry as Map<String, dynamic>))
           .toList(),
       activeWorkspaceId: json['activeWorkspaceId'] as String,
       knownFolders: (json['knownFolders'] as List<dynamic>? ?? const []).cast<String>(),
@@ -82,7 +82,7 @@ class Environment {
     );
   }
 
-  factory Environment.fromManifestJson(Map<String, dynamic> json, List<WorkspaceState> workspaces) {
+  factory Environment.fromManifestJson(Map<String, dynamic> json, List<Workspace> workspaces) {
     return Environment(
       workspaces: workspaces,
       activeWorkspaceId: json['activeWorkspaceId'] as String,

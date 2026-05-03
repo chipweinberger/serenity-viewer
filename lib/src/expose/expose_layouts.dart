@@ -2,12 +2,12 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
+import 'package:serenity_viewer/src/environment/window.dart';
 
-typedef SerenityWindowLayout = ({WorkspaceWindowState window, Rect rect});
+typedef SerenityWindowLayout = ({Window window, Rect rect});
 
 List<SerenityWindowLayout> computeExposeLayoutRects({
-  required List<WorkspaceWindowState> windows,
+  required List<Window> windows,
   required Size viewportSize,
 }) {
   const horizontalPadding = 28.0;
@@ -61,8 +61,8 @@ List<SerenityWindowLayout> computeExposeLayoutRects({
     }
   }
 
-  final rows = <List<({WorkspaceWindowState window, double width})>>[];
-  var currentRow = <({WorkspaceWindowState window, double width})>[];
+  final rows = <List<({Window window, double width})>>[];
+  var currentRow = <({Window window, double width})>[];
   var currentRowWidth = 0.0;
   for (final window in windows) {
     final itemWidth = bestCardHeight * math.max(0.2, window.size.width / math.max(1.0, window.size.height));

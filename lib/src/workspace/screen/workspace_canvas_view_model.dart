@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 
-import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
+import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/workspace_loading/media_load_plan.dart';
-import 'package:serenity_viewer/src/environment/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/workspace.dart';
 
 @immutable
 class WorkspaceCanvasViewModel {
@@ -15,9 +15,9 @@ class WorkspaceCanvasViewModel {
     required this.isDropTargetActive,
   });
 
-  final WorkspaceState workspace;
+  final Workspace workspace;
   final bool isExposeMode;
-  final List<WorkspaceWindowState> windows;
+  final List<Window> windows;
   final String? focusedWindowId;
   final MediaLoadPlan loadPlan;
   final bool isDropTargetActive;

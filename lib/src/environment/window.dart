@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/environment/workspace_asset.dart';
+import 'package:serenity_viewer/src/environment/asset.dart';
 
 @immutable
-class WorkspaceWindowState {
-  const WorkspaceWindowState({
+class Window {
+  const Window({
     required this.asset,
     required this.position,
     required this.size,
@@ -18,7 +18,7 @@ class WorkspaceWindowState {
     required this.zIndex,
   });
 
-  final WorkspaceAsset asset;
+  final Asset asset;
   final Offset position;
   final Size size;
   final double zoom;
@@ -39,8 +39,8 @@ class WorkspaceWindowState {
 
   Offset get contentOffset => Offset(contentOffsetDx ?? 0, contentOffsetDy ?? 0);
 
-  WorkspaceWindowState copyWith({
-    WorkspaceAsset? asset,
+  Window copyWith({
+    Asset? asset,
     Offset? position,
     Size? size,
     double? zoom,
@@ -54,7 +54,7 @@ class WorkspaceWindowState {
     bool clearContentOffset = false,
     int? zIndex,
   }) {
-    return WorkspaceWindowState(
+    return Window(
       asset: asset ?? this.asset,
       position: position ?? this.position,
       size: size ?? this.size,
@@ -87,9 +87,9 @@ class WorkspaceWindowState {
     };
   }
 
-  factory WorkspaceWindowState.fromJson(Map<String, dynamic> json) {
-    return WorkspaceWindowState(
-      asset: WorkspaceAsset.fromJson(json['asset'] as Map<String, dynamic>),
+  factory Window.fromJson(Map<String, dynamic> json) {
+    return Window(
+      asset: Asset.fromJson(json['asset'] as Map<String, dynamic>),
       position: Offset((json['positionDx'] as num).toDouble(), (json['positionDy'] as num).toDouble()),
       size: Size((json['width'] as num).toDouble(), (json['height'] as num).toDouble()),
       zoom: (json['zoom'] as num).toDouble(),

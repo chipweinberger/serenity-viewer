@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
+import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
-import 'package:serenity_viewer/src/environment/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/workspace.dart';
 
 typedef BookmarkResolver = Future<String?> Function(String bookmark);
 typedef BookmarkCreator = Future<String?> Function(String path);
@@ -39,9 +39,9 @@ Future<Environment> resolveMissingAssetsInEnvironment({
   var nextEnvironment = environment;
   var changed = false;
 
-  final nextWorkspaces = <WorkspaceState>[];
+  final nextWorkspaces = <Workspace>[];
   for (final workspace in environment.workspaces) {
-    final nextWindows = <WorkspaceWindowState>[];
+    final nextWindows = <Window>[];
     for (final window in workspace.windows) {
       final path = window.asset.filePath;
       if (path == null || path.isEmpty) {

@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
+import 'package:serenity_viewer/src/environment/window.dart';
 
 Size fitSizeForViewportToAspect(Size viewportSize, double aspectRatio) {
   if (viewportSize.width <= 0 || viewportSize.height <= 0 || aspectRatio <= 0) {
@@ -18,7 +18,7 @@ Size fitSizeForViewportToAspect(Size viewportSize, double aspectRatio) {
   return Size(fittedWidth, fittedHeight);
 }
 
-Rect normalizedVisibleRectForWindow(WorkspaceWindowState window, Size sourceSize) {
+Rect normalizedVisibleRectForWindow(Window window, Size sourceSize) {
   final viewportSize = window.size;
   final fitSize = fitSizeForViewportToAspect(viewportSize, sourceSize.width / sourceSize.height);
   final baseSize = window.zoom > 1.0 && window.zoomBaseSize != null ? window.zoomBaseSize! : fitSize;

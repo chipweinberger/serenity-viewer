@@ -65,7 +65,7 @@ extension _AppShellStartupSeedAndSettings on _AppShellState {
   Environment _seedEnvironment() {
     final now = DateTime.now();
 
-    WorkspaceWindowState buildWindow({
+    Window buildWindow({
       required String id,
       required String filename,
       required String md5,
@@ -79,8 +79,8 @@ extension _AppShellStartupSeedAndSettings on _AppShellState {
       double? intrinsicWidth,
       double? intrinsicHeight,
     }) {
-      return WorkspaceWindowState(
-        asset: WorkspaceAsset(
+      return Window(
+        asset: Asset(
           id: id,
           filename: filename,
           md5: md5,
@@ -106,7 +106,7 @@ extension _AppShellStartupSeedAndSettings on _AppShellState {
       shortVideoLoadLimit: 36,
       longVideoLoadLimit: 12,
       workspaces: [
-        WorkspaceState(
+        Workspace(
           id: 'ws-story',
           name: 'Story Moodboard',
           createdAt: now.subtract(const Duration(days: 6)),
@@ -160,7 +160,7 @@ extension _AppShellStartupSeedAndSettings on _AppShellState {
             ),
           ],
         ),
-        WorkspaceState(
+        Workspace(
           id: 'ws-cut',
           name: 'Cut Review',
           createdAt: now.subtract(const Duration(days: 2)),
@@ -201,7 +201,7 @@ extension _AppShellStartupSeedAndSettings on _AppShellState {
             ),
           ],
         ),
-        WorkspaceState(
+        Workspace(
           id: 'ws-archive',
           name: 'Archive Pulls',
           createdAt: now.subtract(const Duration(days: 15)),

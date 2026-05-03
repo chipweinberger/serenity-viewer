@@ -77,7 +77,7 @@ extension _AppShellContent on _AppShellState {
                     onFitWorkspaceViewportToContent: _fitWorkspaceViewportToContent,
                     onConfirmCollateWorkspaceWindows: _confirmCollateWorkspaceWindows,
                     onConfirmApplyExposeGridToWorkspace: _confirmApplyExposeGridToWorkspace,
-                    onOpenWorkspaceLinks: () => showSerenityWorkspaceLinksDialog(
+                    onOpenLinks: () => showSerenityLinksDialog(
                       context: context,
                       initialWorkspace: activeWorkspace,
                       controller: _workspaceLinksController,

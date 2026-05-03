@@ -6,13 +6,13 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/links/workspace_links_controller.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
-import 'package:serenity_viewer/src/environment/workspace_link.dart';
-import 'package:serenity_viewer/src/environment/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/link.dart';
+import 'package:serenity_viewer/src/environment/workspace.dart';
 
-Future<void> showSerenityWorkspaceLinksDialog({
+Future<void> showSerenityLinksDialog({
   required BuildContext context,
-  required WorkspaceState initialWorkspace,
-  required WorkspaceLinksController controller,
+  required Workspace initialWorkspace,
+  required LinksController controller,
 }) async {
   var workspace = initialWorkspace;
   final pasteController = TextEditingController();
@@ -74,7 +74,7 @@ Future<void> showSerenityWorkspaceLinksDialog({
                 );
               }
 
-              Widget buildLinkRow(WorkspaceLink link) {
+              Widget buildLinkRow(Link link) {
                 final displayTitle = link.hasCustomName
                     ? link.trimmedCustomName
                     : controller.middleTruncatedLabel(link.url, maxLength: 54);
@@ -91,7 +91,7 @@ Future<void> showSerenityWorkspaceLinksDialog({
                       Expanded(
                         child: InkWell(
                           onTap: () async {
-                            await controller.openWorkspaceLink(link);
+                            await controller.openLink(link);
                           },
                           borderRadius: BorderRadius.circular(12),
                           child: Padding(
@@ -126,11 +126,11 @@ Future<void> showSerenityWorkspaceLinksDialog({
                       IconButton(
                         tooltip: 'Name link',
                         onPressed: () async {
-                          final customName = await controller.promptForWorkspaceLinkName(link);
+                          final customName = await controller.promptForLinkName(link);
                           if (customName == null) {
                             return;
                           }
-                          final updatedWorkspace = controller.renameWorkspaceLink(workspace.id, link.id, customName);
+                          final updatedWorkspace = controller.renameLink(workspace.id, link.id, customName);
                           if (updatedWorkspace == null) {
                             return;
                           }
@@ -144,11 +144,11 @@ Future<void> showSerenityWorkspaceLinksDialog({
                       IconButton(
                         tooltip: 'Remove link',
                         onPressed: () async {
-                          final shouldRemove = await controller.confirmRemoveWorkspaceLink(link);
+                          final shouldRemove = await controller.confirmRemoveLink(link);
                           if (!shouldRemove) {
                             return;
                           }
-                          final updatedWorkspace = controller.removeWorkspaceLink(workspace.id, link.id);
+                          final updatedWorkspace = controller.removeLink(workspace.id, link.id);
                           if (updatedWorkspace == null) {
                             return;
                           }
@@ -220,7 +220,7 @@ Future<void> showSerenityWorkspaceLinksDialog({
                                             child: InkWell(
                                               onTap: workspace.links.isEmpty
                                                   ? null
-                                                  : () => unawaited(controller.openAllWorkspaceLinks(workspace)),
+                                                  : () => unawaited(controller.openAllLinks(workspace)),
                                               child: SizedBox(
                                                 height: 32,
                                                 child: Padding(

@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 
 import 'package:serenity_viewer/src/asset_window/content/asset_zoom_utils.dart';
-import 'package:serenity_viewer/src/environment/workspace_state.dart';
-import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
+import 'package:serenity_viewer/src/environment/workspace.dart';
+import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_projection.dart';
@@ -18,7 +18,7 @@ class ThumbnailRenderer {
 
   final bool isRunningInWidgetTest;
 
-  Future<Uint8List?> buildThumbnailBytes({required WorkspaceState workspace, required Size viewportSize}) async {
+  Future<Uint8List?> buildThumbnailBytes({required Workspace workspace, required Size viewportSize}) async {
     const canvasWidth = 560.0;
     const canvasHeight = 360.0;
     const assetCornerRadius = 12.0;
@@ -124,7 +124,7 @@ class ThumbnailRenderer {
     }
   }
 
-  Future<ui.Image?> _decodeThumbnailVideoFrame(WorkspaceWindowState window, {int targetWidth = 320}) async {
+  Future<ui.Image?> _decodeThumbnailVideoFrame(Window window, {int targetWidth = 320}) async {
     if (isRunningInWidgetTest || !Platform.isMacOS) {
       return null;
     }
@@ -164,7 +164,7 @@ class ThumbnailRenderer {
   }
 
   ({Rect mediaRect, Rect visibleRect}) _thumbnailMediaLayoutForWindow({
-    required WorkspaceWindowState window,
+    required Window window,
     required Rect windowRect,
   }) {
     final scale = window.size.width <= 0 ? 1.0 : windowRect.width / window.size.width;

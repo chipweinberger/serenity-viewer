@@ -7,11 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:serenity_viewer/src/asset_import/import_result.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/asset_import/import_window_layout.dart';
-import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
+import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/video_tools/settings_and_video_models.dart';
-import 'package:serenity_viewer/src/environment/workspace_asset.dart';
-import 'package:serenity_viewer/src/environment/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/asset.dart';
+import 'package:serenity_viewer/src/environment/workspace.dart';
 
 typedef SerenitySingleFrameConversionConfirmer = Future<bool> Function(String filename);
 typedef SerenityVideoFrameExporter =
@@ -60,7 +60,7 @@ class ImportCoordinator {
 
   Future<ImportResult> importFiles({
     required Environment environment,
-    required WorkspaceState workspace,
+    required Workspace workspace,
     required List<XFile> files,
   }) async {
     final supported = files.where((file) => _assetTypeForPath(file.path) != null).toList();
@@ -173,7 +173,7 @@ class ImportCoordinator {
     required File file,
     required XFile xfile,
     required AssetType type,
-    required WorkspaceState workspace,
+    required Workspace workspace,
     required int offsetIndex,
     required int nextZ,
     required Set<String> existingAssetDigests,
@@ -230,8 +230,8 @@ class ImportCoordinator {
 
     return _PreparedImportedAsset(
       directory: importFile.parent.path,
-      window: WorkspaceWindowState(
-        asset: WorkspaceAsset(
+      window: Window(
+        asset: Asset(
           id: newId('asset'),
           filename: importFilename,
           md5: digest,
@@ -263,6 +263,6 @@ class _PreparedImportedAsset {
   const _PreparedImportedAsset.duplicate() : directory = '', window = null, wasDuplicate = true;
 
   final String directory;
-  final WorkspaceWindowState? window;
+  final Window? window;
   final bool wasDuplicate;
 }

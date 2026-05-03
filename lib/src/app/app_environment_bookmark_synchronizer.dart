@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:serenity_viewer/src/environment/environment.dart';
-import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
-import 'package:serenity_viewer/src/environment/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/window.dart';
+import 'package:serenity_viewer/src/environment/workspace.dart';
 
 class EnvironmentBookmarkSynchronizer {
   EnvironmentBookmarkSynchronizer({required this.createFileBookmark});
@@ -11,11 +11,11 @@ class EnvironmentBookmarkSynchronizer {
 
   Future<Environment> synchronize(Environment environment) async {
     var changed = false;
-    final nextWorkspaces = <WorkspaceState>[];
+    final nextWorkspaces = <Workspace>[];
 
     for (final workspace in environment.workspaces) {
       var workspaceChanged = false;
-      final nextWindows = <WorkspaceWindowState>[];
+      final nextWindows = <Window>[];
 
       for (final window in workspace.windows) {
         final asset = window.asset;

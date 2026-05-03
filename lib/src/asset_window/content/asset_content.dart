@@ -7,7 +7,7 @@ import 'package:video_player/video_player.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/foundation/keyboard_modifiers.dart';
-import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
+import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/asset_window/content/asset_placeholder_widgets.dart';
 import 'package:serenity_viewer/src/asset_window/content/asset_zoom_utils.dart';
 import 'package:serenity_viewer/src/asset_window/content/demo_art_widget.dart';
@@ -39,7 +39,7 @@ class AssetContent extends StatefulWidget {
     this.videoPreviewMode = false,
   });
 
-  final WorkspaceWindowState window;
+  final Window window;
   final bool isLoaded;
   final VideoPlayerController? sharedVideoController;
   final Future<void>? sharedVideoInitialization;

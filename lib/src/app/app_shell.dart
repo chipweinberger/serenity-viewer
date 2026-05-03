@@ -25,12 +25,12 @@ import 'package:serenity_viewer/src/workspace/controller/workspace_controller.da
 import 'package:serenity_viewer/src/workspace/layout/workspace_layout.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/foundation/keyboard_modifiers.dart';
-import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
+import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/workspace/session/recently_closed_window_entry.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/video_tools/settings_and_video_models.dart';
-import 'package:serenity_viewer/src/environment/workspace_asset.dart';
-import 'package:serenity_viewer/src/environment/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/asset.dart';
+import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/workspace_loading/workspace_load_plan.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
 import 'package:serenity_viewer/src/app/app_environment_state.dart';
@@ -82,7 +82,7 @@ class _AppShellState extends State<AppShell> {
   late final SryDocumentCoordinator _sryDocumentCoordinator;
   late final MediaBridge _mediaBridge;
   late final WorkspaceController _workspaceController;
-  late final WorkspaceLinksController _workspaceLinksController;
+  late final LinksController _workspaceLinksController;
   late final AppShellPlatformBridge _appShellPlatformBridge;
   late final EnvironmentBookmarkSynchronizer _environmentBookmarkSynchronizer;
   late final EnvironmentController _environmentController;
@@ -104,11 +104,11 @@ class _AppShellState extends State<AppShell> {
         WidgetsBinding.instance.runtimeType.toString().contains('Test');
   }
 
-  List<WorkspaceState> get _workspaces => _persistenceState.environment?.workspaces ?? const [];
+  List<Workspace> get _workspaces => _persistenceState.environment?.workspaces ?? const [];
 
-  List<WorkspaceState> get _openWorkspaces => _workspaces.where((workspace) => workspace.isOpen).toList();
+  List<Workspace> get _openWorkspaces => _workspaces.where((workspace) => workspace.isOpen).toList();
 
-  WorkspaceState? get _activeWorkspaceOrNull {
+  Workspace? get _activeWorkspaceOrNull {
     final environment = _persistenceState.environment;
     if (environment == null || environment.workspaces.isEmpty) {
       return null;
@@ -118,7 +118,7 @@ class _AppShellState extends State<AppShell> {
     return matches.isNotEmpty ? matches.first : environment.workspaces.first;
   }
 
-  WorkspaceState get _activeWorkspace {
+  Workspace get _activeWorkspace {
     return _activeWorkspaceOrNull ?? (throw StateError('No active workspace is available.'));
   }
 
@@ -306,7 +306,7 @@ class _AppShellState extends State<AppShell> {
         });
       },
     );
-    _workspaceLinksController = WorkspaceLinksController(
+    _workspaceLinksController = LinksController(
       screen: () => _uiState.screen,
       hasSession: () => _persistenceState.environment != null,
       activeWorkspace: () => _activeWorkspaceOrNull,

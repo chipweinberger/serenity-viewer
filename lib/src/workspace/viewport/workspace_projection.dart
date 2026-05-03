@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
-import 'package:serenity_viewer/src/environment/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/window.dart';
+import 'package:serenity_viewer/src/environment/workspace.dart';
 
 Offset workspaceScreenOffsetForWindow(
-  WorkspaceState workspace,
-  WorkspaceWindowState window,
+  Workspace workspace,
+  Window window,
   Size viewportSize, {
   Offset viewportOffset = Offset.zero,
   double viewportScale = 1.0,
@@ -22,8 +22,8 @@ Offset workspaceScreenOffsetForWindow(
 }
 
 Rect workspaceScreenRectForWindow(
-  WorkspaceState workspace,
-  WorkspaceWindowState window,
+  Workspace workspace,
+  Window window,
   Size viewportSize, {
   Offset viewportOffset = Offset.zero,
   double viewportScale = 1.0,

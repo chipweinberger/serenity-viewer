@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:serenity_viewer/src/video_tools/media_bridge.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/video_tools/settings_and_video_models.dart';
-import 'package:serenity_viewer/src/environment/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/asset_window/content/asset_zoom_utils.dart';
 
 class VideoConversionCoordinator {
@@ -27,8 +27,8 @@ class VideoConversionCoordinator {
   final ValueChanged<String> showMessage;
   final MediaBridge mediaBridge;
   final Future<String?> Function(String path) createFileBookmark;
-  final WorkspaceState? Function() activeWorkspace;
-  final void Function(WorkspaceState workspace) replaceWorkspace;
+  final Workspace? Function() activeWorkspace;
+  final void Function(Workspace workspace) replaceWorkspace;
   final int Function(String value) colorFromDigest;
   final ValueChanged<String> removePausedVideoWindow;
 

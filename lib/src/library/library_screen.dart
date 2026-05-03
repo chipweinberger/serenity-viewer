@@ -6,7 +6,7 @@ import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/library/thumbnail_card.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
 import 'package:serenity_viewer/src/workspace_loading/media_load_plan.dart';
-import 'package:serenity_viewer/src/environment/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/workspace_loading/workspace_load_plan.dart';
 import 'package:serenity_viewer/src/settings/appearance/glass_chip.dart';
 
@@ -41,8 +41,8 @@ class LibraryScreen extends StatelessWidget {
     required this.actions,
   });
 
-  final List<WorkspaceState> allWorkspaces;
-  final List<WorkspaceState> openWorkspaces;
+  final List<Workspace> allWorkspaces;
+  final List<Workspace> openWorkspaces;
   final MediaLoadPlan loadPlan;
   final TextEditingController searchController;
   final WorkspaceSort workspaceSort;
@@ -52,11 +52,11 @@ class LibraryScreen extends StatelessWidget {
   static const double _thumbnailWidth = 224;
   static const double _thumbnailHeight = 192;
 
-  List<WorkspaceState> _visibleOpenWorkspaces() {
+  List<Workspace> _visibleOpenWorkspaces() {
     return openWorkspaces.where(_matchesWorkspaceSearch).toList();
   }
 
-  List<WorkspaceState> _sortedKnownWorkspaces() {
+  List<Workspace> _sortedKnownWorkspaces() {
     final filtered = allWorkspaces.where(_matchesWorkspaceSearch).toList();
 
     switch (workspaceSort) {
@@ -77,7 +77,7 @@ class LibraryScreen extends StatelessWidget {
     return filtered;
   }
 
-  bool _matchesWorkspaceSearch(WorkspaceState workspace) {
+  bool _matchesWorkspaceSearch(Workspace workspace) {
     final query = searchController.text.trim().toLowerCase();
     return query.isEmpty || workspace.name.toLowerCase().contains(query);
   }
@@ -104,7 +104,7 @@ class LibraryScreen extends StatelessWidget {
   }
 
   Widget _buildWorkspaceCard(
-    WorkspaceState workspace, {
+    Workspace workspace, {
     required List<Widget> hoverActions,
     VoidCallback? onTap,
     bool isDimmed = false,
@@ -126,7 +126,7 @@ class LibraryScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildOpenWorkspaceCard(WorkspaceState workspace) {
+  Widget _buildOpenWorkspaceCard(Workspace workspace) {
     return _buildWorkspaceCard(
       workspace,
       hoverActions: [
@@ -155,7 +155,7 @@ class LibraryScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildKnownWorkspaceCard(WorkspaceState workspace) {
+  Widget _buildKnownWorkspaceCard(Workspace workspace) {
     return _buildWorkspaceCard(
       workspace,
       isDimmed: workspace.isOpen,
@@ -229,7 +229,7 @@ class LibraryScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildOpenNowSection(BuildContext context, List<WorkspaceState> visibleOpenWorkspaces) {
+  Widget _buildOpenNowSection(BuildContext context, List<Workspace> visibleOpenWorkspaces) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -251,7 +251,7 @@ class LibraryScreen extends StatelessWidget {
 
   Widget _buildAllWorkspacesSection(
     BuildContext context, {
-    required List<WorkspaceState> knownWorkspaces,
+    required List<Workspace> knownWorkspaces,
     required int knownWorkspaceCount,
   }) {
     return Column(

@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 
 @immutable
-class WorkspaceAsset {
-  const WorkspaceAsset({
+class Asset {
+  const Asset({
     required this.id,
     required this.filename,
     required this.md5,
@@ -49,7 +49,7 @@ class WorkspaceAsset {
     return type == AssetType.video ? (16 / 9) : (4 / 3);
   }
 
-  WorkspaceAsset copyWith({
+  Asset copyWith({
     String? id,
     String? filename,
     String? md5,
@@ -63,7 +63,7 @@ class WorkspaceAsset {
     double? intrinsicHeight,
     bool clearFilePath = false,
   }) {
-    return WorkspaceAsset(
+    return Asset(
       id: id ?? this.id,
       filename: filename ?? this.filename,
       md5: md5 ?? this.md5,
@@ -94,8 +94,8 @@ class WorkspaceAsset {
     };
   }
 
-  factory WorkspaceAsset.fromJson(Map<String, dynamic> json) {
-    return WorkspaceAsset(
+  factory Asset.fromJson(Map<String, dynamic> json) {
+    return Asset(
       id: json['id'] as String,
       filename: json['filename'] as String,
       md5: json['md5'] as String,

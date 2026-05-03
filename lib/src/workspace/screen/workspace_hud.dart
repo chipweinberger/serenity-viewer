@@ -15,7 +15,7 @@ class WorkspaceHudActions {
     required this.onFitWorkspaceViewportToContent,
     required this.onConfirmCollateWorkspaceWindows,
     required this.onConfirmApplyExposeGridToWorkspace,
-    required this.onOpenWorkspaceLinks,
+    required this.onOpenLinks,
     required this.onClearExposeSelection,
     required this.onSetWorkspaceZoom,
     required this.onRefreshActiveWorkspaceThumbnail,
@@ -25,7 +25,7 @@ class WorkspaceHudActions {
   final VoidCallback onFitWorkspaceViewportToContent;
   final Future<void> Function() onConfirmCollateWorkspaceWindows;
   final Future<void> Function() onConfirmApplyExposeGridToWorkspace;
-  final Future<void> Function() onOpenWorkspaceLinks;
+  final Future<void> Function() onOpenLinks;
   final VoidCallback onClearExposeSelection;
   final void Function(String workspaceId, double zoom) onSetWorkspaceZoom;
   final Future<void> Function() onRefreshActiveWorkspaceThumbnail;
@@ -160,7 +160,7 @@ class WorkspaceHud extends StatelessWidget {
         ),
       _buildHudAction(
         tooltip: 'Links',
-        onTap: () => unawaited(actions.onOpenWorkspaceLinks()),
+        onTap: () => unawaited(actions.onOpenLinks()),
         child: const SizedBox(
           width: 38,
           height: 38,

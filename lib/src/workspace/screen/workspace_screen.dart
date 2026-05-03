@@ -15,17 +15,17 @@ import 'package:serenity_viewer/src/asset_window/presentation/expose_asset_windo
 import 'package:serenity_viewer/src/video_tools/media_bridge.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
-import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
+import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/workspace_loading/media_load_plan.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
-import 'package:serenity_viewer/src/environment/workspace_asset.dart';
-import 'package:serenity_viewer/src/environment/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/asset.dart';
+import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
 import 'package:serenity_viewer/src/expose/expose_layouts.dart';
 import 'package:serenity_viewer/src/workspace/screen/workspace_canvas_view_model.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_projection.dart';
 
-typedef SharedVideoLookup = SharedVideoState? Function(WorkspaceWindowState window, {required bool isLoaded});
+typedef SharedVideoLookup = SharedVideoState? Function(Window window, {required bool isLoaded});
 
 @immutable
 class WorkspaceScreenActions {
@@ -62,9 +62,9 @@ class WorkspaceScreenActions {
   final ValueChanged<bool> setDropTargetActive;
   final Future<void> Function(List<XFile> files) importFiles;
   final ValueChanged<Size> trackViewportSize;
-  final void Function(PointerHoverEvent event, WorkspaceState workspace) handleOptionGestureHover;
-  final void Function(PointerPanZoomStartEvent event, WorkspaceState workspace) handleWorkspacePanZoomStart;
-  final void Function(PointerPanZoomUpdateEvent event, WorkspaceState workspace, Size viewportSize)
+  final void Function(PointerHoverEvent event, Workspace workspace) handleOptionGestureHover;
+  final void Function(PointerPanZoomStartEvent event, Workspace workspace) handleWorkspacePanZoomStart;
+  final void Function(PointerPanZoomUpdateEvent event, Workspace workspace, Size viewportSize)
   handleWorkspacePanZoomUpdate;
   final VoidCallback handleWorkspacePanZoomEnd;
   final ValueChanged<String> focusWindow;
@@ -86,7 +86,7 @@ class WorkspaceScreenActions {
   final ValueChanged<String> toggleExposeWindowSelected;
   final void Function(String workspaceId, String windowId) removeWindow;
   final ValueChanged<String?> setOptionGestureWindowId;
-  final Future<void> Function(WorkspaceAsset asset) revealAssetInFinder;
+  final Future<void> Function(Asset asset) revealAssetInFinder;
 }
 
 class WorkspaceScreen extends StatelessWidget {
@@ -103,7 +103,7 @@ class WorkspaceScreen extends StatelessWidget {
   });
 
   final Environment environment;
-  final List<WorkspaceState> openWorkspaces;
+  final List<Workspace> openWorkspaces;
   final ChromeState chromeState;
   final AssetWindowInteractionState windowInteractionState;
   final MediaLoadPlan loadPlan;
@@ -147,13 +147,13 @@ class WorkspaceScreen extends StatelessWidget {
     );
   }
 
-  bool _isExposeModeForWorkspace(WorkspaceState workspace) {
+  bool _isExposeModeForWorkspace(Workspace workspace) {
     return workspace.id == environment.activeWorkspaceId &&
         chromeState.screen == SerenityScreen.workspace &&
         chromeState.workspaceLayoutMode == WorkspaceLayoutMode.expose;
   }
 
-  List<WorkspaceWindowState> _sortedWorkspaceWindows(WorkspaceState workspace, {required bool isExposeMode}) {
+  List<Window> _sortedWorkspaceWindows(Workspace workspace, {required bool isExposeMode}) {
     final windows = [...workspace.windows];
     if (isExposeMode) {
       windows.sort((a, b) => a.asset.filename.compareTo(b.asset.filename));
@@ -163,14 +163,14 @@ class WorkspaceScreen extends StatelessWidget {
     return windows;
   }
 
-  String? _focusedWindowIdForCanvas(List<WorkspaceWindowState> windows, {required bool isExposeMode}) {
+  String? _focusedWindowIdForCanvas(List<Window> windows, {required bool isExposeMode}) {
     if (windows.isEmpty || isExposeMode) {
       return null;
     }
     return windows.last.asset.id;
   }
 
-  WorkspaceCanvasViewModel _buildWorkspaceCanvasViewModel(WorkspaceState workspace) {
+  WorkspaceCanvasViewModel _buildWorkspaceCanvasViewModel(Workspace workspace) {
     final isExposeMode = _isExposeModeForWorkspace(workspace);
     final windows = _sortedWorkspaceWindows(workspace, isExposeMode: isExposeMode);
     return WorkspaceCanvasViewModel(
@@ -183,21 +183,21 @@ class WorkspaceScreen extends StatelessWidget {
     );
   }
 
-  bool _isWindowLoaded(MediaLoadPlan loadPlan, WorkspaceWindowState window) {
+  bool _isWindowLoaded(MediaLoadPlan loadPlan, Window window) {
     return loadPlan.loadedAssetIds.contains(window.asset.id);
   }
 
-  VoidCallback? _showInFinderCallbackForWindow(WorkspaceWindowState window) {
+  VoidCallback? _showInFinderCallbackForWindow(Window window) {
     return window.asset.filePath == null ? null : () => unawaited(actions.revealAssetInFinder(window.asset));
   }
 
-  VoidCallback? _restorePreviousZOrderCallbackForWindow(WorkspaceWindowState window) {
+  VoidCallback? _restorePreviousZOrderCallbackForWindow(Window window) {
     return windowInteractionState.previousWindowZOrders.containsKey(window.asset.id)
         ? () => actions.restorePreviousWindowZOrder(window.asset.id)
         : null;
   }
 
-  void _handleFreeformWindowTap(WorkspaceWindowState window) {
+  void _handleFreeformWindowTap(Window window) {
     if (windowInteractionState.pinnedHoverWindowId == window.asset.id) {
       actions.clearPinnedHoverWindow();
       return;
@@ -222,7 +222,7 @@ class WorkspaceScreen extends StatelessWidget {
 
   Widget _buildFreeformWindow(
     WorkspaceCanvasViewModel canvasViewModel,
-    WorkspaceWindowState window,
+    Window window,
     Size viewportSize,
   ) {
     final workspace = canvasViewModel.workspace;
@@ -346,7 +346,7 @@ class WorkspaceScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildExposeWorkspaceViewport(List<WorkspaceWindowState> windows, MediaLoadPlan loadPlan) {
+  Widget _buildExposeWorkspaceViewport(List<Window> windows, MediaLoadPlan loadPlan) {
     return Positioned.fill(
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -399,7 +399,7 @@ class WorkspaceScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildWorkspaceCanvas(BuildContext context, WorkspaceState workspace) {
+  Widget _buildWorkspaceCanvas(BuildContext context, Workspace workspace) {
     final canvasViewModel = _buildWorkspaceCanvasViewModel(workspace);
 
     return DropTarget(

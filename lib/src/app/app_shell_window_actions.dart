@@ -15,7 +15,7 @@ extension _AppShellWindowActions on _AppShellState {
     _workspaceController.setOptionGestureWindowId(windowId);
   }
 
-  void _handleOptionGestureHover(PointerHoverEvent event, WorkspaceState workspace) {
+  void _handleOptionGestureHover(PointerHoverEvent event, Workspace workspace) {
     _workspaceController.handleOptionGestureHover(
       event,
       workspace,
@@ -96,7 +96,7 @@ extension _AppShellWindowActions on _AppShellState {
     _workspaceController.fitWorkspaceViewportToContent(_activeWorkspaceOrNull);
   }
 
-  void _handleWorkspacePanZoomStart(PointerPanZoomStartEvent event, WorkspaceState workspace) {
+  void _handleWorkspacePanZoomStart(PointerPanZoomStartEvent event, Workspace workspace) {
     _workspaceController.handleWorkspacePanZoomStart(
       event,
       workspace,
@@ -105,7 +105,7 @@ extension _AppShellWindowActions on _AppShellState {
     );
   }
 
-  void _handleWorkspacePanZoomUpdate(PointerPanZoomUpdateEvent event, WorkspaceState workspace, Size viewportSize) {
+  void _handleWorkspacePanZoomUpdate(PointerPanZoomUpdateEvent event, Workspace workspace, Size viewportSize) {
     _workspaceController.handleWorkspacePanZoomUpdate(event, workspace, viewportSize);
   }
 

@@ -1,6 +1,6 @@
 part of 'workspace_layout.dart';
 
-Rect _workspaceContentBounds(List<WorkspaceWindowState> windows) {
+Rect _workspaceContentBounds(List<Window> windows) {
   var minX = windows.first.position.dx;
   var minY = windows.first.position.dy;
   var maxX = windows.first.position.dx + windows.first.size.width;
@@ -16,7 +16,7 @@ Rect _workspaceContentBounds(List<WorkspaceWindowState> windows) {
   return Rect.fromLTRB(minX, minY, maxX, maxY);
 }
 
-WorkspaceState _fitWorkspaceViewportToContent(WorkspaceState workspace, Size viewportSize) {
+Workspace _fitWorkspaceViewportToContent(Workspace workspace, Size viewportSize) {
   if (viewportSize.width <= 0 || viewportSize.height <= 0 || workspace.windows.isEmpty) {
     return _setWorkspaceViewport(workspace, viewportSize: viewportSize, center: defaultWorkspaceCenter, zoom: 1);
   }

@@ -8,7 +8,7 @@ import 'package:video_player/video_player.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/foundation/keyboard_modifiers.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
-import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
+import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/asset_window/content/asset_content.dart';
 import 'package:serenity_viewer/src/asset_window/content/asset_preview_transforms.dart';
 
@@ -28,7 +28,7 @@ class ExposeAssetWindowCard extends StatefulWidget {
     required this.onRemove,
   });
 
-  final WorkspaceWindowState window;
+  final Window window;
   final bool isLoaded;
   final VideoPlayerController? sharedVideoController;
   final Future<void>? sharedVideoInitialization;
@@ -70,7 +70,7 @@ class _ExposeAssetWindowCardState extends State<ExposeAssetWindowCard> {
     _isCommandPressed = isCommandPressed(pressedKeys);
   }
 
-  WorkspaceWindowState _windowForPreview(Size previewSize) {
+  Window _windowForPreview(Size previewSize) {
     final scale = assetPreviewScaleForSize(widget.window, previewSize);
     return scaleAssetPreviewWindow(widget.window, scale, size: previewSize);
   }

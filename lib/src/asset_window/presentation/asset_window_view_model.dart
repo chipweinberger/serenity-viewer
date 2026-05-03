@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:video_player/video_player.dart';
 
-import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
+import 'package:serenity_viewer/src/environment/window.dart';
 
 @immutable
 class AssetWindowViewModel {
@@ -19,7 +19,7 @@ class AssetWindowViewModel {
     required this.isOptionGestureTarget,
   });
 
-  final WorkspaceWindowState window;
+  final Window window;
   final bool isLoaded;
   final VideoPlayerController? sharedVideoController;
   final Future<void>? sharedVideoInitialization;

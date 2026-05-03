@@ -3,7 +3,7 @@
 part of 'app_shell.dart';
 
 extension _AppShellWindowHistoryActions on _AppShellState {
-  WorkspaceWindowState? _focusedWindowOrNull() {
+  Window? _focusedWindowOrNull() {
     return _workspaceController.focusedWindowOrNull(_activeWorkspaceOrNull);
   }
 

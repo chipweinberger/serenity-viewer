@@ -106,7 +106,7 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
     final remainingWorkspaces = environment.workspaces.where((workspace) => workspace.id != workspaceId).toList();
     if (remainingWorkspaces.isEmpty) {
       final now = DateTime.now();
-      final replacementWorkspace = WorkspaceState(
+      final replacementWorkspace = Workspace(
         id: _newId('ws'),
         name: 'Workspace 1',
         createdAt: now,
@@ -149,7 +149,7 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
     }
   }
 
-  Future<bool> _confirmMoveSelectedWindows(WorkspaceState destinationWorkspace, int count) async {
+  Future<bool> _confirmMoveSelectedWindows(Workspace destinationWorkspace, int count) async {
     final noun = count == 1 ? 'window' : 'windows';
     final shouldMove = await showDialog<bool>(
       context: context,
@@ -256,7 +256,7 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
     final environment = _persistenceState.environment!;
     final nextIndex = _nextWorkspaceOrdinal();
     final now = DateTime.now();
-    final workspace = WorkspaceState(
+    final workspace = Workspace(
       id: 'ws-$nextIndex',
       name: 'Workspace $nextIndex',
       createdAt: now,

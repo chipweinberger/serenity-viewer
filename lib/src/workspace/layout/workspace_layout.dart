@@ -3,11 +3,11 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
+import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/asset_window/frame/asset_window_resize_helpers.dart';
 import 'package:serenity_viewer/src/asset_window/content/asset_zoom_utils.dart';
 import 'package:serenity_viewer/src/asset_window/interaction/asset_window_zoom_update.dart';
-import 'package:serenity_viewer/src/environment/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/workspace/workspace_state_helpers.dart';
 
 part 'workspace_collate_logic.dart';
@@ -36,8 +36,8 @@ class WorkspaceLayout {
     return _clampWorkspaceCenter(center: center, zoom: zoom, viewportSize: viewportSize);
   }
 
-  static WorkspaceState setWorkspaceViewport(
-    WorkspaceState workspace, {
+  static Workspace setWorkspaceViewport(
+    Workspace workspace, {
     required Size viewportSize,
     Offset? center,
     double? zoom,
@@ -45,7 +45,7 @@ class WorkspaceLayout {
     return _setWorkspaceViewport(workspace, viewportSize: viewportSize, center: center, zoom: zoom);
   }
 
-  static WorkspaceState fitWorkspaceViewportToContent(WorkspaceState workspace, Size viewportSize) {
+  static Workspace fitWorkspaceViewportToContent(Workspace workspace, Size viewportSize) {
     return _fitWorkspaceViewportToContent(workspace, viewportSize);
   }
 
@@ -65,28 +65,28 @@ class WorkspaceLayout {
     );
   }
 
-  static WorkspaceState moveWindow(WorkspaceState workspace, String windowId, Offset delta) {
+  static Workspace moveWindow(Workspace workspace, String windowId, Offset delta) {
     return _moveWindow(workspace, windowId, delta);
   }
 
-  static WorkspaceWindowState scaleWindowAroundCenter(
-    WorkspaceWindowState window,
+  static Window scaleWindowAroundCenter(
+    Window window,
     double scaleDelta, {
     required bool mirrorContentZoom,
   }) {
     return _scaleWindowAroundCenter(window, scaleDelta, mirrorContentZoom: mirrorContentZoom);
   }
 
-  static ({Rect visibleRect, Size zoomedContentSize}) visibleContentRectForWindow(WorkspaceWindowState window) {
+  static ({Rect visibleRect, Size zoomedContentSize}) visibleContentRectForWindow(Window window) {
     return _visibleContentRectForWindow(window);
   }
 
-  static WorkspaceState collateWorkspaceWindows(WorkspaceState workspace, {required Size targetBox}) {
+  static Workspace collateWorkspaceWindows(Workspace workspace, {required Size targetBox}) {
     return _collateWorkspaceWindows(workspace, targetBox: targetBox);
   }
 
-  static WorkspaceState resizeWindow(
-    WorkspaceState workspace,
+  static Workspace resizeWindow(
+    Workspace workspace,
     String windowId,
     AssetWindowResizeHandle handle,
     Offset delta,
@@ -94,19 +94,19 @@ class WorkspaceLayout {
     return _resizeWindow(workspace, windowId, handle, delta);
   }
 
-  static WorkspaceState transformWindowFromTrackpad(WorkspaceState workspace, String windowId, double scaleDelta) {
+  static Workspace transformWindowFromTrackpad(Workspace workspace, String windowId, double scaleDelta) {
     return _transformWindowFromTrackpad(workspace, windowId, scaleDelta);
   }
 
-  static WorkspaceState fitWindowToContent(WorkspaceState workspace, String windowId) {
+  static Workspace fitWindowToContent(Workspace workspace, String windowId) {
     return _fitWindowToContent(workspace, windowId);
   }
 
-  static WorkspaceState setWindowZoom(WorkspaceState workspace, String windowId, AssetWindowZoomUpdate update) {
+  static Workspace setWindowZoom(Workspace workspace, String windowId, AssetWindowZoomUpdate update) {
     return _setWindowZoom(workspace, windowId, update);
   }
 
-  static WorkspaceState setWindowIntrinsicSize(WorkspaceState workspace, String windowId, Size intrinsicSize) {
+  static Workspace setWindowIntrinsicSize(Workspace workspace, String windowId, Size intrinsicSize) {
     return _setWindowIntrinsicSize(workspace, windowId, intrinsicSize);
   }
 }

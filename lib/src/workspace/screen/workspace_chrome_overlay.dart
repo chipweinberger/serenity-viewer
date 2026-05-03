@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
-import 'package:serenity_viewer/src/environment/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/settings/appearance/glass_chip.dart';
 
 @immutable
@@ -41,7 +41,7 @@ class WorkspaceChromeOverlay extends StatelessWidget {
   });
 
   final String windowTitle;
-  final List<WorkspaceState> openWorkspaces;
+  final List<Workspace> openWorkspaces;
   final String activeWorkspaceId;
   final bool isLibraryScreen;
   final bool shouldMoveSelectedWindows;
@@ -63,7 +63,7 @@ class WorkspaceChromeOverlay extends StatelessWidget {
     );
   }
 
-  Widget _buildWorkspaceTabChip(BuildContext context, WorkspaceState workspace, {required bool isDropTarget}) {
+  Widget _buildWorkspaceTabChip(BuildContext context, Workspace workspace, {required bool isDropTarget}) {
     final isSelected = !isLibraryScreen && workspace.id == activeWorkspaceId;
 
     return AnimatedScale(

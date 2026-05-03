@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
-import 'package:serenity_viewer/src/environment/workspace_asset.dart';
+import 'package:serenity_viewer/src/environment/asset.dart';
 
 class MissingMediaPlaceholder extends StatelessWidget {
   const MissingMediaPlaceholder({super.key, required this.filename, required this.windowSize, required this.compact});
@@ -72,7 +72,7 @@ class MissingMediaPlaceholder extends StatelessWidget {
 class UnloadedMediaPlaceholder extends StatelessWidget {
   const UnloadedMediaPlaceholder({super.key, required this.asset, required this.windowSize});
 
-  final WorkspaceAsset asset;
+  final Asset asset;
   final Size windowSize;
 
   @override

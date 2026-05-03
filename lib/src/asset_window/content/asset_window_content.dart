@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
+import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/asset_window/content/asset_content.dart';
 import 'package:serenity_viewer/src/asset_window/content/asset_preview_transforms.dart';
 import 'package:serenity_viewer/src/asset_window/interaction/asset_window_zoom_update.dart';
@@ -41,7 +41,7 @@ class AssetWindowContent extends StatelessWidget {
     return assetPreviewScaleForInset(viewModel.window, inset);
   }
 
-  WorkspaceWindowState _windowForHoverPreview() {
+  Window _windowForHoverPreview() {
     final scale = _hoverPreviewScale();
     return scaleAssetPreviewWindow(viewModel.window, scale);
   }

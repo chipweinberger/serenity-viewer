@@ -1,8 +1,8 @@
 import 'package:serenity_viewer/src/environment/environment.dart';
-import 'package:serenity_viewer/src/environment/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/workspace.dart';
 
 Environment normalizeDecodedEnvironment(Environment environment) {
-  final dedupedWorkspaces = <WorkspaceState>[];
+  final dedupedWorkspaces = <Workspace>[];
   final seenWorkspaceIds = <String>{};
 
   for (final workspace in environment.workspaces) {

@@ -1,11 +1,11 @@
 import 'dart:math' as math;
 
-import 'package:serenity_viewer/src/environment/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/workspace/workspace_state_helpers.dart';
 
 class WorkspaceStackingOperations {
-  static ({WorkspaceState workspace, int? previousZOrder}) focusWindow(WorkspaceState workspace, String windowId) {
-    final currentWindow = WorkspaceStateHelpers.windowById(workspace, windowId);
+  static ({Workspace workspace, int? previousZOrder}) focusWindow(Workspace workspace, String windowId) {
+    final currentWindow = WorkspaceHelpers.windowById(workspace, windowId);
     if (currentWindow == null) {
       return (workspace: workspace, previousZOrder: null);
     }
@@ -16,7 +16,7 @@ class WorkspaceStackingOperations {
     }
 
     return (
-      workspace: WorkspaceStateHelpers.updateWindowById(
+      workspace: WorkspaceHelpers.updateWindowById(
         workspace,
         windowId,
         (window) => window.copyWith(zIndex: maxZ + 1),
@@ -25,7 +25,7 @@ class WorkspaceStackingOperations {
     );
   }
 
-  static WorkspaceState restorePreviousWindowZOrder(WorkspaceState workspace, String windowId, int previousZOrder) {
+  static Workspace restorePreviousWindowZOrder(Workspace workspace, String windowId, int previousZOrder) {
     final sortedWindows = [...workspace.windows]..sort((a, b) => a.zIndex.compareTo(b.zIndex));
     final currentIndex = sortedWindows.indexWhere((window) => window.asset.id == windowId);
     if (currentIndex == -1) {

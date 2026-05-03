@@ -36,7 +36,7 @@ Size _windowSizeByFittingAspect({
   return currentSize;
 }
 
-_WindowEdges _windowEdges(WorkspaceWindowState window) {
+_WindowEdges _windowEdges(Window window) {
   return (
     left: window.position.dx,
     top: window.position.dy,
@@ -135,18 +135,18 @@ _WindowBounds _clampResizedBounds(_WindowEdges edges, AssetWindowResizeHandle ha
   return (position: Offset(left, top), size: Size(width, height));
 }
 
-_WindowBounds _resizedBoundsForWindow(WorkspaceWindowState window, AssetWindowResizeHandle handle, Offset delta) {
+_WindowBounds _resizedBoundsForWindow(Window window, AssetWindowResizeHandle handle, Offset delta) {
   final resizedEdges = _applyResizeDelta(_windowEdges(window), handle, delta);
   return _clampResizedBounds(resizedEdges, handle);
 }
 
-WorkspaceWindowState _resizeWindowState(WorkspaceWindowState window, AssetWindowResizeHandle handle, Offset delta) {
+Window _resizeWindowState(Window window, AssetWindowResizeHandle handle, Offset delta) {
   final nextBounds = _resizedBoundsForWindow(window, handle, delta);
   return window.copyWith(position: nextBounds.position, size: nextBounds.size);
 }
 
-WorkspaceWindowState _scaleWindowAroundCenter(
-  WorkspaceWindowState window,
+Window _scaleWindowAroundCenter(
+  Window window,
   double scaleDelta, {
   required bool mirrorContentZoom,
 }) {
@@ -192,7 +192,7 @@ WorkspaceWindowState _scaleWindowAroundCenter(
   );
 }
 
-_VisibleWindowContent _visibleContentRectForWindow(WorkspaceWindowState window) {
+_VisibleWindowContent _visibleContentRectForWindow(Window window) {
   final fitSize = fitSizeForViewportToAspect(window.size, window.asset.aspectRatio);
   final baseSize = window.zoom > 1.0 && window.zoomBaseSize != null ? window.zoomBaseSize! : fitSize;
   final zoomedContentSize = Size(baseSize.width * window.zoom, baseSize.height * window.zoom);
@@ -209,7 +209,7 @@ _VisibleWindowContent _visibleContentRectForWindow(WorkspaceWindowState window) 
   );
 }
 
-WorkspaceWindowState _fitWindowToVisibleContent(WorkspaceWindowState currentWindow) {
+Window _fitWindowToVisibleContent(Window currentWindow) {
   final visibleContent = _visibleContentRectForWindow(currentWindow);
   final visibleRect = visibleContent.visibleRect;
   final nextSize = Size(

@@ -9,7 +9,7 @@ extension _AppShellEnvironmentActions on _AppShellState {
     _environmentController.updateEnvironment(nextEnvironment);
   }
 
-  void _replaceWorkspace(WorkspaceState nextWorkspace, {bool queueThumbnail = true}) {
+  void _replaceWorkspace(Workspace nextWorkspace, {bool queueThumbnail = true}) {
     _environmentController.replaceWorkspace(nextWorkspace, queueThumbnail: queueThumbnail);
   }
 
@@ -54,7 +54,7 @@ extension _AppShellEnvironmentActions on _AppShellState {
     final viewportCenter = _workspaceViewportState.viewportSize.center(Offset.zero);
     final safeViewportZoom = workspace.viewportZoom <= 0 ? 1.0 : workspace.viewportZoom;
     final nextViewportZoom = _clampWorkspaceZoom(safeViewportZoom * _appliedExposeViewportZoomFactor);
-    final relaidOutById = <String, WorkspaceWindowState>{};
+    final relaidOutById = <String, Window>{};
     for (final layout in exposeLayouts) {
       final rect = layout.rect;
       final nextSize = Size(rect.width / nextViewportZoom, rect.height / nextViewportZoom);

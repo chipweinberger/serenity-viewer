@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/sry_document/sry_document_normalizer.dart';
 import 'package:serenity_viewer/src/sry_document/sry_document_data.dart';
-import 'package:serenity_viewer/src/environment/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/workspace.dart';
 
 Uint8List encodeSryDocumentBytes({
   required Environment environment,
@@ -56,7 +56,7 @@ SryDocumentData decodeSryDocumentBytes(List<int> bytes) {
   }
 
   final workspaceIds = (manifestJson['workspaceIds'] as List<dynamic>? ?? const []).cast<String>();
-  final workspaces = <WorkspaceState>[];
+  final workspaces = <Workspace>[];
   for (final workspaceId in workspaceIds) {
     final workspaceEntry = archive.findFile('workspaces/$workspaceId.json');
     if (workspaceEntry == null) {
@@ -64,7 +64,7 @@ SryDocumentData decodeSryDocumentBytes(List<int> bytes) {
     }
 
     final workspaceJson = jsonDecode(utf8.decode(workspaceEntry.content as List<int>)) as Map<String, dynamic>;
-    workspaces.add(WorkspaceState.fromJson(workspaceJson));
+    workspaces.add(Workspace.fromJson(workspaceJson));
   }
 
   final thumbnailBytesByWorkspaceId = <String, Uint8List>{};

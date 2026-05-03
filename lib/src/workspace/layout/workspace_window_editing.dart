@@ -1,40 +1,40 @@
 part of 'workspace_layout.dart';
 
-WorkspaceState _moveWindow(WorkspaceState workspace, String windowId, Offset delta) {
-  return WorkspaceStateHelpers.updateWindowById(
+Workspace _moveWindow(Workspace workspace, String windowId, Offset delta) {
+  return WorkspaceHelpers.updateWindowById(
     workspace,
     windowId,
     (window) => window.copyWith(position: _clampWindowPosition(window.position + delta, window.size)),
   );
 }
 
-WorkspaceState _resizeWindow(WorkspaceState workspace, String windowId, AssetWindowResizeHandle handle, Offset delta) {
-  return WorkspaceStateHelpers.updateWindowById(
+Workspace _resizeWindow(Workspace workspace, String windowId, AssetWindowResizeHandle handle, Offset delta) {
+  return WorkspaceHelpers.updateWindowById(
     workspace,
     windowId,
     (window) => _resizeWindowState(window, handle, delta),
   );
 }
 
-WorkspaceState _transformWindowFromTrackpad(WorkspaceState workspace, String windowId, double scaleDelta) {
-  return WorkspaceStateHelpers.updateWindowById(
+Workspace _transformWindowFromTrackpad(Workspace workspace, String windowId, double scaleDelta) {
+  return WorkspaceHelpers.updateWindowById(
     workspace,
     windowId,
     (window) => _scaleWindowAroundCenter(window, scaleDelta, mirrorContentZoom: false),
   );
 }
 
-WorkspaceState _fitWindowToContent(WorkspaceState workspace, String windowId) {
-  final currentWindow = WorkspaceStateHelpers.windowById(workspace, windowId);
+Workspace _fitWindowToContent(Workspace workspace, String windowId) {
+  final currentWindow = WorkspaceHelpers.windowById(workspace, windowId);
   if (currentWindow == null) {
     return workspace;
   }
 
-  return WorkspaceStateHelpers.updateWindowById(workspace, windowId, (_) => _fitWindowToVisibleContent(currentWindow));
+  return WorkspaceHelpers.updateWindowById(workspace, windowId, (_) => _fitWindowToVisibleContent(currentWindow));
 }
 
-WorkspaceState _setWindowZoom(WorkspaceState workspace, String windowId, AssetWindowZoomUpdate update) {
-  return WorkspaceStateHelpers.updateWindowById(
+Workspace _setWindowZoom(Workspace workspace, String windowId, AssetWindowZoomUpdate update) {
+  return WorkspaceHelpers.updateWindowById(
     workspace,
     windowId,
     (window) => window.copyWith(
@@ -49,12 +49,12 @@ WorkspaceState _setWindowZoom(WorkspaceState workspace, String windowId, AssetWi
   );
 }
 
-WorkspaceState _setWindowIntrinsicSize(WorkspaceState workspace, String windowId, Size intrinsicSize) {
+Workspace _setWindowIntrinsicSize(Workspace workspace, String windowId, Size intrinsicSize) {
   if (intrinsicSize.width <= 0 || intrinsicSize.height <= 0) {
     return workspace;
   }
 
-  final currentWindow = WorkspaceStateHelpers.windowById(workspace, windowId);
+  final currentWindow = WorkspaceHelpers.windowById(workspace, windowId);
   if (currentWindow == null) {
     return workspace;
   }
@@ -73,7 +73,7 @@ WorkspaceState _setWindowIntrinsicSize(WorkspaceState workspace, String windowId
     return workspace;
   }
 
-  return WorkspaceStateHelpers.updateWindowById(workspace, windowId, (window) {
+  return WorkspaceHelpers.updateWindowById(workspace, windowId, (window) {
     final nextSize = shouldAdoptContentSize
         ? _windowSizeByFittingAspect(
             currentSize: currentWindow.size,

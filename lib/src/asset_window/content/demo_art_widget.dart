@@ -3,12 +3,12 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/environment/workspace_asset.dart';
+import 'package:serenity_viewer/src/environment/asset.dart';
 
 class DemoArtWidget extends StatelessWidget {
   const DemoArtWidget({super.key, required this.asset});
 
-  final WorkspaceAsset asset;
+  final Asset asset;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class DemoArtWidget extends StatelessWidget {
 class _SerenityDemoArtPainter extends CustomPainter {
   const _SerenityDemoArtPainter({required this.asset});
 
-  final WorkspaceAsset asset;
+  final Asset asset;
 
   @override
   void paint(Canvas canvas, Size size) {

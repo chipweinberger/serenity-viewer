@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/environment/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
 import 'package:serenity_viewer/src/asset_window/interaction/asset_window_interaction_state.dart';
 
@@ -112,7 +112,7 @@ class ChromeController {
   }
 
   WorkspaceSwitchTarget workspaceSwitchTarget({
-    required List<WorkspaceState> openWorkspaces,
+    required List<Workspace> openWorkspaces,
     required String activeWorkspaceId,
     required int direction,
   }) {

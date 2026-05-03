@@ -3,10 +3,10 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
-import 'package:serenity_viewer/src/environment/workspace_link.dart';
+import 'package:serenity_viewer/src/environment/window.dart';
+import 'package:serenity_viewer/src/environment/link.dart';
 
-Offset _workspaceViewportCenterForWindows(List<WorkspaceWindowState> windows) {
+Offset _workspaceViewportCenterForWindows(List<Window> windows) {
   if (windows.isEmpty) {
     return defaultWorkspaceCenter;
   }
@@ -29,8 +29,8 @@ Offset _workspaceViewportCenterForWindows(List<WorkspaceWindowState> windows) {
 }
 
 @immutable
-class WorkspaceState {
-  const WorkspaceState({
+class Workspace {
+  const Workspace({
     required this.id,
     required this.name,
     required this.createdAt,
@@ -51,8 +51,8 @@ class WorkspaceState {
   final DateTime createdAt;
   final DateTime lastViewedAt;
   final int views;
-  final List<WorkspaceLink> links;
-  final List<WorkspaceWindowState> windows;
+  final List<Link> links;
+  final List<Window> windows;
   final bool isOpen;
   final double viewportCenterDx;
   final double viewportCenterDy;
@@ -62,14 +62,14 @@ class WorkspaceState {
 
   Offset get viewportCenter => Offset(viewportCenterDx, viewportCenterDy);
 
-  WorkspaceState copyWith({
+  Workspace copyWith({
     String? id,
     String? name,
     DateTime? createdAt,
     DateTime? lastViewedAt,
     int? views,
-    List<WorkspaceLink>? links,
-    List<WorkspaceWindowState>? windows,
+    List<Link>? links,
+    List<Window>? windows,
     bool? isOpen,
     double? viewportCenterDx,
     double? viewportCenterDy,
@@ -77,7 +77,7 @@ class WorkspaceState {
     String? thumbnailPath,
     int? thumbnailVersion,
   }) {
-    return WorkspaceState(
+    return Workspace(
       id: id ?? this.id,
       name: name ?? this.name,
       createdAt: createdAt ?? this.createdAt,
@@ -112,15 +112,15 @@ class WorkspaceState {
     };
   }
 
-  factory WorkspaceState.fromJson(Map<String, dynamic> json) {
+  factory Workspace.fromJson(Map<String, dynamic> json) {
     final links = (json['links'] as List<dynamic>? ?? const [])
-        .map((entry) => WorkspaceLink.fromJson(entry as Map<String, dynamic>))
+        .map((entry) => Link.fromJson(entry as Map<String, dynamic>))
         .toList();
     final windows = (json['windows'] as List<dynamic>)
-        .map((entry) => WorkspaceWindowState.fromJson(entry as Map<String, dynamic>))
+        .map((entry) => Window.fromJson(entry as Map<String, dynamic>))
         .toList();
     final fallbackCenter = _workspaceViewportCenterForWindows(windows);
-    return WorkspaceState(
+    return Workspace(
       id: json['id'] as String,
       name: json['name'] as String,
       createdAt: DateTime.parse(json['createdAt'] as String),
