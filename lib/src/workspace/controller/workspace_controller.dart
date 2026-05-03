@@ -5,7 +5,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/workspace/layout/workspace_mutations.dart';
+import 'package:serenity_viewer/src/workspace/layout/workspace_layout.dart';
+import 'package:serenity_viewer/src/workspace/operations/workspace_environment_operations.dart';
+import 'package:serenity_viewer/src/workspace/operations/workspace_playback_operations.dart';
+import 'package:serenity_viewer/src/workspace/operations/workspace_stacking_operations.dart';
 import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
 import 'package:serenity_viewer/src/workspace/session/recently_closed_window_entry.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
@@ -15,6 +18,9 @@ import 'package:serenity_viewer/src/asset_window/interaction/asset_window_zoom_u
 import 'package:serenity_viewer/src/environment/workspace_state.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
+
+part 'workspace_collate.dart';
+part 'workspace_zoom_to_fit.dart';
 
 typedef SerenityWorkspaceStateCommit = void Function(VoidCallback update);
 typedef SerenityWorkspaceReplace = void Function(WorkspaceState workspace, {bool queueThumbnail});
@@ -31,8 +37,6 @@ class WorkspaceController {
     required this.setWorkspaceViewport,
     required this.refreshActiveWorkspaceThumbnail,
   });
-
-  static const Size collateTargetBox = Size(700, 700);
 
   final ChromeState chromeState;
   final AssetWindowInteractionState windowInteractionState;
@@ -112,7 +116,7 @@ class WorkspaceController {
   }
 
   void focusWindow(WorkspaceState workspace, String windowId) {
-    final result = WorkspaceMutations.focusWindow(workspace, windowId);
+    final result = WorkspaceStackingOperations.focusWindow(workspace, windowId);
     if (identical(result.workspace, workspace)) {
       return;
     }
@@ -130,41 +134,22 @@ class WorkspaceController {
     }
 
     replaceWorkspace(
-      WorkspaceMutations.restorePreviousWindowZOrder(workspace, windowId, previousZ),
+      WorkspaceStackingOperations.restorePreviousWindowZOrder(workspace, windowId, previousZ),
       queueThumbnail: true,
     );
   }
 
   void moveWindow(WorkspaceState workspace, String windowId, Offset delta) {
-    replaceWorkspace(WorkspaceMutations.moveWindow(workspace, windowId, delta), queueThumbnail: true);
-  }
-
-  bool canCollateWorkspaceWindows(WorkspaceState? workspace) {
-    return workspace != null &&
-        chromeState.workspaceLayoutMode != WorkspaceLayoutMode.expose &&
-        workspace.windows.any((window) => window.asset.type == AssetType.image || window.asset.type == AssetType.video);
-  }
-
-  int collatableWindowCount(WorkspaceState workspace) {
-    return workspace.windows
-        .where((window) => window.asset.type == AssetType.image || window.asset.type == AssetType.video)
-        .length;
-  }
-
-  void collateWorkspaceWindows(WorkspaceState workspace) {
-    replaceWorkspace(
-      WorkspaceMutations.collateWorkspaceWindows(workspace, targetBox: collateTargetBox),
-      queueThumbnail: true,
-    );
+    replaceWorkspace(WorkspaceLayout.moveWindow(workspace, windowId, delta), queueThumbnail: true);
   }
 
   void resizeWindow(WorkspaceState workspace, String windowId, AssetWindowResizeHandle handle, Offset delta) {
-    replaceWorkspace(WorkspaceMutations.resizeWindow(workspace, windowId, handle, delta), queueThumbnail: true);
+    replaceWorkspace(WorkspaceLayout.resizeWindow(workspace, windowId, handle, delta), queueThumbnail: true);
   }
 
   void transformWindowFromTrackpad(WorkspaceState workspace, String windowId, double scaleDelta) {
     replaceWorkspace(
-      WorkspaceMutations.transformWindowFromTrackpad(workspace, windowId, scaleDelta),
+      WorkspaceLayout.transformWindowFromTrackpad(workspace, windowId, scaleDelta),
       queueThumbnail: true,
     );
   }
@@ -174,25 +159,7 @@ class WorkspaceController {
       return;
     }
 
-    replaceWorkspace(WorkspaceMutations.fitWindowToContent(workspace, windowId), queueThumbnail: true);
-  }
-
-  void fitWorkspaceViewportToContent(WorkspaceState? workspace) {
-    if (workspace == null) {
-      return;
-    }
-
-    if (workspaceViewportState.viewportSize.width <= 0 ||
-        workspaceViewportState.viewportSize.height <= 0 ||
-        workspace.windows.isEmpty) {
-      setWorkspaceViewport(workspaceId: workspace.id, center: defaultWorkspaceCenter, zoom: 1, queueThumbnail: true);
-      return;
-    }
-
-    replaceWorkspace(
-      WorkspaceMutations.fitWorkspaceViewportToContent(workspace, workspaceViewportState.viewportSize),
-      queueThumbnail: true,
-    );
+    replaceWorkspace(WorkspaceLayout.fitWindowToContent(workspace, windowId), queueThumbnail: true);
   }
 
   void handleOptionGestureHover(
@@ -242,7 +209,7 @@ class WorkspaceController {
     }
 
     workspaceViewportState.gestureAccumulatedPan += event.panDelta;
-    final nextZoom = WorkspaceMutations.clampWorkspaceZoom(
+    final nextZoom = WorkspaceLayout.clampWorkspaceZoom(
       workspaceViewportState.gestureStartZoom * math.pow(event.scale, 1.15).toDouble(),
     );
     final viewportCenter = viewportSize.center(Offset.zero);
@@ -252,7 +219,7 @@ class WorkspaceController {
             workspaceViewportState.gestureStartZoom);
     final nextAnchorLocalPoint =
         workspaceViewportState.gestureStartLocalFocalPoint + workspaceViewportState.gestureAccumulatedPan;
-    final nextCenter = WorkspaceMutations.clampWorkspaceCenter(
+    final nextCenter = WorkspaceLayout.clampWorkspaceCenter(
       center: anchorWorldPoint - ((nextAnchorLocalPoint - viewportCenter) / nextZoom),
       zoom: nextZoom,
       viewportSize: viewportSize,
@@ -267,7 +234,7 @@ class WorkspaceController {
   }
 
   void setWindowZoom(WorkspaceState workspace, String windowId, AssetWindowZoomUpdate update) {
-    replaceWorkspace(WorkspaceMutations.setWindowZoom(workspace, windowId, update), queueThumbnail: true);
+    replaceWorkspace(WorkspaceLayout.setWindowZoom(workspace, windowId, update), queueThumbnail: true);
   }
 
   void setVideoPosition(WorkspaceState? workspace, String windowId, int positionMs) {
@@ -280,7 +247,10 @@ class WorkspaceController {
       return;
     }
 
-    replaceWorkspace(WorkspaceMutations.setVideoPosition(workspace, windowId, positionMs), queueThumbnail: false);
+    replaceWorkspace(
+      WorkspacePlaybackOperations.setVideoPosition(workspace, windowId, positionMs),
+      queueThumbnail: false,
+    );
   }
 
   void cycleVideoPlaybackSpeed(WorkspaceState? workspace, String windowId) {
@@ -291,7 +261,7 @@ class WorkspaceController {
       return;
     }
 
-    replaceWorkspace(WorkspaceMutations.cycleVideoPlaybackSpeed(workspace, windowId), queueThumbnail: false);
+    replaceWorkspace(WorkspacePlaybackOperations.cycleVideoPlaybackSpeed(workspace, windowId), queueThumbnail: false);
   }
 
   void setWindowIntrinsicSize(WorkspaceState? workspace, String windowId, Size intrinsicSize) {
@@ -303,10 +273,7 @@ class WorkspaceController {
       return;
     }
 
-    replaceWorkspace(
-      WorkspaceMutations.setWindowIntrinsicSize(workspace, windowId, intrinsicSize),
-      queueThumbnail: true,
-    );
+    replaceWorkspace(WorkspaceLayout.setWindowIntrinsicSize(workspace, windowId, intrinsicSize), queueThumbnail: true);
   }
 
   bool isVideoWindowPaused(String windowId) {
@@ -374,7 +341,7 @@ class WorkspaceController {
   }
 
   void toggleWorkspaceOpen(Environment environment, String workspaceId, void Function(Environment) updateEnvironment) {
-    updateEnvironment(WorkspaceMutations.toggleWorkspaceOpen(environment, workspaceId));
+    updateEnvironment(WorkspaceEnvironmentOperations.toggleWorkspaceOpen(environment, workspaceId));
   }
 
   void reorderOpenWorkspace(
@@ -390,7 +357,7 @@ class WorkspaceController {
 
     updateEnvironment(
       environment.copyWith(
-        workspaces: WorkspaceMutations.reorderOpenWorkspaces(
+        workspaces: WorkspaceEnvironmentOperations.reorderOpenWorkspaces(
           workspaces,
           sourceWorkspaceId: sourceWorkspaceId,
           targetWorkspaceId: targetWorkspaceId,
@@ -424,7 +391,7 @@ class WorkspaceController {
     required void Function(String workspaceId, {Duration delay}) queueThumbnailRefresh,
   }) {
     updateEnvironment(
-      WorkspaceMutations.moveSelectedWindowsToWorkspace(
+      WorkspaceEnvironmentOperations.moveSelectedWindowsToWorkspace(
         environment,
         sourceWorkspaceId: sourceWorkspace.id,
         destinationWorkspaceId: destinationWorkspace.id,

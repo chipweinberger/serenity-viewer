@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/workspace/layout/workspace_mutations.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/workspace_state.dart';
+import 'package:serenity_viewer/src/workspace/operations/workspace_environment_operations.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
 import 'package:serenity_viewer/src/app/app_environment_state.dart';
 import 'package:serenity_viewer/src/thumbnails/thumbnail_refresh_state.dart';
@@ -40,7 +40,7 @@ class EnvironmentController {
 
   void replaceWorkspace(WorkspaceState nextWorkspace, {bool queueThumbnail = true}) {
     final environment = persistenceState.environment!;
-    updateEnvironment(WorkspaceMutations.replaceWorkspace(environment, nextWorkspace));
+    updateEnvironment(WorkspaceEnvironmentOperations.replaceWorkspace(environment, nextWorkspace));
     if (queueThumbnail) {
       thumbnailRefreshState.dirtyWorkspaces.add(nextWorkspace.id);
     }

@@ -1,45 +1,23 @@
-part of 'workspace_mutations.dart';
+part of 'workspace_layout.dart';
 
 WorkspaceState _moveWindow(WorkspaceState workspace, String windowId, Offset delta) {
-  return _updateWindowById(
+  return WorkspaceStateHelpers.updateWindowById(
     workspace,
     windowId,
     (window) => window.copyWith(position: _clampWindowPosition(window.position + delta, window.size)),
   );
 }
 
-WorkspaceState _collateWorkspaceWindows(WorkspaceState workspace, {required Size targetBox}) {
-  final targetCenter = workspace.viewportCenter;
-  return _mapWindows(workspace, (window) {
-    if (window.asset.type != AssetType.image && window.asset.type != AssetType.video) {
-      return window;
-    }
-
-    final targetSize = fitSizeForViewportToAspect(targetBox, window.asset.aspectRatio);
-    if (targetSize.width <= 0 || targetSize.height <= 0) {
-      return window;
-    }
-
-    final centeredPosition = _clampWindowPosition(
-      Offset(targetCenter.dx - (targetSize.width / 2), targetCenter.dy - (targetSize.height / 2)),
-      targetSize,
-    );
-    return window.copyWith(
-      position: centeredPosition,
-      size: targetSize,
-      zoom: 1,
-      clearZoomBase: true,
-      clearContentOffset: true,
-    );
-  });
-}
-
 WorkspaceState _resizeWindow(WorkspaceState workspace, String windowId, AssetWindowResizeHandle handle, Offset delta) {
-  return _updateWindowById(workspace, windowId, (window) => _resizeWindowState(window, handle, delta));
+  return WorkspaceStateHelpers.updateWindowById(
+    workspace,
+    windowId,
+    (window) => _resizeWindowState(window, handle, delta),
+  );
 }
 
 WorkspaceState _transformWindowFromTrackpad(WorkspaceState workspace, String windowId, double scaleDelta) {
-  return _updateWindowById(
+  return WorkspaceStateHelpers.updateWindowById(
     workspace,
     windowId,
     (window) => _scaleWindowAroundCenter(window, scaleDelta, mirrorContentZoom: false),
@@ -47,16 +25,16 @@ WorkspaceState _transformWindowFromTrackpad(WorkspaceState workspace, String win
 }
 
 WorkspaceState _fitWindowToContent(WorkspaceState workspace, String windowId) {
-  final currentWindow = _windowById(workspace, windowId);
+  final currentWindow = WorkspaceStateHelpers.windowById(workspace, windowId);
   if (currentWindow == null) {
     return workspace;
   }
 
-  return _updateWindowById(workspace, windowId, (_) => _fitWindowToVisibleContent(currentWindow));
+  return WorkspaceStateHelpers.updateWindowById(workspace, windowId, (_) => _fitWindowToVisibleContent(currentWindow));
 }
 
 WorkspaceState _setWindowZoom(WorkspaceState workspace, String windowId, AssetWindowZoomUpdate update) {
-  return _updateWindowById(
+  return WorkspaceStateHelpers.updateWindowById(
     workspace,
     windowId,
     (window) => window.copyWith(
@@ -71,31 +49,12 @@ WorkspaceState _setWindowZoom(WorkspaceState workspace, String windowId, AssetWi
   );
 }
 
-WorkspaceState _setVideoPosition(WorkspaceState workspace, String windowId, int positionMs) {
-  return _updateWindowById(workspace, windowId, (window) => window.copyWith(videoPositionMs: positionMs));
-}
-
-WorkspaceState _cycleVideoPlaybackSpeed(WorkspaceState workspace, String windowId) {
-  final currentWindow = _videoWindowById(workspace, windowId);
-  if (currentWindow == null) {
-    return workspace;
-  }
-
-  final currentIndex = WorkspaceMutations.videoPlaybackSpeeds.indexWhere(
-    (speed) => (speed - currentWindow.videoPlaybackSpeed).abs() < 0.001,
-  );
-  final nextSpeed =
-      WorkspaceMutations.videoPlaybackSpeeds[(currentIndex + 1) % WorkspaceMutations.videoPlaybackSpeeds.length];
-
-  return _updateWindowById(workspace, windowId, (window) => window.copyWith(videoPlaybackSpeed: nextSpeed));
-}
-
 WorkspaceState _setWindowIntrinsicSize(WorkspaceState workspace, String windowId, Size intrinsicSize) {
   if (intrinsicSize.width <= 0 || intrinsicSize.height <= 0) {
     return workspace;
   }
 
-  final currentWindow = _windowById(workspace, windowId);
+  final currentWindow = WorkspaceStateHelpers.windowById(workspace, windowId);
   if (currentWindow == null) {
     return workspace;
   }
@@ -114,7 +73,7 @@ WorkspaceState _setWindowIntrinsicSize(WorkspaceState workspace, String windowId
     return workspace;
   }
 
-  return _updateWindowById(workspace, windowId, (window) {
+  return WorkspaceStateHelpers.updateWindowById(workspace, windowId, (window) {
     final nextSize = shouldAdoptContentSize
         ? _windowSizeByFittingAspect(
             currentSize: currentWindow.size,

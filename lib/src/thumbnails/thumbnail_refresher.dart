@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/app_environment_controller.dart';
 import 'package:serenity_viewer/src/app/app_environment_state.dart';
-import 'package:serenity_viewer/src/thumbnails/workspace_thumbnail_renderer.dart';
-import 'package:serenity_viewer/src/thumbnails/workspace_thumbnail_store.dart';
+import 'package:serenity_viewer/src/thumbnails/thumbnail_renderer.dart';
+import 'package:serenity_viewer/src/thumbnails/thumbnail_store.dart';
 
-class WorkspaceThumbnailRefresher {
-  WorkspaceThumbnailRefresher({
+class ThumbnailRefresher {
+  ThumbnailRefresher({
     required this.persistenceState,
     required this.environmentController,
     required this.renderer,
@@ -15,8 +15,8 @@ class WorkspaceThumbnailRefresher {
 
   final AppEnvironmentState persistenceState;
   final EnvironmentController environmentController;
-  final WorkspaceThumbnailRenderer renderer;
-  final WorkspaceThumbnailStore store;
+  final ThumbnailRenderer renderer;
+  final ThumbnailStore store;
 
   Future<bool> refreshWorkspace(String workspaceId, {required Size viewportSize}) async {
     final environment = persistenceState.environment;
@@ -30,7 +30,7 @@ class WorkspaceThumbnailRefresher {
     }
 
     final workspace = workspaceMatches.first;
-    final bytes = await renderer.buildWorkspaceThumbnailBytes(workspace: workspace, viewportSize: viewportSize);
+    final bytes = await renderer.buildThumbnailBytes(workspace: workspace, viewportSize: viewportSize);
     if (bytes == null) {
       return false;
     }

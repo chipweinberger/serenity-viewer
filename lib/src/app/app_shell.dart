@@ -21,8 +21,8 @@ import 'package:serenity_viewer/src/asset_window/interaction/asset_window_intera
 import 'package:serenity_viewer/src/asset_window/interaction/asset_window_zoom_update.dart';
 import 'package:serenity_viewer/src/video_tools/media_bridge.dart';
 import 'package:serenity_viewer/src/video_tools/video_conversion_coordinator.dart';
-import 'package:serenity_viewer/src/workspace/layout/workspace_controller.dart';
-import 'package:serenity_viewer/src/workspace/layout/workspace_mutations.dart';
+import 'package:serenity_viewer/src/workspace/controller/workspace_controller.dart';
+import 'package:serenity_viewer/src/workspace/layout/workspace_layout.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/foundation/keyboard_modifiers.dart';
 import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
@@ -41,9 +41,9 @@ import 'package:serenity_viewer/src/links/workspace_links_dialog.dart';
 import 'package:serenity_viewer/src/settings/behavior/settings_dialog.dart';
 import 'package:serenity_viewer/src/library/library_screen.dart';
 import 'package:serenity_viewer/src/thumbnails/thumbnail_refresh_state.dart';
-import 'package:serenity_viewer/src/thumbnails/workspace_thumbnail_refresher.dart';
-import 'package:serenity_viewer/src/thumbnails/workspace_thumbnail_renderer.dart';
-import 'package:serenity_viewer/src/thumbnails/workspace_thumbnail_store.dart';
+import 'package:serenity_viewer/src/thumbnails/thumbnail_refresher.dart';
+import 'package:serenity_viewer/src/thumbnails/thumbnail_renderer.dart';
+import 'package:serenity_viewer/src/thumbnails/thumbnail_store.dart';
 import 'package:serenity_viewer/src/workspace/screen/workspace_chrome_overlay.dart';
 import 'package:serenity_viewer/src/workspace/screen/workspace_chrome_view_model.dart';
 import 'package:serenity_viewer/src/workspace/screen/workspace_hud.dart';
@@ -86,9 +86,9 @@ class _AppShellState extends State<AppShell> {
   late final AppShellPlatformBridge _appShellPlatformBridge;
   late final EnvironmentBookmarkSynchronizer _environmentBookmarkSynchronizer;
   late final EnvironmentController _environmentController;
-  late final WorkspaceThumbnailRenderer _workspaceThumbnailRenderer;
-  late final WorkspaceThumbnailStore _workspaceThumbnailStore;
-  late final WorkspaceThumbnailRefresher _workspaceThumbnailRefresher;
+  late final ThumbnailRenderer _thumbnailRenderer;
+  late final ThumbnailStore _thumbnailStore;
+  late final ThumbnailRefresher _thumbnailRefresher;
   late final VideoConversionCoordinator _videoConversionCoordinator;
 
   ShellHandles get _handles => _dependencies.handles;
@@ -214,7 +214,7 @@ class _AppShellState extends State<AppShell> {
     }
 
     try {
-      await _workspaceThumbnailRefresher.refreshWorkspace(workspaceId, viewportSize: viewportSize);
+      await _thumbnailRefresher.refreshWorkspace(workspaceId, viewportSize: viewportSize);
     } finally {
       if (!mounted) {
         _thumbnailRefreshState.dirtyWorkspaces.remove(workspaceId);
@@ -267,13 +267,13 @@ class _AppShellState extends State<AppShell> {
     _environmentBookmarkSynchronizer = EnvironmentBookmarkSynchronizer(
       createFileBookmark: _appShellPlatformBridge.createFileBookmark,
     );
-    _workspaceThumbnailRenderer = WorkspaceThumbnailRenderer(isRunningInWidgetTest: _isRunningInWidgetTest);
-    _workspaceThumbnailStore = WorkspaceThumbnailStore(thumbnailDirectory: _appShellPlatformBridge.thumbnailDirectory);
-    _workspaceThumbnailRefresher = WorkspaceThumbnailRefresher(
+    _thumbnailRenderer = ThumbnailRenderer(isRunningInWidgetTest: _isRunningInWidgetTest);
+    _thumbnailStore = ThumbnailStore(thumbnailDirectory: _appShellPlatformBridge.thumbnailDirectory);
+    _thumbnailRefresher = ThumbnailRefresher(
       persistenceState: _persistenceState,
       environmentController: _environmentController,
-      renderer: _workspaceThumbnailRenderer,
-      store: _workspaceThumbnailStore,
+      renderer: _thumbnailRenderer,
+      store: _thumbnailStore,
     );
     _sryDocumentCoordinator = SryDocumentCoordinator(
       persistenceState: _persistenceState,

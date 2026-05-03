@@ -12,7 +12,7 @@ extension _AppShellWorkspaceGeometry on _AppShellState {
   }
 
   double _clampWorkspaceZoom(double zoom) {
-    return WorkspaceMutations.clampWorkspaceZoom(zoom);
+    return WorkspaceLayout.clampWorkspaceZoom(zoom);
   }
 
   void _setWorkspaceViewport({required String workspaceId, Offset? center, double? zoom, bool queueThumbnail = false}) {
@@ -27,7 +27,7 @@ extension _AppShellWorkspaceGeometry on _AppShellState {
     }
 
     final workspace = workspaceMatches.first;
-    final nextWorkspace = WorkspaceMutations.setWorkspaceViewport(
+    final nextWorkspace = WorkspaceLayout.setWorkspaceViewport(
       workspace,
       viewportSize: _workspaceViewportState.viewportSize,
       center: center,
@@ -48,6 +48,6 @@ extension _AppShellWorkspaceGeometry on _AppShellState {
   }
 
   Offset _clampWindowPosition(Offset position, Size size) {
-    return WorkspaceMutations.clampWindowPosition(position, size);
+    return WorkspaceLayout.clampWindowPosition(position, size);
   }
 }

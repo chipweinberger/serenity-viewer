@@ -12,4 +12,5 @@ class WorkspaceMediaCounts {
   final int links;
 
   int get videos => shortVideos + longVideos;
+  int get total => images + videos + links;
 }

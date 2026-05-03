@@ -1,4 +1,4 @@
-part of 'package:serenity_viewer/src/workspace/layout/workspace_mutations.dart';
+part of 'package:serenity_viewer/src/workspace/layout/workspace_layout.dart';
 
 typedef _WindowEdges = ({double left, double top, double right, double bottom});
 typedef _WindowBounds = ({Offset position, Size size});
@@ -24,12 +24,12 @@ Size _windowSizeByFittingAspect({
   final currentAspectRatio = currentSize.width / currentSize.height;
 
   if (currentAspectRatio > aspectRatio) {
-    final nextWidth = math.max(WorkspaceMutations.minWindowWidth, currentSize.height * aspectRatio);
+    final nextWidth = math.max(WorkspaceLayout.minWindowWidth, currentSize.height * aspectRatio);
     return Size(math.min(currentSize.width, nextWidth), currentSize.height);
   }
 
   if (currentAspectRatio < aspectRatio) {
-    final nextHeight = math.max(WorkspaceMutations.minWindowHeight, currentSize.width / aspectRatio);
+    final nextHeight = math.max(WorkspaceLayout.minWindowHeight, currentSize.width / aspectRatio);
     return Size(currentSize.width, math.min(currentSize.height, nextHeight));
   }
 
@@ -108,27 +108,27 @@ _WindowBounds _clampResizedBounds(_WindowEdges edges, AssetWindowResizeHandle ha
   var bottom = edges.bottom;
 
   var width = right - left;
-  if (width < WorkspaceMutations.minWindowWidth) {
+  if (width < WorkspaceLayout.minWindowWidth) {
     if (_resizesFromLeft(handle)) {
-      left = right - WorkspaceMutations.minWindowWidth;
+      left = right - WorkspaceLayout.minWindowWidth;
     } else {
-      right = left + WorkspaceMutations.minWindowWidth;
+      right = left + WorkspaceLayout.minWindowWidth;
     }
-    width = WorkspaceMutations.minWindowWidth;
+    width = WorkspaceLayout.minWindowWidth;
   }
 
   var height = bottom - top;
-  if (height < WorkspaceMutations.minWindowHeight) {
+  if (height < WorkspaceLayout.minWindowHeight) {
     if (_resizesFromTop(handle)) {
-      top = bottom - WorkspaceMutations.minWindowHeight;
+      top = bottom - WorkspaceLayout.minWindowHeight;
     } else {
-      bottom = top + WorkspaceMutations.minWindowHeight;
+      bottom = top + WorkspaceLayout.minWindowHeight;
     }
-    height = WorkspaceMutations.minWindowHeight;
+    height = WorkspaceLayout.minWindowHeight;
   }
 
-  width = width.clamp(WorkspaceMutations.minWindowWidth, workspaceExtent * 2);
-  height = height.clamp(WorkspaceMutations.minWindowHeight, workspaceExtent * 2);
+  width = width.clamp(WorkspaceLayout.minWindowWidth, workspaceExtent * 2);
+  height = height.clamp(WorkspaceLayout.minWindowHeight, workspaceExtent * 2);
   left = left.clamp(workspaceMinCoordinate, workspaceMaxCoordinate - width);
   top = top.clamp(workspaceMinCoordinate, workspaceMaxCoordinate - height);
 
@@ -156,10 +156,10 @@ WorkspaceWindowState _scaleWindowAroundCenter(
     window.position.dy + (window.size.height / 2),
   );
   final nextWidth = (window.size.width * clampedScaleDelta)
-      .clamp(WorkspaceMutations.minWindowWidth, workspaceExtent * 2)
+      .clamp(WorkspaceLayout.minWindowWidth, workspaceExtent * 2)
       .toDouble();
   final nextHeight = (window.size.height * clampedScaleDelta)
-      .clamp(WorkspaceMutations.minWindowHeight, workspaceExtent * 2)
+      .clamp(WorkspaceLayout.minWindowHeight, workspaceExtent * 2)
       .toDouble();
   final nextSize = Size(nextWidth, nextHeight);
   final nextPosition = _clampWindowPosition(
@@ -168,7 +168,7 @@ WorkspaceWindowState _scaleWindowAroundCenter(
   );
   final shouldScaleContentZoom = mirrorContentZoom || window.zoom > 1.0 || window.zoomBaseSize != null;
   final nextZoom = shouldScaleContentZoom
-      ? (window.zoom * clampedScaleDelta).clamp(1.0, WorkspaceMutations.maxContentZoom).toDouble()
+      ? (window.zoom * clampedScaleDelta).clamp(1.0, WorkspaceLayout.maxContentZoom).toDouble()
       : window.zoom;
   final snappedZoom = (nextZoom - 1).abs() < 0.02 ? 1.0 : nextZoom;
   final nextContentOffset = snappedZoom > 1.0 ? window.contentOffset * clampedScaleDelta : Offset.zero;
@@ -213,8 +213,8 @@ WorkspaceWindowState _fitWindowToVisibleContent(WorkspaceWindowState currentWind
   final visibleContent = _visibleContentRectForWindow(currentWindow);
   final visibleRect = visibleContent.visibleRect;
   final nextSize = Size(
-    math.max(1.0, visibleRect.width).clamp(WorkspaceMutations.minWindowWidth, workspaceExtent * 2),
-    math.max(1.0, visibleRect.height).clamp(WorkspaceMutations.minWindowHeight, workspaceExtent * 2),
+    math.max(1.0, visibleRect.width).clamp(WorkspaceLayout.minWindowWidth, workspaceExtent * 2),
+    math.max(1.0, visibleRect.height).clamp(WorkspaceLayout.minWindowHeight, workspaceExtent * 2),
   );
   final nextPosition = _clampWindowPosition(currentWindow.position + visibleRect.topLeft, nextSize);
   final nextLeft =

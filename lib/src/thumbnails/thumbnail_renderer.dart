@@ -6,22 +6,19 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 
-import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/asset_window/content/asset_zoom_utils.dart';
+import 'package:serenity_viewer/src/environment/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
+import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_projection.dart';
-import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
-import 'package:serenity_viewer/src/environment/workspace_state.dart';
 
-class WorkspaceThumbnailRenderer {
-  WorkspaceThumbnailRenderer({required this.isRunningInWidgetTest});
+class ThumbnailRenderer {
+  ThumbnailRenderer({required this.isRunningInWidgetTest});
 
   final bool isRunningInWidgetTest;
 
-  Future<Uint8List?> buildWorkspaceThumbnailBytes({
-    required WorkspaceState workspace,
-    required Size viewportSize,
-  }) async {
+  Future<Uint8List?> buildThumbnailBytes({required WorkspaceState workspace, required Size viewportSize}) async {
     const canvasWidth = 560.0;
     const canvasHeight = 360.0;
     const assetCornerRadius = 12.0;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/workspace/layout/workspace_mutations.dart';
+import 'package:serenity_viewer/src/workspace/layout/workspace_layout.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 
 String importedAssetNote({
@@ -30,7 +30,7 @@ Size importedAssetWindowSize({
     if (videoDimensions == null) {
       return const Size(520, 340);
     }
-    return WorkspaceMutations.windowSizeByFittingAspect(
+    return WorkspaceLayout.windowSizeByFittingAspect(
       currentSize: const Size(520, 340),
       contentWidth: videoDimensions.width,
       contentHeight: videoDimensions.height,
@@ -40,7 +40,7 @@ Size importedAssetWindowSize({
   if (imageDimensions == null) {
     return const Size(420, 300);
   }
-  return WorkspaceMutations.windowSizeByFittingAspect(
+  return WorkspaceLayout.windowSizeByFittingAspect(
     currentSize: const Size(420, 300),
     contentWidth: imageDimensions.width,
     contentHeight: imageDimensions.height,
@@ -52,7 +52,7 @@ Offset importedAssetWindowPosition({
   required int offsetIndex,
   required Size windowSize,
 }) {
-  return WorkspaceMutations.clampWindowPosition(
+  return WorkspaceLayout.clampWindowPosition(
     Offset(viewportCenter.dx - 180 + (offsetIndex * 26), viewportCenter.dy - 130 + (offsetIndex * 22)),
     windowSize,
   );

@@ -4,68 +4,29 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
-import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/asset_window/frame/asset_window_resize_helpers.dart';
 import 'package:serenity_viewer/src/asset_window/content/asset_zoom_utils.dart';
 import 'package:serenity_viewer/src/asset_window/interaction/asset_window_zoom_update.dart';
 import 'package:serenity_viewer/src/environment/workspace_state.dart';
+import 'package:serenity_viewer/src/workspace/workspace_state_helpers.dart';
 
-part 'workspace_environment_mutations.dart';
-part 'workspace_viewport_mutations.dart';
+part 'workspace_collate_logic.dart';
+part 'workspace_viewport_bounds.dart';
+part 'workspace_zoom_to_fit_logic.dart';
 part '../viewport/workspace_window_geometry.dart';
-part 'workspace_window_mutations.dart';
+part 'workspace_window_editing.dart';
 
-class WorkspaceMutations {
-  static const List<double> videoPlaybackSpeeds = [0.25, 0.5, 0.75, 1.0];
+/// Pure layout helpers for viewport math and window geometry.
+///
+/// File map:
+/// - `workspace_collate_logic.dart`: the user-facing collate feature
+/// - `workspace_viewport_bounds.dart`: viewport clamping and updates
+/// - `workspace_zoom_to_fit_logic.dart`: the user-facing zoom-to-fit feature
+/// - `workspace_window_editing.dart`: moving, resizing, zooming, and fit-to-content geometry updates
+class WorkspaceLayout {
   static const double minWindowWidth = 96.0;
   static const double minWindowHeight = 72.0;
   static const double maxContentZoom = 30.0;
-
-  static Environment replaceWorkspace(Environment environment, WorkspaceState nextWorkspace) {
-    return environment.copyWith(
-      workspaces: environment.workspaces
-          .map((workspace) => workspace.id == nextWorkspace.id ? nextWorkspace : workspace)
-          .toList(),
-    );
-  }
-
-  static Environment toggleWorkspaceOpen(Environment environment, String workspaceId) {
-    return _toggleWorkspaceOpen(environment, workspaceId);
-  }
-
-  static List<WorkspaceState> reorderOpenWorkspaces(
-    List<WorkspaceState> workspaces, {
-    required String sourceWorkspaceId,
-    required String targetWorkspaceId,
-  }) {
-    return _reorderOpenWorkspaces(
-      workspaces,
-      sourceWorkspaceId: sourceWorkspaceId,
-      targetWorkspaceId: targetWorkspaceId,
-    );
-  }
-
-  static Environment moveSelectedWindowsToWorkspace(
-    Environment environment, {
-    required String sourceWorkspaceId,
-    required String destinationWorkspaceId,
-    required Set<String> selectedWindowIds,
-  }) {
-    return _moveSelectedWindowsToWorkspace(
-      environment,
-      sourceWorkspaceId: sourceWorkspaceId,
-      destinationWorkspaceId: destinationWorkspaceId,
-      selectedWindowIds: selectedWindowIds,
-    );
-  }
-
-  static ({WorkspaceState workspace, int? previousZOrder}) focusWindow(WorkspaceState workspace, String windowId) {
-    return _focusWindow(workspace, windowId);
-  }
-
-  static WorkspaceState restorePreviousWindowZOrder(WorkspaceState workspace, String windowId, int previousZOrder) {
-    return _restorePreviousWindowZOrder(workspace, windowId, previousZOrder);
-  }
 
   static double clampWorkspaceZoom(double zoom) {
     return _clampWorkspaceZoom(zoom);
@@ -143,14 +104,6 @@ class WorkspaceMutations {
 
   static WorkspaceState setWindowZoom(WorkspaceState workspace, String windowId, AssetWindowZoomUpdate update) {
     return _setWindowZoom(workspace, windowId, update);
-  }
-
-  static WorkspaceState setVideoPosition(WorkspaceState workspace, String windowId, int positionMs) {
-    return _setVideoPosition(workspace, windowId, positionMs);
-  }
-
-  static WorkspaceState cycleVideoPlaybackSpeed(WorkspaceState workspace, String windowId) {
-    return _cycleVideoPlaybackSpeed(workspace, windowId);
   }
 
   static WorkspaceState setWindowIntrinsicSize(WorkspaceState workspace, String windowId, Size intrinsicSize) {

@@ -3,8 +3,8 @@ import 'dart:typed_data';
 
 import 'package:flutter/painting.dart';
 
-class WorkspaceThumbnailStore {
-  WorkspaceThumbnailStore({required this.thumbnailDirectory});
+class ThumbnailStore {
+  ThumbnailStore({required this.thumbnailDirectory});
 
   final Future<Directory> Function() thumbnailDirectory;
 
