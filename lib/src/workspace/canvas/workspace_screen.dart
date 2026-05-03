@@ -10,14 +10,14 @@ import 'package:serenity_viewer/src/media/playback/media_bridge.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_projection.dart';
-import 'package:serenity_viewer/src/workspace/windows/workspace_window_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/workspace_window_state.dart';
 import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
-import 'package:serenity_viewer/src/environments/session/session_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/session_state.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_frame_view_model.dart';
 import 'package:serenity_viewer/src/workspace/canvas/workspace_canvas_view_model.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_zoom_update.dart';
-import 'package:serenity_viewer/src/media/assets/workspace_asset.dart';
-import 'package:serenity_viewer/src/workspace/workspace_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/workspace_asset.dart';
+import 'package:serenity_viewer/src/sry_document/models/workspace_state.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_interaction_state.dart';
 import 'package:serenity_viewer/src/workspace/expose/expose_window_card.dart';
@@ -25,8 +25,7 @@ import 'package:serenity_viewer/src/workspace/windows/window_frame.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_resize_helpers.dart';
 import 'package:serenity_viewer/src/workspace/expose/expose_layouts.dart';
 
-typedef SharedVideoLookup =
-    SharedVideoState? Function(WorkspaceWindowState window, {required bool isLoaded});
+typedef SharedVideoLookup = SharedVideoState? Function(WorkspaceWindowState window, {required bool isLoaded});
 
 @immutable
 class WorkspaceScreenActions {
@@ -122,11 +121,7 @@ class WorkspaceScreen extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.add_photo_alternate_outlined,
-                  size: 40,
-                  color: AppTheme.textMuted.withValues(alpha: 0.8),
-                ),
+                Icon(Icons.add_photo_alternate_outlined, size: 40, color: AppTheme.textMuted.withValues(alpha: 0.8)),
                 const SizedBox(height: 12),
                 Text(
                   'Empty workspace',

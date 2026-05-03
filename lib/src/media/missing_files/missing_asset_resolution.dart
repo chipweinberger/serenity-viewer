@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:serenity_viewer/src/workspace/windows/workspace_window_state.dart';
-import 'package:serenity_viewer/src/environments/session/session_state.dart';
-import 'package:serenity_viewer/src/workspace/workspace_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/workspace_window_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/session_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/workspace_state.dart';
 
 typedef BookmarkResolver = Future<String?> Function(String bookmark);
 typedef BookmarkCreator = Future<String?> Function(String path);

@@ -7,11 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:serenity_viewer/src/media/importing/import_result.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/media/importing/import_window_layout.dart';
-import 'package:serenity_viewer/src/workspace/windows/workspace_window_state.dart';
-import 'package:serenity_viewer/src/environments/session/session_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/workspace_window_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/session_state.dart';
 import 'package:serenity_viewer/src/media/conversion/settings_and_video_models.dart';
-import 'package:serenity_viewer/src/media/assets/workspace_asset.dart';
-import 'package:serenity_viewer/src/workspace/workspace_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/workspace_asset.dart';
+import 'package:serenity_viewer/src/sry_document/models/workspace_state.dart';
 
 typedef SerenitySingleFrameConversionConfirmer = Future<bool> Function(String filename);
 typedef SerenityVideoFrameExporter =
@@ -65,12 +65,7 @@ class ImportCoordinator {
   }) async {
     final supported = files.where((file) => _assetTypeForPath(file.path) != null).toList();
     if (supported.isEmpty) {
-      return ImportResult(
-        session: session,
-        importedCount: 0,
-        skippedDuplicateCount: 0,
-        hadSupportedFiles: false,
-      );
+      return ImportResult(session: session, importedCount: 0, skippedDuplicateCount: 0, hadSupportedFiles: false);
     }
 
     final limited = supported.take(maxImportedFiles).toList();

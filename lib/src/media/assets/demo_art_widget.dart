@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/media/assets/workspace_asset.dart';
+import 'package:serenity_viewer/src/sry_document/models/workspace_asset.dart';
 
 class DemoArtWidget extends StatelessWidget {
   const DemoArtWidget({super.key, required this.asset});

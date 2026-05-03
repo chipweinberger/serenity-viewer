@@ -56,12 +56,12 @@ extension _AppShellMenuActions on _AppShellState {
         menus: [
           PlatformMenuItem(
             label: 'New Environment…',
-            onSelected: () => unawaited(_environmentCoordinator.createEnvironment()),
+            onSelected: () => unawaited(_sryDocumentCoordinator.createDocument()),
             shortcut: const SingleActivator(LogicalKeyboardKey.keyN, meta: true, shift: true),
           ),
           PlatformMenuItem(
             label: 'Open Environment…',
-            onSelected: () => unawaited(_environmentCoordinator.openEnvironment()),
+            onSelected: () => unawaited(_sryDocumentCoordinator.openDocument()),
             shortcut: const SingleActivator(LogicalKeyboardKey.keyO, meta: true, shift: true),
           ),
           PlatformMenuItem(
@@ -71,12 +71,12 @@ extension _AppShellMenuActions on _AppShellState {
           ),
           PlatformMenuItem(
             label: 'Save',
-            onSelected: () => unawaited(_environmentCoordinator.saveEnvironment()),
+            onSelected: () => unawaited(_sryDocumentCoordinator.saveDocument()),
             shortcut: const SingleActivator(LogicalKeyboardKey.keyS, meta: true),
           ),
           PlatformMenuItem(
             label: 'Save As…',
-            onSelected: () => unawaited(_environmentCoordinator.saveEnvironmentAs()),
+            onSelected: () => unawaited(_sryDocumentCoordinator.saveDocumentAs()),
             shortcut: const SingleActivator(LogicalKeyboardKey.keyS, meta: true, shift: true),
           ),
         ],

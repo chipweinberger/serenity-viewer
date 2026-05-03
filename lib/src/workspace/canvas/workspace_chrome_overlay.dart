@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
-import 'package:serenity_viewer/src/workspace/workspace_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/workspace_state.dart';
 import 'package:serenity_viewer/src/settings/appearance/glass_chip.dart';
 
 @immutable
@@ -143,10 +143,7 @@ class WorkspaceChromeOverlay extends StatelessWidget {
               ),
             Padding(
               padding: const EdgeInsets.only(left: 10),
-              child: GlassChip(
-                onTap: actions.onCreateWorkspace,
-                child: const Icon(Icons.add_rounded, size: 16),
-              ),
+              child: GlassChip(onTap: actions.onCreateWorkspace, child: const Icon(Icons.add_rounded, size: 16)),
             ),
           ],
         ),

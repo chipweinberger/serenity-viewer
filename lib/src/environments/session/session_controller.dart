@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/workspace/workspace_mutations.dart';
-import 'package:serenity_viewer/src/environments/session/session_state.dart';
-import 'package:serenity_viewer/src/workspace/workspace_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/session_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/workspace_state.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
 import 'package:serenity_viewer/src/environments/session/shell_persistence_state.dart';
-import 'package:serenity_viewer/src/environments/persistence/thumbnail_refresh_state.dart';
+import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresh_state.dart';
 
 typedef SerenitySessionStateCommit = void Function(VoidCallback update);
 

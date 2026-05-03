@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
-import 'package:serenity_viewer/src/workspace/links/workspace_link.dart';
-import 'package:serenity_viewer/src/workspace/workspace_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/workspace_link.dart';
+import 'package:serenity_viewer/src/sry_document/models/workspace_state.dart';
 
 Future<void> showSerenityWorkspaceLinksDialog({
   required BuildContext context,
@@ -65,14 +65,11 @@ Future<void> showSerenityWorkspaceLinksDialog({
                       border: InputBorder.none,
                       isDense: true,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
-                      hintStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                        color: AppTheme.textMuted.withValues(alpha: 0.9),
-                        height: 1.0,
-                      ),
+                      hintStyle: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium!.copyWith(color: AppTheme.textMuted.withValues(alpha: 0.9), height: 1.0),
                     ),
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyMedium!.copyWith(color: AppTheme.textPrimary, height: 1.0),
+                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: AppTheme.textPrimary, height: 1.0),
                   ),
                 );
               }
@@ -254,11 +251,7 @@ Future<void> showSerenityWorkspaceLinksDialog({
                                               child: const SizedBox(
                                                 width: 32,
                                                 height: 32,
-                                                child: Icon(
-                                                  Icons.close_rounded,
-                                                  size: 18,
-                                                  color: AppTheme.textPrimary,
-                                                ),
+                                                child: Icon(Icons.close_rounded, size: 18, color: AppTheme.textPrimary),
                                               ),
                                             ),
                                           ),

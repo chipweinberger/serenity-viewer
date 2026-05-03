@@ -15,7 +15,7 @@ extension _AppShellMediaImportActions on _AppShellState {
           positionMs: positionMs,
         );
       },
-      createFileBookmark: _sessionPersistenceBridge.createFileBookmark,
+      createFileBookmark: _appShellPlatformBridge.createFileBookmark,
       md5ForFile: _mediaBridge.md5ForFile,
       imageDimensionsForFile: _mediaBridge.imageDimensionsForFile,
       videoDurationMsForFile: _mediaBridge.videoDurationMsForFile,

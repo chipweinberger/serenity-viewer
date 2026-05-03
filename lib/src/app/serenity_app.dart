@@ -16,10 +16,7 @@ class SerenityApp extends StatelessWidget {
         secondary: AppTheme.accentSoft,
         surface: AppTheme.panel,
       ),
-      textTheme: ThemeData.light().textTheme.apply(
-        bodyColor: AppTheme.textPrimary,
-        displayColor: AppTheme.textPrimary,
-      ),
+      textTheme: ThemeData.light().textTheme.apply(bodyColor: AppTheme.textPrimary, displayColor: AppTheme.textPrimary),
       useMaterial3: true,
     );
 

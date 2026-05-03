@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/workspace/windows/workspace_window_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/workspace_window_state.dart';
 
 Size fitSizeForViewportToAspect(Size viewportSize, double aspectRatio) {
   if (viewportSize.width <= 0 || viewportSize.height <= 0 || aspectRatio <= 0) {

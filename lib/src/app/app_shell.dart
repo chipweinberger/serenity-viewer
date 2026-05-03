@@ -9,37 +9,38 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:serenity_viewer/src/settings/behavior/chrome_controller.dart';
-import 'package:serenity_viewer/src/environments/environment_coordinator.dart';
 import 'package:serenity_viewer/src/media/importing/import_coordinator.dart';
 import 'package:serenity_viewer/src/media/importing/import_result.dart';
 import 'package:serenity_viewer/src/media/playback/media_bridge.dart';
+import 'package:serenity_viewer/src/app/app_shell_platform_bridge.dart';
 import 'package:serenity_viewer/src/app/shell_dependencies.dart';
+import 'package:serenity_viewer/src/app/sry_document_coordinator.dart';
+import 'package:serenity_viewer/src/environments/session/session_bookmark_synchronizer.dart';
 import 'package:serenity_viewer/src/environments/session/session_controller.dart';
-import 'package:serenity_viewer/src/environments/persistence/session_persistence_bridge.dart';
-import 'package:serenity_viewer/src/environments/persistence/workspace_thumbnail_refresher.dart';
-import 'package:serenity_viewer/src/environments/persistence/workspace_thumbnail_renderer.dart';
-import 'package:serenity_viewer/src/environments/persistence/workspace_thumbnail_store.dart';
 import 'package:serenity_viewer/src/media/conversion/video_conversion_coordinator.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.dart';
 import 'package:serenity_viewer/src/workspace/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/workspace_mutations.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/foundation/keyboard_modifiers.dart';
-import 'package:serenity_viewer/src/workspace/windows/workspace_window_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/workspace_window_state.dart';
 import 'package:serenity_viewer/src/workspace/windows/recently_closed_window_entry.dart';
-import 'package:serenity_viewer/src/environments/session/session_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/session_state.dart';
 import 'package:serenity_viewer/src/workspace/canvas/workspace_chrome_view_model.dart';
 import 'package:serenity_viewer/src/media/conversion/settings_and_video_models.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_zoom_update.dart';
-import 'package:serenity_viewer/src/media/assets/workspace_asset.dart';
-import 'package:serenity_viewer/src/workspace/workspace_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/workspace_asset.dart';
+import 'package:serenity_viewer/src/sry_document/models/workspace_state.dart';
 import 'package:serenity_viewer/src/media/loading/workspace_load_plan.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
 import 'package:serenity_viewer/src/environments/session/shell_persistence_state.dart';
-import 'package:serenity_viewer/src/environments/persistence/thumbnail_refresh_state.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_interaction_state.dart';
 import 'package:serenity_viewer/src/workspace/workspace_view_tracking_state.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
+import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresh_state.dart';
+import 'package:serenity_viewer/src/workspace/thumbnails/workspace_thumbnail_refresher.dart';
+import 'package:serenity_viewer/src/workspace/thumbnails/workspace_thumbnail_renderer.dart';
+import 'package:serenity_viewer/src/workspace/thumbnails/workspace_thumbnail_store.dart';
 import 'package:serenity_viewer/src/settings/behavior/settings_dialog.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_resize_helpers.dart';
 import 'package:serenity_viewer/src/library/library_screen.dart';
@@ -78,12 +79,13 @@ class _AppShellState extends State<AppShell> {
   AppLifecycleListener? _appLifecycleListener;
   Timer? _autosaveTimer;
   late final ChromeController _chromeController;
-  late final EnvironmentCoordinator _environmentCoordinator;
+  late final SryDocumentCoordinator _sryDocumentCoordinator;
   late final MediaBridge _mediaBridge;
   late final WorkspaceController _workspaceController;
   late final WorkspaceLinksController _workspaceLinksController;
+  late final AppShellPlatformBridge _appShellPlatformBridge;
+  late final SessionBookmarkSynchronizer _sessionBookmarkSynchronizer;
   late final SessionController _sessionController;
-  late final SessionPersistenceBridge _sessionPersistenceBridge;
   late final WorkspaceThumbnailRenderer _workspaceThumbnailRenderer;
   late final WorkspaceThumbnailStore _workspaceThumbnailStore;
   late final WorkspaceThumbnailRefresher _workspaceThumbnailRefresher;
@@ -127,6 +129,61 @@ class _AppShellState extends State<AppShell> {
       return 'Serenity$suffix';
     }
     return '${path.split(Platform.pathSeparator).last}$suffix';
+  }
+
+  Future<void> _restoreSession() async {
+    if (_isRunningInWidgetTest) {
+      _sessionController.restoreWidgetTestSession(_seedSession());
+      return;
+    }
+
+    try {
+      final lastEnvironmentPath = await _appShellPlatformBridge.loadLastEnvironmentPath();
+      if (lastEnvironmentPath != null && lastEnvironmentPath.isNotEmpty && await File(lastEnvironmentPath).exists()) {
+        await _sryDocumentCoordinator.loadDocumentFromPath(
+          lastEnvironmentPath,
+          showSuccessMessage: false,
+          persistAsLastOpened: true,
+        );
+        return;
+      }
+      await _appShellPlatformBridge.storeLastEnvironmentPath(null);
+    } catch (_) {
+      await _appShellPlatformBridge.storeLastEnvironmentPath(null);
+    }
+
+    _sessionController.showMissingStartupState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_sryDocumentCoordinator.promptForStartupDocument());
+    });
+  }
+
+  Future<void> _saveSession({bool force = false}) async {
+    final session = _persistenceState.session;
+    final environmentPath = _persistenceState.currentEnvironmentPath;
+    if (session == null || environmentPath == null || environmentPath.isEmpty) {
+      return;
+    }
+    if (!force && !_persistenceState.hasUnsavedChanges) {
+      return;
+    }
+
+    try {
+      final sessionToSave = await _sessionBookmarkSynchronizer.synchronize(session);
+      _sessionController.applySavedSessionState(
+        originalSession: session,
+        savedSession: sessionToSave,
+        mounted: mounted,
+      );
+      await _sryDocumentCoordinator.saveDocumentToPath(
+        environmentPath,
+        sessionOverride: sessionToSave,
+        showMessageOnFailure: false,
+      );
+      await _appShellPlatformBridge.syncWindowTitle();
+    } catch (_) {
+      // Widget tests and unsupported platforms can skip local persistence.
+    }
   }
 
   Future<void> _refreshActiveWorkspaceThumbnailIfNeeded() async {
@@ -200,28 +257,25 @@ class _AppShellState extends State<AppShell> {
       thumbnailRefreshState: _thumbnailRefreshState,
       commitStateChange: setState,
       refreshWorkspaceTracking: _refreshWorkspaceViewTracking,
-      syncWindowTitle: () => _sessionPersistenceBridge.syncWindowTitle(),
+      syncWindowTitle: () => _appShellPlatformBridge.syncWindowTitle(),
     );
-    _sessionPersistenceBridge = SessionPersistenceBridge(
+    _appShellPlatformBridge = AppShellPlatformBridge(
       persistenceState: _persistenceState,
-      sessionController: _sessionController,
       isRunningInWidgetTest: _isRunningInWidgetTest,
-      mounted: () => mounted,
-      seedSession: _seedSession,
-      environmentCoordinator: () => _environmentCoordinator,
       windowTitle: () => _windowTitle,
     );
-    _workspaceThumbnailRenderer = WorkspaceThumbnailRenderer(isRunningInWidgetTest: _isRunningInWidgetTest);
-    _workspaceThumbnailStore = WorkspaceThumbnailStore(
-      thumbnailDirectory: _sessionPersistenceBridge.thumbnailDirectory,
+    _sessionBookmarkSynchronizer = SessionBookmarkSynchronizer(
+      createFileBookmark: _appShellPlatformBridge.createFileBookmark,
     );
+    _workspaceThumbnailRenderer = WorkspaceThumbnailRenderer(isRunningInWidgetTest: _isRunningInWidgetTest);
+    _workspaceThumbnailStore = WorkspaceThumbnailStore(thumbnailDirectory: _appShellPlatformBridge.thumbnailDirectory);
     _workspaceThumbnailRefresher = WorkspaceThumbnailRefresher(
       persistenceState: _persistenceState,
       sessionController: _sessionController,
       renderer: _workspaceThumbnailRenderer,
       store: _workspaceThumbnailStore,
     );
-    _environmentCoordinator = EnvironmentCoordinator(
+    _sryDocumentCoordinator = SryDocumentCoordinator(
       persistenceState: _persistenceState,
       sessionController: _sessionController,
       context: () => context,
@@ -229,20 +283,20 @@ class _AppShellState extends State<AppShell> {
       seedSession: _seedSession,
       showMessage: _showMessage,
       refreshActiveWorkspaceThumbnailIfNeeded: _refreshActiveWorkspaceThumbnailIfNeeded,
-      storeLastEnvironmentPath: _sessionPersistenceBridge.storeLastEnvironmentPath,
-      syncWindowTitle: _sessionPersistenceBridge.syncWindowTitle,
-      resolveFileBookmark: _sessionPersistenceBridge.resolveFileBookmark,
-      createFileBookmark: _sessionPersistenceBridge.createFileBookmark,
-      thumbnailDirectory: _sessionPersistenceBridge.thumbnailDirectory,
+      storeLastEnvironmentPath: _appShellPlatformBridge.storeLastEnvironmentPath,
+      syncWindowTitle: _appShellPlatformBridge.syncWindowTitle,
+      resolveFileBookmark: _appShellPlatformBridge.resolveFileBookmark,
+      createFileBookmark: _appShellPlatformBridge.createFileBookmark,
+      thumbnailDirectory: _appShellPlatformBridge.thumbnailDirectory,
       updateSession: _updateSession,
-      saveSession: _sessionPersistenceBridge.saveSession,
+      saveSession: _saveSession,
     );
     _videoConversionCoordinator = VideoConversionCoordinator(
       context: () => context,
       mounted: () => mounted,
       showMessage: _showMessage,
       mediaBridge: _mediaBridge,
-      sessionPersistenceBridge: _sessionPersistenceBridge,
+      createFileBookmark: _appShellPlatformBridge.createFileBookmark,
       activeWorkspace: () => _activeWorkspaceOrNull,
       replaceWorkspace: _replaceWorkspace,
       colorFromDigest: _colorFromDigest,
@@ -274,17 +328,17 @@ class _AppShellState extends State<AppShell> {
     );
     _autosaveTimer = Timer.periodic(const Duration(minutes: 1), (_) {
       if (_persistenceState.hasUnsavedChanges) {
-        unawaited(_sessionPersistenceBridge.saveSession());
+        unawaited(_saveSession());
       }
     });
     _appLifecycleListener = AppLifecycleListener(
       onStateChange: _handleAppLifecycleStateChanged,
       onExitRequested: () async {
-        await _sessionPersistenceBridge.saveSession(force: true);
+        await _saveSession(force: true);
         return ui.AppExitResponse.exit;
       },
     );
-    _sessionPersistenceBridge.restoreSession();
+    _restoreSession();
   }
 
   @override

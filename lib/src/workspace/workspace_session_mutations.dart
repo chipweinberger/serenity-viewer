@@ -8,7 +8,10 @@ WorkspaceWindowState? _windowById(WorkspaceState workspace, String windowId) {
   return workspace.windows.where((window) => window.asset.id == windowId).firstOrNull;
 }
 
-WorkspaceState _mapWindows(WorkspaceState workspace, WorkspaceWindowState Function(WorkspaceWindowState window) transform) {
+WorkspaceState _mapWindows(
+  WorkspaceState workspace,
+  WorkspaceWindowState Function(WorkspaceWindowState window) transform,
+) {
   return workspace.copyWith(windows: workspace.windows.map(transform).toList());
 }
 

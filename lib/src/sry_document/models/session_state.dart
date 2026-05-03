@@ -1,51 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/workspace/workspace_state.dart';
-
-SessionState _normalizeSessionState(SessionState session) {
-  final dedupedWorkspaces = <WorkspaceState>[];
-  final seenWorkspaceIds = <String>{};
-
-  for (final workspace in session.workspaces) {
-    if (seenWorkspaceIds.add(workspace.id)) {
-      dedupedWorkspaces.add(workspace);
-    }
-  }
-
-  if (dedupedWorkspaces.isEmpty) {
-    return session;
-  }
-
-  final hasActiveWorkspace = dedupedWorkspaces.any((workspace) => workspace.id == session.activeWorkspaceId);
-  final nextActiveWorkspaceId = hasActiveWorkspace ? session.activeWorkspaceId : dedupedWorkspaces.first.id;
-  final hasOpenWorkspace = dedupedWorkspaces.any((workspace) => workspace.isOpen);
-  final normalizedWorkspaces = dedupedWorkspaces
-      .map(
-        (workspace) => (!hasOpenWorkspace || workspace.id == nextActiveWorkspaceId) && !workspace.isOpen
-            ? workspace.copyWith(isOpen: true)
-            : workspace,
-      )
-      .toList();
-
-  final changed =
-      dedupedWorkspaces.length != session.workspaces.length ||
-      nextActiveWorkspaceId != session.activeWorkspaceId ||
-      normalizedWorkspaces.asMap().entries.any((entry) => entry.value.isOpen != dedupedWorkspaces[entry.key].isOpen);
-
-  if (!changed) {
-    return session;
-  }
-
-  return SessionState(
-    workspaces: normalizedWorkspaces,
-    activeWorkspaceId: nextActiveWorkspaceId,
-    knownFolders: session.knownFolders,
-    folderPopularity: session.folderPopularity,
-    imageLoadLimit: session.imageLoadLimit,
-    shortVideoLoadLimit: session.shortVideoLoadLimit,
-    longVideoLoadLimit: session.longVideoLoadLimit,
-  );
-}
+import 'package:serenity_viewer/src/environments/session/session_state_normalizer.dart';
+import 'package:serenity_viewer/src/sry_document/models/workspace_state.dart';
 
 @immutable
 class SessionState {
@@ -76,7 +32,7 @@ class SessionState {
     int? shortVideoLoadLimit,
     int? longVideoLoadLimit,
   }) {
-    return _normalizeSessionState(
+    return normalizeSessionState(
       SessionState(
         workspaces: workspaces ?? this.workspaces,
         activeWorkspaceId: activeWorkspaceId ?? this.activeWorkspaceId,
@@ -114,7 +70,7 @@ class SessionState {
   }
 
   factory SessionState.fromJson(Map<String, dynamic> json) {
-    return _normalizeSessionState(
+    return normalizeSessionState(
       SessionState(
         workspaces: (json['workspaces'] as List<dynamic>)
             .map((entry) => WorkspaceState.fromJson(entry as Map<String, dynamic>))
@@ -132,7 +88,7 @@ class SessionState {
   }
 
   factory SessionState.fromManifestJson(Map<String, dynamic> json, List<WorkspaceState> workspaces) {
-    return _normalizeSessionState(
+    return normalizeSessionState(
       SessionState(
         workspaces: workspaces,
         activeWorkspaceId: json['activeWorkspaceId'] as String,

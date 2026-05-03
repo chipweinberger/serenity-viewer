@@ -7,11 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/workspace/windows/workspace_window_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/workspace_window_state.dart';
 import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
-import 'package:serenity_viewer/src/environments/session/session_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/session_state.dart';
 import 'package:serenity_viewer/src/media/conversion/settings_and_video_models.dart';
-import 'package:serenity_viewer/src/media/assets/workspace_asset.dart';
+import 'package:serenity_viewer/src/sry_document/models/workspace_asset.dart';
 
 @immutable
 class SharedVideoState {

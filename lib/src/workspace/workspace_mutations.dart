@@ -3,10 +3,10 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/workspace/windows/workspace_window_state.dart';
-import 'package:serenity_viewer/src/environments/session/session_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/workspace_window_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/session_state.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_zoom_update.dart';
-import 'package:serenity_viewer/src/workspace/workspace_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/workspace_state.dart';
 import 'package:serenity_viewer/src/media/assets/media_zoom_utils.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_resize_helpers.dart';
 

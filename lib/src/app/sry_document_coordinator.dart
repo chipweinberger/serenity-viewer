@@ -5,15 +5,15 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/environments/session/session_controller.dart';
-import 'package:serenity_viewer/src/media/missing_files/missing_asset_resolution.dart';
-import 'package:serenity_viewer/src/environments/session/session_state.dart';
-import 'package:serenity_viewer/src/media/conversion/settings_and_video_models.dart';
-import 'package:serenity_viewer/src/workspace/workspace_state.dart';
-import 'package:serenity_viewer/src/environments/archive/environment_archive.dart';
+import 'package:serenity_viewer/src/sry_document/models/session_state.dart';
 import 'package:serenity_viewer/src/environments/session/shell_persistence_state.dart';
+import 'package:serenity_viewer/src/media/conversion/settings_and_video_models.dart';
+import 'package:serenity_viewer/src/media/missing_files/missing_asset_resolution.dart';
+import 'package:serenity_viewer/src/sry_document/sry_document_codec.dart';
+import 'package:serenity_viewer/src/sry_document/models/workspace_state.dart';
 
-class EnvironmentCoordinator {
-  EnvironmentCoordinator({
+class SryDocumentCoordinator {
+  SryDocumentCoordinator({
     required this.persistenceState,
     required this.sessionController,
     required this.context,
@@ -45,7 +45,7 @@ class EnvironmentCoordinator {
   final ValueChanged<SessionState> updateSession;
   final Future<void> Function() saveSession;
 
-  Future<void> saveEnvironmentToPath(
+  Future<void> saveDocumentToPath(
     String path, {
     SessionState? sessionOverride,
     bool showMessageOnFailure = true,
@@ -73,7 +73,7 @@ class EnvironmentCoordinator {
         thumbnailBytesByWorkspaceId[workspace.id] = await thumbnailFile.readAsBytes();
       }
 
-      final encoded = buildEnvironmentArchiveBytes(
+      final encoded = encodeSryDocumentBytes(
         session: session,
         thumbnailBytesByWorkspaceId: thumbnailBytesByWorkspaceId,
       );
@@ -92,7 +92,7 @@ class EnvironmentCoordinator {
     }
   }
 
-  Future<void> saveEnvironmentAs() async {
+  Future<void> saveDocumentAs() async {
     final location = await getSaveLocation(
       suggestedName: 'serenity-enviroment',
       acceptedTypeGroups: const [
@@ -105,23 +105,23 @@ class EnvironmentCoordinator {
     }
 
     try {
-      await saveEnvironmentToPath(location.path);
+      await saveDocumentToPath(location.path);
     } catch (_) {}
   }
 
-  Future<void> saveEnvironment() async {
+  Future<void> saveDocument() async {
     final path = persistenceState.currentEnvironmentPath;
     if (path == null || path.isEmpty) {
-      await saveEnvironmentAs();
+      await saveDocumentAs();
       return;
     }
 
     try {
-      await saveEnvironmentToPath(path);
+      await saveDocumentToPath(path);
     } catch (_) {}
   }
 
-  Future<bool> openEnvironment({bool showSuccessMessage = true}) async {
+  Future<bool> openDocument({bool showSuccessMessage = true}) async {
     final file = await openFile(
       acceptedTypeGroups: const [
         XTypeGroup(label: 'Serenity Environment', extensions: ['sry']),
@@ -132,17 +132,17 @@ class EnvironmentCoordinator {
       return false;
     }
 
-    return loadEnvironmentFromPath(file.path, showSuccessMessage: showSuccessMessage, persistAsLastOpened: true);
+    return loadDocumentFromPath(file.path, showSuccessMessage: showSuccessMessage, persistAsLastOpened: true);
   }
 
-  Future<bool> loadEnvironmentFromPath(
+  Future<bool> loadDocumentFromPath(
     String path, {
     bool showSuccessMessage = true,
     bool persistAsLastOpened = true,
   }) async {
     try {
       final bytes = await XFile(path).readAsBytes();
-      final decoded = decodeEnvironmentArchiveBytes(bytes);
+      final decoded = decodeSryDocumentBytes(bytes);
       final resolved = await resolveMissingAssetsInSession(
         session: decoded.session,
         resolveBookmark: resolveFileBookmark,
@@ -156,7 +156,7 @@ class EnvironmentCoordinator {
       if (persistAsLastOpened) {
         await storeLastEnvironmentPath(path);
       }
-      await restoreEnvironmentThumbnails(decoded.thumbnailBytesByWorkspaceId, resolved);
+      await restoreDocumentThumbnails(decoded.thumbnailBytesByWorkspaceId, resolved);
       await saveSession();
       if (mounted() && showSuccessMessage) {
         showMessage('Opened ${path.split(Platform.pathSeparator).last}.');
@@ -170,7 +170,7 @@ class EnvironmentCoordinator {
     }
   }
 
-  Future<bool> createEnvironment() async {
+  Future<bool> createDocument() async {
     final location = await getSaveLocation(
       suggestedName: 'serenity-enviroment',
       acceptedTypeGroups: const [
@@ -188,7 +188,7 @@ class EnvironmentCoordinator {
     }
 
     sessionController.applyCreatedEnvironment(session: seeded, path: location.path);
-    await saveEnvironmentToPath(location.path, sessionOverride: seeded);
+    await saveDocumentToPath(location.path, sessionOverride: seeded);
     if (!mounted()) {
       return false;
     }
@@ -196,7 +196,7 @@ class EnvironmentCoordinator {
     return true;
   }
 
-  Future<void> promptForStartupEnvironment() async {
+  Future<void> promptForStartupDocument() async {
     if (!sessionController.shouldPromptForStartupEnvironment(mounted: mounted())) {
       return;
     }
@@ -231,7 +231,7 @@ class EnvironmentCoordinator {
         );
 
         if (choice == StartupEnvironmentChoice.open) {
-          final opened = await openEnvironment(showSuccessMessage: false);
+          final opened = await openDocument(showSuccessMessage: false);
           if (opened) {
             return;
           }
@@ -239,7 +239,7 @@ class EnvironmentCoordinator {
         }
 
         if (choice == StartupEnvironmentChoice.create) {
-          final created = await createEnvironment();
+          final created = await createDocument();
           if (created) {
             return;
           }
@@ -251,7 +251,7 @@ class EnvironmentCoordinator {
     }
   }
 
-  Future<void> restoreEnvironmentThumbnails(
+  Future<void> restoreDocumentThumbnails(
     Map<String, List<int>> thumbnailBytesByWorkspaceId,
     SessionState session,
   ) async {

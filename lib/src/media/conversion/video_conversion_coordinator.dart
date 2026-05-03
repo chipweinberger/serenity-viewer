@@ -4,10 +4,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/media/playback/media_bridge.dart';
-import 'package:serenity_viewer/src/environments/persistence/session_persistence_bridge.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/media/conversion/settings_and_video_models.dart';
-import 'package:serenity_viewer/src/workspace/workspace_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/workspace_state.dart';
 import 'package:serenity_viewer/src/media/assets/media_zoom_utils.dart';
 
 class VideoConversionCoordinator {
@@ -16,7 +15,7 @@ class VideoConversionCoordinator {
     required this.mounted,
     required this.showMessage,
     required this.mediaBridge,
-    required this.sessionPersistenceBridge,
+    required this.createFileBookmark,
     required this.activeWorkspace,
     required this.replaceWorkspace,
     required this.colorFromDigest,
@@ -27,7 +26,7 @@ class VideoConversionCoordinator {
   final bool Function() mounted;
   final ValueChanged<String> showMessage;
   final MediaBridge mediaBridge;
-  final SessionPersistenceBridge sessionPersistenceBridge;
+  final Future<String?> Function(String path) createFileBookmark;
   final WorkspaceState? Function() activeWorkspace;
   final void Function(WorkspaceState workspace) replaceWorkspace;
   final int Function(String value) colorFromDigest;
@@ -171,7 +170,7 @@ class VideoConversionCoordinator {
       return;
     }
 
-    final bookmark = await sessionPersistenceBridge.createFileBookmark(conversion.path);
+    final bookmark = await createFileBookmark(conversion.path);
     replaceWorkspace(
       workspace.copyWith(
         windows: workspace.windows

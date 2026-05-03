@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-import 'package:serenity_viewer/src/environments/session/session_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/session_state.dart';
 
 @immutable
 class ImportResult {

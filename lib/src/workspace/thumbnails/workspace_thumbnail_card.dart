@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
 import 'package:serenity_viewer/src/media/assets/workspace_media_counts.dart';
-import 'package:serenity_viewer/src/workspace/workspace_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/workspace_state.dart';
 
 class WorkspaceThumbnailCard extends StatefulWidget {
   const WorkspaceThumbnailCard({
@@ -155,11 +155,7 @@ class _WorkspaceThumbnailCardState extends State<WorkspaceThumbnailCard> {
               color: AppTheme.panel,
               borderRadius: BorderRadius.circular(18),
               boxShadow: [
-                BoxShadow(
-                  color: AppTheme.shadow.withValues(alpha: 0.24),
-                  blurRadius: 8,
-                  offset: const Offset(0, 3),
-                ),
+                BoxShadow(color: AppTheme.shadow.withValues(alpha: 0.24), blurRadius: 8, offset: const Offset(0, 3)),
               ],
             ),
             child: ClipRRect(
@@ -267,10 +263,9 @@ class _WorkspaceThumbnailCardState extends State<WorkspaceThumbnailCard> {
                             workspace.name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              color: AppTheme.textPrimary,
-                              fontWeight: FontWeight.w800,
-                            ),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.labelLarge?.copyWith(color: AppTheme.textPrimary, fontWeight: FontWeight.w800),
                           ),
                           const SizedBox(height: 1),
                           DefaultTextStyle(

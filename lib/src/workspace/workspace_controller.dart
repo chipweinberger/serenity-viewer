@@ -6,11 +6,11 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/workspace/workspace_mutations.dart';
-import 'package:serenity_viewer/src/workspace/windows/workspace_window_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/workspace_window_state.dart';
 import 'package:serenity_viewer/src/workspace/windows/recently_closed_window_entry.dart';
-import 'package:serenity_viewer/src/environments/session/session_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/session_state.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_zoom_update.dart';
-import 'package:serenity_viewer/src/workspace/workspace_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/workspace_state.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_interaction_state.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
@@ -280,10 +280,7 @@ class WorkspaceController {
       return;
     }
 
-    replaceWorkspace(
-      WorkspaceMutations.setVideoPosition(workspace, windowId, positionMs),
-      queueThumbnail: false,
-    );
+    replaceWorkspace(WorkspaceMutations.setVideoPosition(workspace, windowId, positionMs), queueThumbnail: false);
   }
 
   void cycleVideoPlaybackSpeed(WorkspaceState? workspace, String windowId) {
@@ -376,11 +373,7 @@ class WorkspaceController {
     }
   }
 
-  void toggleWorkspaceOpen(
-    SessionState session,
-    String workspaceId,
-    void Function(SessionState) updateSession,
-  ) {
+  void toggleWorkspaceOpen(SessionState session, String workspaceId, void Function(SessionState) updateSession) {
     updateSession(WorkspaceMutations.toggleWorkspaceOpen(session, workspaceId));
   }
 

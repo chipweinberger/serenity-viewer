@@ -1,14 +1,11 @@
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/workspace/windows/workspace_window_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/workspace_window_state.dart';
 import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
-import 'package:serenity_viewer/src/environments/session/session_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/session_state.dart';
 import 'package:serenity_viewer/src/media/assets/workspace_media_counts.dart';
-import 'package:serenity_viewer/src/workspace/workspace_state.dart';
+import 'package:serenity_viewer/src/sry_document/models/workspace_state.dart';
 
-MediaLoadPlan buildWorkspaceLoadPlan({
-  required SessionState session,
-  required WorkspaceState? activeWorkspace,
-}) {
+MediaLoadPlan buildWorkspaceLoadPlan({required SessionState session, required WorkspaceState? activeWorkspace}) {
   final loadedAssetIds = <String>{};
   var loadedImages = 0;
   var loadedShortVideos = 0;

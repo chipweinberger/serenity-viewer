@@ -225,23 +225,17 @@ class WorkspaceHud extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       DefaultTextStyle(
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodySmall!.copyWith(color: AppTheme.textMuted, height: 1.1),
+                        style: Theme.of(context).textTheme.bodySmall!.copyWith(color: AppTheme.textMuted, height: 1.1),
                         child: Text('${viewModel.selectedCount} selected'),
                       ),
                       const SizedBox(width: 8),
                       DefaultTextStyle(
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodySmall!.copyWith(color: AppTheme.textMuted, height: 1.1),
+                        style: Theme.of(context).textTheme.bodySmall!.copyWith(color: AppTheme.textMuted, height: 1.1),
                         child: const Text('·'),
                       ),
                       const SizedBox(width: 8),
                       DefaultTextStyle(
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodySmall!.copyWith(color: AppTheme.textMuted, height: 1.1),
+                        style: Theme.of(context).textTheme.bodySmall!.copyWith(color: AppTheme.textMuted, height: 1.1),
                         child: const Text('Click workspace to move'),
                       ),
                       const SizedBox(width: 8),

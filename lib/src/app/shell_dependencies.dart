@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
 import 'package:serenity_viewer/src/environments/session/shell_persistence_state.dart';
-import 'package:serenity_viewer/src/environments/persistence/thumbnail_refresh_state.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_interaction_state.dart';
 import 'package:serenity_viewer/src/workspace/workspace_view_tracking_state.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
+import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresh_state.dart';
 
 class ShellDependencies {
   final ShellHandles handles = ShellHandles();

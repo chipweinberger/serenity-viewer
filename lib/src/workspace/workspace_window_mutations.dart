@@ -84,8 +84,8 @@ WorkspaceState _cycleVideoPlaybackSpeed(WorkspaceState workspace, String windowI
   final currentIndex = WorkspaceMutations.videoPlaybackSpeeds.indexWhere(
     (speed) => (speed - currentWindow.videoPlaybackSpeed).abs() < 0.001,
   );
-  final nextSpeed = WorkspaceMutations
-      .videoPlaybackSpeeds[(currentIndex + 1) % WorkspaceMutations.videoPlaybackSpeeds.length];
+  final nextSpeed =
+      WorkspaceMutations.videoPlaybackSpeeds[(currentIndex + 1) % WorkspaceMutations.videoPlaybackSpeeds.length];
 
   return _updateWindowById(workspace, windowId, (window) => window.copyWith(videoPlaybackSpeed: nextSpeed));
 }
