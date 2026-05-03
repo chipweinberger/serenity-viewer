@@ -17,6 +17,7 @@ import 'package:serenity_viewer/src/app/serenity_media_bridge.dart';
 import 'package:serenity_viewer/src/app/serenity_shell_dependencies.dart';
 import 'package:serenity_viewer/src/app/serenity_session_controller.dart';
 import 'package:serenity_viewer/src/app/serenity_session_persistence_bridge.dart';
+import 'package:serenity_viewer/src/app/serenity_video_conversion_coordinator.dart';
 import 'package:serenity_viewer/src/app/serenity_workspace_links_controller.dart';
 import 'package:serenity_viewer/src/app/serenity_workspace_controller.dart';
 import 'package:serenity_viewer/src/app/serenity_workspace_mutations.dart';
@@ -61,7 +62,6 @@ part '../app/serenity_workspace_geometry.dart';
 part '../views/serenity_library_view.dart';
 part '../persistence/serenity_thumbnail_persistence.dart';
 part '../media/serenity_import_and_load_plan.dart';
-part '../media/serenity_video_conversion_tools.dart';
 
 class SerenityApp extends StatelessWidget {
   const SerenityApp({super.key});
@@ -110,6 +110,7 @@ class _SerenityShellState extends State<SerenityShell> {
   late final SerenityWorkspaceLinksController _workspaceLinksController;
   late final SerenitySessionController _sessionController;
   late final SerenitySessionPersistenceBridge _sessionPersistenceBridge;
+  late final SerenityVideoConversionCoordinator _videoConversionCoordinator;
 
   SerenityShellHandles get _handles => _dependencies.handles;
   SerenityShellPersistenceState get _persistenceState => _dependencies.persistenceState;
@@ -197,6 +198,21 @@ class _SerenityShellState extends State<SerenityShell> {
       thumbnailDirectory: _sessionPersistenceBridge.thumbnailDirectory,
       updateSession: _updateSession,
       saveSession: _sessionPersistenceBridge.saveSession,
+    );
+    _videoConversionCoordinator = SerenityVideoConversionCoordinator(
+      context: () => context,
+      mounted: () => mounted,
+      showMessage: _showMessage,
+      mediaBridge: _mediaBridge,
+      sessionPersistenceBridge: _sessionPersistenceBridge,
+      activeWorkspace: () => _activeWorkspaceOrNull,
+      replaceWorkspace: _replaceWorkspace,
+      colorFromDigest: _colorFromDigest,
+      removePausedVideoWindow: (windowId) {
+        setState(() {
+          _windowInteractionState.pausedVideoWindows.remove(windowId);
+        });
+      },
     );
     _workspaceLinksController = SerenityWorkspaceLinksController(
       screen: () => _uiState.screen,

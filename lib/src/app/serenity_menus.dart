@@ -113,7 +113,8 @@ extension _SerenityShellMenus on _SerenityShellState {
                 label: 'Convert to JPEG',
                 onSelected: focusedVideoWindow == null
                     ? null
-                    : () => unawaited(_convertVideoWindowToJpeg(focusedVideoWindow.asset.id)),
+                    : () =>
+                          unawaited(_videoConversionCoordinator.convertVideoWindowToJpeg(focusedVideoWindow.asset.id)),
                 shortcut: const SingleActivator(LogicalKeyboardKey.keyJ, meta: true, shift: true),
               ),
               PlatformMenuItem(

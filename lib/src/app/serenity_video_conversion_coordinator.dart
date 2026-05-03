@@ -1,11 +1,41 @@
-// ignore_for_file: invalid_use_of_protected_member
+import 'dart:async';
+import 'dart:io';
 
-part of '../app/serenity_shell.dart';
+import 'package:flutter/material.dart';
 
-extension _SerenityVideoConversionTools on _SerenityShellState {
-  Future<bool> _confirmOverwriteJpeg(String filename) async {
+import 'package:serenity_viewer/src/app/serenity_media_bridge.dart';
+import 'package:serenity_viewer/src/app/serenity_session_persistence_bridge.dart';
+import 'package:serenity_viewer/src/core/serenity_core.dart';
+import 'package:serenity_viewer/src/models/session_support.dart';
+import 'package:serenity_viewer/src/models/workspace_state.dart';
+import 'package:serenity_viewer/src/widgets/serenity_media_zoom_utils.dart';
+
+class SerenityVideoConversionCoordinator {
+  SerenityVideoConversionCoordinator({
+    required this.context,
+    required this.mounted,
+    required this.showMessage,
+    required this.mediaBridge,
+    required this.sessionPersistenceBridge,
+    required this.activeWorkspace,
+    required this.replaceWorkspace,
+    required this.colorFromDigest,
+    required this.removePausedVideoWindow,
+  });
+
+  final BuildContext Function() context;
+  final bool Function() mounted;
+  final ValueChanged<String> showMessage;
+  final SerenityMediaBridge mediaBridge;
+  final SerenitySessionPersistenceBridge sessionPersistenceBridge;
+  final WorkspaceState? Function() activeWorkspace;
+  final void Function(WorkspaceState workspace) replaceWorkspace;
+  final int Function(String value) colorFromDigest;
+  final ValueChanged<String> removePausedVideoWindow;
+
+  Future<bool> confirmOverwriteJpeg(String filename) async {
     final shouldOverwrite = await showDialog<bool>(
-      context: context,
+      context: context(),
       builder: (context) {
         return AlertDialog(
           title: const Text('Replace Existing JPEG?'),
@@ -21,9 +51,9 @@ extension _SerenityVideoConversionTools on _SerenityShellState {
     return shouldOverwrite == true;
   }
 
-  Future<bool> _confirmSingleFrameConversion(String filename) async {
+  Future<bool> confirmSingleFrameConversion(String filename) async {
     final shouldConvert = await showDialog<bool>(
-      context: context,
+      context: context(),
       builder: (context) {
         return AlertDialog(
           title: const Text('Single-Frame Video Detected'),
@@ -39,7 +69,7 @@ extension _SerenityVideoConversionTools on _SerenityShellState {
     return shouldConvert == true;
   }
 
-  Future<VideoConversionResult?> _exportVideoFrameToJpeg({
+  Future<VideoConversionResult?> exportVideoFrameToJpeg({
     required String sourcePath,
     required VideoProbeResult probe,
     int? positionMs,
@@ -64,7 +94,7 @@ extension _SerenityVideoConversionTools on _SerenityShellState {
     final outputFile = File(outputPath);
 
     if (promptBeforeOverwrite && await outputFile.exists()) {
-      final shouldOverwrite = await _confirmOverwriteJpeg(outputFile.uri.pathSegments.last);
+      final shouldOverwrite = await confirmOverwriteJpeg(outputFile.uri.pathSegments.last);
       if (!shouldOverwrite) {
         return null;
       }
@@ -82,12 +112,12 @@ extension _SerenityVideoConversionTools on _SerenityShellState {
       if (result == null || !await outputFile.exists()) {
         return null;
       }
-      final digest = await _mediaBridge.md5ForFile(outputFile);
+      final digest = await mediaBridge.md5ForFile(outputFile);
       final width = (result['width'] as num?)?.toDouble();
       final height = (result['height'] as num?)?.toDouble();
       final dimensions = width != null && height != null
           ? Size(width, height)
-          : await _mediaBridge.imageDimensionsForFile(outputFile);
+          : await mediaBridge.imageDimensionsForFile(outputFile);
       if (dimensions == null) {
         return null;
       }
@@ -104,8 +134,8 @@ extension _SerenityVideoConversionTools on _SerenityShellState {
     }
   }
 
-  Future<void> _convertVideoWindowToJpeg(String windowId) async {
-    final workspace = _activeWorkspaceOrNull;
+  Future<void> convertVideoWindowToJpeg(String windowId) async {
+    final workspace = activeWorkspace();
     if (workspace == null) {
       return;
     }
@@ -114,24 +144,24 @@ extension _SerenityVideoConversionTools on _SerenityShellState {
       (window) => window.asset.id == windowId && window.asset.type == AssetType.video,
     );
     if (matches.isEmpty) {
-      _showMessage('Focus a video window first.');
+      showMessage('Focus a video window first.');
       return;
     }
 
     final window = matches.first;
     final sourcePath = window.asset.filePath;
     if (sourcePath == null || sourcePath.isEmpty) {
-      _showMessage('That video is missing its source file.');
+      showMessage('That video is missing its source file.');
       return;
     }
 
-    final probe = await _mediaBridge.probeVideoFile(File(sourcePath));
+    final probe = await mediaBridge.probeVideoFile(File(sourcePath));
     if (probe == null || probe.width == null || probe.height == null) {
-      _showMessage('Serenity could not inspect that video for conversion.');
+      showMessage('Serenity could not inspect that video for conversion.');
       return;
     }
 
-    final conversion = await _exportVideoFrameToJpeg(
+    final conversion = await exportVideoFrameToJpeg(
       sourcePath: sourcePath,
       probe: probe,
       positionMs: window.videoPositionMs,
@@ -141,8 +171,8 @@ extension _SerenityVideoConversionTools on _SerenityShellState {
       return;
     }
 
-    final bookmark = await _sessionPersistenceBridge.createFileBookmark(conversion.path);
-    _replaceWorkspace(
+    final bookmark = await sessionPersistenceBridge.createFileBookmark(conversion.path);
+    replaceWorkspace(
       workspace.copyWith(
         windows: workspace.windows
             .map(
@@ -155,7 +185,7 @@ extension _SerenityVideoConversionTools on _SerenityShellState {
                         filename: conversion.filename,
                         md5: conversion.md5,
                         type: AssetType.image,
-                        colorValue: _colorFromDigest(conversion.md5),
+                        colorValue: colorFromDigest(conversion.md5),
                         note:
                             'Converted from video still in ${File(conversion.path).parent.path.split(Platform.pathSeparator).last}.',
                         videoDurationMs: null,
@@ -172,9 +202,7 @@ extension _SerenityVideoConversionTools on _SerenityShellState {
       ),
     );
 
-    setState(() {
-      _windowInteractionState.pausedVideoWindows.remove(windowId);
-    });
-    _showMessage('Converted ${window.asset.filename} to ${conversion.filename}.');
+    removePausedVideoWindow(windowId);
+    showMessage('Converted ${window.asset.filename} to ${conversion.filename}.');
   }
 }

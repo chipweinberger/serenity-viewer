@@ -7,9 +7,13 @@ extension _SerenityShellImportAndLoadPlan on _SerenityShellState {
     return SerenityImportCoordinator(
       imageExtensions: _SerenityShellState._imageExtensions,
       videoExtensions: _SerenityShellState._videoExtensions,
-      confirmSingleFrameConversion: _confirmSingleFrameConversion,
+      confirmSingleFrameConversion: _videoConversionCoordinator.confirmSingleFrameConversion,
       exportVideoFrameToJpeg: ({required sourcePath, required probe, positionMs}) {
-        return _exportVideoFrameToJpeg(sourcePath: sourcePath, probe: probe, positionMs: positionMs);
+        return _videoConversionCoordinator.exportVideoFrameToJpeg(
+          sourcePath: sourcePath,
+          probe: probe,
+          positionMs: positionMs,
+        );
       },
       createFileBookmark: _sessionPersistenceBridge.createFileBookmark,
       md5ForFile: _mediaBridge.md5ForFile,
