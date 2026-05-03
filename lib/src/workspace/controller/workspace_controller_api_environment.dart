@@ -36,7 +36,7 @@ class WorkspaceEnvironmentApi {
       environment: environment,
       sourceWorkspace: sourceWorkspace,
       destinationWorkspaceId: destinationWorkspaceId,
-      hasSelectedWindowIds: _controller.windowInteractionState.selectedExposeWindowIds.isNotEmpty,
+      hasSelectedWindowIds: _controller.expose.hasWindowSelection(),
     );
   }
 
@@ -51,7 +51,7 @@ class WorkspaceEnvironmentApi {
       environment: environment,
       sourceWorkspace: sourceWorkspace,
       destinationWorkspace: destinationWorkspace,
-      selectedWindowIds: _controller.windowInteractionState.selectedExposeWindowIds,
+      selectedWindowIds: _controller.expose.selectedWindowIds(),
       updateEnvironment: updateEnvironment,
       queueThumbnailRefresh: queueThumbnailRefresh,
       clearExposeSelection: _controller.expose.clearWindowSelection,

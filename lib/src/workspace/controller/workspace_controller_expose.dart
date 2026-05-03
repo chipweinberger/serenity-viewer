@@ -34,6 +34,14 @@ class WorkspaceExposeControllerState {
         .length;
   }
 
+  bool hasWindowSelection() {
+    return windowInteractionState.selectedExposeWindowIds.isNotEmpty;
+  }
+
+  Set<String> selectedWindowIds() {
+    return {...windowInteractionState.selectedExposeWindowIds};
+  }
+
   void removeWindowSelection(String windowId) {
     windowInteractionState.selectedExposeWindowIds.remove(windowId);
   }
