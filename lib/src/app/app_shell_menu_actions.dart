@@ -96,7 +96,9 @@ extension _AppShellMenuActions on _AppShellState {
               ),
               PlatformMenuItem(
                 label: focusedWindowIsSelected ? 'Deselect' : 'Select',
-                onSelected: focusedWindow == null ? null : () => _toggleSelectedWindow(focusedWindow.asset.id),
+                onSelected: focusedWindow == null
+                    ? null
+                    : () => _workspaceShellController.navigation.toggleSelectedWindow(focusedWindow.asset.id),
                 shortcut: const SingleActivator(LogicalKeyboardKey.keyE, meta: true),
               ),
               PlatformMenuItem(
@@ -138,7 +140,7 @@ extension _AppShellMenuActions on _AppShellState {
           ),
           PlatformMenuItem(
             label: 'View All',
-            onSelected: () => unawaited(_toggleWorkspaceOverview()),
+            onSelected: _workspaceShellController.navigation.toggleOverview,
             shortcut: const SingleActivator(LogicalKeyboardKey.arrowDown),
           ),
         ],
@@ -148,17 +150,17 @@ extension _AppShellMenuActions on _AppShellState {
         menus: [
           PlatformMenuItem(
             label: 'New',
-            onSelected: _createWorkspace,
+            onSelected: _workspaceShellController.management.createWorkspace,
             shortcut: const SingleActivator(LogicalKeyboardKey.keyT, meta: true),
           ),
           PlatformMenuItem(
             label: 'Previous',
-            onSelected: () => unawaited(_switchWorkspace(-1)),
+            onSelected: () => _workspaceShellController.navigation.switchWorkspace(-1),
             shortcut: const SingleActivator(LogicalKeyboardKey.arrowLeft),
           ),
           PlatformMenuItem(
             label: 'Next',
-            onSelected: () => unawaited(_switchWorkspace(1)),
+            onSelected: () => _workspaceShellController.navigation.switchWorkspace(1),
             shortcut: const SingleActivator(LogicalKeyboardKey.arrowRight),
           ),
           PlatformMenuItem(
@@ -180,13 +182,13 @@ extension _AppShellMenuActions on _AppShellState {
             label: 'Rename…',
             onSelected: activeWorkspace == null
                 ? () => _showMessage('There is no workspace to rename.')
-                : () => unawaited(_renameWorkspace(activeWorkspace.id)),
+                : () => unawaited(_workspaceShellController.management.renameWorkspace(activeWorkspace.id)),
           ),
           PlatformMenuItem(
             label: 'Delete…',
             onSelected: activeWorkspace == null
                 ? () => _showMessage('There is no workspace to delete.')
-                : () => unawaited(_confirmDeleteWorkspace(activeWorkspace.id)),
+                : () => unawaited(_workspaceShellController.management.confirmDeleteWorkspace(activeWorkspace.id)),
           ),
         ],
       ),

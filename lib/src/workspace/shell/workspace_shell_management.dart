@@ -1,14 +1,16 @@
-// ignore_for_file: invalid_use_of_protected_member
+part of 'workspace_shell_controller.dart';
 
-part of 'package:serenity_viewer/src/app/app_shell.dart';
+class WorkspaceShellManagementApi {
+  WorkspaceShellManagementApi._(this._controller);
 
-extension _AppShellWorkspaceManagementActions on _AppShellState {
+  final WorkspaceShellController _controller;
+
   int _nextWorkspaceOrdinal() {
     var maxOrdinal = 0;
     final idPattern = RegExp(r'^ws-(\d+)$');
     final namePattern = RegExp(r'^Workspace (\d+)$');
 
-    for (final workspace in _workspaces) {
+    for (final workspace in _controller.workspaces()) {
       final idMatch = idPattern.firstMatch(workspace.id);
       if (idMatch != null) {
         maxOrdinal = math.max(maxOrdinal, int.parse(idMatch.group(1)!));
@@ -23,16 +25,21 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
     return maxOrdinal + 1;
   }
 
-  void _toggleWorkspaceOpen(String workspaceId) {
-    _workspaceController.environment.toggleWorkspaceOpen(
-      _persistenceState.environment!,
+  void toggleWorkspaceOpen(String workspaceId) {
+    final environment = _controller.persistenceState.environment;
+    if (environment == null) {
+      return;
+    }
+
+    _controller.workspaceController.environment.toggleWorkspaceOpen(
+      environment,
       workspaceId,
-      _updateEnvironment,
+      _controller.updateEnvironment,
     );
   }
 
-  Future<void> _renameWorkspace(String workspaceId) async {
-    final workspaceMatches = _workspaces.where((entry) => entry.id == workspaceId);
+  Future<void> renameWorkspace(String workspaceId) async {
+    final workspaceMatches = _controller.workspaces().where((entry) => entry.id == workspaceId);
     if (workspaceMatches.isEmpty) {
       return;
     }
@@ -40,7 +47,7 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
     final workspace = workspaceMatches.first;
     final controller = TextEditingController(text: workspace.name);
     final nextName = await showDialog<String>(
-      context: context,
+      context: _controller.context(),
       builder: (context) {
         return AlertDialog(
           title: const Text('Rename Workspace'),
@@ -67,11 +74,11 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
       return;
     }
 
-    _replaceWorkspace(workspace.copyWith(name: trimmedName));
+    _controller.replaceWorkspace(workspace.copyWith(name: trimmedName));
   }
 
-  Future<void> _confirmDeleteWorkspace(String workspaceId) async {
-    final environment = _persistenceState.environment;
+  Future<void> confirmDeleteWorkspace(String workspaceId) async {
+    final environment = _controller.persistenceState.environment;
     if (environment == null) {
       return;
     }
@@ -83,7 +90,7 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
 
     final workspace = workspaceMatches.first;
     final shouldDelete = await showDialog<bool>(
-      context: context,
+      context: _controller.context(),
       builder: (context) {
         return AlertDialog(
           title: const Text('Delete Workspace?'),
@@ -96,13 +103,13 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
       },
     );
 
-    if (shouldDelete == true && mounted) {
-      _deleteWorkspace(workspaceId);
+    if (shouldDelete == true && _controller.mounted()) {
+      deleteWorkspace(workspaceId);
     }
   }
 
-  void _deleteWorkspace(String workspaceId) {
-    final environment = _persistenceState.environment;
+  void deleteWorkspace(String workspaceId) {
+    final environment = _controller.persistenceState.environment;
     if (environment == null) {
       return;
     }
@@ -111,7 +118,7 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
     if (remainingWorkspaces.isEmpty) {
       final now = DateTime.now();
       final replacementWorkspace = Workspace(
-        id: _newId('ws'),
+        id: _controller.newId('ws'),
         name: 'Workspace 1',
         createdAt: now,
         lastViewedAt: now,
@@ -123,18 +130,18 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
         viewportCenterDy: defaultWorkspaceCenter.dy,
         viewportZoom: 1,
       );
-      _updateEnvironment(
+      _controller.updateEnvironment(
         environment.copyWith(workspaces: [replacementWorkspace], activeWorkspaceId: replacementWorkspace.id),
       );
-      _showWorkspaceScreen(resetEditMode: false, clearExposeSelection: false);
-      _thumbnailController.queueWorkspaceRefresh(replacementWorkspace.id, delay: Duration.zero);
+      _controller.showWorkspaceScreen(resetEditMode: false, clearExposeSelection: false);
+      _controller.queueWorkspaceRefresh(replacementWorkspace.id, delay: Duration.zero);
       return;
     }
 
     final stillActive = remainingWorkspaces.any((workspace) => workspace.id == environment.activeWorkspaceId);
     final nextActiveWorkspace = stillActive
         ? remainingWorkspaces.firstWhere((workspace) => workspace.id == environment.activeWorkspaceId)
-        : (remainingWorkspaces.firstWhere((workspace) => workspace.isOpen, orElse: () => remainingWorkspaces.first));
+        : remainingWorkspaces.firstWhere((workspace) => workspace.isOpen, orElse: () => remainingWorkspaces.first);
 
     final normalizedWorkspaces = remainingWorkspaces
         .map(
@@ -144,19 +151,19 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
         )
         .toList();
 
-    _updateEnvironment(
+    _controller.updateEnvironment(
       environment.copyWith(workspaces: normalizedWorkspaces, activeWorkspaceId: nextActiveWorkspace.id),
     );
 
-    if (_uiState.screen != SerenityScreen.library && nextActiveWorkspace.id != workspaceId) {
-      _showWorkspaceScreen(resetEditMode: false);
+    if (_controller.chromeState.screen != SerenityScreen.library && nextActiveWorkspace.id != workspaceId) {
+      _controller.showWorkspaceScreen(resetEditMode: false);
     }
   }
 
   Future<bool> _confirmMoveSelectedWindows(Workspace destinationWorkspace, int count) async {
     final noun = count == 1 ? 'window' : 'windows';
     final shouldMove = await showDialog<bool>(
-      context: context,
+      context: _controller.context(),
       builder: (context) {
         return AlertDialog(
           title: const Text('Move Selected Windows?'),
@@ -172,30 +179,26 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
     return shouldMove == true;
   }
 
-  Future<void> _moveSelectedExposeWindowsToWorkspace(String destinationWorkspaceId) async {
-    final environment = _persistenceState.environment;
-    final sourceWorkspace = _activeWorkspaceOrNull;
-    if (!_workspaceController.environment.canMoveSelectedWindowsToWorkspace(
+  Future<void> moveSelectedExposeWindowsToWorkspace(String destinationWorkspaceId) async {
+    final environment = _controller.persistenceState.environment;
+    final sourceWorkspace = _controller.activeWorkspace();
+    if (!_controller.workspaceController.environment.canMoveSelectedWindowsToWorkspace(
       environment: environment,
       sourceWorkspace: sourceWorkspace,
       destinationWorkspaceId: destinationWorkspaceId,
     )) {
       if (sourceWorkspace != null && destinationWorkspaceId == sourceWorkspace.id) {
-        _showMessage('Choose a different tab to move those windows.');
+        _controller.showMessage('Choose a different tab to move those windows.');
       }
       return;
     }
 
-    if (sourceWorkspace == null) {
-      return;
-    }
-
-    if (environment == null) {
+    if (sourceWorkspace == null || environment == null) {
       return;
     }
 
     if (destinationWorkspaceId == sourceWorkspace.id) {
-      _showMessage('Choose a different tab to move those windows.');
+      _controller.showMessage('Choose a different tab to move those windows.');
       return;
     }
 
@@ -205,30 +208,35 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
     }
 
     final destinationWorkspace = destinationMatches.first;
-    final selectedWindowCount = _workspaceController.expose.selectedWindowCount(sourceWorkspace);
+    final selectedWindowCount = _controller.workspaceController.expose.selectedWindowCount(sourceWorkspace);
     if (selectedWindowCount == 0) {
-      _clearExposeSelection();
+      _controller.navigation.clearExposeSelection();
       return;
     }
 
     final shouldMove = await _confirmMoveSelectedWindows(destinationWorkspace, selectedWindowCount);
-    if (!shouldMove || !mounted) {
+    if (!shouldMove || !_controller.mounted()) {
       return;
     }
 
-    _workspaceController.environment.moveSelectedExposeWindowsToWorkspace(
+    _controller.workspaceController.environment.moveSelectedExposeWindowsToWorkspace(
       environment: environment,
       sourceWorkspace: sourceWorkspace,
       destinationWorkspace: destinationWorkspace,
-      updateEnvironment: _updateEnvironment,
-      queueThumbnailRefresh: _thumbnailController.queueWorkspaceRefresh,
+      updateEnvironment: _controller.updateEnvironment,
+      queueThumbnailRefresh: _controller.queueWorkspaceRefresh,
     );
   }
 
-  Future<void> _confirmCloseTab(String workspaceId) async {
-    final workspace = _workspaces.firstWhere((entry) => entry.id == workspaceId);
+  Future<void> confirmCloseTab(String workspaceId) async {
+    final workspaceMatches = _controller.workspaces().where((entry) => entry.id == workspaceId);
+    if (workspaceMatches.isEmpty) {
+      return;
+    }
+
+    final workspace = workspaceMatches.first;
     final shouldClose = await showDialog<bool>(
-      context: context,
+      context: _controller.context(),
       builder: (context) {
         return AlertDialog(
           title: const Text('Close Tab?'),
@@ -241,23 +249,27 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
       },
     );
 
-    if (shouldClose == true && mounted) {
-      _toggleWorkspaceOpen(workspaceId);
+    if (shouldClose == true && _controller.mounted()) {
+      toggleWorkspaceOpen(workspaceId);
     }
   }
 
-  void _reorderOpenWorkspace(String sourceWorkspaceId, String targetWorkspaceId) {
-    _workspaceController.environment.reorderOpenWorkspace(
-      _persistenceState.environment,
-      _workspaces,
+  void reorderOpenWorkspace(String sourceWorkspaceId, String targetWorkspaceId) {
+    _controller.workspaceController.environment.reorderOpenWorkspace(
+      _controller.persistenceState.environment,
+      _controller.workspaces(),
       sourceWorkspaceId: sourceWorkspaceId,
       targetWorkspaceId: targetWorkspaceId,
-      updateEnvironment: _updateEnvironment,
+      updateEnvironment: _controller.updateEnvironment,
     );
   }
 
-  void _createWorkspace() {
-    final environment = _persistenceState.environment!;
+  void createWorkspace() {
+    final environment = _controller.persistenceState.environment;
+    if (environment == null) {
+      return;
+    }
+
     final nextIndex = _nextWorkspaceOrdinal();
     final now = DateTime.now();
     final workspace = Workspace(
@@ -274,62 +286,11 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
       windows: const [],
     );
 
-    _updateEnvironment(
+    _controller.updateEnvironment(
       environment.copyWith(workspaces: [workspace, ...environment.workspaces], activeWorkspaceId: workspace.id),
     );
 
-    _showWorkspaceScreen(resetEditMode: false, clearExposeSelection: false);
-    _thumbnailController.queueWorkspaceRefresh(workspace.id, delay: Duration.zero);
-  }
-
-  void _handleShortcut(LogicalKeyboardKey key) {
-    if (key == LogicalKeyboardKey.arrowUp) {
-      if (_uiState.screen == SerenityScreen.library) {
-        _showWorkspaceScreen(clearExposeSelection: false);
-      } else if (_uiState.screen == SerenityScreen.workspace &&
-          _uiState.workspaceLayoutMode != WorkspaceLayoutMode.expose) {
-        _toggleExpose();
-      }
-    } else if (key == LogicalKeyboardKey.arrowDown) {
-      if (_uiState.screen == SerenityScreen.workspace && _uiState.workspaceLayoutMode == WorkspaceLayoutMode.expose) {
-        _showWorkspaceScreen(clearExposeSelection: false);
-      } else if (_uiState.screen == SerenityScreen.workspace) {
-        unawaited(_toggleWorkspaceOverview());
-      }
-    } else if (key == LogicalKeyboardKey.arrowLeft) {
-      unawaited(_switchWorkspace(-1));
-    } else if (key == LogicalKeyboardKey.arrowRight) {
-      unawaited(_switchWorkspace(1));
-    } else if (key == LogicalKeyboardKey.space) {
-      final focusedWindow = _focusedWindowOrNull();
-      if (focusedWindow?.asset.type == AssetType.video) {
-        _toggleVideoPlayback(focusedWindow!.asset.id);
-      }
-    }
-  }
-
-  KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
-    if (event is! KeyDownEvent) {
-      return KeyEventResult.ignored;
-    }
-
-    if (_workspaceLinksController.shouldHandlePasteLinksShortcut(event)) {
-      unawaited(_workspaceLinksController.pasteLinksFromClipboard());
-      return KeyEventResult.handled;
-    }
-
-    final key = event.logicalKey;
-    if ({
-      LogicalKeyboardKey.arrowUp,
-      LogicalKeyboardKey.arrowDown,
-      LogicalKeyboardKey.arrowLeft,
-      LogicalKeyboardKey.arrowRight,
-      LogicalKeyboardKey.space,
-    }.contains(key)) {
-      _handleShortcut(key);
-      return KeyEventResult.handled;
-    }
-
-    return KeyEventResult.ignored;
+    _controller.showWorkspaceScreen(resetEditMode: false, clearExposeSelection: false);
+    _controller.queueWorkspaceRefresh(workspace.id, delay: Duration.zero);
   }
 }

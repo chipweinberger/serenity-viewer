@@ -21,6 +21,7 @@ import 'package:serenity_viewer/src/asset_window/interaction/asset_window_intera
 import 'package:serenity_viewer/src/asset_window/interaction/asset_window_zoom_update.dart';
 import 'package:serenity_viewer/src/video_tools/media_bridge.dart';
 import 'package:serenity_viewer/src/video_tools/video_conversion_coordinator.dart';
+import 'package:serenity_viewer/src/workspace/shell/workspace_shell_controller.dart';
 import 'package:serenity_viewer/src/workspace/controller/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/layout/workspace_layout.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
@@ -35,7 +36,6 @@ import 'package:serenity_viewer/src/workspace_loading/workspace_load_plan.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
 import 'package:serenity_viewer/src/app/app_environment_state.dart';
 import 'package:serenity_viewer/src/workspace/session/workspace_view_tracking_state.dart';
-import 'package:serenity_viewer/src/expose/expose_layouts.dart';
 import 'package:serenity_viewer/src/links/workspace_links_controller.dart';
 import 'package:serenity_viewer/src/links/workspace_links_dialog.dart';
 import 'package:serenity_viewer/src/settings/behavior/settings_dialog.dart';
@@ -55,10 +55,8 @@ part '../app/app_shell_environment_actions.dart';
 part '../settings/behavior/app_shell_navigation_actions.dart';
 part '../app/app_shell_window_actions.dart';
 part '../app/app_shell_window_history_actions.dart';
-part '../workspace/app_shell/app_shell_workspace_management_actions.dart';
 part '../app/app_shell_menu_actions.dart';
 part '../app/app_shell_startup_seed_and_settings.dart';
-part '../workspace/app_shell/app_shell_workspace_view_tracking_actions.dart';
 part '../workspace/viewport/app_shell_workspace_geometry.dart';
 part '../app/app_shell_content.dart';
 part '../asset_import/app_shell_media_import_actions.dart';
@@ -83,6 +81,7 @@ class _AppShellState extends State<AppShell> {
   late final SryDocumentCoordinator _sryDocumentCoordinator;
   late final MediaBridge _mediaBridge;
   late final WorkspaceController _workspaceController;
+  late final WorkspaceShellController _workspaceShellController;
   late final LinksController _workspaceLinksController;
   late final AppShellPlatformBridge _appShellPlatformBridge;
   late final EnvironmentBookmarkSynchronizer _environmentBookmarkSynchronizer;
@@ -192,7 +191,7 @@ class _AppShellState extends State<AppShell> {
       chromeState: _uiState,
       windowInteractionState: _windowInteractionState,
       commitStateChange: setState,
-      refreshWorkspaceTracking: _refreshWorkspaceViewTracking,
+      refreshWorkspaceTracking: () => _workspaceShellController.tracking.refresh(),
     );
     _mediaBridge = MediaBridge(
       isRunningInWidgetTest: _isRunningInWidgetTest,
@@ -204,7 +203,7 @@ class _AppShellState extends State<AppShell> {
       chromeState: _uiState,
       markWorkspaceThumbnailDirty: (workspaceId) => _thumbnailController.markWorkspaceDirty(workspaceId),
       commitStateChange: setState,
-      refreshWorkspaceTracking: _refreshWorkspaceViewTracking,
+      refreshWorkspaceTracking: () => _workspaceShellController.tracking.refresh(),
       syncWindowTitle: () => _appShellPlatformBridge.syncWindowTitle(),
     );
     _appShellPlatformBridge = AppShellPlatformBridge(
@@ -280,13 +279,38 @@ class _AppShellState extends State<AppShell> {
       setWorkspaceViewport: _setWorkspaceViewport,
       refreshActiveWorkspaceThumbnail: _thumbnailController.refreshActiveWorkspaceIfNeeded,
     );
+    _workspaceShellController = WorkspaceShellController(
+      persistenceState: _persistenceState,
+      chromeState: _uiState,
+      workspaceViewTrackingState: _workspaceViewTrackingState,
+      workspaceViewportState: _workspaceViewportState,
+      workspaceController: _workspaceController,
+      workspaceLinksController: _workspaceLinksController,
+      context: () => context,
+      mounted: () => mounted,
+      workspaces: () => _workspaces,
+      openWorkspaces: () => _openWorkspaces,
+      activeWorkspace: () => _activeWorkspaceOrNull,
+      focusedWindowOrNull: _focusedWindowOrNull,
+      updateEnvironment: _updateEnvironment,
+      replaceWorkspace: _replaceWorkspace,
+      showWorkspaceScreen: _showWorkspaceScreen,
+      showLibraryScreen: _showLibraryScreen,
+      toggleExpose: _toggleExpose,
+      showMessage: _showMessage,
+      newId: _newId,
+      workspaceSwitchTarget: _chromeController.workspaceSwitchTarget,
+      refreshActiveWorkspaceThumbnail: _thumbnailController.refreshActiveWorkspaceIfNeeded,
+      queueWorkspaceRefresh: _thumbnailController.queueWorkspaceRefresh,
+      toggleVideoPlayback: _toggleVideoPlayback,
+    );
     _autosaveTimer = Timer.periodic(const Duration(minutes: 1), (_) {
       if (_persistenceState.hasUnsavedChanges) {
         unawaited(_saveEnvironment());
       }
     });
     _appLifecycleListener = AppLifecycleListener(
-      onStateChange: _handleAppLifecycleStateChanged,
+      onStateChange: _workspaceShellController.tracking.handleAppLifecycleStateChanged,
       onExitRequested: () async {
         await _saveEnvironment(force: true);
         return ui.AppExitResponse.exit;
@@ -299,6 +323,7 @@ class _AppShellState extends State<AppShell> {
   void dispose() {
     _autosaveTimer?.cancel();
     _appLifecycleListener?.dispose();
+    _workspaceShellController.tracking.cancel();
     _workspaceViewTrackingState.dispose();
     _windowInteractionState.dispose();
     _thumbnailController.dispose();
@@ -314,7 +339,7 @@ class _AppShellState extends State<AppShell> {
       child: Focus(
         focusNode: _handles.focusNode,
         autofocus: true,
-        onKeyEvent: _onKeyEvent,
+        onKeyEvent: (_, event) => _workspaceShellController.shortcuts.onKeyEvent(event),
         child: Scaffold(body: SafeArea(top: false, child: _buildShellContent(context))),
       ),
     );
