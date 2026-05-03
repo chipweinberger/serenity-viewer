@@ -271,6 +271,8 @@ extension _SerenityShellWorkspaceChrome on _SerenityShellState {
             child: Icon(Icons.menu_rounded, size: 18, color: SerenityTheme.textPrimary),
           ),
         ),
+        const SizedBox(width: 10),
+        _buildWorkspaceZoomControl(context),
         if (showExposeSelectionHud) ...[
           const SizedBox(width: 10),
           ClipRRect(
@@ -330,5 +332,79 @@ extension _SerenityShellWorkspaceChrome on _SerenityShellState {
         ],
       ],
     );
+  }
+
+  Widget _buildWorkspaceZoomControl(BuildContext context) {
+    final zoomValue = _workspaceZoomSliderValue(_activeWorkspace.viewportZoom);
+
+    return Tooltip(
+      message: 'Workspace zoom',
+      waitDuration: const Duration(milliseconds: 350),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: BackdropFilter(
+          filter: ui.ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+          child: Container(
+            width: 170,
+            height: 38,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.52),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.35)),
+            ),
+            child: Row(
+              children: [
+                const SizedBox(width: 8),
+                Icon(Icons.remove_rounded, size: 14, color: SerenityTheme.textMuted.withValues(alpha: 0.9)),
+                Expanded(
+                  child: SliderTheme(
+                    data: SliderTheme.of(context).copyWith(
+                      trackHeight: 3,
+                      overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
+                      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+                      activeTrackColor: SerenityTheme.textPrimary,
+                      inactiveTrackColor: SerenityTheme.textMuted.withValues(alpha: 0.18),
+                      thumbColor: SerenityTheme.textPrimary,
+                      overlayColor: SerenityTheme.textPrimary.withValues(alpha: 0.14),
+                    ),
+                    child: Slider(
+                      value: zoomValue,
+                      min: 0,
+                      max: 1,
+                      onChanged: (value) {
+                        _setWorkspaceViewport(
+                          workspaceId: _activeWorkspace.id,
+                          zoom: _workspaceZoomForSliderValue(value),
+                          queueThumbnail: false,
+                        );
+                      },
+                      onChangeEnd: (_) => unawaited(_refreshActiveWorkspaceThumbnailIfNeeded()),
+                    ),
+                  ),
+                ),
+                Icon(Icons.add_rounded, size: 14, color: SerenityTheme.textMuted.withValues(alpha: 0.9)),
+                const SizedBox(width: 8),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  double _workspaceZoomSliderValue(double zoom) {
+    final safeZoom = zoom.clamp(_workspaceMinZoom, _workspaceMaxZoom);
+    final minLog = math.log(_workspaceMinZoom);
+    final maxLog = math.log(_workspaceMaxZoom);
+    final zoomLog = math.log(safeZoom);
+    return (zoomLog - minLog) / (maxLog - minLog);
+  }
+
+  double _workspaceZoomForSliderValue(double value) {
+    final clampedValue = value.clamp(0.0, 1.0);
+    final minLog = math.log(_workspaceMinZoom);
+    final maxLog = math.log(_workspaceMaxZoom);
+    final zoomLog = minLog + ((maxLog - minLog) * clampedValue);
+    return math.exp(zoomLog);
   }
 }
