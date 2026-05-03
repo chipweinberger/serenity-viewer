@@ -104,27 +104,17 @@ extension _SerenityShellImportAndLoadPlan on _SerenityShellState {
       final directory = importFile.parent.path;
       _recordFolder(directory, weight: 2);
       nextZ += 1;
-      final basePlacement = _clampWindowPosition(
-        Offset(
-          workspace.viewportCenter.dx - 180 + (offsetIndex * 26),
-          workspace.viewportCenter.dy - 130 + (offsetIndex * 22),
-        ),
-        importType == AssetType.video
-            ? (videoDimensions == null
-                  ? const Size(520, 340)
-                  : _windowSizeByFittingAspect(
-                      currentSize: const Size(520, 340),
-                      contentWidth: videoDimensions.width,
-                      contentHeight: videoDimensions.height,
-                    ))
-            : (imageDimensions == null
-                  ? const Size(420, 300)
-                  : _windowSizeByFittingAspect(
-                      currentSize: const Size(420, 300),
-                      contentWidth: imageDimensions.width,
-                      contentHeight: imageDimensions.height,
-                    )),
+      final windowSize = importedAssetWindowSize(
+        importType: importType,
+        imageDimensions: imageDimensions,
+        videoDimensions: videoDimensions,
       );
+      final basePlacement = importedAssetWindowPosition(
+        viewportCenter: workspace.viewportCenter,
+        offsetIndex: offsetIndex,
+        windowSize: windowSize,
+      );
+      final sourceFolderName = file.parent.path.split(Platform.pathSeparator).last;
 
       nextWindows.add(
         AssetWindowState(
@@ -134,11 +124,12 @@ extension _SerenityShellImportAndLoadPlan on _SerenityShellState {
             md5: digest,
             type: importType,
             colorValue: _colorFromDigest(digest),
-            note: importType == AssetType.video
-                ? 'Imported ${videoDurationMs != null && videoDurationMs < 120000 ? 'short video' : 'long video'} from ${file.parent.path.split(Platform.pathSeparator).last}.'
-                : type == AssetType.video
-                ? 'Converted single-frame video from ${file.parent.path.split(Platform.pathSeparator).last}.'
-                : 'Imported image from ${file.parent.path.split(Platform.pathSeparator).last}.',
+            note: importedAssetNote(
+              originalType: type,
+              importType: importType,
+              videoDurationMs: videoDurationMs,
+              sourceFolderName: sourceFolderName,
+            ),
             videoDurationMs: videoDurationMs,
             filePath: importPath,
             fileBookmark: fileBookmark,
@@ -146,21 +137,7 @@ extension _SerenityShellImportAndLoadPlan on _SerenityShellState {
             intrinsicHeight: importType == AssetType.video ? videoDimensions?.height : imageDimensions?.height,
           ),
           position: basePlacement,
-          size: importType == AssetType.video
-              ? (videoDimensions == null
-                    ? const Size(520, 340)
-                    : _windowSizeByFittingAspect(
-                        currentSize: const Size(520, 340),
-                        contentWidth: videoDimensions.width,
-                        contentHeight: videoDimensions.height,
-                      ))
-              : (imageDimensions == null
-                    ? const Size(420, 300)
-                    : _windowSizeByFittingAspect(
-                        currentSize: const Size(420, 300),
-                        contentWidth: imageDimensions.width,
-                        contentHeight: imageDimensions.height,
-                      )),
+          size: windowSize,
           zoom: 1,
           zIndex: nextZ,
         ),

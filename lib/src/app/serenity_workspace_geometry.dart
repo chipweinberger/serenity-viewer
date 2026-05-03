@@ -65,16 +65,4 @@ extension _SerenityShellWorkspaceGeometry on _SerenityShellState {
   Offset _clampWindowPosition(Offset position, Size size) {
     return SerenityWorkspaceMutations.clampWindowPosition(position, size);
   }
-
-  Size _windowSizeByFittingAspect({
-    required Size currentSize,
-    required double contentWidth,
-    required double contentHeight,
-  }) {
-    return SerenityWorkspaceMutations.windowSizeByFittingAspect(
-      currentSize: currentSize,
-      contentWidth: contentWidth,
-      contentHeight: contentHeight,
-    );
-  }
 }
