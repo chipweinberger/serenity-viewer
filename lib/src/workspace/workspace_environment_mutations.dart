@@ -1,7 +1,7 @@
 part of 'workspace_mutations.dart';
 
-WorkspaceState? _workspaceById(SessionState session, String workspaceId) {
-  return session.workspaces.where((workspace) => workspace.id == workspaceId).firstOrNull;
+WorkspaceState? _workspaceById(Environment environment, String workspaceId) {
+  return environment.workspaces.where((workspace) => workspace.id == workspaceId).firstOrNull;
 }
 
 WorkspaceWindowState? _windowById(WorkspaceState workspace, String windowId) {
@@ -23,12 +23,12 @@ WorkspaceState _updateWindowById(
   return _mapWindows(workspace, (window) => window.asset.id == windowId ? transform(window) : window);
 }
 
-SessionState _toggleWorkspaceOpen(SessionState session, String workspaceId) {
-  final nextWorkspaces = session.workspaces
+Environment _toggleWorkspaceOpen(Environment environment, String workspaceId) {
+  final nextWorkspaces = environment.workspaces
       .map((workspace) => workspace.id == workspaceId ? workspace.copyWith(isOpen: !workspace.isOpen) : workspace)
       .toList();
 
-  var nextActiveId = session.activeWorkspaceId;
+  var nextActiveId = environment.activeWorkspaceId;
   final openWorkspaces = nextWorkspaces.where((workspace) => workspace.isOpen).toList();
   if (openWorkspaces.isEmpty) {
     nextWorkspaces[0] = nextWorkspaces[0].copyWith(isOpen: true);
@@ -37,7 +37,7 @@ SessionState _toggleWorkspaceOpen(SessionState session, String workspaceId) {
     nextActiveId = openWorkspaces.first.id;
   }
 
-  return session.copyWith(workspaces: nextWorkspaces, activeWorkspaceId: nextActiveId);
+  return environment.copyWith(workspaces: nextWorkspaces, activeWorkspaceId: nextActiveId);
 }
 
 List<WorkspaceState> _reorderOpenWorkspaces(
@@ -72,27 +72,27 @@ List<WorkspaceState> _reorderOpenWorkspaces(
   }).toList();
 }
 
-SessionState _moveSelectedWindowsToWorkspace(
-  SessionState session, {
+Environment _moveSelectedWindowsToWorkspace(
+  Environment environment, {
   required String sourceWorkspaceId,
   required String destinationWorkspaceId,
   required Set<String> selectedWindowIds,
 }) {
   if (selectedWindowIds.isEmpty || sourceWorkspaceId == destinationWorkspaceId) {
-    return session;
+    return environment;
   }
 
-  final sourceWorkspace = _workspaceById(session, sourceWorkspaceId);
-  final destinationWorkspace = _workspaceById(session, destinationWorkspaceId);
+  final sourceWorkspace = _workspaceById(environment, sourceWorkspaceId);
+  final destinationWorkspace = _workspaceById(environment, destinationWorkspaceId);
   if (sourceWorkspace == null || destinationWorkspace == null) {
-    return session;
+    return environment;
   }
 
   final selectedWindows = sourceWorkspace.windows
       .where((window) => selectedWindowIds.contains(window.asset.id))
       .toList();
   if (selectedWindows.isEmpty) {
-    return session;
+    return environment;
   }
 
   var nextZ = destinationWorkspace.windows.fold<int>(0, (value, window) => math.max(value, window.zIndex));
@@ -101,7 +101,7 @@ SessionState _moveSelectedWindowsToWorkspace(
     return window.copyWith(zIndex: nextZ);
   }).toList();
 
-  final nextWorkspaces = session.workspaces.map((workspace) {
+  final nextWorkspaces = environment.workspaces.map((workspace) {
     if (workspace.id == sourceWorkspaceId) {
       return workspace.copyWith(
         windows: workspace.windows.where((window) => !selectedWindowIds.contains(window.asset.id)).toList(),
@@ -113,7 +113,7 @@ SessionState _moveSelectedWindowsToWorkspace(
     return workspace;
   }).toList();
 
-  return session.copyWith(workspaces: nextWorkspaces);
+  return environment.copyWith(workspaces: nextWorkspaces);
 }
 
 ({WorkspaceState workspace, int? previousZOrder}) _focusWindow(WorkspaceState workspace, String windowId) {

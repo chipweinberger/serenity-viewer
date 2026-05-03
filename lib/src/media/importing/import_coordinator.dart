@@ -7,11 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:serenity_viewer/src/media/importing/import_result.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/media/importing/import_window_layout.dart';
-import 'package:serenity_viewer/src/sry_document/models/workspace_window_state.dart';
-import 'package:serenity_viewer/src/sry_document/models/session_state.dart';
+import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
+import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/media/conversion/settings_and_video_models.dart';
-import 'package:serenity_viewer/src/sry_document/models/workspace_asset.dart';
-import 'package:serenity_viewer/src/sry_document/models/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/workspace_asset.dart';
+import 'package:serenity_viewer/src/environment/workspace_state.dart';
 
 typedef SerenitySingleFrameConversionConfirmer = Future<bool> Function(String filename);
 typedef SerenityVideoFrameExporter =
@@ -59,17 +59,22 @@ class ImportCoordinator {
   final SerenityDigestColorResolver colorFromDigest;
 
   Future<ImportResult> importFiles({
-    required SessionState session,
+    required Environment environment,
     required WorkspaceState workspace,
     required List<XFile> files,
   }) async {
     final supported = files.where((file) => _assetTypeForPath(file.path) != null).toList();
     if (supported.isEmpty) {
-      return ImportResult(session: session, importedCount: 0, skippedDuplicateCount: 0, hadSupportedFiles: false);
+      return ImportResult(
+        environment: environment,
+        importedCount: 0,
+        skippedDuplicateCount: 0,
+        hadSupportedFiles: false,
+      );
     }
 
     final limited = supported.take(maxImportedFiles).toList();
-    var nextSession = session;
+    var nextEnvironment = environment;
     final nextWindows = [...workspace.windows];
     final existingAssetDigests = nextWindows.map((window) => window.asset.md5).toSet();
     var nextZ = nextWindows.fold<int>(0, (value, item) => math.max(value, item.zIndex));
@@ -107,7 +112,7 @@ class ImportCoordinator {
       }
 
       final window = importedAsset.window!;
-      nextSession = _recordFolder(nextSession, importedAsset.directory, weight: 2);
+      nextEnvironment = _recordFolder(nextEnvironment, importedAsset.directory, weight: 2);
       nextWindows.add(window);
       existingAssetDigests.add(window.asset.md5);
       nextZ = window.zIndex;
@@ -117,19 +122,19 @@ class ImportCoordinator {
 
     if (importedCount == 0) {
       return ImportResult(
-        session: nextSession,
+        environment: nextEnvironment,
         importedCount: 0,
         skippedDuplicateCount: skippedDuplicateCount,
         hadSupportedFiles: true,
       );
     }
 
-    final nextWorkspaces = nextSession.workspaces
+    final nextWorkspaces = nextEnvironment.workspaces
         .map((entry) => entry.id == workspace.id ? entry.copyWith(windows: nextWindows, isOpen: true) : entry)
         .toList();
 
     return ImportResult(
-      session: nextSession.copyWith(workspaces: nextWorkspaces),
+      environment: nextEnvironment.copyWith(workspaces: nextWorkspaces),
       importedCount: importedCount,
       skippedDuplicateCount: skippedDuplicateCount,
       hadSupportedFiles: true,
@@ -152,16 +157,16 @@ class ImportCoordinator {
     return null;
   }
 
-  SessionState _recordFolder(SessionState session, String path, {int weight = 1}) {
+  Environment _recordFolder(Environment environment, String path, {int weight = 1}) {
     final normalized = Directory(path).absolute.path;
-    final nextKnownFolders = [...session.knownFolders];
+    final nextKnownFolders = [...environment.knownFolders];
     if (!nextKnownFolders.contains(normalized)) {
       nextKnownFolders.add(normalized);
     }
 
-    final nextPopularity = Map<String, int>.from(session.folderPopularity);
+    final nextPopularity = Map<String, int>.from(environment.folderPopularity);
     nextPopularity[normalized] = (nextPopularity[normalized] ?? 0) + weight;
-    return session.copyWith(knownFolders: nextKnownFolders, folderPopularity: nextPopularity);
+    return environment.copyWith(knownFolders: nextKnownFolders, folderPopularity: nextPopularity);
   }
 
   Future<_PreparedImportedAsset?> _buildImportedAsset({

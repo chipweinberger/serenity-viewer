@@ -1,7 +1,7 @@
-import 'package:serenity_viewer/src/sry_document/models/session_state.dart';
+import 'package:serenity_viewer/src/environment/environment.dart';
 
-class ShellPersistenceState {
-  SessionState? session;
+class AppEnvironmentState {
+  Environment? environment;
   String? currentEnvironmentPath;
   bool hasUnsavedChanges = false;
   bool isLoading = true;

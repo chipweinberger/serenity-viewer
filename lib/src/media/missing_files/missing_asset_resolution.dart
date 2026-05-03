@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:serenity_viewer/src/sry_document/models/workspace_window_state.dart';
-import 'package:serenity_viewer/src/sry_document/models/session_state.dart';
-import 'package:serenity_viewer/src/sry_document/models/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
+import 'package:serenity_viewer/src/environment/environment.dart';
+import 'package:serenity_viewer/src/environment/workspace_state.dart';
 
 typedef BookmarkResolver = Future<String?> Function(String bookmark);
 typedef BookmarkCreator = Future<String?> Function(String path);
@@ -28,19 +28,19 @@ Future<String?> locateMissingAssetFile({
   return null;
 }
 
-Future<SessionState> resolveMissingAssetsInSession({
-  required SessionState session,
+Future<Environment> resolveMissingAssetsInEnvironment({
+  required Environment environment,
   required BookmarkResolver resolveBookmark,
   required BookmarkCreator createBookmark,
 }) async {
-  final rankedFolders = [...session.knownFolders];
-  rankedFolders.sort((a, b) => (session.folderPopularity[b] ?? 0).compareTo(session.folderPopularity[a] ?? 0));
+  final rankedFolders = [...environment.knownFolders];
+  rankedFolders.sort((a, b) => (environment.folderPopularity[b] ?? 0).compareTo(environment.folderPopularity[a] ?? 0));
 
-  var nextSession = session;
+  var nextEnvironment = environment;
   var changed = false;
 
   final nextWorkspaces = <WorkspaceState>[];
-  for (final workspace in session.workspaces) {
+  for (final workspace in environment.workspaces) {
     final nextWindows = <WorkspaceWindowState>[];
     for (final window in workspace.windows) {
       final path = window.asset.filePath;
@@ -94,15 +94,15 @@ Future<SessionState> resolveMissingAssetsInSession({
       }
 
       final folder = File(resolvedPath).parent.path;
-      final nextKnownFolders = [...nextSession.knownFolders];
+      final nextKnownFolders = [...nextEnvironment.knownFolders];
       if (!nextKnownFolders.contains(folder)) {
         nextKnownFolders.add(folder);
       }
 
-      final nextPopularity = Map<String, int>.from(nextSession.folderPopularity);
+      final nextPopularity = Map<String, int>.from(nextEnvironment.folderPopularity);
       nextPopularity[folder] = (nextPopularity[folder] ?? 0) + 1;
 
-      nextSession = nextSession.copyWith(knownFolders: nextKnownFolders, folderPopularity: nextPopularity);
+      nextEnvironment = nextEnvironment.copyWith(knownFolders: nextKnownFolders, folderPopularity: nextPopularity);
       changed = true;
       final refreshedBookmark = await createBookmark(resolvedPath);
       final actualFilename = File(resolvedPath).uri.pathSegments.isEmpty
@@ -123,8 +123,8 @@ Future<SessionState> resolveMissingAssetsInSession({
   }
 
   if (!changed) {
-    return nextSession;
+    return nextEnvironment;
   }
 
-  return nextSession.copyWith(workspaces: nextWorkspaces);
+  return nextEnvironment.copyWith(workspaces: nextWorkspaces);
 }

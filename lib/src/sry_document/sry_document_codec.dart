@@ -3,12 +3,13 @@ import 'dart:convert';
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
 
-import 'package:serenity_viewer/src/sry_document/models/session_state.dart';
+import 'package:serenity_viewer/src/environment/environment.dart';
+import 'package:serenity_viewer/src/sry_document/sry_document_normalizer.dart';
 import 'package:serenity_viewer/src/sry_document/sry_document_data.dart';
-import 'package:serenity_viewer/src/sry_document/models/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/workspace_state.dart';
 
 Uint8List encodeSryDocumentBytes({
-  required SessionState session,
+  required Environment environment,
   Map<String, List<int>> thumbnailBytesByWorkspaceId = const {},
   DateTime? savedAt,
 }) {
@@ -21,12 +22,12 @@ Uint8List encodeSryDocumentBytes({
           'format': 'sry',
           'version': 2,
           'savedAt': (savedAt ?? DateTime.now()).toIso8601String(),
-          ...session.toManifestJson(),
+          ...environment.toManifestJson(),
         }),
       ),
     );
 
-  for (final workspace in session.workspaces) {
+  for (final workspace in environment.workspaces) {
     archive.addFile(
       ArchiveFile.string(
         'workspaces/${workspace.id}.json',
@@ -75,8 +76,12 @@ SryDocumentData decodeSryDocumentBytes(List<int> bytes) {
     thumbnailBytesByWorkspaceId[workspaceId] = Uint8List.fromList(thumbnailEntry.content as List<int>);
   }
 
+  final decodedEnvironment = normalizeDecodedEnvironment(
+    Environment.fromManifestJson(manifestJson, workspaces),
+  );
+
   return SryDocumentData(
-    session: SessionState.fromManifestJson(manifestJson, workspaces),
+    environment: decodedEnvironment,
     thumbnailBytesByWorkspaceId: thumbnailBytesByWorkspaceId,
   );
 }

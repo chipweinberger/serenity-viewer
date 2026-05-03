@@ -4,16 +4,16 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/workspace/workspace_mutations.dart';
-import 'package:serenity_viewer/src/sry_document/models/session_state.dart';
-import 'package:serenity_viewer/src/sry_document/models/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/environment.dart';
+import 'package:serenity_viewer/src/environment/workspace_state.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
-import 'package:serenity_viewer/src/environments/session/shell_persistence_state.dart';
+import 'package:serenity_viewer/src/app/app_environment_state.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresh_state.dart';
 
-typedef SerenitySessionStateCommit = void Function(VoidCallback update);
+typedef SerenityEnvironmentCommit = void Function(VoidCallback update);
 
-class SessionController {
-  SessionController({
+class EnvironmentController {
+  EnvironmentController({
     required this.persistenceState,
     required this.chromeState,
     required this.thumbnailRefreshState,
@@ -22,16 +22,16 @@ class SessionController {
     required this.syncWindowTitle,
   });
 
-  final ShellPersistenceState persistenceState;
+  final AppEnvironmentState persistenceState;
   final ChromeState chromeState;
   final ThumbnailRefreshState thumbnailRefreshState;
-  final SerenitySessionStateCommit commitStateChange;
+  final SerenityEnvironmentCommit commitStateChange;
   final VoidCallback refreshWorkspaceTracking;
   final Future<void> Function() syncWindowTitle;
 
-  void updateSession(SessionState nextSession) {
+  void updateEnvironment(Environment nextEnvironment) {
     commitStateChange(() {
-      persistenceState.session = nextSession;
+      persistenceState.environment = nextEnvironment;
     });
     refreshWorkspaceTracking();
     unawaited(syncWindowTitle());
@@ -39,8 +39,8 @@ class SessionController {
   }
 
   void replaceWorkspace(WorkspaceState nextWorkspace, {bool queueThumbnail = true}) {
-    final session = persistenceState.session!;
-    updateSession(WorkspaceMutations.replaceWorkspace(session, nextWorkspace));
+    final environment = persistenceState.environment!;
+    updateEnvironment(WorkspaceMutations.replaceWorkspace(environment, nextWorkspace));
     if (queueThumbnail) {
       thumbnailRefreshState.dirtyWorkspaces.add(nextWorkspace.id);
     }
@@ -54,9 +54,9 @@ class SessionController {
     }
   }
 
-  void restoreWidgetTestSession(SessionState seedSession) {
+  void restoreWidgetTestEnvironment(Environment seedEnvironment) {
     commitStateChange(() {
-      persistenceState.session = seedSession;
+      persistenceState.environment = seedEnvironment;
       persistenceState.isLoading = false;
     });
     refreshWorkspaceTracking();
@@ -64,7 +64,7 @@ class SessionController {
 
   void showMissingStartupState() {
     commitStateChange(() {
-      persistenceState.session = null;
+      persistenceState.environment = null;
       persistenceState.currentEnvironmentPath = null;
       persistenceState.isLoading = false;
       persistenceState.hasUnsavedChanges = false;
@@ -74,16 +74,16 @@ class SessionController {
   }
 
   bool shouldPromptForStartupEnvironment({required bool mounted}) {
-    return mounted && persistenceState.session == null && !persistenceState.isPromptingForStartupEnvironment;
+    return mounted && persistenceState.environment == null && !persistenceState.isPromptingForStartupEnvironment;
   }
 
   void setStartupPromptInProgress(bool isPrompting) {
     persistenceState.isPromptingForStartupEnvironment = isPrompting;
   }
 
-  void applyLoadedEnvironment({required SessionState session, required String path}) {
+  void applyLoadedEnvironment({required Environment environment, required String path}) {
     commitStateChange(() {
-      persistenceState.session = session;
+      persistenceState.environment = environment;
       persistenceState.currentEnvironmentPath = path;
       persistenceState.hasUnsavedChanges = false;
       persistenceState.isLoading = false;
@@ -95,9 +95,9 @@ class SessionController {
     unawaited(syncWindowTitle());
   }
 
-  void applyCreatedEnvironment({required SessionState session, required String path}) {
+  void applyCreatedEnvironment({required Environment environment, required String path}) {
     commitStateChange(() {
-      persistenceState.session = session;
+      persistenceState.environment = environment;
       persistenceState.currentEnvironmentPath = path;
       persistenceState.hasUnsavedChanges = false;
       persistenceState.isLoading = false;
@@ -122,23 +122,23 @@ class SessionController {
     persistenceState.hasUnsavedChanges = false;
   }
 
-  void applySavedSessionState({
-    required SessionState originalSession,
-    required SessionState savedSession,
+  void applySavedEnvironment({
+    required Environment originalEnvironment,
+    required Environment savedEnvironment,
     required bool mounted,
   }) {
     if (mounted) {
       commitStateChange(() {
-        if (!identical(savedSession, originalSession)) {
-          persistenceState.session = savedSession;
+        if (!identical(savedEnvironment, originalEnvironment)) {
+          persistenceState.environment = savedEnvironment;
         }
         persistenceState.hasUnsavedChanges = false;
       });
       return;
     }
 
-    if (!identical(savedSession, originalSession)) {
-      persistenceState.session = savedSession;
+    if (!identical(savedEnvironment, originalEnvironment)) {
+      persistenceState.environment = savedEnvironment;
     }
     persistenceState.hasUnsavedChanges = false;
   }

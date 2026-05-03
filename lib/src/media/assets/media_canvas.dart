@@ -7,7 +7,7 @@ import 'package:video_player/video_player.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/foundation/keyboard_modifiers.dart';
-import 'package:serenity_viewer/src/sry_document/models/workspace_window_state.dart';
+import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_zoom_update.dart';
 import 'package:serenity_viewer/src/media/assets/demo_art_widget.dart';
 import 'package:serenity_viewer/src/media/assets/image_surface.dart';

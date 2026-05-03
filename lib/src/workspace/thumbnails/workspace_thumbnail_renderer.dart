@@ -10,8 +10,8 @@ import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/media/assets/media_zoom_utils.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_projection.dart';
-import 'package:serenity_viewer/src/sry_document/models/workspace_window_state.dart';
-import 'package:serenity_viewer/src/sry_document/models/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
+import 'package:serenity_viewer/src/environment/workspace_state.dart';
 
 class WorkspaceThumbnailRenderer {
   WorkspaceThumbnailRenderer({required this.isRunningInWidgetTest});

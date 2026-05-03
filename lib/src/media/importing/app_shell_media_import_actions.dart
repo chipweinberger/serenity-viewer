@@ -39,13 +39,13 @@ extension _AppShellMediaImportActions on _AppShellState {
   }
 
   Future<void> _importFiles(List<XFile> files) async {
-    if (files.isEmpty || _persistenceState.session == null) {
+    if (files.isEmpty || _persistenceState.environment == null) {
       return;
     }
 
     final workspace = _activeWorkspace;
     final ImportResult result = await _buildImportCoordinator().importFiles(
-      session: _persistenceState.session!,
+      environment: _persistenceState.environment!,
       workspace: workspace,
       files: files,
     );
@@ -56,7 +56,7 @@ extension _AppShellMediaImportActions on _AppShellState {
     }
 
     if (result.importedCount > 0) {
-      _updateSession(result.session);
+      _updateEnvironment(result.environment);
       _queueThumbnailRefresh(workspace.id);
     }
     if (result.skippedDuplicateCount > 0) {

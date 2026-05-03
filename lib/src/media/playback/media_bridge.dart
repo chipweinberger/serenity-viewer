@@ -7,11 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/sry_document/models/workspace_window_state.dart';
+import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
 import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
-import 'package:serenity_viewer/src/sry_document/models/session_state.dart';
+import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/media/conversion/settings_and_video_models.dart';
-import 'package:serenity_viewer/src/sry_document/models/workspace_asset.dart';
+import 'package:serenity_viewer/src/environment/workspace_asset.dart';
 
 @immutable
 class SharedVideoState {
@@ -58,13 +58,13 @@ class MediaBridge {
     return SharedVideoState(controller: controller, initialization: initialization);
   }
 
-  void syncSharedVideoControllers({required MediaLoadPlan loadPlan, required SessionState? session}) {
-    if (session == null) {
+  void syncSharedVideoControllers({required MediaLoadPlan loadPlan, required Environment? environment}) {
+    if (environment == null) {
       return;
     }
 
     final retainedVideoIds = <String>{};
-    for (final workspace in session.workspaces) {
+    for (final workspace in environment.workspaces) {
       for (final window in workspace.windows) {
         final path = window.asset.filePath;
         if (window.asset.type == AssetType.video &&

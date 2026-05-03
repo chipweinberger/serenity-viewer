@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
 import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
-import 'package:serenity_viewer/src/sry_document/models/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/workspace_state.dart';
 import 'package:serenity_viewer/src/media/loading/workspace_load_plan.dart';
 import 'package:serenity_viewer/src/settings/appearance/glass_chip.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/workspace_thumbnail_card.dart';
@@ -227,10 +227,9 @@ class LibraryScreen extends StatelessWidget {
                   children: [
                     Text(
                       'Open Now • ${visibleOpenWorkspaces.length}',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: AppTheme.textPrimary,
-                        fontWeight: FontWeight.w800,
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.headlineSmall?.copyWith(color: AppTheme.textPrimary, fontWeight: FontWeight.w800),
                     ),
                     const SizedBox(height: 12),
                     Wrap(
@@ -246,10 +245,9 @@ class LibraryScreen extends StatelessWidget {
                       children: [
                         Text(
                           'All Workspaces • $knownWorkspaceCount',
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            color: AppTheme.textPrimary,
-                            fontWeight: FontWeight.w800,
-                          ),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.headlineSmall?.copyWith(color: AppTheme.textPrimary, fontWeight: FontWeight.w800),
                         ),
                         SizedBox(
                           width: 280,

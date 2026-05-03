@@ -4,13 +4,13 @@ part of 'package:serenity_viewer/src/app/app_shell.dart';
 
 extension _AppShellContent on _AppShellState {
   Widget _buildShellContent(BuildContext context) {
-    if (_persistenceState.isLoading || _persistenceState.session == null) {
+    if (_persistenceState.isLoading || _persistenceState.environment == null) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    final session = _persistenceState.session!;
-    final workspaceLoadPlan = buildWorkspaceLoadPlan(session: session, activeWorkspace: _activeWorkspaceOrNull);
-    _mediaBridge.syncSharedVideoControllers(loadPlan: workspaceLoadPlan, session: session);
+    final environment = _persistenceState.environment!;
+    final workspaceLoadPlan = buildWorkspaceLoadPlan(environment: environment, activeWorkspace: _activeWorkspaceOrNull);
+    _mediaBridge.syncSharedVideoControllers(loadPlan: workspaceLoadPlan, environment: environment);
     final activeWorkspace = _activeWorkspace;
     final mediaCounts = workspaceMediaCounts(activeWorkspace);
     final workspaceChromeViewModel = WorkspaceChromeViewModel(
@@ -35,7 +35,7 @@ extension _AppShellContent on _AppShellState {
             index: activeScreenIndex,
             children: [
               WorkspaceScreen(
-                session: session,
+                environment: environment,
                 openWorkspaces: _openWorkspaces,
                 chromeState: _uiState,
                 windowInteractionState: _windowInteractionState,
@@ -111,7 +111,7 @@ extension _AppShellContent on _AppShellState {
         WorkspaceChromeOverlay(
           windowTitle: _windowTitle,
           openWorkspaces: _openWorkspaces,
-          activeWorkspaceId: session.activeWorkspaceId,
+          activeWorkspaceId: environment.activeWorkspaceId,
           isLibraryScreen: _chromeController.isLibraryScreen,
           shouldMoveSelectedWindows: _chromeController.shouldMoveSelectedWindowsToWorkspaceOnTap,
           draggingTabWorkspaceId: _uiState.draggingTabWorkspaceId,

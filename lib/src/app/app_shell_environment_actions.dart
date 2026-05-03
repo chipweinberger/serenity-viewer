@@ -2,15 +2,15 @@
 
 part of 'package:serenity_viewer/src/app/app_shell.dart';
 
-extension _AppShellSessionActions on _AppShellState {
+extension _AppShellEnvironmentActions on _AppShellState {
   static const double _appliedExposeViewportZoomFactor = 0.0625;
 
-  void _updateSession(SessionState nextSession) {
-    _sessionController.updateSession(nextSession);
+  void _updateEnvironment(Environment nextEnvironment) {
+    _environmentController.updateEnvironment(nextEnvironment);
   }
 
   void _replaceWorkspace(WorkspaceState nextWorkspace, {bool queueThumbnail = true}) {
-    _sessionController.replaceWorkspace(nextWorkspace, queueThumbnail: queueThumbnail);
+    _environmentController.replaceWorkspace(nextWorkspace, queueThumbnail: queueThumbnail);
   }
 
   void _toggleExpose() {
@@ -132,7 +132,7 @@ extension _AppShellSessionActions on _AppShellState {
     final openWorkspaces = _openWorkspaces;
     final target = _chromeController.workspaceSwitchTarget(
       openWorkspaces: openWorkspaces,
-      activeWorkspaceId: _persistenceState.session!.activeWorkspaceId,
+      activeWorkspaceId: _persistenceState.environment!.activeWorkspaceId,
       direction: direction,
     );
     if (target.showsLibrary) {
@@ -144,17 +144,17 @@ extension _AppShellSessionActions on _AppShellState {
   }
 
   Future<void> _setActiveWorkspace(String workspaceId) async {
-    final session = _persistenceState.session!;
-    final currentWorkspaceId = session.activeWorkspaceId;
+    final environment = _persistenceState.environment!;
+    final currentWorkspaceId = environment.activeWorkspaceId;
     if (currentWorkspaceId != workspaceId) {
       unawaited(_refreshActiveWorkspaceThumbnailIfNeeded());
     }
 
     final shouldPreserveExpose = _chromeController.isExposeMode;
-    _updateSession(
-      session.copyWith(
+    _updateEnvironment(
+      environment.copyWith(
         activeWorkspaceId: workspaceId,
-        workspaces: session.workspaces
+        workspaces: environment.workspaces
             .map((workspace) => workspace.id == workspaceId ? workspace.copyWith(isOpen: true) : workspace)
             .toList(),
       ),

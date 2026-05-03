@@ -276,9 +276,7 @@ class _SerenitySettingsDialogState extends State<SettingsDialog> {
                                   const SizedBox(height: 2),
                                   Text(
                                     'Recovery score ${_folderPopularity[folder] ?? 0}',
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.bodySmall?.copyWith(color: AppTheme.textMuted),
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppTheme.textMuted),
                                   ),
                                 ],
                               ),

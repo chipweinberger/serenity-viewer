@@ -121,7 +121,7 @@ extension _AppShellMenuActions on _AppShellState {
                 label: 'Close',
                 onSelected: focusedWindow == null
                     ? null
-                    : () => _removeWindow(_persistenceState.session!.activeWorkspaceId, focusedWindow.asset.id),
+                    : () => _removeWindow(_persistenceState.environment!.activeWorkspaceId, focusedWindow.asset.id),
                 shortcut: const SingleActivator(LogicalKeyboardKey.backspace, meta: true),
               ),
             ],

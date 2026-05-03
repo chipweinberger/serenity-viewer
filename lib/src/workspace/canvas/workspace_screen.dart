@@ -10,14 +10,14 @@ import 'package:serenity_viewer/src/media/playback/media_bridge.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_projection.dart';
-import 'package:serenity_viewer/src/sry_document/models/workspace_window_state.dart';
+import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
 import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
-import 'package:serenity_viewer/src/sry_document/models/session_state.dart';
+import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_frame_view_model.dart';
 import 'package:serenity_viewer/src/workspace/canvas/workspace_canvas_view_model.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_zoom_update.dart';
-import 'package:serenity_viewer/src/sry_document/models/workspace_asset.dart';
-import 'package:serenity_viewer/src/sry_document/models/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/workspace_asset.dart';
+import 'package:serenity_viewer/src/environment/workspace_state.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_interaction_state.dart';
 import 'package:serenity_viewer/src/workspace/expose/expose_window_card.dart';
@@ -92,7 +92,7 @@ class WorkspaceScreenActions {
 class WorkspaceScreen extends StatelessWidget {
   const WorkspaceScreen({
     super.key,
-    required this.session,
+    required this.environment,
     required this.openWorkspaces,
     required this.chromeState,
     required this.windowInteractionState,
@@ -102,7 +102,7 @@ class WorkspaceScreen extends StatelessWidget {
     required this.workspaceHud,
   });
 
-  final SessionState session;
+  final Environment environment;
   final List<WorkspaceState> openWorkspaces;
   final ChromeState chromeState;
   final WindowInteractionState windowInteractionState;
@@ -148,7 +148,7 @@ class WorkspaceScreen extends StatelessWidget {
   }
 
   bool _isExposeModeForWorkspace(WorkspaceState workspace) {
-    return workspace.id == session.activeWorkspaceId &&
+    return workspace.id == environment.activeWorkspaceId &&
         chromeState.screen == SerenityScreen.workspace &&
         chromeState.workspaceLayoutMode == WorkspaceLayoutMode.expose;
   }
@@ -277,7 +277,7 @@ class WorkspaceScreen extends StatelessWidget {
             onFitToContent: () => actions.fitWindowToContent(window.asset.id),
             onShowInFinder: _showInFinderCallbackForWindow(window),
             onRestorePreviousZOrder: _restorePreviousZOrderCallbackForWindow(window),
-            onClose: () => actions.removeWindow(session.activeWorkspaceId, window.asset.id),
+            onClose: () => actions.removeWindow(environment.activeWorkspaceId, window.asset.id),
             onOptionGestureWindowRequested: () => actions.setOptionGestureWindowId(window.asset.id),
             onOptionGestureReleased: () => actions.setOptionGestureWindowId(null),
           ),
@@ -341,7 +341,7 @@ class WorkspaceScreen extends StatelessWidget {
         },
         onToggleSelected: () => actions.toggleExposeWindowSelected(window.asset.id),
         onShowInFinder: _showInFinderCallbackForWindow(window),
-        onRemove: () => actions.removeWindow(session.activeWorkspaceId, window.asset.id),
+        onRemove: () => actions.removeWindow(environment.activeWorkspaceId, window.asset.id),
       ),
     );
   }
@@ -419,7 +419,7 @@ class WorkspaceScreen extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final activeWorkspaceId = session.activeWorkspaceId;
+    final activeWorkspaceId = environment.activeWorkspaceId;
     final activeWorkspaceIndex = openWorkspaces.indexWhere((workspace) => workspace.id == activeWorkspaceId);
     final safeActiveIndex = activeWorkspaceIndex < 0 ? 0 : activeWorkspaceIndex;
 

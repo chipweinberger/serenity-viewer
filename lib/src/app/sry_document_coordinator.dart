@@ -4,21 +4,21 @@ import 'dart:io';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/environments/session/session_controller.dart';
-import 'package:serenity_viewer/src/sry_document/models/session_state.dart';
-import 'package:serenity_viewer/src/environments/session/shell_persistence_state.dart';
+import 'package:serenity_viewer/src/app/app_environment_controller.dart';
+import 'package:serenity_viewer/src/environment/environment.dart';
+import 'package:serenity_viewer/src/app/app_environment_state.dart';
 import 'package:serenity_viewer/src/media/conversion/settings_and_video_models.dart';
 import 'package:serenity_viewer/src/media/missing_files/missing_asset_resolution.dart';
 import 'package:serenity_viewer/src/sry_document/sry_document_codec.dart';
-import 'package:serenity_viewer/src/sry_document/models/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/workspace_state.dart';
 
 class SryDocumentCoordinator {
   SryDocumentCoordinator({
     required this.persistenceState,
-    required this.sessionController,
+    required this.environmentController,
     required this.context,
     required this.mounted,
-    required this.seedSession,
+    required this.seedEnvironment,
     required this.showMessage,
     required this.refreshActiveWorkspaceThumbnailIfNeeded,
     required this.storeLastEnvironmentPath,
@@ -26,15 +26,15 @@ class SryDocumentCoordinator {
     required this.resolveFileBookmark,
     required this.createFileBookmark,
     required this.thumbnailDirectory,
-    required this.updateSession,
-    required this.saveSession,
+    required this.updateEnvironment,
+    required this.saveEnvironment,
   });
 
-  final ShellPersistenceState persistenceState;
-  final SessionController sessionController;
+  final AppEnvironmentState persistenceState;
+  final EnvironmentController environmentController;
   final BuildContext Function() context;
   final bool Function() mounted;
-  final SessionState Function() seedSession;
+  final Environment Function() seedEnvironment;
   final ValueChanged<String> showMessage;
   final Future<void> Function() refreshActiveWorkspaceThumbnailIfNeeded;
   final Future<void> Function(String? path) storeLastEnvironmentPath;
@@ -42,16 +42,16 @@ class SryDocumentCoordinator {
   final Future<String?> Function(String bookmark) resolveFileBookmark;
   final Future<String?> Function(String path) createFileBookmark;
   final Future<Directory> Function() thumbnailDirectory;
-  final ValueChanged<SessionState> updateSession;
-  final Future<void> Function() saveSession;
+  final ValueChanged<Environment> updateEnvironment;
+  final Future<void> Function() saveEnvironment;
 
   Future<void> saveDocumentToPath(
     String path, {
-    SessionState? sessionOverride,
+    Environment? environmentOverride,
     bool showMessageOnFailure = true,
   }) async {
-    final session = sessionOverride ?? persistenceState.session;
-    if (session == null) {
+    final environment = environmentOverride ?? persistenceState.environment;
+    if (environment == null) {
       return;
     }
 
@@ -60,7 +60,7 @@ class SryDocumentCoordinator {
       await refreshActiveWorkspaceThumbnailIfNeeded();
 
       final thumbnailBytesByWorkspaceId = <String, List<int>>{};
-      for (final workspace in session.workspaces) {
+      for (final workspace in environment.workspaces) {
         final thumbnailPath = workspace.thumbnailPath;
         if (thumbnailPath == null || thumbnailPath.isEmpty) {
           continue;
@@ -74,14 +74,14 @@ class SryDocumentCoordinator {
       }
 
       final encoded = encodeSryDocumentBytes(
-        session: session,
+        environment: environment,
         thumbnailBytesByWorkspaceId: thumbnailBytesByWorkspaceId,
       );
 
       final file = File(path);
       await file.parent.create(recursive: true);
       await file.writeAsBytes(encoded, flush: true);
-      sessionController.noteEnvironmentPathSaved(file.path, mounted: mounted());
+      environmentController.noteEnvironmentPathSaved(file.path, mounted: mounted());
       await storeLastEnvironmentPath(file.path);
       await syncWindowTitle();
     } catch (_) {
@@ -143,8 +143,8 @@ class SryDocumentCoordinator {
     try {
       final bytes = await XFile(path).readAsBytes();
       final decoded = decodeSryDocumentBytes(bytes);
-      final resolved = await resolveMissingAssetsInSession(
-        session: decoded.session,
+      final resolved = await resolveMissingAssetsInEnvironment(
+        environment: decoded.environment,
         resolveBookmark: resolveFileBookmark,
         createBookmark: createFileBookmark,
       );
@@ -152,12 +152,12 @@ class SryDocumentCoordinator {
         return false;
       }
 
-      sessionController.applyLoadedEnvironment(session: resolved, path: path);
+      environmentController.applyLoadedEnvironment(environment: resolved, path: path);
       if (persistAsLastOpened) {
         await storeLastEnvironmentPath(path);
       }
       await restoreDocumentThumbnails(decoded.thumbnailBytesByWorkspaceId, resolved);
-      await saveSession();
+      await saveEnvironment();
       if (mounted() && showSuccessMessage) {
         showMessage('Opened ${path.split(Platform.pathSeparator).last}.');
       }
@@ -182,13 +182,13 @@ class SryDocumentCoordinator {
       return false;
     }
 
-    final seeded = seedSession();
+    final seeded = seedEnvironment();
     if (!mounted()) {
       return false;
     }
 
-    sessionController.applyCreatedEnvironment(session: seeded, path: location.path);
-    await saveDocumentToPath(location.path, sessionOverride: seeded);
+    environmentController.applyCreatedEnvironment(environment: seeded, path: location.path);
+    await saveDocumentToPath(location.path, environmentOverride: seeded);
     if (!mounted()) {
       return false;
     }
@@ -197,13 +197,13 @@ class SryDocumentCoordinator {
   }
 
   Future<void> promptForStartupDocument() async {
-    if (!sessionController.shouldPromptForStartupEnvironment(mounted: mounted())) {
+    if (!environmentController.shouldPromptForStartupEnvironment(mounted: mounted())) {
       return;
     }
 
-    sessionController.setStartupPromptInProgress(true);
+    environmentController.setStartupPromptInProgress(true);
     try {
-      while (mounted() && persistenceState.session == null) {
+      while (mounted() && persistenceState.environment == null) {
         if (!mounted()) {
           return;
         }
@@ -247,19 +247,19 @@ class SryDocumentCoordinator {
         }
       }
     } finally {
-      sessionController.setStartupPromptInProgress(false);
+      environmentController.setStartupPromptInProgress(false);
     }
   }
 
   Future<void> restoreDocumentThumbnails(
     Map<String, List<int>> thumbnailBytesByWorkspaceId,
-    SessionState session,
+    Environment environment,
   ) async {
     final thumbnailDir = await thumbnailDirectory();
     final nextWorkspaces = <WorkspaceState>[];
     var updated = false;
 
-    for (final workspace in session.workspaces) {
+    for (final workspace in environment.workspaces) {
       final thumbnailBytes = thumbnailBytesByWorkspaceId[workspace.id];
       if (thumbnailBytes == null) {
         nextWorkspaces.add(workspace);
@@ -273,8 +273,8 @@ class SryDocumentCoordinator {
       updated = true;
     }
 
-    if (updated && mounted() && persistenceState.session != null) {
-      updateSession(persistenceState.session!.copyWith(workspaces: nextWorkspaces));
+    if (updated && mounted() && persistenceState.environment != null) {
+      updateEnvironment(persistenceState.environment!.copyWith(workspaces: nextWorkspaces));
     }
   }
 }

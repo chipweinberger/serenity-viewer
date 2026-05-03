@@ -31,19 +31,19 @@ extension _AppShellStartupSeedAndSettings on _AppShellState {
   }
 
   Future<void> _openSettings() async {
-    final session = _persistenceState.session;
-    if (session == null) {
+    final environment = _persistenceState.environment;
+    if (environment == null) {
       return;
     }
 
     final result = await showDialog<SettingsResult>(
       context: context,
       builder: (context) => SettingsDialog(
-        imageLoadLimit: session.imageLoadLimit,
-        shortVideoLoadLimit: session.shortVideoLoadLimit,
-        longVideoLoadLimit: session.longVideoLoadLimit,
-        knownFolders: session.knownFolders,
-        folderPopularity: session.folderPopularity,
+        imageLoadLimit: environment.imageLoadLimit,
+        shortVideoLoadLimit: environment.shortVideoLoadLimit,
+        longVideoLoadLimit: environment.longVideoLoadLimit,
+        knownFolders: environment.knownFolders,
+        folderPopularity: environment.folderPopularity,
       ),
     );
 
@@ -51,8 +51,8 @@ extension _AppShellStartupSeedAndSettings on _AppShellState {
       return;
     }
 
-    _updateSession(
-      session.copyWith(
+    _updateEnvironment(
+      environment.copyWith(
         knownFolders: result.knownFolders,
         folderPopularity: result.folderPopularity,
         imageLoadLimit: result.imageLoadLimit,
@@ -62,7 +62,7 @@ extension _AppShellStartupSeedAndSettings on _AppShellState {
     );
   }
 
-  SessionState _seedSession() {
+  Environment _seedEnvironment() {
     final now = DateTime.now();
 
     WorkspaceWindowState buildWindow({
@@ -98,7 +98,7 @@ extension _AppShellStartupSeedAndSettings on _AppShellState {
       );
     }
 
-    return SessionState(
+    return Environment(
       activeWorkspaceId: 'ws-story',
       knownFolders: const [],
       folderPopularity: const {},

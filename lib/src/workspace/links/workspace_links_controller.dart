@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/sry_document/models/workspace_link.dart';
-import 'package:serenity_viewer/src/sry_document/models/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/workspace_link.dart';
+import 'package:serenity_viewer/src/environment/workspace_state.dart';
 
 class WorkspaceLinksController {
   WorkspaceLinksController({

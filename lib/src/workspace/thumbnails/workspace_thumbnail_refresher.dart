@@ -1,30 +1,30 @@
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/environments/session/session_controller.dart';
-import 'package:serenity_viewer/src/environments/session/shell_persistence_state.dart';
+import 'package:serenity_viewer/src/app/app_environment_controller.dart';
+import 'package:serenity_viewer/src/app/app_environment_state.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/workspace_thumbnail_renderer.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/workspace_thumbnail_store.dart';
 
 class WorkspaceThumbnailRefresher {
   WorkspaceThumbnailRefresher({
     required this.persistenceState,
-    required this.sessionController,
+    required this.environmentController,
     required this.renderer,
     required this.store,
   });
 
-  final ShellPersistenceState persistenceState;
-  final SessionController sessionController;
+  final AppEnvironmentState persistenceState;
+  final EnvironmentController environmentController;
   final WorkspaceThumbnailRenderer renderer;
   final WorkspaceThumbnailStore store;
 
   Future<bool> refreshWorkspace(String workspaceId, {required Size viewportSize}) async {
-    final session = persistenceState.session;
-    if (session == null) {
+    final environment = persistenceState.environment;
+    if (environment == null) {
       return false;
     }
 
-    final workspaceMatches = session.workspaces.where((entry) => entry.id == workspaceId);
+    final workspaceMatches = environment.workspaces.where((entry) => entry.id == workspaceId);
     if (workspaceMatches.isEmpty) {
       return false;
     }
@@ -36,19 +36,19 @@ class WorkspaceThumbnailRefresher {
     }
 
     final thumbnailPath = await store.persistThumbnail(workspaceId: workspaceId, bytes: bytes);
-    final freshSession = persistenceState.session;
-    if (freshSession == null) {
+    final freshEnvironment = persistenceState.environment;
+    if (freshEnvironment == null) {
       return false;
     }
 
-    final currentMatching = freshSession.workspaces.where((entry) => entry.id == workspaceId);
+    final currentMatching = freshEnvironment.workspaces.where((entry) => entry.id == workspaceId);
     if (currentMatching.isEmpty) {
       return false;
     }
 
     final currentWorkspace = currentMatching.first;
-    final nextSession = freshSession.copyWith(
-      workspaces: freshSession.workspaces
+    final nextEnvironment = freshEnvironment.copyWith(
+      workspaces: freshEnvironment.workspaces
           .map(
             (entry) => entry.id == workspaceId
                 ? entry.copyWith(thumbnailPath: thumbnailPath, thumbnailVersion: currentWorkspace.thumbnailVersion + 1)
@@ -56,7 +56,7 @@ class WorkspaceThumbnailRefresher {
           )
           .toList(),
     );
-    sessionController.updateSession(nextSession);
+    environmentController.updateEnvironment(nextEnvironment);
     return true;
   }
 }

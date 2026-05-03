@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 
-import 'package:serenity_viewer/src/environments/session/shell_persistence_state.dart';
+import 'package:serenity_viewer/src/app/app_environment_state.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 
 class AppShellPlatformBridge {
@@ -13,7 +13,7 @@ class AppShellPlatformBridge {
     required this.windowTitle,
   });
 
-  final ShellPersistenceState persistenceState;
+  final AppEnvironmentState persistenceState;
   final bool isRunningInWidgetTest;
   final String Function() windowTitle;
 

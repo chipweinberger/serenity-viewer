@@ -3,14 +3,14 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/sry_document/models/workspace_window_state.dart';
-import 'package:serenity_viewer/src/sry_document/models/session_state.dart';
+import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
+import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_zoom_update.dart';
-import 'package:serenity_viewer/src/sry_document/models/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/workspace_state.dart';
 import 'package:serenity_viewer/src/media/assets/media_zoom_utils.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_resize_helpers.dart';
 
-part 'workspace_session_mutations.dart';
+part 'workspace_environment_mutations.dart';
 part 'workspace_viewport_mutations.dart';
 part 'viewport/workspace_window_geometry.dart';
 part 'workspace_window_mutations.dart';
@@ -21,16 +21,16 @@ class WorkspaceMutations {
   static const double minWindowHeight = 72.0;
   static const double maxContentZoom = 30.0;
 
-  static SessionState replaceWorkspace(SessionState session, WorkspaceState nextWorkspace) {
-    return session.copyWith(
-      workspaces: session.workspaces
+  static Environment replaceWorkspace(Environment environment, WorkspaceState nextWorkspace) {
+    return environment.copyWith(
+      workspaces: environment.workspaces
           .map((workspace) => workspace.id == nextWorkspace.id ? nextWorkspace : workspace)
           .toList(),
     );
   }
 
-  static SessionState toggleWorkspaceOpen(SessionState session, String workspaceId) {
-    return _toggleWorkspaceOpen(session, workspaceId);
+  static Environment toggleWorkspaceOpen(Environment environment, String workspaceId) {
+    return _toggleWorkspaceOpen(environment, workspaceId);
   }
 
   static List<WorkspaceState> reorderOpenWorkspaces(
@@ -45,14 +45,14 @@ class WorkspaceMutations {
     );
   }
 
-  static SessionState moveSelectedWindowsToWorkspace(
-    SessionState session, {
+  static Environment moveSelectedWindowsToWorkspace(
+    Environment environment, {
     required String sourceWorkspaceId,
     required String destinationWorkspaceId,
     required Set<String> selectedWindowIds,
   }) {
     return _moveSelectedWindowsToWorkspace(
-      session,
+      environment,
       sourceWorkspaceId: sourceWorkspaceId,
       destinationWorkspaceId: destinationWorkspaceId,
       selectedWindowIds: selectedWindowIds,

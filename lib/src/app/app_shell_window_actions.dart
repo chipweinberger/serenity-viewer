@@ -138,6 +138,6 @@ extension _AppShellWindowActions on _AppShellState {
   }
 
   void _pauseAllVideos() {
-    _workspaceController.pauseAllVideos(_persistenceState.session);
+    _workspaceController.pauseAllVideos(_persistenceState.environment);
   }
 }

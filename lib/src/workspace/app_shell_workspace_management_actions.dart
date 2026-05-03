@@ -24,7 +24,7 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
   }
 
   void _toggleWorkspaceOpen(String workspaceId) {
-    _workspaceController.toggleWorkspaceOpen(_persistenceState.session!, workspaceId, _updateSession);
+    _workspaceController.toggleWorkspaceOpen(_persistenceState.environment!, workspaceId, _updateEnvironment);
   }
 
   Future<void> _renameWorkspace(String workspaceId) async {
@@ -67,12 +67,12 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
   }
 
   Future<void> _confirmDeleteWorkspace(String workspaceId) async {
-    final session = _persistenceState.session;
-    if (session == null) {
+    final environment = _persistenceState.environment;
+    if (environment == null) {
       return;
     }
 
-    final workspaceMatches = session.workspaces.where((entry) => entry.id == workspaceId);
+    final workspaceMatches = environment.workspaces.where((entry) => entry.id == workspaceId);
     if (workspaceMatches.isEmpty) {
       return;
     }
@@ -98,12 +98,12 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
   }
 
   void _deleteWorkspace(String workspaceId) {
-    final session = _persistenceState.session;
-    if (session == null) {
+    final environment = _persistenceState.environment;
+    if (environment == null) {
       return;
     }
 
-    final remainingWorkspaces = session.workspaces.where((workspace) => workspace.id != workspaceId).toList();
+    final remainingWorkspaces = environment.workspaces.where((workspace) => workspace.id != workspaceId).toList();
     if (remainingWorkspaces.isEmpty) {
       final now = DateTime.now();
       final replacementWorkspace = WorkspaceState(
@@ -119,15 +119,17 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
         viewportCenterDy: defaultWorkspaceCenter.dy,
         viewportZoom: 1,
       );
-      _updateSession(session.copyWith(workspaces: [replacementWorkspace], activeWorkspaceId: replacementWorkspace.id));
+      _updateEnvironment(
+        environment.copyWith(workspaces: [replacementWorkspace], activeWorkspaceId: replacementWorkspace.id),
+      );
       _showWorkspaceScreen(resetEditMode: false, clearExposeSelection: false);
       _queueThumbnailRefresh(replacementWorkspace.id, delay: Duration.zero);
       return;
     }
 
-    final stillActive = remainingWorkspaces.any((workspace) => workspace.id == session.activeWorkspaceId);
+    final stillActive = remainingWorkspaces.any((workspace) => workspace.id == environment.activeWorkspaceId);
     final nextActiveWorkspace = stillActive
-        ? remainingWorkspaces.firstWhere((workspace) => workspace.id == session.activeWorkspaceId)
+        ? remainingWorkspaces.firstWhere((workspace) => workspace.id == environment.activeWorkspaceId)
         : (remainingWorkspaces.firstWhere((workspace) => workspace.isOpen, orElse: () => remainingWorkspaces.first));
 
     final normalizedWorkspaces = remainingWorkspaces
@@ -138,7 +140,9 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
         )
         .toList();
 
-    _updateSession(session.copyWith(workspaces: normalizedWorkspaces, activeWorkspaceId: nextActiveWorkspace.id));
+    _updateEnvironment(
+      environment.copyWith(workspaces: normalizedWorkspaces, activeWorkspaceId: nextActiveWorkspace.id),
+    );
 
     if (_uiState.screen != SerenityScreen.library && nextActiveWorkspace.id != workspaceId) {
       _showWorkspaceScreen(resetEditMode: false);
@@ -165,10 +169,10 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
   }
 
   Future<void> _moveSelectedExposeWindowsToWorkspace(String destinationWorkspaceId) async {
-    final session = _persistenceState.session;
+    final environment = _persistenceState.environment;
     final sourceWorkspace = _activeWorkspaceOrNull;
     if (!_workspaceController.canMoveSelectedWindowsToWorkspace(
-      session: session,
+      environment: environment,
       sourceWorkspace: sourceWorkspace,
       destinationWorkspaceId: destinationWorkspaceId,
     )) {
@@ -182,7 +186,7 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
       return;
     }
 
-    if (session == null) {
+    if (environment == null) {
       return;
     }
 
@@ -191,7 +195,7 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
       return;
     }
 
-    final destinationMatches = session.workspaces.where((workspace) => workspace.id == destinationWorkspaceId);
+    final destinationMatches = environment.workspaces.where((workspace) => workspace.id == destinationWorkspaceId);
     if (destinationMatches.isEmpty) {
       return;
     }
@@ -209,10 +213,10 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
     }
 
     _workspaceController.moveSelectedExposeWindowsToWorkspace(
-      session: session,
+      environment: environment,
       sourceWorkspace: sourceWorkspace,
       destinationWorkspace: destinationWorkspace,
-      updateSession: _updateSession,
+      updateEnvironment: _updateEnvironment,
       queueThumbnailRefresh: _queueThumbnailRefresh,
     );
   }
@@ -240,16 +244,16 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
 
   void _reorderOpenWorkspace(String sourceWorkspaceId, String targetWorkspaceId) {
     _workspaceController.reorderOpenWorkspace(
-      _persistenceState.session,
+      _persistenceState.environment,
       _workspaces,
       sourceWorkspaceId: sourceWorkspaceId,
       targetWorkspaceId: targetWorkspaceId,
-      updateSession: _updateSession,
+      updateEnvironment: _updateEnvironment,
     );
   }
 
   void _createWorkspace() {
-    final session = _persistenceState.session!;
+    final environment = _persistenceState.environment!;
     final nextIndex = _nextWorkspaceOrdinal();
     final now = DateTime.now();
     final workspace = WorkspaceState(
@@ -266,7 +270,9 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
       windows: const [],
     );
 
-    _updateSession(session.copyWith(workspaces: [workspace, ...session.workspaces], activeWorkspaceId: workspace.id));
+    _updateEnvironment(
+      environment.copyWith(workspaces: [workspace, ...environment.workspaces], activeWorkspaceId: workspace.id),
+    );
 
     _showWorkspaceScreen(resetEditMode: false, clearExposeSelection: false);
     _queueThumbnailRefresh(workspace.id, delay: Duration.zero);

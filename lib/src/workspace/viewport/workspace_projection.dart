@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/sry_document/models/workspace_window_state.dart';
-import 'package:serenity_viewer/src/sry_document/models/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
+import 'package:serenity_viewer/src/environment/workspace_state.dart';
 
 Offset workspaceScreenOffsetForWindow(
   WorkspaceState workspace,

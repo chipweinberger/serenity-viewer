@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
-import 'package:serenity_viewer/src/sry_document/models/workspace_asset.dart';
+import 'package:serenity_viewer/src/environment/workspace_asset.dart';
 
 class MissingMediaPlaceholder extends StatelessWidget {
   const MissingMediaPlaceholder({super.key, required this.filename, required this.windowSize, required this.compact});

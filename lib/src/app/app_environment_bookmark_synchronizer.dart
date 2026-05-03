@@ -1,19 +1,19 @@
 import 'dart:io';
 
-import 'package:serenity_viewer/src/sry_document/models/session_state.dart';
-import 'package:serenity_viewer/src/sry_document/models/workspace_window_state.dart';
-import 'package:serenity_viewer/src/sry_document/models/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/environment.dart';
+import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
+import 'package:serenity_viewer/src/environment/workspace_state.dart';
 
-class SessionBookmarkSynchronizer {
-  SessionBookmarkSynchronizer({required this.createFileBookmark});
+class EnvironmentBookmarkSynchronizer {
+  EnvironmentBookmarkSynchronizer({required this.createFileBookmark});
 
   final Future<String?> Function(String path) createFileBookmark;
 
-  Future<SessionState> synchronize(SessionState session) async {
+  Future<Environment> synchronize(Environment environment) async {
     var changed = false;
     final nextWorkspaces = <WorkspaceState>[];
 
-    for (final workspace in session.workspaces) {
+    for (final workspace in environment.workspaces) {
       var workspaceChanged = false;
       final nextWindows = <WorkspaceWindowState>[];
 
@@ -45,9 +45,9 @@ class SessionBookmarkSynchronizer {
     }
 
     if (!changed) {
-      return session;
+      return environment;
     }
 
-    return session.copyWith(workspaces: nextWorkspaces);
+    return environment.copyWith(workspaces: nextWorkspaces);
   }
 }

@@ -1,17 +1,17 @@
 import 'package:flutter/foundation.dart';
 
-import 'package:serenity_viewer/src/sry_document/models/session_state.dart';
+import 'package:serenity_viewer/src/environment/environment.dart';
 
 @immutable
 class ImportResult {
   const ImportResult({
-    required this.session,
+    required this.environment,
     required this.importedCount,
     required this.skippedDuplicateCount,
     required this.hadSupportedFiles,
   });
 
-  final SessionState session;
+  final Environment environment;
   final int importedCount;
   final int skippedDuplicateCount;
   final bool hadSupportedFiles;

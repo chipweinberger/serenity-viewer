@@ -5,14 +5,14 @@ part of 'package:serenity_viewer/src/app/app_shell.dart';
 extension _AppShellWorkspaceViewTrackingActions on _AppShellState {
   static const Duration _workspaceViewThreshold = Duration(seconds: 30);
 
-  bool get _shouldTrackWorkspaceViewSession {
+  bool get _shouldTrackWorkspaceViewEnvironment {
     return _workspaceViewTrackingState.isAppForeground &&
         _uiState.screen == SerenityScreen.workspace &&
         _activeWorkspaceOrNull != null;
   }
 
   String? _currentWorkspaceViewCandidateId() {
-    if (!_shouldTrackWorkspaceViewSession) {
+    if (!_shouldTrackWorkspaceViewEnvironment) {
       return null;
     }
     return _activeWorkspaceOrNull?.id;
@@ -76,16 +76,16 @@ extension _AppShellWorkspaceViewTrackingActions on _AppShellState {
   }
 
   void _incrementWorkspaceViews(String workspaceId) {
-    final session = _persistenceState.session;
-    if (session == null) {
+    final environment = _persistenceState.environment;
+    if (environment == null) {
       return;
     }
 
     final now = DateTime.now();
 
-    _updateSession(
-      session.copyWith(
-        workspaces: session.workspaces
+    _updateEnvironment(
+      environment.copyWith(
+        workspaces: environment.workspaces
             .map((entry) => entry.id == workspaceId ? entry.copyWith(views: entry.views + 1, lastViewedAt: now) : entry)
             .toList(),
       ),

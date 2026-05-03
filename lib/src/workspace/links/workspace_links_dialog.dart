@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
-import 'package:serenity_viewer/src/sry_document/models/workspace_link.dart';
-import 'package:serenity_viewer/src/sry_document/models/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/workspace_link.dart';
+import 'package:serenity_viewer/src/environment/workspace_state.dart';
 
 Future<void> showSerenityWorkspaceLinksDialog({
   required BuildContext context,

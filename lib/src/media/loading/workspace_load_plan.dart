@@ -1,11 +1,11 @@
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/sry_document/models/workspace_window_state.dart';
+import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
 import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
-import 'package:serenity_viewer/src/sry_document/models/session_state.dart';
+import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/media/assets/workspace_media_counts.dart';
-import 'package:serenity_viewer/src/sry_document/models/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/workspace_state.dart';
 
-MediaLoadPlan buildWorkspaceLoadPlan({required SessionState session, required WorkspaceState? activeWorkspace}) {
+MediaLoadPlan buildWorkspaceLoadPlan({required Environment environment, required WorkspaceState? activeWorkspace}) {
   final loadedAssetIds = <String>{};
   var loadedImages = 0;
   var loadedShortVideos = 0;
@@ -39,13 +39,13 @@ MediaLoadPlan buildWorkspaceLoadPlan({required SessionState session, required Wo
     retainWindow(window);
   }
 
-  final hiddenWorkspaces = session.workspaces.where((workspace) => workspace.id != activeWorkspaceId).toList()
+  final hiddenWorkspaces = environment.workspaces.where((workspace) => workspace.id != activeWorkspaceId).toList()
     ..sort((a, b) => b.lastViewedAt.compareTo(a.lastViewedAt));
 
   for (final workspace in hiddenWorkspaces) {
     for (final window in workspace.windows) {
       if (window.asset.type == AssetType.image) {
-        if (loadedImages >= session.imageLoadLimit) {
+        if (loadedImages >= environment.imageLoadLimit) {
           continue;
         }
         retainWindow(window);
@@ -53,14 +53,14 @@ MediaLoadPlan buildWorkspaceLoadPlan({required SessionState session, required Wo
       }
 
       if (window.asset.videoLengthCategory == VideoLengthCategory.short) {
-        if (loadedShortVideos >= session.shortVideoLoadLimit) {
+        if (loadedShortVideos >= environment.shortVideoLoadLimit) {
           continue;
         }
         retainWindow(window);
         continue;
       }
 
-      if (loadedLongVideos >= session.longVideoLoadLimit) {
+      if (loadedLongVideos >= environment.longVideoLoadLimit) {
         continue;
       }
       retainWindow(window);

@@ -37,8 +37,8 @@ extension _AppShellWindowHistoryActions on _AppShellState {
 
   void _restoreRecentlyClosedWindow([RecentlyClosedWindowEntry? entry]) {
     final targetEntry = entry ?? (_recentlyClosedWindows.isEmpty ? null : _recentlyClosedWindows.first);
-    final session = _persistenceState.session;
-    if (targetEntry == null || session == null) {
+    final environment = _persistenceState.environment;
+    if (targetEntry == null || environment == null) {
       _showMessage('There are no recently closed windows to restore.');
       return;
     }
@@ -60,10 +60,10 @@ extension _AppShellWindowHistoryActions on _AppShellState {
       _recentlyClosedWindows.remove(targetEntry);
     });
 
-    _updateSession(
-      session.copyWith(
+    _updateEnvironment(
+      environment.copyWith(
         activeWorkspaceId: workspace.id,
-        workspaces: session.workspaces
+        workspaces: environment.workspaces
             .map(
               (entry) => entry.id == workspace.id
                   ? entry.copyWith(windows: [...workspace.windows, restoredWindow], isOpen: true)

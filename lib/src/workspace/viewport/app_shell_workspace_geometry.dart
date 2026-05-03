@@ -16,12 +16,12 @@ extension _AppShellWorkspaceGeometry on _AppShellState {
   }
 
   void _setWorkspaceViewport({required String workspaceId, Offset? center, double? zoom, bool queueThumbnail = false}) {
-    final session = _persistenceState.session;
-    if (session == null) {
+    final environment = _persistenceState.environment;
+    if (environment == null) {
       return;
     }
 
-    final workspaceMatches = session.workspaces.where((workspace) => workspace.id == workspaceId);
+    final workspaceMatches = environment.workspaces.where((workspace) => workspace.id == workspaceId);
     if (workspaceMatches.isEmpty) {
       return;
     }

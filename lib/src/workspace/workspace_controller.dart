@@ -6,11 +6,11 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/workspace/workspace_mutations.dart';
-import 'package:serenity_viewer/src/sry_document/models/workspace_window_state.dart';
+import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
 import 'package:serenity_viewer/src/workspace/windows/recently_closed_window_entry.dart';
-import 'package:serenity_viewer/src/sry_document/models/session_state.dart';
+import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_zoom_update.dart';
-import 'package:serenity_viewer/src/sry_document/models/workspace_state.dart';
+import 'package:serenity_viewer/src/environment/workspace_state.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_interaction_state.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
@@ -327,13 +327,13 @@ class WorkspaceController {
     });
   }
 
-  void pauseAllVideos(SessionState? session) {
-    if (session == null) {
+  void pauseAllVideos(Environment? environment) {
+    if (environment == null) {
       return;
     }
 
     commitInteractionState(() {
-      for (final workspace in session.workspaces) {
+      for (final workspace in environment.workspaces) {
         for (final window in workspace.windows) {
           if (window.asset.type == AssetType.video) {
             windowInteractionState.pausedVideoWindows[window.asset.id] = true;
@@ -373,23 +373,23 @@ class WorkspaceController {
     }
   }
 
-  void toggleWorkspaceOpen(SessionState session, String workspaceId, void Function(SessionState) updateSession) {
-    updateSession(WorkspaceMutations.toggleWorkspaceOpen(session, workspaceId));
+  void toggleWorkspaceOpen(Environment environment, String workspaceId, void Function(Environment) updateEnvironment) {
+    updateEnvironment(WorkspaceMutations.toggleWorkspaceOpen(environment, workspaceId));
   }
 
   void reorderOpenWorkspace(
-    SessionState? session,
+    Environment? environment,
     List<WorkspaceState> workspaces, {
     required String sourceWorkspaceId,
     required String targetWorkspaceId,
-    required void Function(SessionState) updateSession,
+    required void Function(Environment) updateEnvironment,
   }) {
-    if (session == null || sourceWorkspaceId == targetWorkspaceId) {
+    if (environment == null || sourceWorkspaceId == targetWorkspaceId) {
       return;
     }
 
-    updateSession(
-      session.copyWith(
+    updateEnvironment(
+      environment.copyWith(
         workspaces: WorkspaceMutations.reorderOpenWorkspaces(
           workspaces,
           sourceWorkspaceId: sourceWorkspaceId,
@@ -400,11 +400,11 @@ class WorkspaceController {
   }
 
   bool canMoveSelectedWindowsToWorkspace({
-    required SessionState? session,
+    required Environment? environment,
     required WorkspaceState? sourceWorkspace,
     required String destinationWorkspaceId,
   }) {
-    return session != null &&
+    return environment != null &&
         sourceWorkspace != null &&
         windowInteractionState.selectedExposeWindowIds.isNotEmpty &&
         destinationWorkspaceId != sourceWorkspace.id;
@@ -417,15 +417,15 @@ class WorkspaceController {
   }
 
   void moveSelectedExposeWindowsToWorkspace({
-    required SessionState session,
+    required Environment environment,
     required WorkspaceState sourceWorkspace,
     required WorkspaceState destinationWorkspace,
-    required void Function(SessionState) updateSession,
+    required void Function(Environment) updateEnvironment,
     required void Function(String workspaceId, {Duration delay}) queueThumbnailRefresh,
   }) {
-    updateSession(
+    updateEnvironment(
       WorkspaceMutations.moveSelectedWindowsToWorkspace(
-        session,
+        environment,
         sourceWorkspaceId: sourceWorkspace.id,
         destinationWorkspaceId: destinationWorkspace.id,
         selectedWindowIds: windowInteractionState.selectedExposeWindowIds,
