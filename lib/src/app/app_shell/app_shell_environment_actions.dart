@@ -14,16 +14,4 @@ extension _AppShellEnvironmentActions on _AppShellState {
   void _toggleExpose() {
     _chromeController.toggleExpose();
   }
-
-  void _setPinnedHoverWindow(String? windowId) {
-    _workspaceController.gesture.setPinnedHoverWindow(windowId);
-  }
-
-  void _clearPinnedHoverWindow() {
-    _setPinnedHoverWindow(null);
-  }
-
-  void _flashWindow(String windowId) {
-    _workspaceController.windows.flash(windowId, mounted: mounted);
-  }
 }

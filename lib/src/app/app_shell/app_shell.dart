@@ -2,9 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 import 'package:file_selector/file_selector.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import 'package:serenity_viewer/src/settings/behavior/chrome_controller.dart';
 import 'package:serenity_viewer/src/asset_import/import_coordinator.dart';
@@ -15,20 +13,18 @@ import 'package:serenity_viewer/src/app/environment/app_environment_controller.d
 import 'package:serenity_viewer/src/app/environment/app_environment_state.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_content_builder.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_menu_builder.dart';
+import 'package:serenity_viewer/src/app/app_shell/app_shell_window_controller.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_window_history_controller.dart';
 import 'package:serenity_viewer/src/app/platform/app_shell_platform_bridge.dart';
 import 'package:serenity_viewer/src/app/runtime/app_shell_runtime.dart';
 import 'package:serenity_viewer/src/app/sry_document/sry_document_coordinator.dart';
-import 'package:serenity_viewer/src/asset_window/frame/asset_window_resize_helpers.dart';
 import 'package:serenity_viewer/src/asset_window/interaction/asset_window_interaction_state.dart';
-import 'package:serenity_viewer/src/asset_window/interaction/asset_window_zoom_update.dart';
 import 'package:serenity_viewer/src/video_tools/media_bridge.dart';
 import 'package:serenity_viewer/src/video_tools/video_conversion_coordinator.dart';
 import 'package:serenity_viewer/src/workspace/shell/workspace_shell_controller.dart';
 import 'package:serenity_viewer/src/workspace/controller/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/layout/workspace_layout.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/foundation/keyboard_modifiers.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/workspace/session/recently_closed_window_entry.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
@@ -45,7 +41,6 @@ part 'app_shell_environment_actions.dart';
 part 'app_shell_media_import_actions.dart';
 part 'app_shell_navigation_actions.dart';
 part 'app_shell_startup_seed_and_settings.dart';
-part 'app_shell_window_actions.dart';
 part 'app_shell_workspace_geometry.dart';
 
 class AppShell extends StatefulWidget {
@@ -185,6 +180,19 @@ class _AppShellState extends State<AppShell> {
     );
   }
 
+  AppShellWindowController get _windowController {
+    return AppShellWindowController(
+      context: () => context,
+      mounted: () => mounted,
+      chromeState: _uiState,
+      environment: () => _persistenceState.environment,
+      activeWorkspace: () => _activeWorkspace,
+      activeWorkspaceOrNull: () => _activeWorkspaceOrNull,
+      workspaceController: _workspaceController,
+      showMessage: _showMessage,
+    );
+  }
+
   List<PlatformMenuItem> _buildMenus() {
     final focusedWindow = _windowHistoryController.focusedWindowOrNull();
     final focusedWindowIsSelected =
@@ -200,8 +208,8 @@ class _AppShellState extends State<AppShell> {
       saveEnvironmentAs: _sryDocumentCoordinator.saveDocumentAs,
       revealAssetInFinder: _mediaBridge.revealAssetInFinder,
       toggleWindowSelected: _workspaceShellController.navigation.toggleSelectedWindow,
-      fitWindowToContent: _fitWindowToContent,
-      restorePreviousWindowZOrder: _restorePreviousWindowZOrder,
+      fitWindowToContent: _windowController.fitWindowToContent,
+      restorePreviousWindowZOrder: _windowController.restorePreviousWindowZOrder,
       convertVideoWindowToJpeg: (windowId) => _videoConversionCoordinator.convertVideoWindowToJpeg(windowId),
       closeWindow: _windowHistoryController.removeWindow,
       toggleExpose: _toggleExpose,
@@ -209,9 +217,9 @@ class _AppShellState extends State<AppShell> {
       createWorkspace: _workspaceShellController.management.createWorkspace,
       switchToPreviousWorkspace: () => _workspaceShellController.navigation.switchWorkspace(-1),
       switchToNextWorkspace: () => _workspaceShellController.navigation.switchWorkspace(1),
-      fitWorkspaceViewportToContent: _fitWorkspaceViewportToContent,
-      confirmCollateWorkspaceWindows: _confirmCollateWorkspaceWindows,
-      pauseAllVideos: _pauseAllVideos,
+      fitWorkspaceViewportToContent: _windowController.fitWorkspaceViewportToContent,
+      confirmCollateWorkspaceWindows: _windowController.confirmCollateWorkspaceWindows,
+      pauseAllVideos: _windowController.pauseAllVideos,
       showNoWorkspaceToRenameMessage: () => _showMessage('There is no workspace to rename.'),
       renameWorkspace: _workspaceShellController.management.renameWorkspace,
       showNoWorkspaceToDeleteMessage: () => _showMessage('There is no workspace to delete.'),
@@ -251,29 +259,29 @@ class _AppShellState extends State<AppShell> {
       tabScrollController: _handles.tabScrollController,
       commitStateChange: setState,
       importFiles: _importFiles,
-      handleOptionGestureHover: _handleOptionGestureHover,
-      handleWorkspacePanZoomStart: _handleWorkspacePanZoomStart,
-      handleWorkspacePanZoomUpdate: _handleWorkspacePanZoomUpdate,
-      handleWorkspacePanZoomEnd: _handleWorkspacePanZoomEnd,
-      focusWindow: _focusWindow,
-      restorePreviousWindowZOrder: _restorePreviousWindowZOrder,
-      moveWindow: _moveWindow,
-      resizeWindow: _resizeWindow,
-      transformWindowFromTrackpad: _transformWindowFromTrackpad,
-      fitWindowToContent: _fitWindowToContent,
-      setWindowZoom: _setWindowZoom,
-      setVideoPosition: _setVideoPosition,
-      cycleVideoPlaybackSpeed: _cycleVideoPlaybackSpeed,
-      setWindowIntrinsicSize: _setWindowIntrinsicSize,
-      isVideoWindowPaused: _isVideoWindowPaused,
-      toggleVideoPlayback: _toggleVideoPlayback,
+      handleOptionGestureHover: _windowController.handleOptionGestureHover,
+      handleWorkspacePanZoomStart: _windowController.handleWorkspacePanZoomStart,
+      handleWorkspacePanZoomUpdate: _windowController.handleWorkspacePanZoomUpdate,
+      handleWorkspacePanZoomEnd: _windowController.handleWorkspacePanZoomEnd,
+      focusWindow: _windowController.focusWindow,
+      restorePreviousWindowZOrder: _windowController.restorePreviousWindowZOrder,
+      moveWindow: _windowController.moveWindow,
+      resizeWindow: _windowController.resizeWindow,
+      transformWindowFromTrackpad: _windowController.transformWindowFromTrackpad,
+      fitWindowToContent: _windowController.fitWindowToContent,
+      setWindowZoom: _windowController.setWindowZoom,
+      setVideoPosition: _windowController.setVideoPosition,
+      cycleVideoPlaybackSpeed: _windowController.cycleVideoPlaybackSpeed,
+      setWindowIntrinsicSize: _windowController.setWindowIntrinsicSize,
+      isVideoWindowPaused: _windowController.isVideoWindowPaused,
+      toggleVideoPlayback: _windowController.toggleVideoPlayback,
       toggleExpose: _toggleExpose,
-      setPinnedHoverWindow: _setPinnedHoverWindow,
-      clearPinnedHoverWindow: _clearPinnedHoverWindow,
-      flashWindow: _flashWindow,
-      setActiveGestureWindow: _setActiveGestureWindow,
-      fitWorkspaceViewportToContent: _fitWorkspaceViewportToContent,
-      confirmCollateWorkspaceWindows: _confirmCollateWorkspaceWindows,
+      setPinnedHoverWindow: _windowController.setPinnedHoverWindow,
+      clearPinnedHoverWindow: _windowController.clearPinnedHoverWindow,
+      flashWindow: (windowId) => _windowController.flashWindow(windowId, mounted: mounted),
+      setActiveGestureWindow: _windowController.setActiveGestureWindow,
+      fitWorkspaceViewportToContent: _windowController.fitWorkspaceViewportToContent,
+      confirmCollateWorkspaceWindows: _windowController.confirmCollateWorkspaceWindows,
       setWorkspaceViewport: _setWorkspaceViewport,
     ).build();
   }
@@ -303,7 +311,7 @@ class _AppShellState extends State<AppShell> {
       showWorkspaceScreen: _showWorkspaceScreen,
       showLibraryScreen: _showLibraryScreen,
       toggleExpose: _toggleExpose,
-      toggleVideoPlayback: _toggleVideoPlayback,
+      toggleVideoPlayback: _windowController.toggleVideoPlayback,
     );
     _restoreEnvironment();
   }
