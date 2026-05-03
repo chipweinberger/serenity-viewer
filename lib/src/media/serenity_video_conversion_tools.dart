@@ -82,12 +82,12 @@ extension _SerenityVideoConversionTools on _SerenityShellState {
       if (result == null || !await outputFile.exists()) {
         return null;
       }
-      final digest = await _md5ForFile(outputFile);
+      final digest = await _mediaBridge.md5ForFile(outputFile);
       final width = (result['width'] as num?)?.toDouble();
       final height = (result['height'] as num?)?.toDouble();
       final dimensions = width != null && height != null
           ? Size(width, height)
-          : await _imageDimensionsForFile(outputFile);
+          : await _mediaBridge.imageDimensionsForFile(outputFile);
       if (dimensions == null) {
         return null;
       }
@@ -125,7 +125,7 @@ extension _SerenityVideoConversionTools on _SerenityShellState {
       return;
     }
 
-    final probe = await _probeVideoFile(File(sourcePath));
+    final probe = await _mediaBridge.probeVideoFile(File(sourcePath));
     if (probe == null || probe.width == null || probe.height == null) {
       _showMessage('Serenity could not inspect that video for conversion.');
       return;

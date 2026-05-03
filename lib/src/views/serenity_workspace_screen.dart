@@ -5,8 +5,8 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
 
+import 'package:serenity_viewer/src/app/serenity_media_bridge.dart';
 import 'package:serenity_viewer/src/core/serenity_core.dart';
 import 'package:serenity_viewer/src/core/serenity_theme.dart';
 import 'package:serenity_viewer/src/core/serenity_workspace_projection.dart';
@@ -24,14 +24,6 @@ import 'package:serenity_viewer/src/widgets/expose_window_card.dart';
 import 'package:serenity_viewer/src/widgets/serenity_window_frame.dart';
 import 'package:serenity_viewer/src/widgets/window_resize_helpers.dart';
 import 'package:serenity_viewer/src/views/serenity_workspace_layouts.dart';
-
-@immutable
-class SerenitySharedVideoState {
-  const SerenitySharedVideoState({required this.controller, required this.initialization});
-
-  final VideoPlayerController controller;
-  final Future<void> initialization;
-}
 
 typedef SerenitySharedVideoLookup =
     SerenitySharedVideoState? Function(AssetWindowState window, {required bool isLoaded});

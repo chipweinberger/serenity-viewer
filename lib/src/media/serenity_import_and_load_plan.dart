@@ -12,10 +12,10 @@ extension _SerenityShellImportAndLoadPlan on _SerenityShellState {
         return _exportVideoFrameToJpeg(sourcePath: sourcePath, probe: probe, positionMs: positionMs);
       },
       createFileBookmark: _createFileBookmark,
-      md5ForFile: _md5ForFile,
-      imageDimensionsForFile: _imageDimensionsForFile,
-      videoDurationMsForFile: _videoDurationMsForFile,
-      probeVideoFile: _probeVideoFile,
+      md5ForFile: _mediaBridge.md5ForFile,
+      imageDimensionsForFile: _mediaBridge.imageDimensionsForFile,
+      videoDurationMsForFile: _mediaBridge.videoDurationMsForFile,
+      probeVideoFile: _mediaBridge.probeVideoFile,
       newId: _newId,
       colorFromDigest: _colorFromDigest,
     );

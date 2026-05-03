@@ -89,7 +89,9 @@ extension _SerenityShellMenus on _SerenityShellState {
             members: [
               PlatformMenuItem(
                 label: 'Reveal in Finder',
-                onSelected: focusedWindow == null ? null : () => unawaited(_showFocusedAssetInFinder()),
+                onSelected: focusedWindow == null
+                    ? null
+                    : () => unawaited(_mediaBridge.revealAssetInFinder(focusedWindow.asset)),
                 shortcut: const SingleActivator(LogicalKeyboardKey.keyR, meta: true, shift: true),
               ),
               PlatformMenuItem(

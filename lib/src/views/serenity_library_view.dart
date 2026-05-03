@@ -10,7 +10,7 @@ extension _SerenityShellLibraryView on _SerenityShellState {
 
     final session = _persistenceState.session!;
     final workspaceLoadPlan = buildWorkspaceLoadPlan(session: session, activeWorkspace: _activeWorkspaceOrNull);
-    _syncSharedVideoControllers(workspaceLoadPlan);
+    _mediaBridge.syncSharedVideoControllers(loadPlan: workspaceLoadPlan, session: session);
     final activeWorkspace = _activeWorkspace;
     final mediaCounts = workspaceMediaCounts(activeWorkspace);
     final workspaceChromeViewModel = SerenityWorkspaceChromeViewModel(
@@ -40,13 +40,7 @@ extension _SerenityShellLibraryView on _SerenityShellState {
                 chromeState: _uiState,
                 windowInteractionState: _windowInteractionState,
                 loadPlan: workspaceLoadPlan,
-                sharedVideoLookup: (window, {required isLoaded}) {
-                  final entry = _sharedVideoControllerForWindow(window, isLoaded: isLoaded);
-                  if (entry == null) {
-                    return null;
-                  }
-                  return SerenitySharedVideoState(controller: entry.controller, initialization: entry.initialization);
-                },
+                sharedVideoLookup: _mediaBridge.sharedVideoForWindow,
                 actions: SerenityWorkspaceScreenActions(
                   setDropTargetActive: (isActive) => setState(() => _uiState.isDropTargetActive = isActive),
                   importFiles: _importFiles,
@@ -74,7 +68,7 @@ extension _SerenityShellLibraryView on _SerenityShellState {
                   toggleExposeWindowSelected: _toggleExposeWindowSelected,
                   removeWindow: _removeWindow,
                   setOptionGestureWindowId: _setOptionGestureWindowId,
-                  revealAssetInFinder: _revealAssetInFinder,
+                  revealAssetInFinder: _mediaBridge.revealAssetInFinder,
                 ),
                 workspaceHud: SerenityWorkspaceHud(
                   viewModel: workspaceChromeViewModel,

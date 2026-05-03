@@ -12,11 +12,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
 import 'package:url_launcher/url_launcher.dart';
-import 'package:video_player/video_player.dart';
 
 import 'package:serenity_viewer/src/app/serenity_chrome_controller.dart';
 import 'package:serenity_viewer/src/app/serenity_import_coordinator.dart';
 import 'package:serenity_viewer/src/app/serenity_import_result.dart';
+import 'package:serenity_viewer/src/app/serenity_media_bridge.dart';
 import 'package:serenity_viewer/src/app/serenity_shell_dependencies.dart';
 import 'package:serenity_viewer/src/app/serenity_session_controller.dart';
 import 'package:serenity_viewer/src/app/serenity_workspace_controller.dart';
@@ -27,7 +27,6 @@ import 'package:serenity_viewer/src/core/serenity_theme.dart';
 import 'package:serenity_viewer/src/core/serenity_workspace_projection.dart';
 import 'package:serenity_viewer/src/models/asset_window_state.dart';
 import 'package:serenity_viewer/src/models/recently_closed_window_entry.dart';
-import 'package:serenity_viewer/src/models/serenity_load_plan.dart';
 import 'package:serenity_viewer/src/models/serenity_session_state.dart';
 import 'package:serenity_viewer/src/models/serenity_workspace_chrome_view_model.dart';
 import 'package:serenity_viewer/src/models/session_support.dart';
@@ -54,7 +53,6 @@ import 'package:serenity_viewer/src/views/serenity_workspace_layouts.dart';
 import 'package:serenity_viewer/src/views/serenity_workspace_screen.dart';
 
 part '../app/serenity_session_actions.dart';
-part '../app/serenity_shell_state_buckets.dart';
 part '../app/serenity_shell_ui_state.dart';
 part '../app/serenity_window_actions.dart';
 part '../app/serenity_window_history_actions.dart';
@@ -69,7 +67,6 @@ part '../views/serenity_library_view.dart';
 part '../persistence/serenity_startup_persistence.dart';
 part '../persistence/serenity_thumbnail_persistence.dart';
 part '../persistence/serenity_environment_persistence.dart';
-part '../media/serenity_media_tools.dart';
 part '../media/serenity_import_and_load_plan.dart';
 part '../media/serenity_video_conversion_tools.dart';
 
@@ -110,11 +107,11 @@ class _SerenityShellState extends State<SerenityShell> {
   static const List<String> _videoExtensions = ['mp4', 'mov', 'm4v', 'avi', 'mkv', 'webm'];
 
   final _dependencies = SerenityShellDependencies();
-  final _mediaControllerCache = _SerenityMediaControllerCache();
   final List<RecentlyClosedWindowEntry> _recentlyClosedWindows = [];
   AppLifecycleListener? _appLifecycleListener;
   Timer? _autosaveTimer;
   late final SerenityChromeController _chromeController;
+  late final SerenityMediaBridge _mediaBridge;
   late final SerenityWorkspaceController _workspaceController;
   late final SerenitySessionController _sessionController;
 
@@ -167,6 +164,11 @@ class _SerenityShellState extends State<SerenityShell> {
       commitStateChange: setState,
       refreshWorkspaceTracking: _refreshWorkspaceViewTracking,
     );
+    _mediaBridge = SerenityMediaBridge(
+      isRunningInWidgetTest: _isRunningInWidgetTest,
+      showMessage: _showMessage,
+      isMounted: () => mounted,
+    );
     _sessionController = SerenitySessionController(
       persistenceState: _persistenceState,
       chromeState: _uiState,
@@ -206,9 +208,7 @@ class _SerenityShellState extends State<SerenityShell> {
     _workspaceViewTrackingState.dispose();
     _windowInteractionState.dispose();
     _thumbnailRefreshState.dispose();
-    for (final entry in _mediaControllerCache.sharedVideoControllers.values) {
-      unawaited(entry.controller.dispose());
-    }
+    _mediaBridge.dispose();
     _handles.dispose();
     super.dispose();
   }
