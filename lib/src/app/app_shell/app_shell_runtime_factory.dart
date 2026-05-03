@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
+import 'package:serenity_viewer/src/app/app_shell/app_shell_runtime_bridge.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_runtime_document_factory.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_runtime_foundation_factory.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_runtime.dart';
@@ -16,18 +17,16 @@ class AppShellRuntimeFactory {
   AppShellRuntime create() {
     final dependencies = config.dependencies;
     final persistenceState = dependencies.persistenceState;
-    late AppShellRuntimeWorkspace workspace;
-    late AppShellRuntimeFoundation foundation;
+    final bridge = AppShellRuntimeBridge();
 
-    foundation = AppShellRuntimeFoundationFactory(config).create(
-      refreshWorkspaceTracking: () async => workspace.workspaceShellController.tracking.refresh(),
-      markWorkspaceThumbnailDirty: (workspaceId) => workspace.thumbnailController.markWorkspaceDirty(workspaceId),
-      syncWindowTitle: () => foundation.appShellPlatformBridge.syncWindowTitle(),
+    final foundation = AppShellRuntimeFoundationFactory(config).create(
+      refreshWorkspaceTracking: bridge.refreshWorkspaceTracking,
+      markWorkspaceThumbnailDirty: bridge.markWorkspaceThumbnailDirty,
+      syncWindowTitle: bridge.syncWindowTitle,
     );
-    workspace = AppShellRuntimeWorkspaceFactory(config).create(
-      foundation: foundation,
-      refreshWorkspaceTracking: () async => workspace.workspaceShellController.tracking.refresh(),
-    );
+    bridge.bindFoundation(foundation);
+    final workspace = AppShellRuntimeWorkspaceFactory(config).create(foundation: foundation);
+    bridge.bindWorkspace(workspace);
     final sryDocumentCoordinator = AppShellRuntimeDocumentFactory(
       config,
     ).create(foundation: foundation, workspace: workspace);

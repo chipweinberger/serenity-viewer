@@ -14,10 +14,7 @@ class AppShellRuntimeWorkspaceFactory {
 
   final AppShellRuntimeConfig config;
 
-  AppShellRuntimeWorkspace create({
-    required AppShellRuntimeFoundation foundation,
-    required Future<void> Function() refreshWorkspaceTracking,
-  }) {
+  AppShellRuntimeWorkspace create({required AppShellRuntimeFoundation foundation}) {
     final dependencies = config.dependencies;
     final persistenceState = dependencies.persistenceState;
     final chromeState = dependencies.chromeState;
