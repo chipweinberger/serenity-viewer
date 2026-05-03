@@ -1,83 +1,52 @@
 import 'package:serenity_viewer/src/asset_window/interaction/asset_window_interaction_state.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
-import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/workspace/controller/workspace_controller.dart';
-import 'package:serenity_viewer/src/workspace/operations/workspace_playback_operations.dart';
+import 'package:serenity_viewer/src/workspace/controller/workspace_controller_playback_runtime.dart';
+import 'package:serenity_viewer/src/workspace/controller/workspace_controller_playback_workspace.dart';
 
 class WorkspacePlaybackControllerState {
   WorkspacePlaybackControllerState({
     required this.windowInteractionState,
     required this.commitInteractionState,
     required this.replaceWorkspace,
-  });
+  }) : runtime = WorkspacePlaybackRuntimeState(
+         windowInteractionState: windowInteractionState,
+         commitInteractionState: commitInteractionState,
+       ),
+       workspace = WorkspacePlaybackWorkspaceState(replaceWorkspace: replaceWorkspace);
 
   final AssetWindowInteractionState windowInteractionState;
   final SerenityWorkspaceCommit commitInteractionState;
   final SerenityWorkspaceReplace replaceWorkspace;
+  final WorkspacePlaybackRuntimeState runtime;
+  final WorkspacePlaybackWorkspaceState workspace;
 
   void setVideoPosition(Workspace? workspace, String windowId, int positionMs) {
-    if (workspace == null) {
-      return;
-    }
-
-    final currentWindow = workspace.windows.where((window) => window.asset.id == windowId).firstOrNull;
-    if (currentWindow == null || currentWindow.videoPositionMs == positionMs) {
-      return;
-    }
-
-    replaceWorkspace(
-      WorkspacePlaybackOperations.setVideoPosition(workspace, windowId, positionMs),
-      queueThumbnail: false,
-    );
+    this.workspace.setVideoPosition(workspace, windowId, positionMs);
   }
 
   void cycleVideoPlaybackSpeed(Workspace? workspace, String windowId) {
-    if (workspace == null ||
-        workspace.windows
-            .where((window) => window.asset.id == windowId && window.asset.type == AssetType.video)
-            .isEmpty) {
-      return;
-    }
-
-    replaceWorkspace(WorkspacePlaybackOperations.cycleVideoPlaybackSpeed(workspace, windowId), queueThumbnail: false);
+    this.workspace.cycleVideoPlaybackSpeed(workspace, windowId);
   }
 
   bool isVideoWindowPaused(String windowId) {
-    return windowInteractionState.pausedVideoWindows[windowId] ?? true;
+    return runtime.isVideoWindowPaused(windowId);
   }
 
   void toggleVideoPlayback(Workspace? workspace, String windowId) {
-    if (workspace == null ||
-        workspace.windows
-            .where((window) => window.asset.id == windowId && window.asset.type == AssetType.video)
-            .isEmpty) {
+    if (!this.workspace.canToggleVideoPlayback(workspace, windowId)) {
       return;
     }
 
-    commitInteractionState(() {
-      windowInteractionState.pausedVideoWindows[windowId] =
-          !(windowInteractionState.pausedVideoWindows[windowId] ?? true);
-    });
+    runtime.toggleVideoPlayback(windowId);
   }
 
   void pauseAllVideos(Environment? environment) {
-    if (environment == null) {
-      return;
-    }
-
-    commitInteractionState(() {
-      for (final workspace in environment.workspaces) {
-        for (final window in workspace.windows) {
-          if (window.asset.type == AssetType.video) {
-            windowInteractionState.pausedVideoWindows[window.asset.id] = true;
-          }
-        }
-      }
-    });
+    runtime.pauseAllVideos(environment);
   }
 
   void clearRuntimeState(String windowId) {
-    windowInteractionState.pausedVideoWindows.remove(windowId);
+    runtime.clearRuntimeState(windowId);
   }
 }
