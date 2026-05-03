@@ -42,7 +42,7 @@ extension _SerenityShellThumbnailPersistence on _SerenityShellState {
   }
 
   Future<File> _thumbnailFileForWorkspace(String workspaceId) async {
-    final directory = await _thumbnailDirectory();
+    final directory = await _sessionPersistenceBridge.thumbnailDirectory();
     return File('${directory.path}/$workspaceId.jpg');
   }
 

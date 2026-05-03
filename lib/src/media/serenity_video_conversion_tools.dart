@@ -141,7 +141,7 @@ extension _SerenityVideoConversionTools on _SerenityShellState {
       return;
     }
 
-    final bookmark = await _createFileBookmark(conversion.path);
+    final bookmark = await _sessionPersistenceBridge.createFileBookmark(conversion.path);
     _replaceWorkspace(
       workspace.copyWith(
         windows: workspace.windows

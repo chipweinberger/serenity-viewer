@@ -11,7 +11,7 @@ extension _SerenityShellImportAndLoadPlan on _SerenityShellState {
       exportVideoFrameToJpeg: ({required sourcePath, required probe, positionMs}) {
         return _exportVideoFrameToJpeg(sourcePath: sourcePath, probe: probe, positionMs: positionMs);
       },
-      createFileBookmark: _createFileBookmark,
+      createFileBookmark: _sessionPersistenceBridge.createFileBookmark,
       md5ForFile: _mediaBridge.md5ForFile,
       imageDimensionsForFile: _mediaBridge.imageDimensionsForFile,
       videoDurationMsForFile: _mediaBridge.videoDurationMsForFile,

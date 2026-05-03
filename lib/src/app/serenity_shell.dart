@@ -1,10 +1,8 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
-import 'package:crypto/crypto.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -20,6 +18,7 @@ import 'package:serenity_viewer/src/app/serenity_import_result.dart';
 import 'package:serenity_viewer/src/app/serenity_media_bridge.dart';
 import 'package:serenity_viewer/src/app/serenity_shell_dependencies.dart';
 import 'package:serenity_viewer/src/app/serenity_session_controller.dart';
+import 'package:serenity_viewer/src/app/serenity_session_persistence_bridge.dart';
 import 'package:serenity_viewer/src/app/serenity_workspace_controller.dart';
 import 'package:serenity_viewer/src/app/serenity_workspace_mutations.dart';
 import 'package:serenity_viewer/src/core/serenity_core.dart';
@@ -63,7 +62,6 @@ part '../app/serenity_workspace_views.dart';
 part '../app/serenity_workspace_geometry.dart';
 part '../views/serenity_workspace_links_dialog.dart';
 part '../views/serenity_library_view.dart';
-part '../persistence/serenity_startup_persistence.dart';
 part '../persistence/serenity_thumbnail_persistence.dart';
 part '../media/serenity_import_and_load_plan.dart';
 part '../media/serenity_video_conversion_tools.dart';
@@ -113,6 +111,7 @@ class _SerenityShellState extends State<SerenityShell> {
   late final SerenityMediaBridge _mediaBridge;
   late final SerenityWorkspaceController _workspaceController;
   late final SerenitySessionController _sessionController;
+  late final SerenitySessionPersistenceBridge _sessionPersistenceBridge;
 
   SerenityShellHandles get _handles => _dependencies.handles;
   SerenityShellPersistenceState get _persistenceState => _dependencies.persistenceState;
@@ -174,7 +173,16 @@ class _SerenityShellState extends State<SerenityShell> {
       thumbnailRefreshState: _thumbnailRefreshState,
       commitStateChange: setState,
       refreshWorkspaceTracking: _refreshWorkspaceViewTracking,
-      syncWindowTitle: _syncWindowTitle,
+      syncWindowTitle: () => _sessionPersistenceBridge.syncWindowTitle(),
+    );
+    _sessionPersistenceBridge = SerenitySessionPersistenceBridge(
+      persistenceState: _persistenceState,
+      sessionController: _sessionController,
+      isRunningInWidgetTest: _isRunningInWidgetTest,
+      mounted: () => mounted,
+      seedSession: _seedSession,
+      environmentCoordinator: () => _environmentCoordinator,
+      windowTitle: () => _windowTitle,
     );
     _environmentCoordinator = SerenityEnvironmentCoordinator(
       persistenceState: _persistenceState,
@@ -184,13 +192,13 @@ class _SerenityShellState extends State<SerenityShell> {
       seedSession: _seedSession,
       showMessage: _showMessage,
       refreshActiveWorkspaceThumbnailIfNeeded: _refreshActiveWorkspaceThumbnailIfNeeded,
-      storeLastEnvironmentPath: _storeLastEnvironmentPath,
-      syncWindowTitle: _syncWindowTitle,
-      resolveFileBookmark: _resolveFileBookmark,
-      createFileBookmark: _createFileBookmark,
-      thumbnailDirectory: _thumbnailDirectory,
+      storeLastEnvironmentPath: _sessionPersistenceBridge.storeLastEnvironmentPath,
+      syncWindowTitle: _sessionPersistenceBridge.syncWindowTitle,
+      resolveFileBookmark: _sessionPersistenceBridge.resolveFileBookmark,
+      createFileBookmark: _sessionPersistenceBridge.createFileBookmark,
+      thumbnailDirectory: _sessionPersistenceBridge.thumbnailDirectory,
       updateSession: _updateSession,
-      saveSession: _saveSession,
+      saveSession: _sessionPersistenceBridge.saveSession,
     );
     _workspaceController = SerenityWorkspaceController(
       chromeState: _uiState,
@@ -203,17 +211,17 @@ class _SerenityShellState extends State<SerenityShell> {
     );
     _autosaveTimer = Timer.periodic(const Duration(minutes: 1), (_) {
       if (_persistenceState.hasUnsavedChanges) {
-        unawaited(_saveSession());
+        unawaited(_sessionPersistenceBridge.saveSession());
       }
     });
     _appLifecycleListener = AppLifecycleListener(
       onStateChange: _handleAppLifecycleStateChanged,
       onExitRequested: () async {
-        await _saveSession(force: true);
+        await _sessionPersistenceBridge.saveSession(force: true);
         return ui.AppExitResponse.exit;
       },
     );
-    _restoreSession();
+    _sessionPersistenceBridge.restoreSession();
   }
 
   @override
