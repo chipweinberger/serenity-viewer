@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:serenity_viewer/src/app/serenity_shell.dart';
-import 'package:serenity_viewer/src/widgets/serenity_window_frame.dart';
+import 'package:serenity_viewer/src/workspace/windows/serenity_window_frame.dart';
 
 void main() {
   testWidgets('Serenity renders the workspace shell', (tester) async {

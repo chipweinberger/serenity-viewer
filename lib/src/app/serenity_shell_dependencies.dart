@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/state/serenity_chrome_state.dart';
-import 'package:serenity_viewer/src/state/serenity_shell_persistence_state.dart';
-import 'package:serenity_viewer/src/state/serenity_thumbnail_refresh_state.dart';
-import 'package:serenity_viewer/src/state/serenity_window_interaction_state.dart';
-import 'package:serenity_viewer/src/state/serenity_workspace_view_tracking_state.dart';
-import 'package:serenity_viewer/src/state/serenity_workspace_viewport_state.dart';
+import 'package:serenity_viewer/src/settings/behavior/serenity_chrome_state.dart';
+import 'package:serenity_viewer/src/environments/session/serenity_shell_persistence_state.dart';
+import 'package:serenity_viewer/src/environments/persistence/serenity_thumbnail_refresh_state.dart';
+import 'package:serenity_viewer/src/workspace/windows/serenity_window_interaction_state.dart';
+import 'package:serenity_viewer/src/workspace/serenity_workspace_view_tracking_state.dart';
+import 'package:serenity_viewer/src/workspace/viewport/serenity_workspace_viewport_state.dart';
 
 class SerenityShellDependencies {
   final SerenityShellHandles handles = SerenityShellHandles();
