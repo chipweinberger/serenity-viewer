@@ -4,7 +4,7 @@ part of '../app/serenity_shell.dart';
 
 extension _SerenityShellStartupPersistence on _SerenityShellState {
   Future<Directory> _thumbnailDirectory() async {
-    final environmentPath = _currentEnvironmentPath ?? 'startup';
+    final environmentPath = _persistenceState.currentEnvironmentPath ?? 'startup';
     final cacheKey = md5.convert(utf8.encode(environmentPath)).toString();
     final thumbnails = Directory('${Directory.systemTemp.path}/serenity-workspace-thumbnails/$cacheKey');
     await thumbnails.create(recursive: true);
@@ -14,8 +14,8 @@ extension _SerenityShellStartupPersistence on _SerenityShellState {
   Future<void> _restoreSession() async {
     if (_isRunningInWidgetTest) {
       setState(() {
-        _session = _seedSession();
-        _isLoading = false;
+        _persistenceState.session = _seedSession();
+        _persistenceState.isLoading = false;
       });
       _refreshWorkspaceViewTracking();
       return;
@@ -33,9 +33,9 @@ extension _SerenityShellStartupPersistence on _SerenityShellState {
     }
 
     setState(() {
-      _session = null;
-      _currentEnvironmentPath = null;
-      _isLoading = false;
+      _persistenceState.session = null;
+      _persistenceState.currentEnvironmentPath = null;
+      _persistenceState.isLoading = false;
     });
 
     _refreshWorkspaceViewTracking();
@@ -46,8 +46,8 @@ extension _SerenityShellStartupPersistence on _SerenityShellState {
   }
 
   void _queueSave() {
-    final shouldSyncTitle = !_hasUnsavedChanges;
-    _hasUnsavedChanges = true;
+    final shouldSyncTitle = !_persistenceState.hasUnsavedChanges;
+    _persistenceState.hasUnsavedChanges = true;
     if (shouldSyncTitle) {
       unawaited(_syncWindowTitle());
     }
@@ -95,12 +95,12 @@ extension _SerenityShellStartupPersistence on _SerenityShellState {
   }
 
   Future<void> _saveSession({bool force = false}) async {
-    final session = _session;
-    final environmentPath = _currentEnvironmentPath;
+    final session = _persistenceState.session;
+    final environmentPath = _persistenceState.currentEnvironmentPath;
     if (session == null || environmentPath == null || environmentPath.isEmpty) {
       return;
     }
-    if (!force && !_hasUnsavedChanges) {
+    if (!force && !_persistenceState.hasUnsavedChanges) {
       return;
     }
 
@@ -109,15 +109,15 @@ extension _SerenityShellStartupPersistence on _SerenityShellState {
       if (mounted) {
         setState(() {
           if (!identical(sessionToSave, session)) {
-            _session = sessionToSave;
+            _persistenceState.session = sessionToSave;
           }
-          _hasUnsavedChanges = false;
+          _persistenceState.hasUnsavedChanges = false;
         });
       } else {
         if (!identical(sessionToSave, session)) {
-          _session = sessionToSave;
+          _persistenceState.session = sessionToSave;
         }
-        _hasUnsavedChanges = false;
+        _persistenceState.hasUnsavedChanges = false;
       }
       await _saveEnvironmentToPath(environmentPath, sessionOverride: sessionToSave, showMessageOnFailure: false);
       await _syncWindowTitle();

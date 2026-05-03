@@ -55,7 +55,7 @@ extension _SerenityWindowHistoryActions on _SerenityShellState {
 
   void _restoreRecentlyClosedWindow([RecentlyClosedWindowEntry? entry]) {
     final targetEntry = entry ?? (_recentlyClosedWindows.isEmpty ? null : _recentlyClosedWindows.first);
-    final session = _session;
+    final session = _persistenceState.session;
     if (targetEntry == null || session == null) {
       _showMessage('There are no recently closed windows to restore.');
       return;
@@ -91,7 +91,7 @@ extension _SerenityWindowHistoryActions on _SerenityShellState {
       ),
     );
 
-    if (_screen == SerenityScreen.library) {
+    if (_uiState.screen == SerenityScreen.library) {
       _showWorkspaceScreen(resetEditMode: false, clearExposeSelection: false, refreshWorkspaceTracking: false);
     }
   }

@@ -4,7 +4,7 @@ part of '../app/serenity_shell.dart';
 
 extension _SerenityShellImportAndLoadPlan on _SerenityShellState {
   void _recordFolder(String path, {int weight = 1}) {
-    final session = _session!;
+    final session = _persistenceState.session!;
     final normalized = Directory(path).absolute.path;
     final nextKnownFolders = [...session.knownFolders];
     if (!nextKnownFolders.contains(normalized)) {
@@ -14,7 +14,7 @@ extension _SerenityShellImportAndLoadPlan on _SerenityShellState {
     final nextPopularity = Map<String, int>.from(session.folderPopularity);
     nextPopularity[normalized] = (nextPopularity[normalized] ?? 0) + weight;
 
-    _session = session.copyWith(knownFolders: nextKnownFolders, folderPopularity: nextPopularity);
+    _persistenceState.session = session.copyWith(knownFolders: nextKnownFolders, folderPopularity: nextPopularity);
   }
 
   Future<void> _pickAndImportAssets() async {
@@ -31,7 +31,7 @@ extension _SerenityShellImportAndLoadPlan on _SerenityShellState {
   }
 
   Future<void> _importFiles(List<XFile> files) async {
-    if (files.isEmpty || _session == null) {
+    if (files.isEmpty || _persistenceState.session == null) {
       return;
     }
 
@@ -148,12 +148,12 @@ extension _SerenityShellImportAndLoadPlan on _SerenityShellState {
     }
 
     _updateSession(
-      _session!.copyWith(
+      _persistenceState.session!.copyWith(
         workspaces: _workspaces
             .map((entry) => entry.id == workspace.id ? entry.copyWith(windows: nextWindows, isOpen: true) : entry)
             .toList(),
-        knownFolders: _session!.knownFolders,
-        folderPopularity: _session!.folderPopularity,
+        knownFolders: _persistenceState.session!.knownFolders,
+        folderPopularity: _persistenceState.session!.folderPopularity,
       ),
     );
     _queueThumbnailRefresh(workspace.id);

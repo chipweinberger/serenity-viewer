@@ -31,7 +31,7 @@ extension _SerenityShellSeedAndSettings on _SerenityShellState {
   }
 
   Future<void> _openSettings() async {
-    final session = _session;
+    final session = _persistenceState.session;
     if (session == null) {
       return;
     }

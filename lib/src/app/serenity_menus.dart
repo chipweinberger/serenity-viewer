@@ -118,7 +118,7 @@ extension _SerenityShellMenus on _SerenityShellState {
                 label: 'Close',
                 onSelected: focusedWindow == null
                     ? null
-                    : () => _removeWindow(_session!.activeWorkspaceId, focusedWindow.asset.id),
+                    : () => _removeWindow(_persistenceState.session!.activeWorkspaceId, focusedWindow.asset.id),
                 shortcut: const SingleActivator(LogicalKeyboardKey.backspace, meta: true),
               ),
             ],

@@ -51,3 +51,20 @@ class _SerenityWorkspaceViewportState {
   Offset gestureStartLocalFocalPoint = Offset.zero;
   Offset gestureAccumulatedPan = Offset.zero;
 }
+
+class _SerenityShellPersistenceState {
+  SerenitySessionState? session;
+  String? currentEnvironmentPath;
+  bool hasUnsavedChanges = false;
+  bool isLoading = true;
+  bool isPromptingForStartupEnvironment = false;
+}
+
+class _SerenityShellUiFields {
+  SerenityScreen screen = SerenityScreen.workspace;
+  WorkspaceLayoutMode workspaceLayoutMode = WorkspaceLayoutMode.freeform;
+  WorkspaceSort workspaceSort = WorkspaceSort.recentlyViewed;
+  bool editMode = false;
+  bool isDropTargetActive = false;
+  String? draggingTabWorkspaceId;
+}

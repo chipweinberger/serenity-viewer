@@ -8,12 +8,12 @@ extension _SerenityShellEnvironmentPersistence on _SerenityShellState {
     SerenitySessionState? sessionOverride,
     bool showMessageOnFailure = true,
   }) async {
-    final session = sessionOverride ?? _session;
+    final session = sessionOverride ?? _persistenceState.session;
     if (session == null) {
       return;
     }
 
-    _currentEnvironmentPath = path;
+    _persistenceState.currentEnvironmentPath = path;
     try {
       await _refreshActiveWorkspaceThumbnailIfNeeded();
 
@@ -41,12 +41,12 @@ extension _SerenityShellEnvironmentPersistence on _SerenityShellState {
       await file.writeAsBytes(encoded, flush: true);
       if (mounted) {
         setState(() {
-          _currentEnvironmentPath = file.path;
-          _hasUnsavedChanges = false;
+          _persistenceState.currentEnvironmentPath = file.path;
+          _persistenceState.hasUnsavedChanges = false;
         });
       } else {
-        _currentEnvironmentPath = file.path;
-        _hasUnsavedChanges = false;
+        _persistenceState.currentEnvironmentPath = file.path;
+        _persistenceState.hasUnsavedChanges = false;
       }
       await _storeLastEnvironmentPath(file.path);
       await _syncWindowTitle();
@@ -76,7 +76,7 @@ extension _SerenityShellEnvironmentPersistence on _SerenityShellState {
   }
 
   Future<void> _saveEnvironment() async {
-    final path = _currentEnvironmentPath;
+    final path = _persistenceState.currentEnvironmentPath;
     if (path == null || path.isEmpty) {
       await _saveEnvironmentAs();
       return;
@@ -115,12 +115,12 @@ extension _SerenityShellEnvironmentPersistence on _SerenityShellState {
       }
 
       setState(() {
-        _session = resolved;
-        _currentEnvironmentPath = path;
-        _screen = SerenityScreen.workspace;
-        _workspaceLayoutMode = WorkspaceLayoutMode.freeform;
-        _editMode = false;
-        _isLoading = false;
+        _persistenceState.session = resolved;
+        _persistenceState.currentEnvironmentPath = path;
+        _uiState.screen = SerenityScreen.workspace;
+        _uiState.workspaceLayoutMode = WorkspaceLayoutMode.freeform;
+        _uiState.editMode = false;
+        _persistenceState.isLoading = false;
       });
       _refreshWorkspaceViewTracking();
       if (persistAsLastOpened) {
@@ -159,12 +159,12 @@ extension _SerenityShellEnvironmentPersistence on _SerenityShellState {
     }
 
     setState(() {
-      _session = seeded;
-      _currentEnvironmentPath = location.path;
-      _screen = SerenityScreen.workspace;
-      _workspaceLayoutMode = WorkspaceLayoutMode.freeform;
-      _editMode = false;
-      _isLoading = false;
+      _persistenceState.session = seeded;
+      _persistenceState.currentEnvironmentPath = location.path;
+      _uiState.screen = SerenityScreen.workspace;
+      _uiState.workspaceLayoutMode = WorkspaceLayoutMode.freeform;
+      _uiState.editMode = false;
+      _persistenceState.isLoading = false;
     });
     _refreshWorkspaceViewTracking();
     await _saveEnvironmentToPath(location.path, sessionOverride: seeded);
@@ -176,13 +176,13 @@ extension _SerenityShellEnvironmentPersistence on _SerenityShellState {
   }
 
   Future<void> _promptForStartupEnvironment() async {
-    if (!mounted || _session != null || _isPromptingForStartupEnvironment) {
+    if (!mounted || _persistenceState.session != null || _persistenceState.isPromptingForStartupEnvironment) {
       return;
     }
 
-    _isPromptingForStartupEnvironment = true;
+    _persistenceState.isPromptingForStartupEnvironment = true;
     try {
-      while (mounted && _session == null) {
+      while (mounted && _persistenceState.session == null) {
         if (!mounted) {
           return;
         }
@@ -226,7 +226,7 @@ extension _SerenityShellEnvironmentPersistence on _SerenityShellState {
         }
       }
     } finally {
-      _isPromptingForStartupEnvironment = false;
+      _persistenceState.isPromptingForStartupEnvironment = false;
     }
   }
 
@@ -252,8 +252,8 @@ extension _SerenityShellEnvironmentPersistence on _SerenityShellState {
       updated = true;
     }
 
-    if (updated && mounted && _session != null) {
-      _updateSession(_session!.copyWith(workspaces: nextWorkspaces));
+    if (updated && mounted && _persistenceState.session != null) {
+      _updateSession(_persistenceState.session!.copyWith(workspaces: nextWorkspaces));
     }
   }
 }

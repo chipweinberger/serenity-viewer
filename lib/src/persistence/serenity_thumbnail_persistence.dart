@@ -24,7 +24,7 @@ extension _SerenityShellThumbnailPersistence on _SerenityShellState {
   }
 
   Future<void> _refreshActiveWorkspaceThumbnailIfNeeded() async {
-    if (_screen != SerenityScreen.workspace) {
+    if (_uiState.screen != SerenityScreen.workspace) {
       return;
     }
 
@@ -113,7 +113,7 @@ extension _SerenityShellThumbnailPersistence on _SerenityShellState {
       _thumbnailRefreshState.refreshInFlight.add(workspaceId);
     }
 
-    final session = _session;
+    final session = _persistenceState.session;
     if (session == null) {
       _thumbnailRefreshState.refreshInFlight.remove(workspaceId);
       return;
@@ -147,7 +147,7 @@ extension _SerenityShellThumbnailPersistence on _SerenityShellState {
       return;
     }
 
-    final freshSession = _session;
+    final freshSession = _persistenceState.session;
     if (freshSession == null) {
       setState(() {
         _thumbnailRefreshState.dirtyWorkspaces.remove(workspaceId);

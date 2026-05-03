@@ -6,7 +6,7 @@ extension _SerenityShellWorkspaceLinks on _SerenityShellState {
   static final RegExp _urlPattern = RegExp(r"""((?:https?:\/\/)|(?:www\.))[^\s<>"']+""", caseSensitive: false);
 
   bool _shouldHandlePasteLinksShortcut(KeyDownEvent event) {
-    if (_screen != SerenityScreen.workspace || _session == null) {
+    if (_uiState.screen != SerenityScreen.workspace || _persistenceState.session == null) {
       return false;
     }
     if (_isTextInputFocused()) {

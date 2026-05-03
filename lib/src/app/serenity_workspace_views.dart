@@ -7,7 +7,7 @@ extension _SerenityShellWorkspaceViews on _SerenityShellState {
 
   bool get _shouldTrackWorkspaceViewSession {
     return _workspaceViewTrackingState.isAppForeground &&
-        _screen == SerenityScreen.workspace &&
+        _uiState.screen == SerenityScreen.workspace &&
         _activeWorkspaceOrNull != null;
   }
 
@@ -76,7 +76,7 @@ extension _SerenityShellWorkspaceViews on _SerenityShellState {
   }
 
   void _incrementWorkspaceViews(String workspaceId) {
-    final session = _session;
+    final session = _persistenceState.session;
     if (session == null) {
       return;
     }

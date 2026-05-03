@@ -24,7 +24,7 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
   }
 
   void _toggleWorkspaceOpen(String workspaceId) {
-    final session = _session!;
+    final session = _persistenceState.session!;
     _updateSession(SerenityWorkspaceMutations.toggleWorkspaceOpen(session, workspaceId));
   }
 
@@ -68,7 +68,7 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
   }
 
   Future<void> _confirmDeleteWorkspace(String workspaceId) async {
-    final session = _session;
+    final session = _persistenceState.session;
     if (session == null) {
       return;
     }
@@ -99,7 +99,7 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
   }
 
   void _deleteWorkspace(String workspaceId) {
-    final session = _session;
+    final session = _persistenceState.session;
     if (session == null) {
       return;
     }
@@ -141,7 +141,7 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
 
     _updateSession(session.copyWith(workspaces: normalizedWorkspaces, activeWorkspaceId: nextActiveWorkspace.id));
 
-    if (_screen != SerenityScreen.library && nextActiveWorkspace.id != workspaceId) {
+    if (_uiState.screen != SerenityScreen.library && nextActiveWorkspace.id != workspaceId) {
       _showWorkspaceScreen(resetEditMode: false);
     }
   }
@@ -166,7 +166,7 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
   }
 
   Future<void> _moveSelectedExposeWindowsToWorkspace(String destinationWorkspaceId) async {
-    final session = _session;
+    final session = _persistenceState.session;
     if (session == null || _windowInteractionState.selectedExposeWindowIds.isEmpty) {
       return;
     }
@@ -237,7 +237,7 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
   }
 
   void _reorderOpenWorkspace(String sourceWorkspaceId, String targetWorkspaceId) {
-    if (_session == null || sourceWorkspaceId == targetWorkspaceId) {
+    if (_persistenceState.session == null || sourceWorkspaceId == targetWorkspaceId) {
       return;
     }
 
@@ -246,11 +246,11 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
       sourceWorkspaceId: sourceWorkspaceId,
       targetWorkspaceId: targetWorkspaceId,
     );
-    _updateSession(_session!.copyWith(workspaces: nextWorkspaces));
+    _updateSession(_persistenceState.session!.copyWith(workspaces: nextWorkspaces));
   }
 
   void _createWorkspace() {
-    final session = _session!;
+    final session = _persistenceState.session!;
     final nextIndex = _nextWorkspaceOrdinal();
     final now = DateTime.now();
     final workspace = WorkspaceState(
@@ -275,15 +275,16 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
 
   void _handleShortcut(LogicalKeyboardKey key) {
     if (key == LogicalKeyboardKey.arrowUp) {
-      if (_screen == SerenityScreen.library) {
+      if (_uiState.screen == SerenityScreen.library) {
         _showWorkspaceScreen(clearExposeSelection: false);
-      } else if (_screen == SerenityScreen.workspace && _workspaceLayoutMode != WorkspaceLayoutMode.expose) {
+      } else if (_uiState.screen == SerenityScreen.workspace &&
+          _uiState.workspaceLayoutMode != WorkspaceLayoutMode.expose) {
         _toggleExpose();
       }
     } else if (key == LogicalKeyboardKey.arrowDown) {
-      if (_screen == SerenityScreen.workspace && _workspaceLayoutMode == WorkspaceLayoutMode.expose) {
+      if (_uiState.screen == SerenityScreen.workspace && _uiState.workspaceLayoutMode == WorkspaceLayoutMode.expose) {
         _showWorkspaceScreen(clearExposeSelection: false);
-      } else if (_screen == SerenityScreen.workspace) {
+      } else if (_uiState.screen == SerenityScreen.workspace) {
         unawaited(_toggleWorkspaceOverview());
       }
     } else if (key == LogicalKeyboardKey.arrowLeft) {
@@ -332,7 +333,7 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
       return workspace.name.toLowerCase().contains(query);
     }).toList();
 
-    switch (_workspaceSort) {
+    switch (_uiState.workspaceSort) {
       case WorkspaceSort.views:
         filtered.sort((a, b) => b.views.compareTo(a.views));
         break;

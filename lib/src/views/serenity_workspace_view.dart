@@ -133,7 +133,8 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
                                   _windowInteractionState.previousWindowZOrders.containsKey(window.asset.id)
                                   ? () => _restorePreviousWindowZOrder(window.asset.id)
                                   : null,
-                              onClose: () => _removeWindow(_session!.activeWorkspaceId, window.asset.id),
+                              onClose: () =>
+                                  _removeWindow(_persistenceState.session!.activeWorkspaceId, window.asset.id),
                               isOptionGestureTarget: _windowInteractionState.optionGestureWindowId == window.asset.id,
                               onOptionGestureWindowRequested: () => _setOptionGestureWindowId(window.asset.id),
                               onOptionGestureReleased: () => _setOptionGestureWindowId(null),
@@ -152,30 +153,35 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
   }
 
   Widget _buildWorkspaceCanvas(BuildContext context, WorkspaceState workspace) {
-    final isActiveWorkspace = workspace.id == _session!.activeWorkspaceId;
+    final isActiveWorkspace = workspace.id == _persistenceState.session!.activeWorkspaceId;
     final isExposeMode =
-        isActiveWorkspace && _screen == SerenityScreen.workspace && _workspaceLayoutMode == WorkspaceLayoutMode.expose;
+        isActiveWorkspace &&
+        _uiState.screen == SerenityScreen.workspace &&
+        _uiState.workspaceLayoutMode == WorkspaceLayoutMode.expose;
     final windows = isExposeMode
         ? ([...workspace.windows]..sort((a, b) => a.asset.filename.compareTo(b.asset.filename)))
         : ([...workspace.windows]..sort((a, b) => a.zIndex.compareTo(b.zIndex)));
     final focusedWindowId = windows.isEmpty || isExposeMode ? null : windows.last.asset.id;
-    final loadPlan = buildWorkspaceLoadPlan(session: _session!, activeWorkspace: _activeWorkspaceOrNull);
+    final loadPlan = buildWorkspaceLoadPlan(
+      session: _persistenceState.session!,
+      activeWorkspace: _activeWorkspaceOrNull,
+    );
     _syncSharedVideoControllers(loadPlan);
 
     return DropTarget(
       onDragEntered: (_) {
         setState(() {
-          _isDropTargetActive = true;
+          _uiState.isDropTargetActive = true;
         });
       },
       onDragExited: (_) {
         setState(() {
-          _isDropTargetActive = false;
+          _uiState.isDropTargetActive = false;
         });
       },
       onDragDone: (details) async {
         setState(() {
-          _isDropTargetActive = false;
+          _uiState.isDropTargetActive = false;
         });
         await _importFiles(details.files);
       },
@@ -225,7 +231,7 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
                                 sharedVideoInitialization: sharedVideoControllerEntry?.initialization,
                                 isVideoPaused: _isVideoWindowPaused(window.asset.id),
                                 isSelected: _windowInteractionState.selectedExposeWindowIds.contains(window.asset.id),
-                                editMode: _editMode,
+                                editMode: _uiState.editMode,
                                 onOpen: () {
                                   _focusWindow(window.asset.id);
                                   _toggleExpose();
@@ -235,7 +241,8 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
                                 onShowInFinder: window.asset.filePath == null
                                     ? null
                                     : () => unawaited(_revealAssetInFinder(window.asset)),
-                                onRemove: () => _removeWindow(_session!.activeWorkspaceId, window.asset.id),
+                                onRemove: () =>
+                                    _removeWindow(_persistenceState.session!.activeWorkspaceId, window.asset.id),
                               );
                             },
                           ),
@@ -248,7 +255,7 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
           else
             _buildFreeformWorkspaceViewport(context, workspace, windows, loadPlan, focusedWindowId),
           if (!isExposeMode && windows.isEmpty) Positioned.fill(child: _buildEmptyWorkspaceCanvasState(context)),
-          if (_isDropTargetActive)
+          if (_uiState.isDropTargetActive)
             Positioned.fill(
               child: IgnorePointer(
                 child: BackdropFilter(
@@ -277,7 +284,7 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
       return const SizedBox.shrink();
     }
 
-    final activeWorkspaceId = _session!.activeWorkspaceId;
+    final activeWorkspaceId = _persistenceState.session!.activeWorkspaceId;
     final activeWorkspaceIndex = openWorkspaces.indexWhere((workspace) => workspace.id == activeWorkspaceId);
     final safeActiveIndex = activeWorkspaceIndex < 0 ? 0 : activeWorkspaceIndex;
 

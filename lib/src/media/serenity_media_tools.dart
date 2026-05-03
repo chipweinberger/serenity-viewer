@@ -41,7 +41,7 @@ extension _SerenityShellMediaTools on _SerenityShellState {
   }
 
   void _syncSharedVideoControllers(SerenityLoadPlan loadPlan) {
-    final session = _session;
+    final session = _persistenceState.session;
     if (session == null) {
       return;
     }

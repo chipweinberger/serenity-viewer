@@ -24,7 +24,7 @@ extension _SerenityShellWindowActions on _SerenityShellState {
 
   void _handleOptionGestureHover(PointerHoverEvent event, WorkspaceState workspace) {
     final targetWindowId = _windowInteractionState.optionGestureWindowId;
-    if (_screen != SerenityScreen.workspace || _workspaceLayoutMode == WorkspaceLayoutMode.expose) {
+    if (_uiState.screen != SerenityScreen.workspace || _uiState.workspaceLayoutMode == WorkspaceLayoutMode.expose) {
       return;
     }
     if (_isCommandPressedForContentGesture || !_isOptionPressedForWindowGesture || targetWindowId == null) {
@@ -67,7 +67,7 @@ extension _SerenityShellWindowActions on _SerenityShellState {
 
   void _collateWorkspaceWindows() {
     final workspace = _activeWorkspaceOrNull;
-    if (workspace == null || _workspaceLayoutMode == WorkspaceLayoutMode.expose) {
+    if (workspace == null || _uiState.workspaceLayoutMode == WorkspaceLayoutMode.expose) {
       return;
     }
 
@@ -86,7 +86,7 @@ extension _SerenityShellWindowActions on _SerenityShellState {
 
   Future<void> _confirmCollateWorkspaceWindows() async {
     final workspace = _activeWorkspaceOrNull;
-    if (workspace == null || _workspaceLayoutMode != WorkspaceLayoutMode.freeform) {
+    if (workspace == null || _uiState.workspaceLayoutMode != WorkspaceLayoutMode.freeform) {
       return;
     }
 
@@ -164,7 +164,7 @@ extension _SerenityShellWindowActions on _SerenityShellState {
   }
 
   void _handleWorkspacePanZoomStart(PointerPanZoomStartEvent event, WorkspaceState workspace) {
-    if (_screen != SerenityScreen.workspace || _workspaceLayoutMode == WorkspaceLayoutMode.expose) {
+    if (_uiState.screen != SerenityScreen.workspace || _uiState.workspaceLayoutMode == WorkspaceLayoutMode.expose) {
       _workspaceViewportState.isGestureActive = false;
       return;
     }
@@ -295,7 +295,7 @@ extension _SerenityShellWindowActions on _SerenityShellState {
   }
 
   void _pauseAllVideos() {
-    final session = _session;
+    final session = _persistenceState.session;
     if (session == null) {
       return;
     }

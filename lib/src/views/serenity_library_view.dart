@@ -6,7 +6,10 @@ extension _SerenityShellLibraryView on _SerenityShellState {
   Widget _buildWorkspaceOverview(BuildContext context) {
     final visibleOpenWorkspaces = _openWorkspaces.where(_matchesWorkspaceSearch).toList();
     final knownWorkspaces = _sortedKnownWorkspaces();
-    final loadPlan = buildWorkspaceLoadPlan(session: _session!, activeWorkspace: _activeWorkspaceOrNull);
+    final loadPlan = buildWorkspaceLoadPlan(
+      session: _persistenceState.session!,
+      activeWorkspace: _activeWorkspaceOrNull,
+    );
     const thumbnailWidth = 224.0;
     const thumbnailHeight = 192.0;
     final knownWorkspaceCount = knownWorkspaces.length;
@@ -119,26 +122,26 @@ extension _SerenityShellLibraryView on _SerenityShellState {
                       children: [
                         _buildGlassChip(
                           context: context,
-                          selected: _workspaceSort == WorkspaceSort.recentlyCreated,
-                          onTap: () => setState(() => _workspaceSort = WorkspaceSort.recentlyCreated),
+                          selected: _uiState.workspaceSort == WorkspaceSort.recentlyCreated,
+                          onTap: () => setState(() => _uiState.workspaceSort = WorkspaceSort.recentlyCreated),
                           child: const Text('Date created'),
                         ),
                         _buildGlassChip(
                           context: context,
-                          selected: _workspaceSort == WorkspaceSort.name,
-                          onTap: () => setState(() => _workspaceSort = WorkspaceSort.name),
+                          selected: _uiState.workspaceSort == WorkspaceSort.name,
+                          onTap: () => setState(() => _uiState.workspaceSort = WorkspaceSort.name),
                           child: const Text('Alphabetical'),
                         ),
                         _buildGlassChip(
                           context: context,
-                          selected: _workspaceSort == WorkspaceSort.views,
-                          onTap: () => setState(() => _workspaceSort = WorkspaceSort.views),
+                          selected: _uiState.workspaceSort == WorkspaceSort.views,
+                          onTap: () => setState(() => _uiState.workspaceSort = WorkspaceSort.views),
                           child: const Text('Most views'),
                         ),
                         _buildGlassChip(
                           context: context,
-                          selected: _workspaceSort == WorkspaceSort.recentlyViewed,
-                          onTap: () => setState(() => _workspaceSort = WorkspaceSort.recentlyViewed),
+                          selected: _uiState.workspaceSort == WorkspaceSort.recentlyViewed,
+                          onTap: () => setState(() => _uiState.workspaceSort = WorkspaceSort.recentlyViewed),
                           child: const Text('Recently viewed'),
                         ),
                       ],
@@ -222,11 +225,11 @@ extension _SerenityShellLibraryView on _SerenityShellState {
   }
 
   Widget _buildBody(BuildContext context) {
-    if (_isLoading || _session == null) {
+    if (_persistenceState.isLoading || _persistenceState.session == null) {
       return _buildLoadingView();
     }
 
-    final activeScreenIndex = switch (_screen) {
+    final activeScreenIndex = switch (_uiState.screen) {
       SerenityScreen.workspace => 0,
       SerenityScreen.library => 1,
     };

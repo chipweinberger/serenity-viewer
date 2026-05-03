@@ -7,7 +7,7 @@ extension _SerenityShellSessionActions on _SerenityShellState {
 
   void _updateSession(SerenitySessionState nextSession) {
     setState(() {
-      _session = nextSession;
+      _persistenceState.session = nextSession;
     });
     _refreshWorkspaceViewTracking();
     unawaited(_syncWindowTitle());
@@ -15,7 +15,7 @@ extension _SerenityShellSessionActions on _SerenityShellState {
   }
 
   void _replaceWorkspace(WorkspaceState nextWorkspace, {bool queueThumbnail = true}) {
-    final session = _session!;
+    final session = _persistenceState.session!;
     _updateSession(SerenityWorkspaceMutations.replaceWorkspace(session, nextWorkspace));
     if (queueThumbnail) {
       _thumbnailRefreshState.dirtyWorkspaces.add(nextWorkspace.id);
@@ -23,7 +23,7 @@ extension _SerenityShellSessionActions on _SerenityShellState {
   }
 
   void _toggleExpose() {
-    final nextWorkspaceLayoutMode = _workspaceLayoutMode == WorkspaceLayoutMode.expose
+    final nextWorkspaceLayoutMode = _uiState.workspaceLayoutMode == WorkspaceLayoutMode.expose
         ? WorkspaceLayoutMode.freeform
         : WorkspaceLayoutMode.expose;
     _showWorkspaceScreen(
@@ -65,8 +65,8 @@ extension _SerenityShellSessionActions on _SerenityShellState {
   void _applyExposeGridToWorkspace() {
     final workspace = _activeWorkspaceOrNull;
     if (workspace == null ||
-        _screen != SerenityScreen.workspace ||
-        _workspaceLayoutMode != WorkspaceLayoutMode.expose) {
+        _uiState.screen != SerenityScreen.workspace ||
+        _uiState.workspaceLayoutMode != WorkspaceLayoutMode.expose) {
       return;
     }
     if (_workspaceViewportState.viewportSize.width <= 0 ||
@@ -114,8 +114,8 @@ extension _SerenityShellSessionActions on _SerenityShellState {
   Future<void> _confirmApplyExposeGridToWorkspace() async {
     final workspace = _activeWorkspaceOrNull;
     if (workspace == null ||
-        _screen != SerenityScreen.workspace ||
-        _workspaceLayoutMode != WorkspaceLayoutMode.expose ||
+        _uiState.screen != SerenityScreen.workspace ||
+        _uiState.workspaceLayoutMode != WorkspaceLayoutMode.expose ||
         workspace.windows.isEmpty) {
       return;
     }
@@ -142,11 +142,11 @@ extension _SerenityShellSessionActions on _SerenityShellState {
   }
 
   Future<void> _toggleWorkspaceOverview() async {
-    if (_screen == SerenityScreen.workspace) {
+    if (_uiState.screen == SerenityScreen.workspace) {
       unawaited(_refreshActiveWorkspaceThumbnailIfNeeded());
     }
 
-    final showingLibrary = _screen == SerenityScreen.library;
+    final showingLibrary = _uiState.screen == SerenityScreen.library;
     if (showingLibrary) {
       _showWorkspaceScreen();
     } else {
@@ -155,7 +155,7 @@ extension _SerenityShellSessionActions on _SerenityShellState {
   }
 
   Future<void> _showWorkspaceOverview() async {
-    if (_screen == SerenityScreen.workspace) {
+    if (_uiState.screen == SerenityScreen.workspace) {
       unawaited(_refreshActiveWorkspaceThumbnailIfNeeded());
     }
 
@@ -169,9 +169,9 @@ extension _SerenityShellSessionActions on _SerenityShellState {
       return;
     }
 
-    final currentIndex = _screen == SerenityScreen.library
+    final currentIndex = _uiState.screen == SerenityScreen.library
         ? 0
-        : openWorkspaces.indexWhere((workspace) => workspace.id == _session!.activeWorkspaceId) + 1;
+        : openWorkspaces.indexWhere((workspace) => workspace.id == _persistenceState.session!.activeWorkspaceId) + 1;
     final nextIndex = (currentIndex + direction) % tabCount;
     final safeIndex = nextIndex < 0 ? tabCount - 1 : nextIndex;
 
@@ -185,14 +185,14 @@ extension _SerenityShellSessionActions on _SerenityShellState {
   }
 
   Future<void> _setActiveWorkspace(String workspaceId) async {
-    final session = _session!;
+    final session = _persistenceState.session!;
     final currentWorkspaceId = session.activeWorkspaceId;
     if (currentWorkspaceId != workspaceId) {
       unawaited(_refreshActiveWorkspaceThumbnailIfNeeded());
     }
 
     final shouldPreserveExpose =
-        _screen == SerenityScreen.workspace && _workspaceLayoutMode == WorkspaceLayoutMode.expose;
+        _uiState.screen == SerenityScreen.workspace && _uiState.workspaceLayoutMode == WorkspaceLayoutMode.expose;
     _updateSession(
       session.copyWith(
         activeWorkspaceId: workspaceId,

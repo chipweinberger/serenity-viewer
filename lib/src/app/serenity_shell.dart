@@ -103,18 +103,8 @@ class _SerenityShellState extends State<SerenityShell> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _tabScrollController = ScrollController();
 
-  SerenitySessionState? _session;
-  String? _currentEnvironmentPath;
-  bool _hasUnsavedChanges = false;
-
-  SerenityScreen _screen = SerenityScreen.workspace;
-  WorkspaceLayoutMode _workspaceLayoutMode = WorkspaceLayoutMode.freeform;
-  WorkspaceSort _workspaceSort = WorkspaceSort.recentlyViewed;
-  bool _isLoading = true;
-  bool _editMode = false;
-  bool _isDropTargetActive = false;
-  bool _isPromptingForStartupEnvironment = false;
-  String? _draggingTabWorkspaceId;
+  final _SerenityShellPersistenceState _persistenceState = _SerenityShellPersistenceState();
+  final _SerenityShellUiFields _uiState = _SerenityShellUiFields();
 
   final _SerenityWindowInteractionState _windowInteractionState = _SerenityWindowInteractionState();
   final List<RecentlyClosedWindowEntry> _recentlyClosedWindows = [];
@@ -130,12 +120,12 @@ class _SerenityShellState extends State<SerenityShell> {
         WidgetsBinding.instance.runtimeType.toString().contains('Test');
   }
 
-  List<WorkspaceState> get _workspaces => _session?.workspaces ?? const [];
+  List<WorkspaceState> get _workspaces => _persistenceState.session?.workspaces ?? const [];
 
   List<WorkspaceState> get _openWorkspaces => _workspaces.where((workspace) => workspace.isOpen).toList();
 
   WorkspaceState? get _activeWorkspaceOrNull {
-    final session = _session;
+    final session = _persistenceState.session;
     if (session == null || session.workspaces.isEmpty) {
       return null;
     }
@@ -149,8 +139,8 @@ class _SerenityShellState extends State<SerenityShell> {
   }
 
   String get _windowTitle {
-    final path = _currentEnvironmentPath;
-    final suffix = _hasUnsavedChanges ? ' *' : '';
+    final path = _persistenceState.currentEnvironmentPath;
+    final suffix = _persistenceState.hasUnsavedChanges ? ' *' : '';
     if (path == null || path.isEmpty) {
       return 'Serenity$suffix';
     }
@@ -161,7 +151,7 @@ class _SerenityShellState extends State<SerenityShell> {
   void initState() {
     super.initState();
     _autosaveTimer = Timer.periodic(const Duration(minutes: 1), (_) {
-      if (_hasUnsavedChanges) {
+      if (_persistenceState.hasUnsavedChanges) {
         unawaited(_saveSession());
       }
     });

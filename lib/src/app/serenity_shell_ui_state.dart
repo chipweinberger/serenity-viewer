@@ -10,21 +10,21 @@ extension _SerenityShellUiState on _SerenityShellState {
     bool clearExposeSelection = false,
     bool refreshWorkspaceTracking = true,
   }) {
-    final nextScreen = screen ?? _screen;
-    final nextWorkspaceLayoutMode = workspaceLayoutMode ?? _workspaceLayoutMode;
-    final nextEditMode = resetEditMode ? false : _editMode;
+    final nextScreen = screen ?? _uiState.screen;
+    final nextWorkspaceLayoutMode = workspaceLayoutMode ?? _uiState.workspaceLayoutMode;
+    final nextEditMode = resetEditMode ? false : _uiState.editMode;
     final shouldClearSelection = clearExposeSelection && _windowInteractionState.selectedExposeWindowIds.isNotEmpty;
     final changed =
-        nextScreen != _screen ||
-        nextWorkspaceLayoutMode != _workspaceLayoutMode ||
-        nextEditMode != _editMode ||
+        nextScreen != _uiState.screen ||
+        nextWorkspaceLayoutMode != _uiState.workspaceLayoutMode ||
+        nextEditMode != _uiState.editMode ||
         shouldClearSelection;
     if (changed) {
       setState(() {
-        _screen = nextScreen;
-        _workspaceLayoutMode = nextWorkspaceLayoutMode;
+        _uiState.screen = nextScreen;
+        _uiState.workspaceLayoutMode = nextWorkspaceLayoutMode;
         if (resetEditMode) {
-          _editMode = false;
+          _uiState.editMode = false;
         }
         if (clearExposeSelection) {
           _windowInteractionState.selectedExposeWindowIds.clear();

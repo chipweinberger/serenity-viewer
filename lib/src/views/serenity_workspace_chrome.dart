@@ -57,7 +57,7 @@ extension _SerenityShellWorkspaceChrome on _SerenityShellState {
           children: [
             _buildGlassChip(
               context: context,
-              selected: _screen == SerenityScreen.library,
+              selected: _uiState.screen == SerenityScreen.library,
               onTap: _showWorkspaceOverview,
               child: const Row(
                 mainAxisSize: MainAxisSize.min,
@@ -76,9 +76,9 @@ extension _SerenityShellWorkspaceChrome on _SerenityShellState {
                       data: workspace.id,
                       maxSimultaneousDrags: 1,
                       dragAnchorStrategy: pointerDragAnchorStrategy,
-                      onDragStarted: () => setState(() => _draggingTabWorkspaceId = workspace.id),
-                      onDragEnd: (_) => setState(() => _draggingTabWorkspaceId = null),
-                      onDraggableCanceled: (_, __) => setState(() => _draggingTabWorkspaceId = null),
+                      onDragStarted: () => setState(() => _uiState.draggingTabWorkspaceId = workspace.id),
+                      onDragEnd: (_) => setState(() => _uiState.draggingTabWorkspaceId = null),
+                      onDraggableCanceled: (_, __) => setState(() => _uiState.draggingTabWorkspaceId = null),
                       feedback: Material(
                         color: Colors.transparent,
                         child: _buildWorkspaceTabChip(context, workspace, isDropTarget: false),
@@ -107,15 +107,16 @@ extension _SerenityShellWorkspaceChrome on _SerenityShellState {
   }
 
   Widget _buildWorkspaceTabChip(BuildContext context, WorkspaceState workspace, {required bool isDropTarget}) {
-    final isSelected = _screen != SerenityScreen.library && workspace.id == _session!.activeWorkspaceId;
+    final isSelected =
+        _uiState.screen != SerenityScreen.library && workspace.id == _persistenceState.session!.activeWorkspaceId;
     final shouldMoveSelectedWindows =
-        _screen == SerenityScreen.workspace && _windowInteractionState.selectedExposeWindowIds.isNotEmpty;
+        _uiState.screen == SerenityScreen.workspace && _windowInteractionState.selectedExposeWindowIds.isNotEmpty;
 
     return AnimatedScale(
       duration: const Duration(milliseconds: 120),
       scale: isDropTarget ? 1.04 : 1,
       child: Opacity(
-        opacity: _draggingTabWorkspaceId == workspace.id ? 0.7 : 1,
+        opacity: _uiState.draggingTabWorkspaceId == workspace.id ? 0.7 : 1,
         child: _buildGlassChip(
           context: context,
           selected: isSelected,
@@ -192,9 +193,10 @@ extension _SerenityShellWorkspaceChrome on _SerenityShellState {
     final imageLabel = '${mediaCounts.images} image${mediaCounts.images == 1 ? '' : 's'}';
     final videoLabel = '${mediaCounts.videos} video${mediaCounts.videos == 1 ? '' : 's'}';
     final linkLabel = '${mediaCounts.links} link${mediaCounts.links == 1 ? '' : 's'}';
-    final isExposeMode = _screen == SerenityScreen.workspace && _workspaceLayoutMode == WorkspaceLayoutMode.expose;
+    final isExposeMode =
+        _uiState.screen == SerenityScreen.workspace && _uiState.workspaceLayoutMode == WorkspaceLayoutMode.expose;
     final showExposeSelectionHud =
-        _screen == SerenityScreen.workspace && _windowInteractionState.selectedExposeWindowIds.isNotEmpty;
+        _uiState.screen == SerenityScreen.workspace && _windowInteractionState.selectedExposeWindowIds.isNotEmpty;
     final selectedCount = _windowInteractionState.selectedExposeWindowIds.length;
     final modeActions = <Widget>[
       if (!isExposeMode) ...[
@@ -242,13 +244,13 @@ extension _SerenityShellWorkspaceChrome on _SerenityShellState {
       mainAxisSize: MainAxisSize.min,
       children: [
         _buildWorkspaceHudAction(
-          tooltip: _workspaceLayoutMode == WorkspaceLayoutMode.expose ? 'Freeform' : 'Expose',
+          tooltip: _uiState.workspaceLayoutMode == WorkspaceLayoutMode.expose ? 'Freeform' : 'Expose',
           onTap: _toggleExpose,
           child: SizedBox(
             width: 38,
             height: 38,
             child: Icon(
-              _workspaceLayoutMode == WorkspaceLayoutMode.expose ? Icons.grid_view_rounded : Icons.apps_rounded,
+              _uiState.workspaceLayoutMode == WorkspaceLayoutMode.expose ? Icons.grid_view_rounded : Icons.apps_rounded,
               size: 17,
               color: SerenityTheme.textPrimary,
             ),

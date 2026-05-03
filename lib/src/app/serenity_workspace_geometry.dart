@@ -31,7 +31,7 @@ extension _SerenityShellWorkspaceGeometry on _SerenityShellState {
   }
 
   void _setWorkspaceViewport({required String workspaceId, Offset? center, double? zoom, bool queueThumbnail = false}) {
-    final session = _session;
+    final session = _persistenceState.session;
     if (session == null) {
       return;
     }
