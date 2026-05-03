@@ -13,6 +13,7 @@ import 'package:serenity_viewer/src/app/dependencies/shell_dependencies.dart';
 import 'package:serenity_viewer/src/app/environment/app_environment_bookmark_synchronizer.dart';
 import 'package:serenity_viewer/src/app/environment/app_environment_controller.dart';
 import 'package:serenity_viewer/src/app/environment/app_environment_state.dart';
+import 'package:serenity_viewer/src/app/app_shell/app_shell_content_builder.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_menu_builder.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_window_history_controller.dart';
 import 'package:serenity_viewer/src/app/platform/app_shell_platform_bridge.dart';
@@ -34,20 +35,12 @@ import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/video_tools/settings_and_video_models.dart';
 import 'package:serenity_viewer/src/environment/asset.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
-import 'package:serenity_viewer/src/workspace_loading/workspace_load_plan.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
 import 'package:serenity_viewer/src/links/workspace_links_controller.dart';
-import 'package:serenity_viewer/src/links/workspace_links_dialog.dart';
 import 'package:serenity_viewer/src/settings/behavior/settings_dialog.dart';
-import 'package:serenity_viewer/src/library/library_screen.dart';
 import 'package:serenity_viewer/src/thumbnails/thumbnail_controller.dart';
-import 'package:serenity_viewer/src/workspace/screen/workspace_chrome_overlay.dart';
-import 'package:serenity_viewer/src/workspace/screen/workspace_chrome_view_model.dart';
-import 'package:serenity_viewer/src/workspace/screen/workspace_hud.dart';
-import 'package:serenity_viewer/src/workspace/screen/workspace_screen.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 
-part 'app_shell_content.dart';
 part 'app_shell_environment_actions.dart';
 part 'app_shell_media_import_actions.dart';
 part 'app_shell_navigation_actions.dart';
@@ -230,6 +223,59 @@ class _AppShellState extends State<AppShell> {
       focusedWindowIsSelected: focusedWindowIsSelected,
       recentlyClosedWindows: _recentlyClosedWindows,
     );
+  }
+
+  Widget _buildShellContent(BuildContext context) {
+    if (_persistenceState.isLoading || _persistenceState.environment == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return AppShellContentBuilder(
+      context: context,
+      uiState: _uiState,
+      environment: _persistenceState.environment!,
+      windowTitle: _windowTitle,
+      workspaces: _workspaces,
+      openWorkspaces: _openWorkspaces,
+      activeWorkspace: _activeWorkspace,
+      activeWorkspaceOrNull: _activeWorkspaceOrNull,
+      windowInteractionState: _windowInteractionState,
+      workspaceViewportState: _workspaceViewportState,
+      chromeController: _chromeController,
+      mediaBridge: _mediaBridge,
+      workspaceShellController: _workspaceShellController,
+      workspaceLinksController: _workspaceLinksController,
+      thumbnailController: _thumbnailController,
+      windowHistoryController: _windowHistoryController,
+      searchController: _handles.searchController,
+      tabScrollController: _handles.tabScrollController,
+      commitStateChange: setState,
+      importFiles: _importFiles,
+      handleOptionGestureHover: _handleOptionGestureHover,
+      handleWorkspacePanZoomStart: _handleWorkspacePanZoomStart,
+      handleWorkspacePanZoomUpdate: _handleWorkspacePanZoomUpdate,
+      handleWorkspacePanZoomEnd: _handleWorkspacePanZoomEnd,
+      focusWindow: _focusWindow,
+      restorePreviousWindowZOrder: _restorePreviousWindowZOrder,
+      moveWindow: _moveWindow,
+      resizeWindow: _resizeWindow,
+      transformWindowFromTrackpad: _transformWindowFromTrackpad,
+      fitWindowToContent: _fitWindowToContent,
+      setWindowZoom: _setWindowZoom,
+      setVideoPosition: _setVideoPosition,
+      cycleVideoPlaybackSpeed: _cycleVideoPlaybackSpeed,
+      setWindowIntrinsicSize: _setWindowIntrinsicSize,
+      isVideoWindowPaused: _isVideoWindowPaused,
+      toggleVideoPlayback: _toggleVideoPlayback,
+      toggleExpose: _toggleExpose,
+      setPinnedHoverWindow: _setPinnedHoverWindow,
+      clearPinnedHoverWindow: _clearPinnedHoverWindow,
+      flashWindow: _flashWindow,
+      setActiveGestureWindow: _setActiveGestureWindow,
+      fitWorkspaceViewportToContent: _fitWorkspaceViewportToContent,
+      confirmCollateWorkspaceWindows: _confirmCollateWorkspaceWindows,
+      setWorkspaceViewport: _setWorkspaceViewport,
+    ).build();
   }
 
   @override
