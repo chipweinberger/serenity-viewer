@@ -24,7 +24,11 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
   }
 
   void _toggleWorkspaceOpen(String workspaceId) {
-    _workspaceController.toggleWorkspaceOpen(_persistenceState.environment!, workspaceId, _updateEnvironment);
+    _workspaceController.environment.toggleWorkspaceOpen(
+      _persistenceState.environment!,
+      workspaceId,
+      _updateEnvironment,
+    );
   }
 
   Future<void> _renameWorkspace(String workspaceId) async {
@@ -171,7 +175,7 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
   Future<void> _moveSelectedExposeWindowsToWorkspace(String destinationWorkspaceId) async {
     final environment = _persistenceState.environment;
     final sourceWorkspace = _activeWorkspaceOrNull;
-    if (!_workspaceController.canMoveSelectedWindowsToWorkspace(
+    if (!_workspaceController.environment.canMoveSelectedWindowsToWorkspace(
       environment: environment,
       sourceWorkspace: sourceWorkspace,
       destinationWorkspaceId: destinationWorkspaceId,
@@ -201,7 +205,7 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
     }
 
     final destinationWorkspace = destinationMatches.first;
-    final selectedWindowCount = _workspaceController.selectedExposeWindowCount(sourceWorkspace);
+    final selectedWindowCount = _workspaceController.interaction.selectedExposeWindowCount(sourceWorkspace);
     if (selectedWindowCount == 0) {
       _clearExposeSelection();
       return;
@@ -212,7 +216,7 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
       return;
     }
 
-    _workspaceController.moveSelectedExposeWindowsToWorkspace(
+    _workspaceController.environment.moveSelectedExposeWindowsToWorkspace(
       environment: environment,
       sourceWorkspace: sourceWorkspace,
       destinationWorkspace: destinationWorkspace,
@@ -243,7 +247,7 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
   }
 
   void _reorderOpenWorkspace(String sourceWorkspaceId, String targetWorkspaceId) {
-    _workspaceController.reorderOpenWorkspace(
+    _workspaceController.environment.reorderOpenWorkspace(
       _persistenceState.environment,
       _workspaces,
       sourceWorkspaceId: sourceWorkspaceId,
