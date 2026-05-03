@@ -229,6 +229,9 @@ extension _SerenityShellLibraryView on _SerenityShellState {
       return _buildLoadingView();
     }
 
+    final session = _persistenceState.session!;
+    final workspaceLoadPlan = buildWorkspaceLoadPlan(session: session, activeWorkspace: _activeWorkspaceOrNull);
+    _syncSharedVideoControllers(workspaceLoadPlan);
     final activeScreenIndex = switch (_uiState.screen) {
       SerenityScreen.workspace => 0,
       SerenityScreen.library => 1,
@@ -239,7 +242,53 @@ extension _SerenityShellLibraryView on _SerenityShellState {
         Positioned.fill(
           child: IndexedStack(
             index: activeScreenIndex,
-            children: [_buildWorkspaceScreen(context), _buildWorkspaceOverview(context)],
+            children: [
+              SerenityWorkspaceScreen(
+                session: session,
+                openWorkspaces: _openWorkspaces,
+                chromeState: _uiState,
+                windowInteractionState: _windowInteractionState,
+                loadPlan: workspaceLoadPlan,
+                sharedVideoLookup: (window, {required isLoaded}) {
+                  final entry = _sharedVideoControllerForWindow(window, isLoaded: isLoaded);
+                  if (entry == null) {
+                    return null;
+                  }
+                  return SerenitySharedVideoState(controller: entry.controller, initialization: entry.initialization);
+                },
+                actions: SerenityWorkspaceScreenActions(
+                  setDropTargetActive: (isActive) => setState(() => _uiState.isDropTargetActive = isActive),
+                  importFiles: _importFiles,
+                  trackViewportSize: (viewportSize) => _workspaceViewportState.viewportSize = viewportSize,
+                  handleOptionGestureHover: _handleOptionGestureHover,
+                  handleWorkspacePanZoomStart: _handleWorkspacePanZoomStart,
+                  handleWorkspacePanZoomUpdate: _handleWorkspacePanZoomUpdate,
+                  handleWorkspacePanZoomEnd: _handleWorkspacePanZoomEnd,
+                  focusWindow: _focusWindow,
+                  restorePreviousWindowZOrder: _restorePreviousWindowZOrder,
+                  moveWindow: _moveWindow,
+                  resizeWindow: _resizeWindow,
+                  transformWindowFromTrackpad: _transformWindowFromTrackpad,
+                  fitWindowToContent: _fitWindowToContent,
+                  setWindowZoom: _setWindowZoom,
+                  setVideoPosition: _setVideoPosition,
+                  cycleVideoPlaybackSpeed: _cycleVideoPlaybackSpeed,
+                  setWindowIntrinsicSize: _setWindowIntrinsicSize,
+                  isVideoWindowPaused: _isVideoWindowPaused,
+                  toggleVideoPlayback: _toggleVideoPlayback,
+                  toggleExpose: _toggleExpose,
+                  setPinnedHoverWindow: _setPinnedHoverWindow,
+                  clearPinnedHoverWindow: _clearPinnedHoverWindow,
+                  flashWindow: _flashWindow,
+                  toggleExposeWindowSelected: _toggleExposeWindowSelected,
+                  removeWindow: _removeWindow,
+                  setOptionGestureWindowId: _setOptionGestureWindowId,
+                  revealAssetInFinder: _revealAssetInFinder,
+                ),
+                buildWorkspaceHud: _buildWorkspaceHud,
+              ),
+              _buildWorkspaceOverview(context),
+            ],
           ),
         ),
         _buildTopChromeHitBlock(),
