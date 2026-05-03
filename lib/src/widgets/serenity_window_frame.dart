@@ -173,6 +173,26 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> with SingleTi
     return _isOptionPressed && !_isCommandPressed && (widget.isOptionGestureTarget || _claimedOptionGestureTarget);
   }
 
+  bool get _shouldShowCommandOverlay {
+    return widget.isPinnedHover || (_isCommandPressed && (_isHovered || _isResizing || widget.isSelected));
+  }
+
+  bool get _showExpandedVideoControls => _shouldShowCommandOverlay;
+
+  bool get _showHoverFrame => _shouldShowCommandOverlay;
+
+  WindowResizeHandle? get _hoveredResizeHandle {
+    return _hoverPosition == null ? null : _resizeHandleForPosition(_hoverPosition!);
+  }
+
+  WindowResizeHandle? get _displayedResizeHandle {
+    return _activeResizeHandle ?? _hoveredResizeHandle;
+  }
+
+  MouseCursor get _pointerCursor {
+    return Platform.isMacOS ? MouseCursor.defer : _cursorForHandle(_displayedResizeHandle);
+  }
+
   void _handleContentTap() {
     if (widget.isPinnedHover) {
       widget.onPinnedHoverDismissed();
@@ -199,16 +219,13 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> with SingleTi
   }
 
   Widget _buildContent({required bool shrinkContent, required double inset}) {
-    final showExpandedVideoControls =
-        widget.isPinnedHover || (_isCommandPressed && (_isHovered || _isResizing || widget.isSelected));
-
     return SerenityWindowFrameContent(
       window: widget.window,
       isLoaded: widget.isLoaded,
       sharedVideoController: widget.sharedVideoController,
       sharedVideoInitialization: widget.sharedVideoInitialization,
       isPinnedHover: widget.isPinnedHover,
-      showExpandedVideoControls: showExpandedVideoControls,
+      showExpandedVideoControls: _showExpandedVideoControls,
       workspaceZoom: widget.workspaceZoom,
       shrinkContent: shrinkContent,
       inset: inset,
@@ -234,9 +251,7 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> with SingleTi
   }
 
   Widget _buildOverlay() {
-    final shouldShowCommandOverlay =
-        widget.isPinnedHover || (_isCommandPressed && (_isHovered || _isResizing || widget.isSelected));
-    if (!shouldShowCommandOverlay) {
+    if (!_shouldShowCommandOverlay) {
       return const SizedBox.shrink();
     }
 
@@ -311,6 +326,145 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> with SingleTi
     _syncNativeCursor(preserveHover && _hoverPosition != null ? _resizeHandleForPosition(_hoverPosition!) : null);
   }
 
+  void _clearHoverState() {
+    _syncNativeCursor(null);
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _isHovered = false;
+      _hoverPosition = null;
+    });
+  }
+
+  void _handleMouseEnter(PointerEnterEvent event) {
+    if (_anyWindowResizing && !_isResizing) {
+      return;
+    }
+    _syncNativeCursor(_resizeHandleForPosition(event.localPosition));
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _isHovered = true;
+      _hoverPosition = event.localPosition;
+    });
+  }
+
+  void _handleMouseHover(PointerHoverEvent event) {
+    if (_anyWindowResizing && !_isResizing) {
+      if (_isHovered || _hoverPosition != null) {
+        _clearHoverState();
+      }
+      return;
+    }
+    _updateHoverPosition(event.localPosition);
+  }
+
+  void _handleMouseExit(PointerExitEvent event) {
+    if (_isResizing) {
+      return;
+    }
+    _clearHoverState();
+  }
+
+  void _beginResize(PointerDownEvent event, WindowResizeHandle handle) {
+    _syncNativeCursor(handle);
+    _anyWindowResizing = true;
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _isHovered = true;
+      _isResizing = true;
+      _activeResizeHandle = handle;
+      _hoverPosition = event.localPosition;
+    });
+  }
+
+  void _handlePointerDown(PointerDownEvent event) {
+    if (event.kind != ui.PointerDeviceKind.mouse || event.buttons != kPrimaryMouseButton) {
+      return;
+    }
+
+    final resizeHandle = _resizeHandleForPosition(event.localPosition);
+    if (resizeHandle != null) {
+      _beginResize(event, resizeHandle);
+    }
+  }
+
+  void _dragWindow(Offset delta) {
+    if (_isInteractingWithVideoControls) {
+      return;
+    }
+
+    if (!_isDraggingWindow) {
+      _isDraggingWindow = true;
+      widget.onTap();
+    }
+    widget.onPanUpdate(delta);
+  }
+
+  void _handlePointerMove(PointerMoveEvent event) {
+    if (event.kind != ui.PointerDeviceKind.mouse) {
+      return;
+    }
+
+    _updateHoverPosition(event.localPosition);
+
+    if (event.buttons != kPrimaryMouseButton) {
+      return;
+    }
+
+    final resizeHandle = _activeResizeHandle;
+    if (resizeHandle != null) {
+      widget.onResizeUpdate(resizeHandle, event.delta);
+      return;
+    }
+
+    _dragWindow(event.delta);
+  }
+
+  void _handlePanZoomStart(PointerPanZoomStartEvent event) {
+    _isTrackpadWindowGestureActive = _isOptionGestureTargetActive;
+    _lastTrackpadScale = 1.0;
+  }
+
+  void _handlePanZoomUpdate(PointerPanZoomUpdateEvent event) {
+    if (!_isTrackpadWindowGestureActive) {
+      return;
+    }
+    final scaleDelta = event.scale / _lastTrackpadScale;
+    _lastTrackpadScale = event.scale;
+    widget.onTrackpadWindowScale(scaleDelta, event.localPosition);
+  }
+
+  void _handlePanZoomEnd(PointerPanZoomEndEvent event) {
+    _isTrackpadWindowGestureActive = false;
+    _lastTrackpadScale = 1.0;
+  }
+
+  Widget _buildFramedWindow() {
+    const hoverInset = 3.0;
+
+    return SerenityWindowFrameChrome(
+      flashValue: _flashAnimation.value,
+      isFocused: widget.isFocused,
+      showHoverFrame: _showHoverFrame,
+      assetColor: widget.window.asset.color,
+      child: Stack(
+        children: [
+          _buildContent(shrinkContent: _showHoverFrame, inset: hoverInset),
+          _buildOverlay(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAnimatedFrame() {
+    return AnimatedBuilder(animation: _flashAnimation, builder: (context, child) => _buildFramedWindow());
+  }
+
   @override
   void dispose() {
     if (_isResizing) {
@@ -324,139 +478,20 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> with SingleTi
 
   @override
   Widget build(BuildContext context) {
-    final hoveredResizeHandle = _hoverPosition == null ? null : _resizeHandleForPosition(_hoverPosition!);
-    final activeResizeHandle = _activeResizeHandle ?? hoveredResizeHandle;
-    final pointerCursor = Platform.isMacOS ? MouseCursor.defer : _cursorForHandle(activeResizeHandle);
-
     return MouseRegion(
-      cursor: pointerCursor,
-      onEnter: (event) {
-        if (_anyWindowResizing && !_isResizing) {
-          return;
-        }
-        _syncNativeCursor(_resizeHandleForPosition(event.localPosition));
-        if (!mounted) {
-          return;
-        }
-        setState(() {
-          _isHovered = true;
-          _hoverPosition = event.localPosition;
-        });
-      },
-      onHover: (event) {
-        if (_anyWindowResizing && !_isResizing) {
-          if (_isHovered || _hoverPosition != null) {
-            _syncNativeCursor(null);
-            if (!mounted) {
-              return;
-            }
-            setState(() {
-              _isHovered = false;
-              _hoverPosition = null;
-            });
-          }
-          return;
-        }
-        _updateHoverPosition(event.localPosition);
-      },
-      onExit: (_) {
-        if (!_isResizing) {
-          _syncNativeCursor(null);
-          if (!mounted) {
-            return;
-          }
-          setState(() {
-            _isHovered = false;
-            _hoverPosition = null;
-          });
-        }
-      },
+      cursor: _pointerCursor,
+      onEnter: _handleMouseEnter,
+      onHover: _handleMouseHover,
+      onExit: _handleMouseExit,
       child: Listener(
-        onPointerDown: (event) {
-          if (event.kind == ui.PointerDeviceKind.mouse && event.buttons == kPrimaryMouseButton) {
-            final resizeHandle = _resizeHandleForPosition(event.localPosition);
-            if (resizeHandle != null) {
-              _syncNativeCursor(resizeHandle);
-              _anyWindowResizing = true;
-              if (!mounted) {
-                return;
-              }
-              setState(() {
-                _isHovered = true;
-                _isResizing = true;
-                _activeResizeHandle = resizeHandle;
-                _hoverPosition = event.localPosition;
-              });
-            }
-          }
-        },
-        onPointerMove: (event) {
-          if (event.kind != ui.PointerDeviceKind.mouse) {
-            return;
-          }
-
-          _updateHoverPosition(event.localPosition);
-
-          if (event.buttons != kPrimaryMouseButton) {
-            return;
-          }
-
-          final resizeHandle = _activeResizeHandle;
-          if (resizeHandle != null) {
-            widget.onResizeUpdate(resizeHandle, event.delta);
-            return;
-          }
-
-          if (_isInteractingWithVideoControls) {
-            return;
-          }
-
-          if (!_isDraggingWindow) {
-            _isDraggingWindow = true;
-            widget.onTap();
-          }
-          widget.onPanUpdate(event.delta);
-        },
+        onPointerDown: _handlePointerDown,
+        onPointerMove: _handlePointerMove,
         onPointerUp: (_) => _clearResizeState(preserveHover: true),
         onPointerCancel: (_) => _clearResizeState(preserveHover: false),
-        onPointerPanZoomStart: (_) {
-          _isTrackpadWindowGestureActive = _isOptionGestureTargetActive;
-          _lastTrackpadScale = 1.0;
-        },
-        onPointerPanZoomUpdate: (event) {
-          if (!_isTrackpadWindowGestureActive) {
-            return;
-          }
-          final scaleDelta = event.scale / _lastTrackpadScale;
-          _lastTrackpadScale = event.scale;
-          widget.onTrackpadWindowScale(scaleDelta, event.localPosition);
-        },
-        onPointerPanZoomEnd: (_) {
-          _isTrackpadWindowGestureActive = false;
-          _lastTrackpadScale = 1.0;
-        },
-        child: AnimatedBuilder(
-          animation: _flashAnimation,
-          builder: (context, child) {
-            final flashValue = _flashAnimation.value;
-            final showHoverFrame =
-                widget.isPinnedHover || (_isCommandPressed && (_isHovered || _isResizing || widget.isSelected));
-            const hoverInset = 3.0;
-
-            return SerenityWindowFrameChrome(
-              flashValue: flashValue,
-              isFocused: widget.isFocused,
-              showHoverFrame: showHoverFrame,
-              assetColor: widget.window.asset.color,
-              child: Stack(
-                children: [
-                  _buildContent(shrinkContent: showHoverFrame, inset: hoverInset),
-                  _buildOverlay(),
-                ],
-              ),
-            );
-          },
-        ),
+        onPointerPanZoomStart: _handlePanZoomStart,
+        onPointerPanZoomUpdate: _handlePanZoomUpdate,
+        onPointerPanZoomEnd: _handlePanZoomEnd,
+        child: _buildAnimatedFrame(),
       ),
     );
   }
