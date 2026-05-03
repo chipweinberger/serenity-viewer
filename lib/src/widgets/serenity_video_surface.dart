@@ -8,6 +8,121 @@ import 'package:video_player/video_player.dart';
 import 'package:serenity_viewer/src/core/serenity_theme.dart';
 import 'package:serenity_viewer/src/widgets/serenity_zoom_box.dart';
 
+class _SerenityVideoPlaybackCoordinator {
+  _SerenityVideoPlaybackCoordinator({required this.onIntrinsicSizeResolved, required this.onPositionChanged});
+
+  final ValueChanged<Size> onIntrinsicSizeResolved;
+  final ValueChanged<int> onPositionChanged;
+
+  VideoPlayerController? _controller;
+  double? _reportedAspectRatio;
+  int? _lastReportedPositionBucket;
+  bool _isApplyingInitialPosition = false;
+
+  void attach(VideoPlayerController controller) {
+    if (_controller == controller) {
+      return;
+    }
+
+    detach();
+    _controller = controller;
+    controller.addListener(_handleControllerTick);
+  }
+
+  void detach() {
+    _controller?.removeListener(_handleControllerTick);
+    _controller = null;
+  }
+
+  void resetReportedState() {
+    _reportedAspectRatio = null;
+    _lastReportedPositionBucket = null;
+  }
+
+  Duration? boundedPosition(Duration duration, int? positionMs) {
+    if (positionMs == null || positionMs <= 0 || duration <= Duration.zero) {
+      return null;
+    }
+
+    final maxMs = math.max(0, duration.inMilliseconds - 1);
+    return Duration(milliseconds: positionMs.clamp(0, maxMs));
+  }
+
+  void reportPlaybackPosition(Duration position) {
+    final bucket = (position.inMilliseconds / 100).round();
+    if (_lastReportedPositionBucket == bucket) {
+      return;
+    }
+
+    _lastReportedPositionBucket = bucket;
+    onPositionChanged(bucket * 100);
+  }
+
+  void reportIntrinsicSize(VideoPlayerController controller) {
+    final aspectRatio = controller.value.aspectRatio;
+    final size = controller.value.size;
+    if (aspectRatio <= 0 || size.width <= 0 || size.height <= 0 || _reportedAspectRatio == aspectRatio) {
+      return;
+    }
+
+    _reportedAspectRatio = aspectRatio;
+    onIntrinsicSizeResolved(size);
+  }
+
+  Future<void> syncToWidget({
+    required Future<void> initialization,
+    required VideoPlayerController controller,
+    required int? positionMs,
+    required bool isPaused,
+    required double playbackSpeed,
+    required bool forceSeek,
+    required VoidCallback refreshUi,
+  }) async {
+    _isApplyingInitialPosition = true;
+    try {
+      await initialization;
+      if (!controller.value.isInitialized) {
+        return;
+      }
+
+      reportIntrinsicSize(controller);
+      final targetPosition = boundedPosition(controller.value.duration, positionMs);
+      if (targetPosition != null) {
+        final deltaMs = (controller.value.position.inMilliseconds - targetPosition.inMilliseconds).abs();
+        if (forceSeek || deltaMs > 150) {
+          await controller.seekTo(targetPosition);
+        }
+      }
+
+      if (isPaused) {
+        await controller.pause();
+      } else {
+        await controller.play();
+      }
+      await controller.setPlaybackSpeed(playbackSpeed);
+
+      reportPlaybackPosition(controller.value.position);
+      refreshUi();
+    } finally {
+      _isApplyingInitialPosition = false;
+    }
+  }
+
+  void dispose() {
+    detach();
+  }
+
+  void _handleControllerTick() {
+    final controller = _controller;
+    if (controller == null || !controller.value.isInitialized || _isApplyingInitialPosition) {
+      return;
+    }
+
+    reportIntrinsicSize(controller);
+    reportPlaybackPosition(controller.value.position);
+  }
+}
+
 class SerenityVideoSurface extends StatefulWidget {
   const SerenityVideoSurface({
     super.key,
@@ -55,14 +170,16 @@ class SerenityVideoSurface extends StatefulWidget {
 }
 
 class _SerenityVideoSurfaceState extends State<SerenityVideoSurface> {
-  double? _reportedAspectRatio;
-  int? _lastReportedPositionBucket;
-  bool _isApplyingInitialPosition = false;
+  late final _SerenityVideoPlaybackCoordinator _playbackCoordinator;
 
   @override
   void initState() {
     super.initState();
-    widget.controller.addListener(_handleControllerTick);
+    _playbackCoordinator = _SerenityVideoPlaybackCoordinator(
+      onIntrinsicSizeResolved: widget.onIntrinsicSizeResolved,
+      onPositionChanged: widget.onPositionChanged,
+    );
+    _playbackCoordinator.attach(widget.controller);
     unawaited(_syncControllerToWidget(forceSeek: true));
   }
 
@@ -70,10 +187,8 @@ class _SerenityVideoSurfaceState extends State<SerenityVideoSurface> {
   void didUpdateWidget(covariant SerenityVideoSurface oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
-      oldWidget.controller.removeListener(_handleControllerTick);
-      widget.controller.addListener(_handleControllerTick);
-      _reportedAspectRatio = null;
-      _lastReportedPositionBucket = null;
+      _playbackCoordinator.attach(widget.controller);
+      _playbackCoordinator.resetReportedState();
       unawaited(_syncControllerToWidget(forceSeek: true));
       return;
     }
@@ -83,14 +198,6 @@ class _SerenityVideoSurfaceState extends State<SerenityVideoSurface> {
         oldWidget.playbackSpeed != widget.playbackSpeed) {
       unawaited(_syncControllerToWidget(forceSeek: oldWidget.path != widget.path));
     }
-  }
-
-  Duration? _boundedPosition(Duration duration, int? positionMs) {
-    if (positionMs == null || positionMs <= 0 || duration <= Duration.zero) {
-      return null;
-    }
-    final maxMs = math.max(0, duration.inMilliseconds - 1);
-    return Duration(milliseconds: positionMs.clamp(0, maxMs));
   }
 
   String _playbackSpeedLabel(double speed) {
@@ -105,72 +212,25 @@ class _SerenityVideoSurfaceState extends State<SerenityVideoSurface> {
     return (1 / safeZoom).clamp(0.85, 2.1);
   }
 
-  void _handleControllerTick() {
-    final controller = widget.controller;
-    if (!controller.value.isInitialized || _isApplyingInitialPosition) {
-      return;
-    }
-    _reportIntrinsicSize(controller);
-    _reportPlaybackPosition(controller.value.position);
-  }
-
-  void _reportPlaybackPosition(Duration position) {
-    final bucket = (position.inMilliseconds / 100).round();
-    if (_lastReportedPositionBucket == bucket) {
-      return;
-    }
-    _lastReportedPositionBucket = bucket;
-    widget.onPositionChanged(bucket * 100);
-  }
-
-  void _reportIntrinsicSize(VideoPlayerController controller) {
-    final aspectRatio = controller.value.aspectRatio;
-    final size = controller.value.size;
-    if (aspectRatio <= 0 || size.width <= 0 || size.height <= 0 || _reportedAspectRatio == aspectRatio) {
-      return;
-    }
-
-    _reportedAspectRatio = aspectRatio;
-    widget.onIntrinsicSizeResolved(size);
-  }
-
   Future<void> _syncControllerToWidget({required bool forceSeek}) async {
-    _isApplyingInitialPosition = true;
-    try {
-      await widget.initialization;
-      final controller = widget.controller;
-      if (!controller.value.isInitialized) {
-        return;
-      }
-
-      _reportIntrinsicSize(controller);
-      final targetPosition = _boundedPosition(controller.value.duration, widget.positionMs);
-      if (targetPosition != null) {
-        final deltaMs = (controller.value.position.inMilliseconds - targetPosition.inMilliseconds).abs();
-        if (forceSeek || deltaMs > 150) {
-          await controller.seekTo(targetPosition);
+    await _playbackCoordinator.syncToWidget(
+      initialization: widget.initialization,
+      controller: widget.controller,
+      positionMs: widget.positionMs,
+      isPaused: widget.isPaused,
+      playbackSpeed: widget.playbackSpeed,
+      forceSeek: forceSeek,
+      refreshUi: () {
+        if (mounted) {
+          setState(() {});
         }
-      }
-
-      if (widget.isPaused) {
-        await controller.pause();
-      } else {
-        await controller.play();
-      }
-      await controller.setPlaybackSpeed(widget.playbackSpeed);
-
-      _reportPlaybackPosition(controller.value.position);
-      if (mounted) {
-        setState(() {});
-      }
-    } finally {
-      _isApplyingInitialPosition = false;
-    }
+      },
+    );
   }
 
   @override
   void dispose() {
-    widget.controller.removeListener(_handleControllerTick);
+    _playbackCoordinator.dispose();
     super.dispose();
   }
 
