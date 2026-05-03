@@ -1,7 +1,12 @@
-part of 'workspace_shell_controller.dart';
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+
+import 'package:serenity_viewer/src/foundation/app_constants.dart';
+import 'package:serenity_viewer/src/workspace/shell/workspace_shell_controller.dart';
 
 class WorkspaceShellTrackingApi {
-  WorkspaceShellTrackingApi._(this._controller);
+  WorkspaceShellTrackingApi(this._controller);
 
   static const Duration _workspaceViewThreshold = Duration(seconds: 30);
 

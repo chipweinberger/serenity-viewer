@@ -14,10 +14,9 @@ import 'package:serenity_viewer/src/workspace/controller/workspace_controller.da
 import 'package:serenity_viewer/src/workspace/shell/workspace_shell_management.dart';
 import 'package:serenity_viewer/src/workspace/shell/workspace_shell_navigation.dart';
 import 'package:serenity_viewer/src/workspace/shell/workspace_shell_shortcuts.dart';
+import 'package:serenity_viewer/src/workspace/shell/workspace_shell_tracking.dart';
 import 'package:serenity_viewer/src/workspace/session/workspace_view_tracking_state.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
-
-part 'workspace_shell_tracking.dart';
 
 typedef SerenityShowWorkspaceScreen =
     void Function({
@@ -65,7 +64,7 @@ class WorkspaceShellController {
     navigation = WorkspaceShellNavigationApi(this);
     management = WorkspaceShellManagementApi(this);
     shortcuts = WorkspaceShellShortcutsApi(this);
-    tracking = WorkspaceShellTrackingApi._(this);
+    tracking = WorkspaceShellTrackingApi(this);
   }
 
   final AppEnvironmentState persistenceState;
