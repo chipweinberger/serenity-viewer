@@ -134,8 +134,10 @@ extension _SerenityShellImportAndLoadPlan on _SerenityShellState {
 
     final workspace = _activeWorkspace;
     final nextWindows = [...workspace.windows];
+    final existingAssetDigests = nextWindows.map((window) => window.asset.md5).toSet();
     var nextZ = nextWindows.fold<int>(0, (value, item) => math.max(value, item.zIndex));
     var offsetIndex = 0;
+    var skippedDuplicateCount = 0;
 
     for (final xfile in limited) {
       final type = _assetTypeForPath(xfile.path);
@@ -182,6 +184,11 @@ extension _SerenityShellImportAndLoadPlan on _SerenityShellState {
 
       final importFile = File(importPath);
       final digest = importMd5 ?? await _md5ForFile(importFile);
+      if (existingAssetDigests.contains(digest)) {
+        skippedDuplicateCount += 1;
+        continue;
+      }
+
       final fileBookmark = await _createFileBookmark(importPath);
       final directory = importFile.parent.path;
       _recordFolder(directory, weight: 2);
@@ -247,6 +254,7 @@ extension _SerenityShellImportAndLoadPlan on _SerenityShellState {
           zIndex: nextZ,
         ),
       );
+      existingAssetDigests.add(digest);
 
       offsetIndex = (offsetIndex + 1) % 8;
     }
@@ -261,5 +269,10 @@ extension _SerenityShellImportAndLoadPlan on _SerenityShellState {
       ),
     );
     _queueThumbnailRefresh(workspace.id);
+    if (skippedDuplicateCount > 0) {
+      _showMessage(
+        'Skipped $skippedDuplicateCount duplicate asset${skippedDuplicateCount == 1 ? '' : 's'} already in this workspace.',
+      );
+    }
   }
 }
