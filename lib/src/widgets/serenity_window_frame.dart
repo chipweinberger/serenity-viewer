@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/gestures.dart';
@@ -11,7 +10,8 @@ import 'package:video_player/video_player.dart';
 import 'package:serenity_viewer/src/core/serenity_core.dart';
 import 'package:serenity_viewer/src/models/asset_window_state.dart';
 import 'package:serenity_viewer/src/models/window_zoom_update.dart';
-import 'package:serenity_viewer/src/widgets/serenity_media_canvas.dart';
+import 'package:serenity_viewer/src/widgets/serenity_window_frame_chrome.dart';
+import 'package:serenity_viewer/src/widgets/serenity_window_frame_content.dart';
 import 'package:serenity_viewer/src/widgets/serenity_window_overlay.dart';
 import 'package:serenity_viewer/src/widgets/window_resize_helpers.dart';
 
@@ -201,93 +201,38 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> with SingleTi
     _lastContentTapAt = now;
   }
 
-  AssetWindowState _windowForHoverPreview({required bool shrinkContent, required double inset}) {
-    final scale = _hoverPreviewScale(shrinkContent: shrinkContent, inset: inset);
-    if (scale == 1.0) {
-      return widget.window;
-    }
-
-    return widget.window.copyWith(
-      zoomBaseWidth: widget.window.zoomBaseWidth == null ? null : widget.window.zoomBaseWidth! * scale,
-      zoomBaseHeight: widget.window.zoomBaseHeight == null ? null : widget.window.zoomBaseHeight! * scale,
-      contentOffsetDx: widget.window.contentOffset.dx * scale,
-      contentOffsetDy: widget.window.contentOffset.dy * scale,
-    );
-  }
-
-  double _hoverPreviewScale({required bool shrinkContent, required double inset}) {
-    if (!shrinkContent || inset <= 0 || widget.window.size.width <= 0 || widget.window.size.height <= 0) {
-      return 1.0;
-    }
-
-    final innerWidth = math.max(1.0, widget.window.size.width - (inset * 2));
-    final innerHeight = math.max(1.0, widget.window.size.height - (inset * 2));
-    return math.min(innerWidth / widget.window.size.width, innerHeight / widget.window.size.height);
-  }
-
-  WindowZoomUpdate _zoomUpdateForWindowState(
-    WindowZoomUpdate update, {
-    required bool shrinkContent,
-    required double inset,
-  }) {
-    final scale = _hoverPreviewScale(shrinkContent: shrinkContent, inset: inset);
-    if (scale == 1.0) {
-      return update;
-    }
-
-    return WindowZoomUpdate(
-      zoom: update.zoom,
-      zoomBaseSize: update.zoomBaseSize == null
-          ? null
-          : Size(update.zoomBaseSize!.width / scale, update.zoomBaseSize!.height / scale),
-      contentOffset: update.contentOffset == null
-          ? null
-          : Offset(update.contentOffset!.dx / scale, update.contentOffset!.dy / scale),
-      clearZoomBase: update.clearZoomBase,
-      clearContentOffset: update.clearContentOffset,
-    );
-  }
-
   Widget _buildContent({required bool shrinkContent, required double inset}) {
-    final previewWindow = _windowForHoverPreview(shrinkContent: shrinkContent, inset: inset);
     final showExpandedVideoControls =
         widget.isPinnedHover || (_isCommandPressed && (_isHovered || _isResizing || widget.isSelected));
 
-    return Positioned.fill(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: SerenityMediaCanvas(
-          key: ValueKey(widget.window.asset.id),
-          window: previewWindow,
-          isLoaded: widget.isLoaded,
-          sharedVideoController: widget.sharedVideoController,
-          sharedVideoInitialization: widget.sharedVideoInitialization,
-          onTap: _handleContentTap,
-          onZoomChanged: (update) {
-            widget.onZoomChanged(_zoomUpdateForWindowState(update, shrinkContent: shrinkContent, inset: inset));
-          },
-          onIntrinsicSizeResolved: widget.onIntrinsicSizeResolved,
-          isVideoPaused: widget.isVideoPaused,
-          onTogglePlayback: widget.onTogglePlayback,
-          showVideoControls: true,
-          showExpandedVideoControls: showExpandedVideoControls,
-          workspaceZoom: widget.workspaceZoom,
-          onVideoControlInteractionChanged: (isInteracting) {
-            if (_isInteractingWithVideoControls == isInteracting) {
-              return;
-            }
-            if (!mounted) {
-              return;
-            }
-            setState(() {
-              _isInteractingWithVideoControls = isInteracting;
-            });
-          },
-          onVideoPositionChanged: widget.onVideoPositionChanged,
-          onCycleVideoPlaybackSpeed: widget.onCycleVideoPlaybackSpeed,
-          allowDirectContentGestures: widget.isPinnedHover,
-        ),
-      ),
+    return SerenityWindowFrameContent(
+      window: widget.window,
+      isLoaded: widget.isLoaded,
+      sharedVideoController: widget.sharedVideoController,
+      sharedVideoInitialization: widget.sharedVideoInitialization,
+      isPinnedHover: widget.isPinnedHover,
+      showExpandedVideoControls: showExpandedVideoControls,
+      workspaceZoom: widget.workspaceZoom,
+      shrinkContent: shrinkContent,
+      inset: inset,
+      onTap: _handleContentTap,
+      onZoomChanged: widget.onZoomChanged,
+      onIntrinsicSizeResolved: widget.onIntrinsicSizeResolved,
+      isVideoPaused: widget.isVideoPaused,
+      onTogglePlayback: widget.onTogglePlayback,
+      onVideoControlInteractionChanged: (isInteracting) {
+        if (_isInteractingWithVideoControls == isInteracting) {
+          return;
+        }
+        if (!mounted) {
+          return;
+        }
+        setState(() {
+          _isInteractingWithVideoControls = isInteracting;
+        });
+      },
+      onVideoPositionChanged: widget.onVideoPositionChanged,
+      onCycleVideoPlaybackSpeed: widget.onCycleVideoPlaybackSpeed,
     );
   }
 
@@ -497,59 +442,20 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> with SingleTi
           animation: _flashAnimation,
           builder: (context, child) {
             final flashValue = _flashAnimation.value;
-            final focusShadowAlpha = widget.isFocused ? 0.26 : 0.18;
-            final focusBlurRadius = widget.isFocused ? 34.0 : 22.0;
-            final flashScale = 1 + (0.035 * flashValue);
             final showHoverFrame =
                 widget.isPinnedHover || (_isCommandPressed && (_isHovered || _isResizing || widget.isSelected));
             const hoverInset = 3.0;
-            final assetColor = widget.window.asset.color;
-            final assetColorLight = HSLColor.fromColor(assetColor).withLightness(0.82).toColor();
-            final assetColorDeep = HSLColor.fromColor(assetColor).withLightness(0.46).toColor();
 
-            return Transform.scale(
-              scale: flashScale,
-              alignment: Alignment.center,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 160),
-                curve: Curves.easeOutCubic,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: focusShadowAlpha + (0.08 * flashValue)),
-                      blurRadius: focusBlurRadius + (12 * flashValue),
-                      offset: const Offset(0, 14),
-                    ),
-                  ],
-                ),
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    gradient: showHoverFrame
-                        ? LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [assetColorLight, assetColor, assetColorDeep],
-                            stops: const [0.0, 0.42, 1.0],
-                          )
-                        : null,
-                  ),
-                  child: AnimatedPadding(
-                    duration: const Duration(milliseconds: 120),
-                    curve: Curves.easeOutCubic,
-                    padding: EdgeInsets.all(showHoverFrame ? hoverInset : 0),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(showHoverFrame ? 13 : 16),
-                      child: Stack(
-                        children: [
-                          _buildContent(shrinkContent: showHoverFrame, inset: hoverInset),
-                          _buildOverlay(),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+            return SerenityWindowFrameChrome(
+              flashValue: flashValue,
+              isFocused: widget.isFocused,
+              showHoverFrame: showHoverFrame,
+              assetColor: widget.window.asset.color,
+              child: Stack(
+                children: [
+                  _buildContent(shrinkContent: showHoverFrame, inset: hoverInset),
+                  _buildOverlay(),
+                ],
               ),
             );
           },
