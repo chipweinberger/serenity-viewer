@@ -4,6 +4,7 @@ import 'package:video_player/video_player.dart';
 import 'package:serenity_viewer/src/models/asset_window_state.dart';
 import 'package:serenity_viewer/src/models/window_zoom_update.dart';
 import 'package:serenity_viewer/src/widgets/serenity_media_canvas.dart';
+import 'package:serenity_viewer/src/widgets/serenity_media_preview_transforms.dart';
 
 class SerenityWindowFrameContent extends StatelessWidget {
   const SerenityWindowFrameContent({
@@ -46,46 +47,19 @@ class SerenityWindowFrameContent extends StatelessWidget {
   final VoidCallback onCycleVideoPlaybackSpeed;
 
   double _hoverPreviewScale() {
-    if (!shrinkContent || inset <= 0 || window.size.width <= 0 || window.size.height <= 0) {
+    if (!shrinkContent) {
       return 1.0;
     }
-
-    final innerWidth = (window.size.width - (inset * 2)).clamp(1.0, double.infinity);
-    final innerHeight = (window.size.height - (inset * 2)).clamp(1.0, double.infinity);
-    return (innerWidth / window.size.width).clamp(0.0, 1.0).clamp(0.0, innerHeight / window.size.height);
+    return previewWindowScaleForInset(window, inset);
   }
 
   AssetWindowState _windowForHoverPreview() {
     final scale = _hoverPreviewScale();
-    if (scale == 1.0) {
-      return window;
-    }
-
-    return window.copyWith(
-      zoomBaseWidth: window.zoomBaseWidth == null ? null : window.zoomBaseWidth! * scale,
-      zoomBaseHeight: window.zoomBaseHeight == null ? null : window.zoomBaseHeight! * scale,
-      contentOffsetDx: window.contentOffset.dx * scale,
-      contentOffsetDy: window.contentOffset.dy * scale,
-    );
+    return scalePreviewWindow(window, scale);
   }
 
   WindowZoomUpdate _zoomUpdateForWindowState(WindowZoomUpdate update) {
-    final scale = _hoverPreviewScale();
-    if (scale == 1.0) {
-      return update;
-    }
-
-    return WindowZoomUpdate(
-      zoom: update.zoom,
-      zoomBaseSize: update.zoomBaseSize == null
-          ? null
-          : Size(update.zoomBaseSize!.width / scale, update.zoomBaseSize!.height / scale),
-      contentOffset: update.contentOffset == null
-          ? null
-          : Offset(update.contentOffset!.dx / scale, update.contentOffset!.dy / scale),
-      clearZoomBase: update.clearZoomBase,
-      clearContentOffset: update.clearContentOffset,
-    );
+    return remapWindowZoomUpdateForPreviewScale(update, _hoverPreviewScale());
   }
 
   @override

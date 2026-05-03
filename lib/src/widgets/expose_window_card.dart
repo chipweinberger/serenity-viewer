@@ -6,9 +6,11 @@ import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 
 import 'package:serenity_viewer/src/core/serenity_core.dart';
+import 'package:serenity_viewer/src/core/serenity_keyboard_modifiers.dart';
 import 'package:serenity_viewer/src/core/serenity_theme.dart';
 import 'package:serenity_viewer/src/models/asset_window_state.dart';
 import 'package:serenity_viewer/src/widgets/serenity_media_canvas.dart';
+import 'package:serenity_viewer/src/widgets/serenity_media_preview_transforms.dart';
 
 class ExposeWindowCard extends StatefulWidget {
   const ExposeWindowCard({
@@ -50,8 +52,7 @@ class _ExposeWindowCardState extends State<ExposeWindowCard> {
 
   bool _handleHardwareKey(KeyEvent event) {
     final pressedKeys = HardwareKeyboard.instance.logicalKeysPressed;
-    final nextIsCommandPressed =
-        pressedKeys.contains(LogicalKeyboardKey.metaLeft) || pressedKeys.contains(LogicalKeyboardKey.metaRight);
+    final nextIsCommandPressed = isCommandPressed(pressedKeys);
     if (nextIsCommandPressed == _isCommandPressed || !mounted) {
       return false;
     }
@@ -66,24 +67,12 @@ class _ExposeWindowCardState extends State<ExposeWindowCard> {
     super.initState();
     HardwareKeyboard.instance.addHandler(_handleHardwareKey);
     final pressedKeys = HardwareKeyboard.instance.logicalKeysPressed;
-    _isCommandPressed =
-        pressedKeys.contains(LogicalKeyboardKey.metaLeft) || pressedKeys.contains(LogicalKeyboardKey.metaRight);
+    _isCommandPressed = isCommandPressed(pressedKeys);
   }
 
   AssetWindowState _windowForPreview(Size previewSize) {
-    if (previewSize.width <= 0 || previewSize.height <= 0) {
-      return widget.window;
-    }
-    final widthScale = previewSize.width / math.max(1.0, widget.window.size.width);
-    final heightScale = previewSize.height / math.max(1.0, widget.window.size.height);
-    final scale = math.min(widthScale, heightScale);
-    return widget.window.copyWith(
-      size: previewSize,
-      zoomBaseWidth: widget.window.zoomBaseWidth == null ? null : widget.window.zoomBaseWidth! * scale,
-      zoomBaseHeight: widget.window.zoomBaseHeight == null ? null : widget.window.zoomBaseHeight! * scale,
-      contentOffsetDx: widget.window.contentOffset.dx * scale,
-      contentOffsetDy: widget.window.contentOffset.dy * scale,
-    );
+    final scale = previewWindowScaleForSize(widget.window, previewSize);
+    return scalePreviewWindow(widget.window, scale, size: previewSize);
   }
 
   Widget _buildMediaPreview() {
