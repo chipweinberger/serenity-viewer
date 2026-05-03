@@ -2,6 +2,97 @@
 
 part of '../../main.dart';
 
+List<({AssetWindowState window, Rect rect})> _computeExposeLayoutRects({
+  required List<AssetWindowState> windows,
+  required Size viewportSize,
+}) {
+  const horizontalPadding = 28.0;
+  const topPadding = 86.0;
+  const bottomPadding = 92.0;
+  const spacing = 22.0;
+  const maxCardHeight = 220.0;
+  const minCardHeight = 56.0;
+
+  if (windows.isEmpty || viewportSize.width <= 0 || viewportSize.height <= 0) {
+    return const [];
+  }
+
+  final availableWidth = math.max(0.0, viewportSize.width - (horizontalPadding * 2));
+  final availableHeight = math.max(0.0, viewportSize.height - topPadding - bottomPadding);
+  final aspectRatios = windows
+      .map((window) => math.max(0.2, window.size.width / math.max(1.0, window.size.height)))
+      .toList();
+
+  double totalHeightForRowHeight(double rowHeight) {
+    var rows = 1;
+    var rowWidth = 0.0;
+    for (final aspectRatio in aspectRatios) {
+      final itemWidth = rowHeight * aspectRatio;
+      if (itemWidth > availableWidth) {
+        return double.infinity;
+      }
+
+      final nextWidth = rowWidth == 0 ? itemWidth : rowWidth + spacing + itemWidth;
+      if (nextWidth > availableWidth + 0.001) {
+        rows += 1;
+        rowWidth = itemWidth;
+      } else {
+        rowWidth = nextWidth;
+      }
+    }
+    return (rows * rowHeight) + ((rows - 1) * spacing);
+  }
+
+  var low = minCardHeight;
+  var high = math.min(maxCardHeight, availableHeight);
+  var bestCardHeight = low;
+  for (var i = 0; i < 24; i++) {
+    final candidate = (low + high) / 2;
+    final totalHeight = totalHeightForRowHeight(candidate);
+    if (totalHeight <= availableHeight + 0.001) {
+      bestCardHeight = candidate;
+      low = candidate;
+    } else {
+      high = candidate;
+    }
+  }
+
+  final rows = <List<({AssetWindowState window, double width})>>[];
+  var currentRow = <({AssetWindowState window, double width})>[];
+  var currentRowWidth = 0.0;
+  for (final window in windows) {
+    final itemWidth = bestCardHeight * math.max(0.2, window.size.width / math.max(1.0, window.size.height));
+    final nextWidth = currentRow.isEmpty ? itemWidth : currentRowWidth + spacing + itemWidth;
+    if (currentRow.isNotEmpty && nextWidth > availableWidth + 0.001) {
+      rows.add(currentRow);
+      currentRow = [];
+      currentRowWidth = 0.0;
+    }
+    currentRow.add((window: window, width: itemWidth));
+    currentRowWidth = currentRow.length == 1 ? itemWidth : currentRowWidth + spacing + itemWidth;
+  }
+  if (currentRow.isNotEmpty) {
+    rows.add(currentRow);
+  }
+
+  final totalGridHeight = (rows.length * bestCardHeight) + (math.max(0, rows.length - 1) * spacing);
+  var top = topPadding + math.max(0.0, (availableHeight - totalGridHeight) / 2);
+  final layouts = <({AssetWindowState window, Rect rect})>[];
+
+  for (final row in rows) {
+    final rowWidth =
+        row.fold<double>(0.0, (value, entry) => value + entry.width) + (math.max(0, row.length - 1) * spacing);
+    var left = horizontalPadding + math.max(0.0, (availableWidth - rowWidth) / 2);
+    for (final entry in row) {
+      layouts.add((window: entry.window, rect: Rect.fromLTWH(left, top, entry.width, bestCardHeight)));
+      left += entry.width + spacing;
+    }
+    top += bestCardHeight + spacing;
+  }
+
+  return layouts;
+}
+
 extension _SerenityShellWorkspaceView on _SerenityShellState {
   Widget _buildEmptyWorkspaceCanvasState(BuildContext context) {
     return IgnorePointer(
@@ -174,106 +265,50 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
             Positioned.fill(
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  const horizontalPadding = 28.0;
-                  const topPadding = 86.0;
-                  const bottomPadding = 92.0;
-                  const spacing = 22.0;
-                  const maxCardHeight = 220.0;
-                  const minCardHeight = 56.0;
+                  final viewportSize = constraints.biggest;
+                  _workspaceViewportSize = viewportSize;
 
                   if (windows.isEmpty) {
                     return const SizedBox.shrink();
                   }
 
-                  final availableWidth = math.max(0.0, constraints.maxWidth - (horizontalPadding * 2));
-                  final availableHeight = math.max(0.0, constraints.maxHeight - topPadding - bottomPadding);
-                  final aspectRatios = windows
-                      .map((window) => math.max(0.2, window.size.width / math.max(1.0, window.size.height)))
-                      .toList();
+                  final exposeLayouts = _computeExposeLayoutRects(windows: windows, viewportSize: viewportSize);
 
-                  double totalHeightForRowHeight(double rowHeight) {
-                    var rows = 1;
-                    var rowWidth = 0.0;
-                    for (final aspectRatio in aspectRatios) {
-                      final itemWidth = rowHeight * aspectRatio;
-                      if (itemWidth > availableWidth) {
-                        return double.infinity;
-                      }
-
-                      final nextWidth = rowWidth == 0 ? itemWidth : rowWidth + spacing + itemWidth;
-                      if (nextWidth > availableWidth + 0.001) {
-                        rows += 1;
-                        rowWidth = itemWidth;
-                      } else {
-                        rowWidth = nextWidth;
-                      }
-                    }
-                    return (rows * rowHeight) + ((rows - 1) * spacing);
-                  }
-
-                  var low = minCardHeight;
-                  var high = math.min(maxCardHeight, availableHeight);
-                  var bestCardHeight = low;
-                  for (var i = 0; i < 24; i++) {
-                    final candidate = (low + high) / 2;
-                    final totalHeight = totalHeightForRowHeight(candidate);
-                    if (totalHeight <= availableHeight + 0.001) {
-                      bestCardHeight = candidate;
-                      low = candidate;
-                    } else {
-                      high = candidate;
-                    }
-                  }
-
-                  return Padding(
-                    padding: const EdgeInsets.fromLTRB(horizontalPadding, topPadding, horizontalPadding, bottomPadding),
-                    child: Center(
-                      child: SizedBox(
-                        width: availableWidth,
-                        child: Wrap(
-                          spacing: spacing,
-                          runSpacing: spacing,
-                          alignment: WrapAlignment.center,
-                          runAlignment: WrapAlignment.center,
-                          children: [
-                            for (final window in windows)
-                              Builder(
-                                builder: (context) {
-                                  final isLoaded = loadPlan.loadedAssetIds.contains(window.asset.id);
-                                  final sharedVideoControllerEntry = _sharedVideoControllerForWindow(
-                                    window,
-                                    isLoaded: isLoaded,
-                                  );
-                                  return SizedBox(
-                                    width:
-                                        bestCardHeight *
-                                        math.max(0.2, window.size.width / math.max(1.0, window.size.height)),
-                                    height: bestCardHeight,
-                                    child: ExposeWindowCard(
-                                      window: window,
-                                      isLoaded: isLoaded,
-                                      sharedVideoController: sharedVideoControllerEntry?.controller,
-                                      sharedVideoInitialization: sharedVideoControllerEntry?.initialization,
-                                      isVideoPaused: _isVideoWindowPaused(window.asset.id),
-                                      isSelected: _selectedExposeWindowIds.contains(window.asset.id),
-                                      editMode: _editMode,
-                                      onOpen: () {
-                                        _focusWindow(window.asset.id);
-                                        _toggleExpose();
-                                      },
-                                      onToggleSelected: () => _toggleExposeWindowSelected(window.asset.id),
-                                      onShowInFinder: window.asset.filePath == null
-                                          ? null
-                                          : () => unawaited(_revealAssetInFinder(window.asset)),
-                                      onRemove: () => _removeWindow(_session!.activeWorkspaceId, window.asset.id),
-                                    ),
-                                  );
+                  return Stack(
+                    children: [
+                      for (final layout in exposeLayouts)
+                        Positioned.fromRect(
+                          rect: layout.rect,
+                          child: Builder(
+                            builder: (context) {
+                              final window = layout.window;
+                              final isLoaded = loadPlan.loadedAssetIds.contains(window.asset.id);
+                              final sharedVideoControllerEntry = _sharedVideoControllerForWindow(
+                                window,
+                                isLoaded: isLoaded,
+                              );
+                              return ExposeWindowCard(
+                                window: window,
+                                isLoaded: isLoaded,
+                                sharedVideoController: sharedVideoControllerEntry?.controller,
+                                sharedVideoInitialization: sharedVideoControllerEntry?.initialization,
+                                isVideoPaused: _isVideoWindowPaused(window.asset.id),
+                                isSelected: _selectedExposeWindowIds.contains(window.asset.id),
+                                editMode: _editMode,
+                                onOpen: () {
+                                  _focusWindow(window.asset.id);
+                                  _toggleExpose();
                                 },
-                              ),
-                          ],
+                                onToggleSelected: () => _toggleExposeWindowSelected(window.asset.id),
+                                onShowInFinder: window.asset.filePath == null
+                                    ? null
+                                    : () => unawaited(_revealAssetInFinder(window.asset)),
+                                onRemove: () => _removeWindow(_session!.activeWorkspaceId, window.asset.id),
+                              );
+                            },
+                          ),
                         ),
-                      ),
-                    ),
+                    ],
                   );
                 },
               ),

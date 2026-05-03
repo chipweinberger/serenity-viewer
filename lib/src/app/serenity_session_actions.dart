@@ -3,6 +3,8 @@
 part of '../../main.dart';
 
 extension _SerenityShellSessionActions on _SerenityShellState {
+  static const double _appliedExposeViewportZoomFactor = 0.5;
+
   void _updateSession(SerenitySessionState nextSession) {
     setState(() {
       _session = nextSession;
@@ -38,6 +40,85 @@ extension _SerenityShellSessionActions on _SerenityShellState {
       }
     });
     _refreshWorkspaceViewTracking();
+  }
+
+  void _applyExposeGridToWorkspace() {
+    final workspace = _activeWorkspaceOrNull;
+    if (workspace == null ||
+        _screen != SerenityScreen.workspace ||
+        _workspaceLayoutMode != WorkspaceLayoutMode.expose) {
+      return;
+    }
+    if (_workspaceViewportSize.width <= 0 || _workspaceViewportSize.height <= 0 || workspace.windows.isEmpty) {
+      return;
+    }
+
+    final sortedWindows = [...workspace.windows]..sort((a, b) => a.asset.filename.compareTo(b.asset.filename));
+    final exposeLayouts = _computeExposeLayoutRects(windows: sortedWindows, viewportSize: _workspaceViewportSize);
+    if (exposeLayouts.isEmpty) {
+      return;
+    }
+
+    final viewportCenter = _workspaceViewportSize.center(Offset.zero);
+    final safeViewportZoom = workspace.viewportZoom <= 0 ? 1.0 : workspace.viewportZoom;
+    final nextViewportZoom = _clampWorkspaceZoom(safeViewportZoom * _appliedExposeViewportZoomFactor);
+    final relaidOutById = <String, AssetWindowState>{};
+    for (final layout in exposeLayouts) {
+      final rect = layout.rect;
+      final nextSize = Size(rect.width / nextViewportZoom, rect.height / nextViewportZoom);
+      final nextPosition = _clampWindowPosition(
+        Offset(
+          workspace.viewportCenter.dx + ((rect.left - viewportCenter.dx) / nextViewportZoom),
+          workspace.viewportCenter.dy + ((rect.top - viewportCenter.dy) / nextViewportZoom),
+        ),
+        nextSize,
+      );
+      relaidOutById[layout.window.asset.id] = layout.window.copyWith(position: nextPosition, size: nextSize);
+    }
+
+    _replaceWorkspace(
+      workspace.copyWith(
+        windows: workspace.windows.map((window) => relaidOutById[window.asset.id] ?? window).toList(),
+        viewportZoom: nextViewportZoom,
+      ),
+    );
+
+    setState(() {
+      _workspaceLayoutMode = WorkspaceLayoutMode.freeform;
+      _editMode = false;
+      _selectedExposeWindowIds.clear();
+    });
+    _refreshWorkspaceViewTracking();
+  }
+
+  Future<void> _confirmApplyExposeGridToWorkspace() async {
+    final workspace = _activeWorkspaceOrNull;
+    if (workspace == null ||
+        _screen != SerenityScreen.workspace ||
+        _workspaceLayoutMode != WorkspaceLayoutMode.expose ||
+        workspace.windows.isEmpty) {
+      return;
+    }
+
+    final shouldApply = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Apply Grid?'),
+          content: Text(
+            'Replace the current freeform layout in "${workspace.name}" with this expose grid arrangement?',
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
+            FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Apply')),
+          ],
+        );
+      },
+    );
+
+    if (shouldApply == true && mounted) {
+      _applyExposeGridToWorkspace();
+    }
   }
 
   Future<void> _toggleWorkspaceOverview() async {

@@ -189,6 +189,7 @@ extension _SerenityShellWorkspaceChrome on _SerenityShellState {
     final imageLabel = '${mediaCounts.images} image${mediaCounts.images == 1 ? '' : 's'}';
     final videoLabel = '${mediaCounts.videos} video${mediaCounts.videos == 1 ? '' : 's'}';
     final linkLabel = '${mediaCounts.links} link${mediaCounts.links == 1 ? '' : 's'}';
+    final isExposeMode = _screen == SerenityScreen.workspace && _workspaceLayoutMode == WorkspaceLayoutMode.expose;
     final showExposeSelectionHud = _screen == SerenityScreen.workspace && _selectedExposeWindowIds.isNotEmpty;
     final selectedCount = _selectedExposeWindowIds.length;
 
@@ -206,28 +207,6 @@ extension _SerenityShellWorkspaceChrome on _SerenityShellState {
               size: 17,
               color: SerenityTheme.textPrimary,
             ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        _buildWorkspaceHudAction(
-          tooltip: 'Zoom to fit',
-          onTap: _fitWorkspaceViewportToContent,
-          child: const SizedBox(
-            width: 38,
-            height: 38,
-            child: Icon(Icons.fit_screen_rounded, size: 17, color: SerenityTheme.textPrimary),
-          ),
-        ),
-        const SizedBox(width: 10),
-        _buildWorkspaceHudAction(
-          tooltip: 'Collate',
-          onTap: _workspaceLayoutMode == WorkspaceLayoutMode.freeform
-              ? () => unawaited(_confirmCollateWorkspaceWindows())
-              : null,
-          child: const SizedBox(
-            width: 38,
-            height: 38,
-            child: Icon(Icons.filter_center_focus_rounded, size: 18, color: SerenityTheme.textPrimary),
           ),
         ),
         const SizedBox(width: 10),
@@ -250,6 +229,39 @@ extension _SerenityShellWorkspaceChrome on _SerenityShellState {
           ),
         ),
         const SizedBox(width: 10),
+        if (!isExposeMode) ...[
+          _buildWorkspaceHudAction(
+            tooltip: 'Zoom to fit',
+            onTap: _fitWorkspaceViewportToContent,
+            child: const SizedBox(
+              width: 38,
+              height: 38,
+              child: Icon(Icons.fit_screen_rounded, size: 17, color: SerenityTheme.textPrimary),
+            ),
+          ),
+          const SizedBox(width: 10),
+          _buildWorkspaceHudAction(
+            tooltip: 'Collate',
+            onTap: () => unawaited(_confirmCollateWorkspaceWindows()),
+            child: const SizedBox(
+              width: 38,
+              height: 38,
+              child: Icon(Icons.gps_fixed_rounded, size: 18, color: SerenityTheme.textPrimary),
+            ),
+          ),
+          const SizedBox(width: 10),
+        ] else ...[
+          _buildWorkspaceHudAction(
+            tooltip: 'Apply grid to freeform',
+            onTap: () => unawaited(_confirmApplyExposeGridToWorkspace()),
+            child: const SizedBox(
+              width: 38,
+              height: 38,
+              child: Icon(Icons.task_alt_rounded, size: 18, color: SerenityTheme.textPrimary),
+            ),
+          ),
+          const SizedBox(width: 10),
+        ],
         _buildWorkspaceHudAction(
           tooltip: 'Open workspace links',
           onTap: () => unawaited(_openWorkspaceLinksDialog(_activeWorkspace)),
