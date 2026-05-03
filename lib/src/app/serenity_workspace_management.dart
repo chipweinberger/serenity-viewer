@@ -25,20 +25,7 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
 
   void _toggleWorkspaceOpen(String workspaceId) {
     final session = _session!;
-    final nextWorkspaces = session.workspaces
-        .map((workspace) => workspace.id == workspaceId ? workspace.copyWith(isOpen: !workspace.isOpen) : workspace)
-        .toList();
-
-    var nextActiveId = session.activeWorkspaceId;
-    final openWorkspaces = nextWorkspaces.where((workspace) => workspace.isOpen).toList();
-    if (openWorkspaces.isEmpty) {
-      nextWorkspaces[0] = nextWorkspaces[0].copyWith(isOpen: true);
-      nextActiveId = nextWorkspaces[0].id;
-    } else if (!openWorkspaces.any((workspace) => workspace.id == nextActiveId)) {
-      nextActiveId = openWorkspaces.first.id;
-    }
-
-    _updateSession(session.copyWith(workspaces: nextWorkspaces, activeWorkspaceId: nextActiveId));
+    _updateSession(SerenityWorkspaceMutations.toggleWorkspaceOpen(session, workspaceId));
   }
 
   Future<void> _renameWorkspace(String workspaceId) async {
@@ -222,25 +209,14 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
       return;
     }
 
-    var nextZ = destinationWorkspace.windows.fold<int>(0, (value, window) => math.max(value, window.zIndex));
-    final movedWindows = selectedWindows.map((window) {
-      nextZ += 1;
-      return window.copyWith(zIndex: nextZ);
-    }).toList();
-
-    final nextWorkspaces = session.workspaces.map((workspace) {
-      if (workspace.id == sourceWorkspace.id) {
-        return workspace.copyWith(
-          windows: workspace.windows.where((window) => !_selectedExposeWindowIds.contains(window.asset.id)).toList(),
-        );
-      }
-      if (workspace.id == destinationWorkspace.id) {
-        return workspace.copyWith(windows: [...workspace.windows, ...movedWindows], isOpen: true);
-      }
-      return workspace;
-    }).toList();
-
-    _updateSession(session.copyWith(workspaces: nextWorkspaces));
+    _updateSession(
+      SerenityWorkspaceMutations.moveSelectedWindowsToWorkspace(
+        session,
+        sourceWorkspaceId: sourceWorkspace.id,
+        destinationWorkspaceId: destinationWorkspace.id,
+        selectedWindowIds: _selectedExposeWindowIds,
+      ),
+    );
     _queueThumbnailRefresh(sourceWorkspace.id, delay: Duration.zero);
     _queueThumbnailRefresh(destinationWorkspace.id, delay: Duration.zero);
     setState(() {
@@ -274,28 +250,11 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
       return;
     }
 
-    final openWorkspaces = [..._openWorkspaces];
-    final sourceIndex = openWorkspaces.indexWhere((workspace) => workspace.id == sourceWorkspaceId);
-    final targetIndex = openWorkspaces.indexWhere((workspace) => workspace.id == targetWorkspaceId);
-    if (sourceIndex == -1 || targetIndex == -1) {
-      return;
-    }
-
-    final moved = openWorkspaces.removeAt(sourceIndex);
-    openWorkspaces.insert(targetIndex, moved);
-
-    final openWorkspaceIds = openWorkspaces.map((workspace) => workspace.id).toList();
-    final openWorkspaceById = {for (final workspace in openWorkspaces) workspace.id: workspace};
-    var openWorkspaceCursor = 0;
-    final nextWorkspaces = _workspaces.map((workspace) {
-      if (!workspace.isOpen) {
-        return workspace;
-      }
-
-      final nextWorkspaceId = openWorkspaceIds[openWorkspaceCursor++];
-      return openWorkspaceById[nextWorkspaceId]!;
-    }).toList();
-
+    final nextWorkspaces = SerenityWorkspaceMutations.reorderOpenWorkspaces(
+      _workspaces,
+      sourceWorkspaceId: sourceWorkspaceId,
+      targetWorkspaceId: targetWorkspaceId,
+    );
     _updateSession(_session!.copyWith(workspaces: nextWorkspaces));
   }
 

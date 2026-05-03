@@ -16,13 +16,7 @@ extension _SerenityShellSessionActions on _SerenityShellState {
 
   void _replaceWorkspace(WorkspaceState nextWorkspace, {bool queueThumbnail = true}) {
     final session = _session!;
-    _updateSession(
-      session.copyWith(
-        workspaces: session.workspaces
-            .map((workspace) => workspace.id == nextWorkspace.id ? nextWorkspace : workspace)
-            .toList(),
-      ),
-    );
+    _updateSession(SerenityWorkspaceMutations.replaceWorkspace(session, nextWorkspace));
     if (queueThumbnail) {
       _thumbnailDirtyWorkspaces.add(nextWorkspace.id);
     }

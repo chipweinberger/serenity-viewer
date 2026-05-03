@@ -23,20 +23,11 @@ extension _SerenityShellWorkspaceGeometry on _SerenityShellState {
   }
 
   double _clampWorkspaceZoom(double zoom) {
-    return zoom.clamp(workspaceMinZoom, workspaceMaxZoom);
+    return SerenityWorkspaceMutations.clampWorkspaceZoom(zoom);
   }
 
   Offset _clampWorkspaceCenter({required Offset center, required double zoom, required Size viewportSize}) {
-    final safeZoom = _clampWorkspaceZoom(zoom);
-    final halfVisibleWidth = viewportSize.width <= 0 ? 0.0 : viewportSize.width / (2 * safeZoom);
-    final halfVisibleHeight = viewportSize.height <= 0 ? 0.0 : viewportSize.height / (2 * safeZoom);
-
-    final minCenterX = halfVisibleWidth >= workspaceExtent ? 0.0 : workspaceMinCoordinate + halfVisibleWidth;
-    final maxCenterX = halfVisibleWidth >= workspaceExtent ? 0.0 : workspaceMaxCoordinate - halfVisibleWidth;
-    final minCenterY = halfVisibleHeight >= workspaceExtent ? 0.0 : workspaceMinCoordinate + halfVisibleHeight;
-    final maxCenterY = halfVisibleHeight >= workspaceExtent ? 0.0 : workspaceMaxCoordinate - halfVisibleHeight;
-
-    return Offset(center.dx.clamp(minCenterX, maxCenterX), center.dy.clamp(minCenterY, maxCenterY));
+    return SerenityWorkspaceMutations.clampWorkspaceCenter(center: center, zoom: zoom, viewportSize: viewportSize);
   }
 
   Offset _workspaceScreenOffsetForWindow(WorkspaceState workspace, AssetWindowState window, Size viewportSize) {
@@ -59,34 +50,28 @@ extension _SerenityShellWorkspaceGeometry on _SerenityShellState {
     }
 
     final workspace = workspaceMatches.first;
-    final nextZoom = _clampWorkspaceZoom(zoom ?? workspace.viewportZoom);
-    final nextCenter = _clampWorkspaceCenter(
-      center: center ?? workspace.viewportCenter,
-      zoom: nextZoom,
+    final nextWorkspace = SerenityWorkspaceMutations.setWorkspaceViewport(
+      workspace,
       viewportSize: _workspaceViewportSize,
+      center: center,
+      zoom: zoom,
     );
     final viewportChanged =
-        (workspace.viewportCenter.dx - nextCenter.dx).abs() > 0.001 ||
-        (workspace.viewportCenter.dy - nextCenter.dy).abs() > 0.001 ||
-        (workspace.viewportZoom - nextZoom).abs() > 0.001;
+        (workspace.viewportCenter.dx - nextWorkspace.viewportCenter.dx).abs() > 0.001 ||
+        (workspace.viewportCenter.dy - nextWorkspace.viewportCenter.dy).abs() > 0.001 ||
+        (workspace.viewportZoom - nextWorkspace.viewportZoom).abs() > 0.001;
     if (!viewportChanged) {
       return;
     }
 
-    _replaceWorkspace(
-      workspace.copyWith(viewportCenterDx: nextCenter.dx, viewportCenterDy: nextCenter.dy, viewportZoom: nextZoom),
-      queueThumbnail: queueThumbnail,
-    );
+    _replaceWorkspace(nextWorkspace, queueThumbnail: queueThumbnail);
     if (!queueThumbnail) {
       _thumbnailDirtyWorkspaces.add(workspaceId);
     }
   }
 
   Offset _clampWindowPosition(Offset position, Size size) {
-    return Offset(
-      position.dx.clamp(workspaceMinCoordinate, math.max(workspaceMinCoordinate, workspaceMaxCoordinate - size.width)),
-      position.dy.clamp(workspaceMinCoordinate, math.max(workspaceMinCoordinate, workspaceMaxCoordinate - size.height)),
-    );
+    return SerenityWorkspaceMutations.clampWindowPosition(position, size);
   }
 
   Size _windowSizeByFittingAspect({
@@ -94,25 +79,10 @@ extension _SerenityShellWorkspaceGeometry on _SerenityShellState {
     required double contentWidth,
     required double contentHeight,
   }) {
-    const minWidth = 96.0;
-    const minHeight = 72.0;
-    if (contentWidth <= 0 || contentHeight <= 0) {
-      return currentSize;
-    }
-
-    final aspectRatio = contentWidth / contentHeight;
-    final currentAspectRatio = currentSize.width / currentSize.height;
-
-    if (currentAspectRatio > aspectRatio) {
-      final nextWidth = math.max(minWidth, currentSize.height * aspectRatio);
-      return Size(math.min(currentSize.width, nextWidth), currentSize.height);
-    }
-
-    if (currentAspectRatio < aspectRatio) {
-      final nextHeight = math.max(minHeight, currentSize.width / aspectRatio);
-      return Size(currentSize.width, math.min(currentSize.height, nextHeight));
-    }
-
-    return currentSize;
+    return SerenityWorkspaceMutations.windowSizeByFittingAspect(
+      currentSize: currentSize,
+      contentWidth: contentWidth,
+      contentHeight: contentHeight,
+    );
   }
 }
