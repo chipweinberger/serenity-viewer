@@ -16,6 +16,143 @@ class SerenityWorkspaceMutations {
   static const double minWindowHeight = 72.0;
   static const double maxContentZoom = 30.0;
 
+  static WorkspaceState? _workspaceById(SerenitySessionState session, String workspaceId) {
+    return session.workspaces.where((workspace) => workspace.id == workspaceId).firstOrNull;
+  }
+
+  static AssetWindowState? _windowById(WorkspaceState workspace, String windowId) {
+    return workspace.windows.where((window) => window.asset.id == windowId).firstOrNull;
+  }
+
+  static WorkspaceState _mapWindows(
+    WorkspaceState workspace,
+    AssetWindowState Function(AssetWindowState window) transform,
+  ) {
+    return workspace.copyWith(windows: workspace.windows.map(transform).toList());
+  }
+
+  static WorkspaceState _updateWindowById(
+    WorkspaceState workspace,
+    String windowId,
+    AssetWindowState Function(AssetWindowState window) transform,
+  ) {
+    return _mapWindows(workspace, (window) => window.asset.id == windowId ? transform(window) : window);
+  }
+
+  static ({double left, double top, double right, double bottom}) _windowEdges(AssetWindowState window) {
+    return (
+      left: window.position.dx,
+      top: window.position.dy,
+      right: window.position.dx + window.size.width,
+      bottom: window.position.dy + window.size.height,
+    );
+  }
+
+  static ({double left, double top, double right, double bottom}) _applyResizeDelta(
+    ({double left, double top, double right, double bottom}) edges,
+    WindowResizeHandle handle,
+    Offset delta,
+  ) {
+    var left = edges.left;
+    var top = edges.top;
+    var right = edges.right;
+    var bottom = edges.bottom;
+
+    switch (handle) {
+      case WindowResizeHandle.left:
+        left += delta.dx;
+        break;
+      case WindowResizeHandle.right:
+        right += delta.dx;
+        break;
+      case WindowResizeHandle.top:
+        top += delta.dy;
+        break;
+      case WindowResizeHandle.bottom:
+        bottom += delta.dy;
+        break;
+      case WindowResizeHandle.topLeft:
+        left += delta.dx;
+        top += delta.dy;
+        break;
+      case WindowResizeHandle.topRight:
+        right += delta.dx;
+        top += delta.dy;
+        break;
+      case WindowResizeHandle.bottomLeft:
+        left += delta.dx;
+        bottom += delta.dy;
+        break;
+      case WindowResizeHandle.bottomRight:
+        right += delta.dx;
+        bottom += delta.dy;
+        break;
+    }
+
+    return (left: left, top: top, right: right, bottom: bottom);
+  }
+
+  static bool _resizesFromLeft(WindowResizeHandle handle) {
+    return {WindowResizeHandle.left, WindowResizeHandle.topLeft, WindowResizeHandle.bottomLeft}.contains(handle);
+  }
+
+  static bool _resizesFromTop(WindowResizeHandle handle) {
+    return {WindowResizeHandle.top, WindowResizeHandle.topLeft, WindowResizeHandle.topRight}.contains(handle);
+  }
+
+  static ({Offset position, Size size}) _clampResizedBounds(
+    ({double left, double top, double right, double bottom}) edges,
+    WindowResizeHandle handle,
+  ) {
+    var left = edges.left;
+    var top = edges.top;
+    var right = edges.right;
+    var bottom = edges.bottom;
+
+    var width = right - left;
+    if (width < minWindowWidth) {
+      if (_resizesFromLeft(handle)) {
+        left = right - minWindowWidth;
+      } else {
+        right = left + minWindowWidth;
+      }
+      width = minWindowWidth;
+    }
+
+    var height = bottom - top;
+    if (height < minWindowHeight) {
+      if (_resizesFromTop(handle)) {
+        top = bottom - minWindowHeight;
+      } else {
+        bottom = top + minWindowHeight;
+      }
+      height = minWindowHeight;
+    }
+
+    width = width.clamp(minWindowWidth, workspaceExtent * 2);
+    height = height.clamp(minWindowHeight, workspaceExtent * 2);
+    left = left.clamp(workspaceMinCoordinate, workspaceMaxCoordinate - width);
+    top = top.clamp(workspaceMinCoordinate, workspaceMaxCoordinate - height);
+
+    return (position: Offset(left, top), size: Size(width, height));
+  }
+
+  static Rect _workspaceContentBounds(List<AssetWindowState> windows) {
+    var minX = windows.first.position.dx;
+    var minY = windows.first.position.dy;
+    var maxX = windows.first.position.dx + windows.first.size.width;
+    var maxY = windows.first.position.dy + windows.first.size.height;
+
+    for (final window in windows.skip(1)) {
+      minX = math.min(minX, window.position.dx);
+      minY = math.min(minY, window.position.dy);
+      maxX = math.max(maxX, window.position.dx + window.size.width);
+      maxY = math.max(maxY, window.position.dy + window.size.height);
+    }
+
+    return Rect.fromLTRB(minX, minY, maxX, maxY);
+  }
+
   static SerenitySessionState replaceWorkspace(SerenitySessionState session, WorkspaceState nextWorkspace) {
     return session.copyWith(
       workspaces: session.workspaces
@@ -83,10 +220,8 @@ class SerenityWorkspaceMutations {
       return session;
     }
 
-    final sourceWorkspace = session.workspaces.where((workspace) => workspace.id == sourceWorkspaceId).firstOrNull;
-    final destinationWorkspace = session.workspaces
-        .where((workspace) => workspace.id == destinationWorkspaceId)
-        .firstOrNull;
+    final sourceWorkspace = _workspaceById(session, sourceWorkspaceId);
+    final destinationWorkspace = _workspaceById(session, destinationWorkspaceId);
     if (sourceWorkspace == null || destinationWorkspace == null) {
       return session;
     }
@@ -120,23 +255,18 @@ class SerenityWorkspaceMutations {
   }
 
   static ({WorkspaceState workspace, int? previousZOrder}) focusWindow(WorkspaceState workspace, String windowId) {
-    final matchingWindow = workspace.windows.where((window) => window.asset.id == windowId);
-    if (matchingWindow.isEmpty) {
+    final currentWindow = _windowById(workspace, windowId);
+    if (currentWindow == null) {
       return (workspace: workspace, previousZOrder: null);
     }
 
-    final currentWindow = matchingWindow.first;
     final maxZ = workspace.windows.fold<int>(0, (value, window) => math.max(value, window.zIndex));
     if (currentWindow.zIndex == maxZ) {
       return (workspace: workspace, previousZOrder: null);
     }
 
     return (
-      workspace: workspace.copyWith(
-        windows: workspace.windows
-            .map((window) => window.asset.id == windowId ? window.copyWith(zIndex: maxZ + 1) : window)
-            .toList(),
-      ),
+      workspace: _updateWindowById(workspace, windowId, (window) => window.copyWith(zIndex: maxZ + 1)),
       previousZOrder: currentWindow.zIndex,
     );
   }
@@ -233,14 +363,10 @@ class SerenityWorkspaceMutations {
   }
 
   static WorkspaceState moveWindow(WorkspaceState workspace, String windowId, Offset delta) {
-    return workspace.copyWith(
-      windows: workspace.windows
-          .map(
-            (window) => window.asset.id == windowId
-                ? window.copyWith(position: clampWindowPosition(window.position + delta, window.size))
-                : window,
-          )
-          .toList(),
+    return _updateWindowById(
+      workspace,
+      windowId,
+      (window) => window.copyWith(position: clampWindowPosition(window.position + delta, window.size)),
     );
   }
 
@@ -306,134 +432,50 @@ class SerenityWorkspaceMutations {
 
   static WorkspaceState collateWorkspaceWindows(WorkspaceState workspace, {required Size targetBox}) {
     final targetCenter = workspace.viewportCenter;
-    return workspace.copyWith(
-      windows: workspace.windows.map((window) {
-        if (window.asset.type != AssetType.image && window.asset.type != AssetType.video) {
-          return window;
-        }
+    return _mapWindows(workspace, (window) {
+      if (window.asset.type != AssetType.image && window.asset.type != AssetType.video) {
+        return window;
+      }
 
-        final targetSize = fitSizeForViewportToAspect(targetBox, window.asset.aspectRatio);
-        if (targetSize.width <= 0 || targetSize.height <= 0) {
-          return window;
-        }
+      final targetSize = fitSizeForViewportToAspect(targetBox, window.asset.aspectRatio);
+      if (targetSize.width <= 0 || targetSize.height <= 0) {
+        return window;
+      }
 
-        final centeredPosition = clampWindowPosition(
-          Offset(targetCenter.dx - (targetSize.width / 2), targetCenter.dy - (targetSize.height / 2)),
-          targetSize,
-        );
-        return window.copyWith(
-          position: centeredPosition,
-          size: targetSize,
-          zoom: 1,
-          clearZoomBase: true,
-          clearContentOffset: true,
-        );
-      }).toList(),
-    );
+      final centeredPosition = clampWindowPosition(
+        Offset(targetCenter.dx - (targetSize.width / 2), targetCenter.dy - (targetSize.height / 2)),
+        targetSize,
+      );
+      return window.copyWith(
+        position: centeredPosition,
+        size: targetSize,
+        zoom: 1,
+        clearZoomBase: true,
+        clearContentOffset: true,
+      );
+    });
   }
 
-  static WorkspaceState resizeWindow(
-    WorkspaceState workspace,
-    String windowId,
+  static ({Offset position, Size size}) _resizedBoundsForWindow(
+    AssetWindowState window,
     WindowResizeHandle handle,
     Offset delta,
   ) {
-    return workspace.copyWith(
-      windows: workspace.windows.map((window) {
-        if (window.asset.id != windowId) {
-          return window;
-        }
-
-        var left = window.position.dx;
-        var top = window.position.dy;
-        var right = window.position.dx + window.size.width;
-        var bottom = window.position.dy + window.size.height;
-
-        switch (handle) {
-          case WindowResizeHandle.left:
-            left += delta.dx;
-            break;
-          case WindowResizeHandle.right:
-            right += delta.dx;
-            break;
-          case WindowResizeHandle.top:
-            top += delta.dy;
-            break;
-          case WindowResizeHandle.bottom:
-            bottom += delta.dy;
-            break;
-          case WindowResizeHandle.topLeft:
-            left += delta.dx;
-            top += delta.dy;
-            break;
-          case WindowResizeHandle.topRight:
-            right += delta.dx;
-            top += delta.dy;
-            break;
-          case WindowResizeHandle.bottomLeft:
-            left += delta.dx;
-            bottom += delta.dy;
-            break;
-          case WindowResizeHandle.bottomRight:
-            right += delta.dx;
-            bottom += delta.dy;
-            break;
-        }
-
-        var width = right - left;
-        if (width < minWindowWidth) {
-          if ({WindowResizeHandle.left, WindowResizeHandle.topLeft, WindowResizeHandle.bottomLeft}.contains(handle)) {
-            left = right - minWindowWidth;
-          } else {
-            right = left + minWindowWidth;
-          }
-          width = minWindowWidth;
-        }
-
-        var height = bottom - top;
-        if (height < minWindowHeight) {
-          if ({WindowResizeHandle.top, WindowResizeHandle.topLeft, WindowResizeHandle.topRight}.contains(handle)) {
-            top = bottom - minWindowHeight;
-          } else {
-            bottom = top + minWindowHeight;
-          }
-          height = minWindowHeight;
-        }
-
-        width = width.clamp(minWindowWidth, workspaceExtent * 2);
-        height = height.clamp(minWindowHeight, workspaceExtent * 2);
-        left = left.clamp(workspaceMinCoordinate, workspaceMaxCoordinate - width);
-        top = top.clamp(workspaceMinCoordinate, workspaceMaxCoordinate - height);
-
-        return window.copyWith(position: Offset(left, top), size: Size(width, height));
-      }).toList(),
-    );
+    final resizedEdges = _applyResizeDelta(_windowEdges(window), handle, delta);
+    return _clampResizedBounds(resizedEdges, handle);
   }
 
-  static WorkspaceState transformWindowFromTrackpad(WorkspaceState workspace, String windowId, double scaleDelta) {
-    return workspace.copyWith(
-      windows: workspace.windows.map((window) {
-        if (window.asset.id != windowId) {
-          return window;
-        }
-        return scaleWindowAroundCenter(window, scaleDelta, mirrorContentZoom: false);
-      }).toList(),
-    );
+  static AssetWindowState _resizeWindowState(AssetWindowState window, WindowResizeHandle handle, Offset delta) {
+    final nextBounds = _resizedBoundsForWindow(window, handle, delta);
+    return window.copyWith(position: nextBounds.position, size: nextBounds.size);
   }
 
-  static WorkspaceState fitWindowToContent(WorkspaceState workspace, String windowId) {
-    final currentWindow = workspace.windows.where((window) => window.asset.id == windowId).firstOrNull;
-    if (currentWindow == null) {
-      return workspace;
-    }
-
+  static AssetWindowState _fitWindowToVisibleContent(AssetWindowState currentWindow) {
     final visibleContent = visibleContentRectForWindow(currentWindow);
     final visibleRect = visibleContent.visibleRect;
-    final visibleWidth = math.max(1.0, visibleRect.width);
-    final visibleHeight = math.max(1.0, visibleRect.height);
     final nextSize = Size(
-      visibleWidth.clamp(minWindowWidth, workspaceExtent * 2),
-      visibleHeight.clamp(minWindowHeight, workspaceExtent * 2),
+      math.max(1.0, visibleRect.width).clamp(minWindowWidth, workspaceExtent * 2),
+      math.max(1.0, visibleRect.height).clamp(minWindowHeight, workspaceExtent * 2),
     );
     final nextPosition = clampWindowPosition(currentWindow.position + visibleRect.topLeft, nextSize);
     final nextLeft =
@@ -449,20 +491,39 @@ class SerenityWorkspaceMutations {
       nextTop - ((nextSize.height - visibleContent.zoomedContentSize.height) / 2),
     );
 
-    return workspace.copyWith(
-      windows: workspace.windows.map((window) {
-        if (window.asset.id != windowId) {
-          return window;
-        }
-        return window.copyWith(
-          position: nextPosition,
-          size: nextSize,
-          contentOffsetDx: currentWindow.zoom > 1.0 ? nextContentOffset.dx : 0,
-          contentOffsetDy: currentWindow.zoom > 1.0 ? nextContentOffset.dy : 0,
-          clearContentOffset: currentWindow.zoom <= 1.0,
-        );
-      }).toList(),
+    return currentWindow.copyWith(
+      position: nextPosition,
+      size: nextSize,
+      contentOffsetDx: currentWindow.zoom > 1.0 ? nextContentOffset.dx : 0,
+      contentOffsetDy: currentWindow.zoom > 1.0 ? nextContentOffset.dy : 0,
+      clearContentOffset: currentWindow.zoom <= 1.0,
     );
+  }
+
+  static WorkspaceState resizeWindow(
+    WorkspaceState workspace,
+    String windowId,
+    WindowResizeHandle handle,
+    Offset delta,
+  ) {
+    return _updateWindowById(workspace, windowId, (window) => _resizeWindowState(window, handle, delta));
+  }
+
+  static WorkspaceState transformWindowFromTrackpad(WorkspaceState workspace, String windowId, double scaleDelta) {
+    return _updateWindowById(
+      workspace,
+      windowId,
+      (window) => scaleWindowAroundCenter(window, scaleDelta, mirrorContentZoom: false),
+    );
+  }
+
+  static WorkspaceState fitWindowToContent(WorkspaceState workspace, String windowId) {
+    final currentWindow = _windowById(workspace, windowId);
+    if (currentWindow == null) {
+      return workspace;
+    }
+
+    return _updateWindowById(workspace, windowId, (_) => _fitWindowToVisibleContent(currentWindow));
   }
 
   static WorkspaceState fitWorkspaceViewportToContent(WorkspaceState workspace, Size viewportSize) {
@@ -470,61 +531,36 @@ class SerenityWorkspaceMutations {
       return setWorkspaceViewport(workspace, viewportSize: viewportSize, center: defaultWorkspaceCenter, zoom: 1);
     }
 
-    var minX = workspace.windows.first.position.dx;
-    var minY = workspace.windows.first.position.dy;
-    var maxX = workspace.windows.first.position.dx + workspace.windows.first.size.width;
-    var maxY = workspace.windows.first.position.dy + workspace.windows.first.size.height;
-    for (final window in workspace.windows.skip(1)) {
-      minX = math.min(minX, window.position.dx);
-      minY = math.min(minY, window.position.dy);
-      maxX = math.max(maxX, window.position.dx + window.size.width);
-      maxY = math.max(maxY, window.position.dy + window.size.height);
-    }
-
+    final contentBounds = _workspaceContentBounds(workspace.windows);
     const padding = 120.0;
-    final contentWidth = math.max(1.0, (maxX - minX) + padding);
-    final contentHeight = math.max(1.0, (maxY - minY) + padding);
+    final contentWidth = math.max(1.0, contentBounds.width + padding);
+    final contentHeight = math.max(1.0, contentBounds.height + padding);
     final zoom = clampWorkspaceZoom(math.min(viewportSize.width / contentWidth, viewportSize.height / contentHeight));
-    return setWorkspaceViewport(
-      workspace,
-      viewportSize: viewportSize,
-      center: Offset((minX + maxX) / 2, (minY + maxY) / 2),
-      zoom: zoom,
-    );
+    return setWorkspaceViewport(workspace, viewportSize: viewportSize, center: contentBounds.center, zoom: zoom);
   }
 
   static WorkspaceState setWindowZoom(WorkspaceState workspace, String windowId, WindowZoomUpdate update) {
-    return workspace.copyWith(
-      windows: workspace.windows
-          .map(
-            (window) => window.asset.id == windowId
-                ? window.copyWith(
-                    zoom: update.zoom,
-                    zoomBaseWidth: update.zoomBaseSize?.width,
-                    zoomBaseHeight: update.zoomBaseSize?.height,
-                    contentOffsetDx: update.contentOffset?.dx,
-                    contentOffsetDy: update.contentOffset?.dy,
-                    clearZoomBase: update.clearZoomBase,
-                    clearContentOffset: update.clearContentOffset,
-                  )
-                : window,
-          )
-          .toList(),
+    return _updateWindowById(
+      workspace,
+      windowId,
+      (window) => window.copyWith(
+        zoom: update.zoom,
+        zoomBaseWidth: update.zoomBaseSize?.width,
+        zoomBaseHeight: update.zoomBaseSize?.height,
+        contentOffsetDx: update.contentOffset?.dx,
+        contentOffsetDy: update.contentOffset?.dy,
+        clearZoomBase: update.clearZoomBase,
+        clearContentOffset: update.clearContentOffset,
+      ),
     );
   }
 
   static WorkspaceState setVideoPosition(WorkspaceState workspace, String windowId, int positionMs) {
-    return workspace.copyWith(
-      windows: workspace.windows
-          .map((window) => window.asset.id == windowId ? window.copyWith(videoPositionMs: positionMs) : window)
-          .toList(),
-    );
+    return _updateWindowById(workspace, windowId, (window) => window.copyWith(videoPositionMs: positionMs));
   }
 
   static WorkspaceState cycleVideoPlaybackSpeed(WorkspaceState workspace, String windowId) {
-    final currentWindow = workspace.windows
-        .where((window) => window.asset.id == windowId && window.asset.type == AssetType.video)
-        .firstOrNull;
+    final currentWindow = _videoWindowById(workspace, windowId);
     if (currentWindow == null) {
       return workspace;
     }
@@ -534,11 +570,7 @@ class SerenityWorkspaceMutations {
     );
     final nextSpeed = videoPlaybackSpeeds[(currentIndex + 1) % videoPlaybackSpeeds.length];
 
-    return workspace.copyWith(
-      windows: workspace.windows
-          .map((window) => window.asset.id == windowId ? window.copyWith(videoPlaybackSpeed: nextSpeed) : window)
-          .toList(),
-    );
+    return _updateWindowById(workspace, windowId, (window) => window.copyWith(videoPlaybackSpeed: nextSpeed));
   }
 
   static WorkspaceState setWindowIntrinsicSize(WorkspaceState workspace, String windowId, Size intrinsicSize) {
@@ -546,7 +578,7 @@ class SerenityWorkspaceMutations {
       return workspace;
     }
 
-    final currentWindow = workspace.windows.where((window) => window.asset.id == windowId).firstOrNull;
+    final currentWindow = _windowById(workspace, windowId);
     if (currentWindow == null) {
       return workspace;
     }
@@ -565,27 +597,30 @@ class SerenityWorkspaceMutations {
       return workspace;
     }
 
-    return workspace.copyWith(
-      windows: workspace.windows.map((window) {
-        if (window.asset.id != windowId) {
-          return window;
-        }
-        final nextSize = shouldAdoptContentSize
-            ? windowSizeByFittingAspect(
-                currentSize: currentWindow.size,
-                contentWidth: intrinsicSize.width,
-                contentHeight: intrinsicSize.height,
-              )
-            : null;
-        return window.copyWith(
-          position: nextSize == null ? null : clampWindowPosition(window.position, nextSize),
-          size: nextSize,
-          zoom: shouldAdoptContentSize ? 1 : null,
-          clearZoomBase: shouldAdoptContentSize,
-          clearContentOffset: shouldAdoptContentSize,
-          asset: window.asset.copyWith(intrinsicWidth: intrinsicSize.width, intrinsicHeight: intrinsicSize.height),
-        );
-      }).toList(),
-    );
+    return _updateWindowById(workspace, windowId, (window) {
+      final nextSize = shouldAdoptContentSize
+          ? windowSizeByFittingAspect(
+              currentSize: currentWindow.size,
+              contentWidth: intrinsicSize.width,
+              contentHeight: intrinsicSize.height,
+            )
+          : null;
+      return window.copyWith(
+        position: nextSize == null ? null : clampWindowPosition(window.position, nextSize),
+        size: nextSize,
+        zoom: shouldAdoptContentSize ? 1 : null,
+        clearZoomBase: shouldAdoptContentSize,
+        clearContentOffset: shouldAdoptContentSize,
+        asset: window.asset.copyWith(intrinsicWidth: intrinsicSize.width, intrinsicHeight: intrinsicSize.height),
+      );
+    });
+  }
+
+  static AssetWindowState? _videoWindowById(WorkspaceState workspace, String windowId) {
+    final window = _windowById(workspace, windowId);
+    if (window == null || window.asset.type != AssetType.video) {
+      return null;
+    }
+    return window;
   }
 }
