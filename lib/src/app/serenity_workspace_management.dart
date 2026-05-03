@@ -24,8 +24,7 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
   }
 
   void _toggleWorkspaceOpen(String workspaceId) {
-    final session = _persistenceState.session!;
-    _updateSession(SerenityWorkspaceMutations.toggleWorkspaceOpen(session, workspaceId));
+    _workspaceController.toggleWorkspaceOpen(_persistenceState.session!, workspaceId, _updateSession);
   }
 
   Future<void> _renameWorkspace(String workspaceId) async {
@@ -167,12 +166,23 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
 
   Future<void> _moveSelectedExposeWindowsToWorkspace(String destinationWorkspaceId) async {
     final session = _persistenceState.session;
-    if (session == null || _windowInteractionState.selectedExposeWindowIds.isEmpty) {
+    final sourceWorkspace = _activeWorkspaceOrNull;
+    if (!_workspaceController.canMoveSelectedWindowsToWorkspace(
+      session: session,
+      sourceWorkspace: sourceWorkspace,
+      destinationWorkspaceId: destinationWorkspaceId,
+    )) {
+      if (sourceWorkspace != null && destinationWorkspaceId == sourceWorkspace.id) {
+        _showMessage('Choose a different tab to move those windows.');
+      }
       return;
     }
 
-    final sourceWorkspace = _activeWorkspaceOrNull;
     if (sourceWorkspace == null) {
+      return;
+    }
+
+    if (session == null) {
       return;
     }
 
@@ -187,32 +197,24 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
     }
 
     final destinationWorkspace = destinationMatches.first;
-    final selectedWindows = sourceWorkspace.windows
-        .where((window) => _windowInteractionState.selectedExposeWindowIds.contains(window.asset.id))
-        .toList();
-    if (selectedWindows.isEmpty) {
+    final selectedWindowCount = _workspaceController.selectedExposeWindowCount(sourceWorkspace);
+    if (selectedWindowCount == 0) {
       _clearExposeSelection();
       return;
     }
 
-    final shouldMove = await _confirmMoveSelectedWindows(destinationWorkspace, selectedWindows.length);
+    final shouldMove = await _confirmMoveSelectedWindows(destinationWorkspace, selectedWindowCount);
     if (!shouldMove || !mounted) {
       return;
     }
 
-    _updateSession(
-      SerenityWorkspaceMutations.moveSelectedWindowsToWorkspace(
-        session,
-        sourceWorkspaceId: sourceWorkspace.id,
-        destinationWorkspaceId: destinationWorkspace.id,
-        selectedWindowIds: _windowInteractionState.selectedExposeWindowIds,
-      ),
+    _workspaceController.moveSelectedExposeWindowsToWorkspace(
+      session: session,
+      sourceWorkspace: sourceWorkspace,
+      destinationWorkspace: destinationWorkspace,
+      updateSession: _updateSession,
+      queueThumbnailRefresh: _queueThumbnailRefresh,
     );
-    _queueThumbnailRefresh(sourceWorkspace.id, delay: Duration.zero);
-    _queueThumbnailRefresh(destinationWorkspace.id, delay: Duration.zero);
-    setState(() {
-      _windowInteractionState.selectedExposeWindowIds.clear();
-    });
   }
 
   Future<void> _confirmCloseTab(String workspaceId) async {
@@ -237,16 +239,13 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
   }
 
   void _reorderOpenWorkspace(String sourceWorkspaceId, String targetWorkspaceId) {
-    if (_persistenceState.session == null || sourceWorkspaceId == targetWorkspaceId) {
-      return;
-    }
-
-    final nextWorkspaces = SerenityWorkspaceMutations.reorderOpenWorkspaces(
+    _workspaceController.reorderOpenWorkspace(
+      _persistenceState.session,
       _workspaces,
       sourceWorkspaceId: sourceWorkspaceId,
       targetWorkspaceId: targetWorkspaceId,
+      updateSession: _updateSession,
     );
-    _updateSession(_persistenceState.session!.copyWith(workspaces: nextWorkspaces));
   }
 
   void _createWorkspace() {

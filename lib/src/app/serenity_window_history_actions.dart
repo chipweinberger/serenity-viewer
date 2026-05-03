@@ -4,29 +4,7 @@ part of 'serenity_shell.dart';
 
 extension _SerenityWindowHistoryActions on _SerenityShellState {
   AssetWindowState? _focusedWindowOrNull() {
-    final workspace = _activeWorkspaceOrNull;
-    if (workspace == null || workspace.windows.isEmpty) {
-      return null;
-    }
-
-    final sortedWindows = [...workspace.windows]..sort((a, b) => a.zIndex.compareTo(b.zIndex));
-    return sortedWindows.last;
-  }
-
-  void _rememberClosedWindow(WorkspaceState workspace, AssetWindowState window) {
-    _recentlyClosedWindows.insert(
-      0,
-      RecentlyClosedWindowEntry(
-        workspaceId: workspace.id,
-        workspaceName: workspace.name,
-        window: window,
-        closedAt: DateTime.now(),
-      ),
-    );
-
-    if (_recentlyClosedWindows.length > _SerenityShellState._maxRecentlyClosedWindows) {
-      _recentlyClosedWindows.removeRange(_SerenityShellState._maxRecentlyClosedWindows, _recentlyClosedWindows.length);
-    }
+    return _workspaceController.focusedWindowOrNull(_activeWorkspaceOrNull);
   }
 
   void _closeWindow(String workspaceId, String windowId) {
@@ -38,9 +16,13 @@ extension _SerenityWindowHistoryActions on _SerenityShellState {
     }
 
     setState(() {
-      _rememberClosedWindow(workspace, window);
-      _windowInteractionState.previousWindowZOrders.remove(windowId);
-      _windowInteractionState.pausedVideoWindows.remove(windowId);
+      _workspaceController.rememberClosedWindow(
+        _recentlyClosedWindows,
+        maxRecentlyClosedWindows: _SerenityShellState._maxRecentlyClosedWindows,
+        workspace: workspace,
+        window: window,
+      );
+      _workspaceController.clearWindowRuntimeState(windowId);
     });
 
     _replaceWorkspace(
@@ -49,7 +31,7 @@ extension _SerenityWindowHistoryActions on _SerenityShellState {
   }
 
   void _removeWindow(String workspaceId, String windowId) {
-    _windowInteractionState.selectedExposeWindowIds.remove(windowId);
+    _workspaceController.removeWindowSelection(windowId);
     _closeWindow(workspaceId, windowId);
   }
 

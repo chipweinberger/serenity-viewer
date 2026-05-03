@@ -15,10 +15,6 @@ extension _SerenityShellWorkspaceGeometry on _SerenityShellState {
     return SerenityWorkspaceMutations.clampWorkspaceZoom(zoom);
   }
 
-  Offset _clampWorkspaceCenter({required Offset center, required double zoom, required Size viewportSize}) {
-    return SerenityWorkspaceMutations.clampWorkspaceCenter(center: center, zoom: zoom, viewportSize: viewportSize);
-  }
-
   void _setWorkspaceViewport({required String workspaceId, Offset? center, double? zoom, bool queueThumbnail = false}) {
     final session = _persistenceState.session;
     if (session == null) {

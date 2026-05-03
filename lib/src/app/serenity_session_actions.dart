@@ -27,12 +27,7 @@ extension _SerenityShellSessionActions on _SerenityShellState {
   }
 
   void _setPinnedHoverWindow(String? windowId) {
-    if (_windowInteractionState.pinnedHoverWindowId == windowId) {
-      return;
-    }
-    setState(() {
-      _windowInteractionState.pinnedHoverWindowId = windowId;
-    });
+    _workspaceController.setPinnedHoverWindow(windowId);
   }
 
   void _clearPinnedHoverWindow() {
@@ -40,19 +35,7 @@ extension _SerenityShellSessionActions on _SerenityShellState {
   }
 
   void _flashWindow(String windowId) {
-    _windowInteractionState.windowFlashTimer?.cancel();
-    setState(() {
-      _windowInteractionState.flashedWindowId = windowId;
-      _windowInteractionState.windowFlashNonce += 1;
-    });
-    _windowInteractionState.windowFlashTimer = Timer(const Duration(milliseconds: 300), () {
-      if (!mounted || _windowInteractionState.flashedWindowId != windowId) {
-        return;
-      }
-      setState(() {
-        _windowInteractionState.flashedWindowId = null;
-      });
-    });
+    _workspaceController.flashWindow(windowId, mounted: mounted);
   }
 
   void _applyExposeGridToWorkspace() {
@@ -192,21 +175,10 @@ extension _SerenityShellSessionActions on _SerenityShellState {
   }
 
   void _toggleExposeWindowSelected(String windowId) {
-    setState(() {
-      if (_windowInteractionState.selectedExposeWindowIds.contains(windowId)) {
-        _windowInteractionState.selectedExposeWindowIds.remove(windowId);
-      } else {
-        _windowInteractionState.selectedExposeWindowIds.add(windowId);
-      }
-    });
+    _workspaceController.toggleExposeWindowSelected(windowId);
   }
 
   void _clearExposeSelection() {
-    if (_windowInteractionState.selectedExposeWindowIds.isEmpty) {
-      return;
-    }
-    setState(() {
-      _windowInteractionState.selectedExposeWindowIds.clear();
-    });
+    _workspaceController.clearExposeSelection();
   }
 }
