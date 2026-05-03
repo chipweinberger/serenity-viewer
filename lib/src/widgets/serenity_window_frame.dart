@@ -69,6 +69,7 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> {
   bool _isCommandPressed = false;
   bool _isOptionPressed = false;
   bool _isTrackpadWindowGestureActive = false;
+  bool _isDraggingWindow = false;
   bool _claimedOptionGestureTarget = false;
   double _lastTrackpadScale = 1.0;
   Offset? _hoverPosition;
@@ -223,6 +224,7 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> {
       }
     });
     _anyWindowResizing = false;
+    _isDraggingWindow = false;
     _syncNativeCursor(preserveHover && _hoverPosition != null ? _resizeHandleForPosition(_hoverPosition!) : null);
   }
 
@@ -325,6 +327,10 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> {
             return;
           }
 
+          if (!_isDraggingWindow) {
+            _isDraggingWindow = true;
+            widget.onTap();
+          }
           widget.onPanUpdate(event.delta);
         },
         onPointerUp: (_) => _clearResizeState(preserveHover: true),
