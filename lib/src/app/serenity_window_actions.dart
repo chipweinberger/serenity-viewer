@@ -151,49 +151,55 @@ extension _SerenityShellWindowActions on _SerenityShellState {
       return;
     }
 
-    if (_workspaceViewportSize.width <= 0 || _workspaceViewportSize.height <= 0 || workspace.windows.isEmpty) {
+    if (_workspaceViewportState.viewportSize.width <= 0 ||
+        _workspaceViewportState.viewportSize.height <= 0 ||
+        workspace.windows.isEmpty) {
       _setWorkspaceViewport(workspaceId: workspace.id, center: defaultWorkspaceCenter, zoom: 1, queueThumbnail: true);
       return;
     }
     _replaceWorkspace(
-      SerenityWorkspaceMutations.fitWorkspaceViewportToContent(workspace, _workspaceViewportSize),
+      SerenityWorkspaceMutations.fitWorkspaceViewportToContent(workspace, _workspaceViewportState.viewportSize),
       queueThumbnail: true,
     );
   }
 
   void _handleWorkspacePanZoomStart(PointerPanZoomStartEvent event, WorkspaceState workspace) {
     if (_screen != SerenityScreen.workspace || _workspaceLayoutMode == WorkspaceLayoutMode.expose) {
-      _isWorkspaceGestureActive = false;
+      _workspaceViewportState.isGestureActive = false;
       return;
     }
     if (_windowInteractionState.pinnedHoverWindowId != null) {
-      _isWorkspaceGestureActive = false;
+      _workspaceViewportState.isGestureActive = false;
       return;
     }
     if (_isCommandPressedForContentGesture || _isOptionPressedForWindowGesture) {
-      _isWorkspaceGestureActive = false;
+      _workspaceViewportState.isGestureActive = false;
       return;
     }
 
-    _isWorkspaceGestureActive = true;
-    _workspaceGestureStartCenter = workspace.viewportCenter;
-    _workspaceGestureStartZoom = workspace.viewportZoom;
-    _workspaceGestureStartLocalFocalPoint = event.localPosition;
-    _workspaceGestureAccumulatedPan = Offset.zero;
+    _workspaceViewportState.isGestureActive = true;
+    _workspaceViewportState.gestureStartCenter = workspace.viewportCenter;
+    _workspaceViewportState.gestureStartZoom = workspace.viewportZoom;
+    _workspaceViewportState.gestureStartLocalFocalPoint = event.localPosition;
+    _workspaceViewportState.gestureAccumulatedPan = Offset.zero;
   }
 
   void _handleWorkspacePanZoomUpdate(PointerPanZoomUpdateEvent event, WorkspaceState workspace, Size viewportSize) {
-    if (!_isWorkspaceGestureActive) {
+    if (!_workspaceViewportState.isGestureActive) {
       return;
     }
 
-    _workspaceGestureAccumulatedPan += event.panDelta;
-    final nextZoom = _clampWorkspaceZoom(_workspaceGestureStartZoom * math.pow(event.scale, 1.15).toDouble());
+    _workspaceViewportState.gestureAccumulatedPan += event.panDelta;
+    final nextZoom = _clampWorkspaceZoom(
+      _workspaceViewportState.gestureStartZoom * math.pow(event.scale, 1.15).toDouble(),
+    );
     final viewportCenter = viewportSize.center(Offset.zero);
     final anchorWorldPoint =
-        _workspaceGestureStartCenter +
-        ((_workspaceGestureStartLocalFocalPoint - viewportCenter) / _workspaceGestureStartZoom);
-    final nextAnchorLocalPoint = _workspaceGestureStartLocalFocalPoint + _workspaceGestureAccumulatedPan;
+        _workspaceViewportState.gestureStartCenter +
+        ((_workspaceViewportState.gestureStartLocalFocalPoint - viewportCenter) /
+            _workspaceViewportState.gestureStartZoom);
+    final nextAnchorLocalPoint =
+        _workspaceViewportState.gestureStartLocalFocalPoint + _workspaceViewportState.gestureAccumulatedPan;
     final nextCenter = _clampWorkspaceCenter(
       center: anchorWorldPoint - ((nextAnchorLocalPoint - viewportCenter) / nextZoom),
       zoom: nextZoom,
@@ -203,8 +209,8 @@ extension _SerenityShellWindowActions on _SerenityShellState {
   }
 
   void _handleWorkspacePanZoomEnd() {
-    _isWorkspaceGestureActive = false;
-    _workspaceGestureAccumulatedPan = Offset.zero;
+    _workspaceViewportState.isGestureActive = false;
+    _workspaceViewportState.gestureAccumulatedPan = Offset.zero;
     unawaited(_refreshActiveWorkspaceThumbnailIfNeeded());
   }
 

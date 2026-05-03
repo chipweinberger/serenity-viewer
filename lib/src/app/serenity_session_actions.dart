@@ -69,17 +69,22 @@ extension _SerenityShellSessionActions on _SerenityShellState {
         _workspaceLayoutMode != WorkspaceLayoutMode.expose) {
       return;
     }
-    if (_workspaceViewportSize.width <= 0 || _workspaceViewportSize.height <= 0 || workspace.windows.isEmpty) {
+    if (_workspaceViewportState.viewportSize.width <= 0 ||
+        _workspaceViewportState.viewportSize.height <= 0 ||
+        workspace.windows.isEmpty) {
       return;
     }
 
     final sortedWindows = [...workspace.windows]..sort((a, b) => a.asset.filename.compareTo(b.asset.filename));
-    final exposeLayouts = computeExposeLayoutRects(windows: sortedWindows, viewportSize: _workspaceViewportSize);
+    final exposeLayouts = computeExposeLayoutRects(
+      windows: sortedWindows,
+      viewportSize: _workspaceViewportState.viewportSize,
+    );
     if (exposeLayouts.isEmpty) {
       return;
     }
 
-    final viewportCenter = _workspaceViewportSize.center(Offset.zero);
+    final viewportCenter = _workspaceViewportState.viewportSize.center(Offset.zero);
     final safeViewportZoom = workspace.viewportZoom <= 0 ? 1.0 : workspace.viewportZoom;
     final nextViewportZoom = _clampWorkspaceZoom(safeViewportZoom * _appliedExposeViewportZoomFactor);
     final relaidOutById = <String, AssetWindowState>{};

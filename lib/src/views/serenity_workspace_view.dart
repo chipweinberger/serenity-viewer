@@ -54,7 +54,7 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final viewportSize = constraints.biggest;
-          _workspaceViewportSize = viewportSize;
+          _workspaceViewportState.viewportSize = viewportSize;
 
           return Listener(
             behavior: HitTestBehavior.translucent,
@@ -197,7 +197,7 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final viewportSize = constraints.biggest;
-                  _workspaceViewportSize = viewportSize;
+                  _workspaceViewportState.viewportSize = viewportSize;
 
                   if (windows.isEmpty) {
                     return const SizedBox.shrink();

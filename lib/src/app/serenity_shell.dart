@@ -123,13 +123,7 @@ class _SerenityShellState extends State<SerenityShell> {
   final _SerenityThumbnailRefreshState _thumbnailRefreshState = _SerenityThumbnailRefreshState();
   AppLifecycleListener? _appLifecycleListener;
   final _SerenityWorkspaceViewTrackingState _workspaceViewTrackingState = _SerenityWorkspaceViewTrackingState();
-
-  Size _workspaceViewportSize = Size.zero;
-  bool _isWorkspaceGestureActive = false;
-  Offset _workspaceGestureStartCenter = defaultWorkspaceCenter;
-  double _workspaceGestureStartZoom = 1;
-  Offset _workspaceGestureStartLocalFocalPoint = Offset.zero;
-  Offset _workspaceGestureAccumulatedPan = Offset.zero;
+  final _SerenityWorkspaceViewportState _workspaceViewportState = _SerenityWorkspaceViewportState();
 
   bool get _isRunningInWidgetTest {
     return Platform.environment.containsKey('FLUTTER_TEST') ||

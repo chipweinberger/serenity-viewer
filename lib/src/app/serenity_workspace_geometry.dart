@@ -44,7 +44,7 @@ extension _SerenityShellWorkspaceGeometry on _SerenityShellState {
     final workspace = workspaceMatches.first;
     final nextWorkspace = SerenityWorkspaceMutations.setWorkspaceViewport(
       workspace,
-      viewportSize: _workspaceViewportSize,
+      viewportSize: _workspaceViewportState.viewportSize,
       center: center,
       zoom: zoom,
     );

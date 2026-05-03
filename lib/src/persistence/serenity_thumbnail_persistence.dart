@@ -34,7 +34,7 @@ extension _SerenityShellThumbnailPersistence on _SerenityShellState {
       return;
     }
 
-    if (_workspaceViewportSize.width <= 0 || _workspaceViewportSize.height <= 0) {
+    if (_workspaceViewportState.viewportSize.width <= 0 || _workspaceViewportState.viewportSize.height <= 0) {
       return;
     }
 
@@ -204,8 +204,9 @@ extension _SerenityShellThumbnailPersistence on _SerenityShellState {
       canvas.drawRect(const Rect.fromLTWH(0, 0, canvasWidth, canvasHeight), emptyPaint);
     } else {
       final sortedWindows = [...workspace.windows]..sort((a, b) => a.zIndex.compareTo(b.zIndex));
-      final sourceViewportSize = _workspaceViewportSize.width > 0 && _workspaceViewportSize.height > 0
-          ? _workspaceViewportSize
+      final sourceViewportSize =
+          _workspaceViewportState.viewportSize.width > 0 && _workspaceViewportState.viewportSize.height > 0
+          ? _workspaceViewportState.viewportSize
           : const Size(canvasWidth, canvasHeight);
       final sourceScale = math.min(canvasWidth / sourceViewportSize.width, canvasHeight / sourceViewportSize.height);
       final sourceOffset = Offset(

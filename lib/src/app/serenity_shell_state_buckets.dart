@@ -42,3 +42,12 @@ class _SerenityWorkspaceViewTrackingState {
     timer = null;
   }
 }
+
+class _SerenityWorkspaceViewportState {
+  Size viewportSize = Size.zero;
+  bool isGestureActive = false;
+  Offset gestureStartCenter = defaultWorkspaceCenter;
+  double gestureStartZoom = 1;
+  Offset gestureStartLocalFocalPoint = Offset.zero;
+  Offset gestureAccumulatedPan = Offset.zero;
+}
