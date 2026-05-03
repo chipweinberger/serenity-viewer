@@ -1,0 +1,292 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+
+import 'package:serenity_viewer/src/foundation/app_constants.dart';
+import 'package:serenity_viewer/src/settings/appearance/theme.dart';
+import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
+import 'package:serenity_viewer/src/workspace/workspace_state.dart';
+import 'package:serenity_viewer/src/media/loading/workspace_load_plan.dart';
+import 'package:serenity_viewer/src/settings/appearance/glass_chip.dart';
+import 'package:serenity_viewer/src/workspace/thumbnails/workspace_thumbnail_card.dart';
+
+@immutable
+class SerenityLibraryScreenActions {
+  const SerenityLibraryScreenActions({
+    required this.onSearchChanged,
+    required this.onWorkspaceSortChanged,
+    required this.onToggleWorkspaceOpen,
+    required this.onRenameWorkspace,
+    required this.onDeleteWorkspace,
+    required this.onSetActiveWorkspace,
+  });
+
+  final ValueChanged<String> onSearchChanged;
+  final ValueChanged<WorkspaceSort> onWorkspaceSortChanged;
+  final ValueChanged<String> onToggleWorkspaceOpen;
+  final Future<void> Function(String workspaceId) onRenameWorkspace;
+  final Future<void> Function(String workspaceId) onDeleteWorkspace;
+  final Future<void> Function(String workspaceId) onSetActiveWorkspace;
+}
+
+class SerenityLibraryScreen extends StatelessWidget {
+  const SerenityLibraryScreen({
+    super.key,
+    required this.allWorkspaces,
+    required this.openWorkspaces,
+    required this.loadPlan,
+    required this.searchController,
+    required this.workspaceSort,
+    required this.refreshingWorkspaceIds,
+    required this.actions,
+  });
+
+  final List<WorkspaceState> allWorkspaces;
+  final List<WorkspaceState> openWorkspaces;
+  final SerenityLoadPlan loadPlan;
+  final TextEditingController searchController;
+  final WorkspaceSort workspaceSort;
+  final Set<String> refreshingWorkspaceIds;
+  final SerenityLibraryScreenActions actions;
+
+  static const double _thumbnailWidth = 224;
+  static const double _thumbnailHeight = 192;
+
+  List<WorkspaceState> _visibleOpenWorkspaces() {
+    return openWorkspaces.where(_matchesWorkspaceSearch).toList();
+  }
+
+  List<WorkspaceState> _sortedKnownWorkspaces() {
+    final filtered = allWorkspaces.where(_matchesWorkspaceSearch).toList();
+
+    switch (workspaceSort) {
+      case WorkspaceSort.views:
+        filtered.sort((a, b) => b.views.compareTo(a.views));
+        break;
+      case WorkspaceSort.recentlyViewed:
+        filtered.sort((a, b) => b.lastViewedAt.compareTo(a.lastViewedAt));
+        break;
+      case WorkspaceSort.recentlyCreated:
+        filtered.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        break;
+      case WorkspaceSort.name:
+        filtered.sort((a, b) => a.name.compareTo(b.name));
+        break;
+    }
+
+    return filtered;
+  }
+
+  bool _matchesWorkspaceSearch(WorkspaceState workspace) {
+    final query = searchController.text.trim().toLowerCase();
+    return query.isEmpty || workspace.name.toLowerCase().contains(query);
+  }
+
+  Widget _buildWorkspaceCardAction({required String tooltip, required VoidCallback onTap, required IconData icon}) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 6),
+      child: Material(
+        color: Colors.black.withValues(alpha: 0.54),
+        borderRadius: BorderRadius.circular(999),
+        child: Tooltip(
+          message: tooltip,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(999),
+            child: Padding(
+              padding: const EdgeInsets.all(7),
+              child: Icon(icon, size: 15, color: Colors.white),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOpenWorkspaceCard(WorkspaceState workspace) {
+    return SizedBox(
+      width: _thumbnailWidth,
+      height: _thumbnailHeight,
+      child: WorkspaceThumbnailCard(
+        workspace: workspace,
+        mediaCounts: workspaceMediaCounts(workspace),
+        unloadedCount: unloadedWorkspaceWindowCount(workspace, loadPlan),
+        isRefreshing: refreshingWorkspaceIds.contains(workspace.id),
+        hoverActions: [
+          _buildWorkspaceCardAction(
+            tooltip: 'Close workspace',
+            onTap: () => actions.onToggleWorkspaceOpen(workspace.id),
+            icon: Icons.close_rounded,
+          ),
+          _buildWorkspaceCardAction(
+            tooltip: 'Rename workspace',
+            onTap: () => unawaited(actions.onRenameWorkspace(workspace.id)),
+            icon: Icons.edit_outlined,
+          ),
+          _buildWorkspaceCardAction(
+            tooltip: 'Delete workspace',
+            onTap: () => unawaited(actions.onDeleteWorkspace(workspace.id)),
+            icon: Icons.delete_outline_rounded,
+          ),
+        ],
+        onTap: () async {
+          if (!workspace.isOpen) {
+            actions.onToggleWorkspaceOpen(workspace.id);
+          }
+          await actions.onSetActiveWorkspace(workspace.id);
+        },
+      ),
+    );
+  }
+
+  Widget _buildKnownWorkspaceCard(WorkspaceState workspace) {
+    return SizedBox(
+      width: _thumbnailWidth,
+      height: _thumbnailHeight,
+      child: WorkspaceThumbnailCard(
+        workspace: workspace,
+        mediaCounts: workspaceMediaCounts(workspace),
+        unloadedCount: unloadedWorkspaceWindowCount(workspace, loadPlan),
+        isRefreshing: refreshingWorkspaceIds.contains(workspace.id),
+        isDimmed: workspace.isOpen,
+        statusLabel: workspace.isOpen ? 'Open' : null,
+        hoverActions: [
+          _buildWorkspaceCardAction(
+            tooltip: 'Rename workspace',
+            onTap: () => unawaited(actions.onRenameWorkspace(workspace.id)),
+            icon: Icons.edit_outlined,
+          ),
+          _buildWorkspaceCardAction(
+            tooltip: 'Delete workspace',
+            onTap: () => unawaited(actions.onDeleteWorkspace(workspace.id)),
+            icon: Icons.delete_outline_rounded,
+          ),
+        ],
+        onTap: workspace.isOpen
+            ? null
+            : () async {
+                actions.onToggleWorkspaceOpen(workspace.id);
+                await actions.onSetActiveWorkspace(workspace.id);
+              },
+      ),
+    );
+  }
+
+  Widget _buildWorkspaceSortChips(BuildContext context) {
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      children: [
+        SerenityGlassChip(
+          selected: workspaceSort == WorkspaceSort.recentlyCreated,
+          onTap: () => actions.onWorkspaceSortChanged(WorkspaceSort.recentlyCreated),
+          child: const Text('Date created'),
+        ),
+        SerenityGlassChip(
+          selected: workspaceSort == WorkspaceSort.name,
+          onTap: () => actions.onWorkspaceSortChanged(WorkspaceSort.name),
+          child: const Text('Alphabetical'),
+        ),
+        SerenityGlassChip(
+          selected: workspaceSort == WorkspaceSort.views,
+          onTap: () => actions.onWorkspaceSortChanged(WorkspaceSort.views),
+          child: const Text('Most views'),
+        ),
+        SerenityGlassChip(
+          selected: workspaceSort == WorkspaceSort.recentlyViewed,
+          onTap: () => actions.onWorkspaceSortChanged(WorkspaceSort.recentlyViewed),
+          child: const Text('Recently viewed'),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final visibleOpenWorkspaces = _visibleOpenWorkspaces();
+    final knownWorkspaces = _sortedKnownWorkspaces();
+    final knownWorkspaceCount = knownWorkspaces.length;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SizedBox.expand(
+          child: DecoratedBox(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFFF5EBD8), Color(0xFFE0D1BA)],
+              ),
+            ),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(24, 88, 24, 28),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minWidth: constraints.maxWidth, minHeight: constraints.maxHeight - 116),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Open Now • ${visibleOpenWorkspaces.length}',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        color: SerenityTheme.textPrimary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 16,
+                      runSpacing: 16,
+                      children: [for (final workspace in visibleOpenWorkspaces) _buildOpenWorkspaceCard(workspace)],
+                    ),
+                    const SizedBox(height: 48),
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(
+                          'All Workspaces • $knownWorkspaceCount',
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            color: SerenityTheme.textPrimary,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 280,
+                          child: TextField(
+                            controller: searchController,
+                            onChanged: actions.onSearchChanged,
+                            decoration: InputDecoration(
+                              prefixIcon: const Icon(Icons.search_rounded),
+                              hintText: 'Search by name',
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                              filled: true,
+                              fillColor: SerenityTheme.panel,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(18),
+                                borderSide: BorderSide.none,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    _buildWorkspaceSortChips(context),
+                    const SizedBox(height: 16),
+                    Wrap(
+                      spacing: 16,
+                      runSpacing: 16,
+                      children: [for (final workspace in knownWorkspaces) _buildKnownWorkspaceCard(workspace)],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}

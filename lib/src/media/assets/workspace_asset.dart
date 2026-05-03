@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/foundation/serenity_core.dart';
+import 'package:serenity_viewer/src/foundation/app_constants.dart';
 
 @immutable
 class WorkspaceAsset {

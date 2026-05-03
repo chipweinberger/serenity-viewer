@@ -2,8 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/foundation/serenity_core.dart';
-import 'package:serenity_viewer/src/workspace/windows/asset_window_state.dart';
+import 'package:serenity_viewer/src/foundation/app_constants.dart';
+import 'package:serenity_viewer/src/workspace/windows/workspace_window_state.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_link.dart';
 
 Offset _workspaceViewportCenterForWindows(List<AssetWindowState> windows) {

@@ -5,12 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 
-import 'package:serenity_viewer/src/foundation/serenity_core.dart';
-import 'package:serenity_viewer/src/foundation/serenity_keyboard_modifiers.dart';
-import 'package:serenity_viewer/src/settings/appearance/serenity_theme.dart';
-import 'package:serenity_viewer/src/workspace/windows/asset_window_state.dart';
-import 'package:serenity_viewer/src/media/assets/serenity_media_canvas.dart';
-import 'package:serenity_viewer/src/media/assets/serenity_media_preview_transforms.dart';
+import 'package:serenity_viewer/src/foundation/app_constants.dart';
+import 'package:serenity_viewer/src/foundation/keyboard_modifiers.dart';
+import 'package:serenity_viewer/src/settings/appearance/theme.dart';
+import 'package:serenity_viewer/src/workspace/windows/workspace_window_state.dart';
+import 'package:serenity_viewer/src/media/assets/media_canvas.dart';
+import 'package:serenity_viewer/src/media/assets/media_preview_transforms.dart';
 
 class ExposeWindowCard extends StatefulWidget {
   const ExposeWindowCard({

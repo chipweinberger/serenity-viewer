@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-import 'package:serenity_viewer/src/workspace/windows/asset_window_state.dart';
+import 'package:serenity_viewer/src/workspace/windows/workspace_window_state.dart';
 
 @immutable
 class RecentlyClosedWindowEntry {

@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/settings/appearance/serenity_theme.dart';
+import 'package:serenity_viewer/src/settings/appearance/theme.dart';
 import 'package:serenity_viewer/src/media/assets/workspace_media_counts.dart';
 import 'package:serenity_viewer/src/workspace/workspace_state.dart';
 
