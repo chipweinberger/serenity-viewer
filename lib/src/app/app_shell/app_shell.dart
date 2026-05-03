@@ -10,6 +10,7 @@ import 'package:serenity_viewer/src/app/environment/app_environment_state.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_content_builder.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_media_import_controller.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_menu_builder.dart';
+import 'package:serenity_viewer/src/app/app_shell/app_shell_navigation_controller.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_window_controller.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_window_history_controller.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_workspace_geometry_controller.dart';
@@ -35,7 +36,6 @@ import 'package:serenity_viewer/src/thumbnails/thumbnail_controller.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 
 part 'app_shell_environment_actions.dart';
-part 'app_shell_navigation_actions.dart';
 part 'app_shell_startup_seed_and_settings.dart';
 
 class AppShell extends StatefulWidget {
@@ -169,7 +169,7 @@ class _AppShellState extends State<AppShell> {
       replaceWorkspace: _replaceWorkspace,
       commitStateChange: setState,
       showMessage: _showMessage,
-      showWorkspaceScreen: _showWorkspaceScreen,
+      showWorkspaceScreen: _navigationController.showWorkspaceScreen,
       screen: () => _uiState.screen,
       maxRecentlyClosedWindows: _AppShellState._maxRecentlyClosedWindows,
     );
@@ -212,6 +212,10 @@ class _AppShellState extends State<AppShell> {
       thumbnailController: _thumbnailController,
       showMessage: _showMessage,
     );
+  }
+
+  AppShellNavigationController get _navigationController {
+    return AppShellNavigationController(chromeController: _chromeController);
   }
 
   List<PlatformMenuItem> _buildMenus() {
@@ -329,8 +333,8 @@ class _AppShellState extends State<AppShell> {
       openWorkspaces: () => _openWorkspaces,
       focusedWindowOrNull: _windowHistoryController.focusedWindowOrNull,
       setWorkspaceViewport: _workspaceGeometryController.setWorkspaceViewport,
-      showWorkspaceScreen: _showWorkspaceScreen,
-      showLibraryScreen: _showLibraryScreen,
+      showWorkspaceScreen: _navigationController.showWorkspaceScreen,
+      showLibraryScreen: _navigationController.showLibraryScreen,
       toggleExpose: _toggleExpose,
       toggleVideoPlayback: _windowController.toggleVideoPlayback,
     );
