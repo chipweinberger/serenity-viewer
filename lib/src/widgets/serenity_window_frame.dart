@@ -185,13 +185,10 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> with SingleTi
   }
 
   AssetWindowState _windowForHoverPreview({required bool shrinkContent, required double inset}) {
-    if (!shrinkContent || inset <= 0 || widget.window.size.width <= 0 || widget.window.size.height <= 0) {
+    final scale = _hoverPreviewScale(shrinkContent: shrinkContent, inset: inset);
+    if (scale == 1.0) {
       return widget.window;
     }
-
-    final innerWidth = math.max(1.0, widget.window.size.width - (inset * 2));
-    final innerHeight = math.max(1.0, widget.window.size.height - (inset * 2));
-    final scale = math.min(innerWidth / widget.window.size.width, innerHeight / widget.window.size.height);
 
     return widget.window.copyWith(
       zoomBaseWidth: widget.window.zoomBaseWidth == null ? null : widget.window.zoomBaseWidth! * scale,
@@ -201,8 +198,43 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> with SingleTi
     );
   }
 
+  double _hoverPreviewScale({required bool shrinkContent, required double inset}) {
+    if (!shrinkContent || inset <= 0 || widget.window.size.width <= 0 || widget.window.size.height <= 0) {
+      return 1.0;
+    }
+
+    final innerWidth = math.max(1.0, widget.window.size.width - (inset * 2));
+    final innerHeight = math.max(1.0, widget.window.size.height - (inset * 2));
+    return math.min(innerWidth / widget.window.size.width, innerHeight / widget.window.size.height);
+  }
+
+  WindowZoomUpdate _zoomUpdateForWindowState(
+    WindowZoomUpdate update, {
+    required bool shrinkContent,
+    required double inset,
+  }) {
+    final scale = _hoverPreviewScale(shrinkContent: shrinkContent, inset: inset);
+    if (scale == 1.0) {
+      return update;
+    }
+
+    return WindowZoomUpdate(
+      zoom: update.zoom,
+      zoomBaseSize: update.zoomBaseSize == null
+          ? null
+          : Size(update.zoomBaseSize!.width / scale, update.zoomBaseSize!.height / scale),
+      contentOffset: update.contentOffset == null
+          ? null
+          : Offset(update.contentOffset!.dx / scale, update.contentOffset!.dy / scale),
+      clearZoomBase: update.clearZoomBase,
+      clearContentOffset: update.clearContentOffset,
+    );
+  }
+
   Widget _buildContent({required bool shrinkContent, required double inset}) {
     final previewWindow = _windowForHoverPreview(shrinkContent: shrinkContent, inset: inset);
+    final showExpandedVideoControls =
+        widget.isPinnedHover || (_isCommandPressed && (_isHovered || _isResizing || widget.isSelected));
 
     return Positioned.fill(
       child: ClipRRect(
@@ -214,11 +246,14 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> with SingleTi
           sharedVideoController: widget.sharedVideoController,
           sharedVideoInitialization: widget.sharedVideoInitialization,
           onTap: _handleContentTap,
-          onZoomChanged: widget.onZoomChanged,
+          onZoomChanged: (update) {
+            widget.onZoomChanged(_zoomUpdateForWindowState(update, shrinkContent: shrinkContent, inset: inset));
+          },
           onIntrinsicSizeResolved: widget.onIntrinsicSizeResolved,
           isVideoPaused: widget.isVideoPaused,
           onTogglePlayback: widget.onTogglePlayback,
-          showVideoControls: _isCommandPressed && (_isHovered || _isResizing),
+          showVideoControls: true,
+          showExpandedVideoControls: showExpandedVideoControls,
           onVideoControlInteractionChanged: (isInteracting) {
             if (_isInteractingWithVideoControls == isInteracting) {
               return;

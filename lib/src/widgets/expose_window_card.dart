@@ -92,6 +92,7 @@ class _ExposeWindowCardState extends State<ExposeWindowCard> {
             isVideoPaused: widget.isVideoPaused,
             onTogglePlayback: () {},
             showVideoControls: false,
+            showExpandedVideoControls: false,
             onVideoControlInteractionChanged: (_) {},
             onVideoPositionChanged: (_) {},
             onCycleVideoPlaybackSpeed: () {},
@@ -196,6 +197,20 @@ class _ExposeWindowCardState extends State<ExposeWindowCard> {
     );
   }
 
+  Widget _buildVideoBadge() {
+    final shouldShowHoverOverlay = _isCommandPressed && (_isHovered || widget.isSelected);
+    if (widget.window.asset.type != AssetType.video || shouldShowHoverOverlay) {
+      return const SizedBox.shrink();
+    }
+
+    return const Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      child: Align(alignment: Alignment.topCenter, child: _SerenityVideoBadge()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
@@ -221,7 +236,10 @@ class _ExposeWindowCardState extends State<ExposeWindowCard> {
                 ),
                 child: ClipRRect(
                   borderRadius: borderRadius,
-                  child: Stack(fit: StackFit.expand, children: [_buildMediaPreview(), _buildHoverOverlay(context)]),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [_buildMediaPreview(), _buildVideoBadge(), _buildHoverOverlay(context)],
+                  ),
                 ),
               ),
             ),
@@ -235,5 +253,34 @@ class _ExposeWindowCardState extends State<ExposeWindowCard> {
   void dispose() {
     HardwareKeyboard.instance.removeHandler(_handleHardwareKey);
     super.dispose();
+  }
+}
+
+class _SerenityVideoBadge extends StatelessWidget {
+  const _SerenityVideoBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.72),
+          borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(12), bottomRight: Radius.circular(12)),
+          border: Border(
+            left: BorderSide(color: Colors.white.withValues(alpha: 0.12)),
+            right: BorderSide(color: Colors.white.withValues(alpha: 0.12)),
+            bottom: BorderSide(color: Colors.white.withValues(alpha: 0.12)),
+          ),
+          boxShadow: const [BoxShadow(color: Color(0x33000000), blurRadius: 10, offset: Offset(0, 4))],
+        ),
+        child: const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 5.5, vertical: 3.1),
+          child: Text(
+            'Video',
+            style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.3),
+          ),
+        ),
+      ),
+    );
   }
 }
