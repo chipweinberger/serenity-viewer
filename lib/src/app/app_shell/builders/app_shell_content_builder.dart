@@ -37,6 +37,7 @@ class AppShellContentBuilder {
     required this.openWorkspaces,
     required this.activeWorkspace,
     required this.activeWorkspaceOrNull,
+    required this.selectedExposeWindowCount,
     required this.windowInteractionState,
     required this.workspaceViewportState,
     required this.chromeController,
@@ -83,6 +84,7 @@ class AppShellContentBuilder {
   final List<Workspace> openWorkspaces;
   final Workspace activeWorkspace;
   final Workspace? activeWorkspaceOrNull;
+  final int selectedExposeWindowCount;
   final AssetWindowInteractionState windowInteractionState;
   final WorkspaceViewportState workspaceViewportState;
   final ChromeController chromeController;
@@ -158,7 +160,7 @@ class AppShellContentBuilder {
       linkLabel: '${mediaCounts.links} link${mediaCounts.links == 1 ? '' : 's'}',
       isExposeMode: chromeController.isExposeMode,
       showExposeSelectionHud: chromeController.shouldMoveSelectedWindowsToWorkspaceOnTap,
-      selectedCount: windowInteractionState.selectedExposeWindowIds.length,
+      selectedCount: selectedExposeWindowCount,
       workspaceId: activeWorkspace.id,
       workspaceZoom: activeWorkspace.viewportZoom,
     );

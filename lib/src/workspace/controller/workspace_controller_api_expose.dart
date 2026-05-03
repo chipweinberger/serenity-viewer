@@ -18,6 +18,14 @@ class WorkspaceExposeApi {
     return _controller.exposeController.selectedWindowCount(workspace);
   }
 
+  bool isWindowSelected(String windowId) {
+    return _controller.exposeController.isWindowSelected(windowId);
+  }
+
+  int selectionCount() {
+    return _controller.exposeController.selectionCount();
+  }
+
   bool hasWindowSelection() {
     return _controller.exposeController.hasWindowSelection();
   }

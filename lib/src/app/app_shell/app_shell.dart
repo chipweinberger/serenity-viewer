@@ -230,7 +230,7 @@ class _AppShellState extends State<AppShell> {
   List<PlatformMenuItem> _buildMenus() {
     final focusedWindow = _windowHistoryController.focusedWindowOrNull();
     final focusedWindowIsSelected =
-        focusedWindow != null && _windowInteractionState.selectedExposeWindowIds.contains(focusedWindow.asset.id);
+        focusedWindow != null && _workspaceController.expose.isWindowSelected(focusedWindow.asset.id);
 
     return AppShellMenuBuilder(
       showAboutSerenity: _uiController.showAboutSerenity,
@@ -281,6 +281,7 @@ class _AppShellState extends State<AppShell> {
       openWorkspaces: _openWorkspaces,
       activeWorkspace: _activeWorkspace,
       activeWorkspaceOrNull: _activeWorkspaceOrNull,
+      selectedExposeWindowCount: _workspaceController.expose.selectionCount(),
       windowInteractionState: _windowInteractionState,
       workspaceViewportState: _workspaceViewportState,
       chromeController: _chromeController,
