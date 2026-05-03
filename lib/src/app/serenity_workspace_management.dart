@@ -3,6 +3,26 @@
 part of '../../main.dart';
 
 extension _SerenityShellWorkspaceManagement on _SerenityShellState {
+  int _nextWorkspaceOrdinal() {
+    var maxOrdinal = 0;
+    final idPattern = RegExp(r'^ws-(\d+)$');
+    final namePattern = RegExp(r'^Workspace (\d+)$');
+
+    for (final workspace in _workspaces) {
+      final idMatch = idPattern.firstMatch(workspace.id);
+      if (idMatch != null) {
+        maxOrdinal = math.max(maxOrdinal, int.parse(idMatch.group(1)!));
+      }
+
+      final nameMatch = namePattern.firstMatch(workspace.name);
+      if (nameMatch != null) {
+        maxOrdinal = math.max(maxOrdinal, int.parse(nameMatch.group(1)!));
+      }
+    }
+
+    return maxOrdinal + 1;
+  }
+
   void _toggleWorkspaceOpen(String workspaceId) {
     final session = _session!;
     final nextWorkspaces = session.workspaces
@@ -281,7 +301,7 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
 
   void _createWorkspace() {
     final session = _session!;
-    final nextIndex = session.workspaces.length + 1;
+    final nextIndex = _nextWorkspaceOrdinal();
     final now = DateTime.now();
     final workspace = WorkspaceState(
       id: 'ws-$nextIndex',
