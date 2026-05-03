@@ -2,9 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+import 'package:serenity_viewer/src/environment/workspace_state.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
 import 'package:serenity_viewer/src/workspace_loading/workspace_media_counts.dart';
-import 'package:serenity_viewer/src/environment/workspace_state.dart';
 
 class WorkspaceThumbnailCard extends StatefulWidget {
   const WorkspaceThumbnailCard({
@@ -242,22 +242,26 @@ class _WorkspaceThumbnailCardState extends State<WorkspaceThumbnailCard> {
                               ),
                             ),
                           ),
-                        if (_isHovered && widget.hoverActions.isNotEmpty)
-                          Positioned(
-                            top: 8,
-                            right: 8,
-                            child: Row(mainAxisSize: MainAxisSize.min, children: widget.hoverActions),
+                        Positioned(
+                          top: 8,
+                          right: 8,
+                          child: IgnorePointer(
+                            ignoring: !_isHovered,
+                            child: AnimatedOpacity(
+                              duration: const Duration(milliseconds: 140),
+                              opacity: _isHovered ? 1 : 0,
+                              child: Row(children: widget.hoverActions),
+                            ),
                           ),
+                        ),
                       ],
                     ),
                   ),
-                  DecoratedBox(
-                    decoration: const BoxDecoration(color: AppTheme.panel),
+                  Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(10, 5, 8, 4),
+                      padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
                             workspace.name,
@@ -265,34 +269,28 @@ class _WorkspaceThumbnailCardState extends State<WorkspaceThumbnailCard> {
                             overflow: TextOverflow.ellipsis,
                             style: Theme.of(
                               context,
-                            ).textTheme.labelLarge?.copyWith(color: AppTheme.textPrimary, fontWeight: FontWeight.w800),
+                            ).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary, fontWeight: FontWeight.w800),
                           ),
-                          const SizedBox(height: 1),
-                          DefaultTextStyle(
-                            style: Theme.of(
-                              context,
-                            ).textTheme.labelMedium!.copyWith(color: AppTheme.textMuted, height: 1.0),
-                            child: Row(
-                              children: [
-                                _buildFooterMetric(context, Icons.visibility_outlined, '${workspace.views}'),
-                                const SizedBox(width: 8),
-                                _buildFooterMetric(context, Icons.image_outlined, '${mediaCounts.images}'),
-                                const SizedBox(width: 8),
-                                _buildFooterMetric(context, Icons.videocam_outlined, '${mediaCounts.videos}'),
-                                const SizedBox(width: 8),
-                                _buildFooterMetric(context, Icons.link_rounded, '${mediaCounts.links}'),
-                                if (widget.unloadedCount > 0) ...[
-                                  const SizedBox(width: 8),
-                                  Flexible(
-                                    child: _buildFooterMetric(
-                                      context,
-                                      Icons.cloud_off_outlined,
-                                      '${widget.unloadedCount}',
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${workspace.windows.length} windows',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppTheme.textMuted),
+                          ),
+                          const Spacer(),
+                          Wrap(
+                            spacing: 10,
+                            runSpacing: 6,
+                            children: [
+                              _buildFooterMetric(context, Icons.photo_library_outlined, '${mediaCounts.loaded} media'),
+                              if (widget.unloadedCount > 0)
+                                _buildFooterMetric(
+                                  context,
+                                  Icons.downloading_rounded,
+                                  '${widget.unloadedCount} pending',
+                                ),
+                            ],
                           ),
                         ],
                       ),
