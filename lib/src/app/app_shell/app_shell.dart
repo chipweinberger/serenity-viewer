@@ -213,28 +213,36 @@ class _AppShellState extends State<AppShell> {
   void initState() {
     super.initState();
     _runtime = AppShellRuntime.create(
-      isRunningInWidgetTest: _isRunningInWidgetTest,
-      dependencies: _dependencies,
-      windowTitle: () => _derived.windowTitle,
-      context: () => context,
-      mounted: () => mounted,
-      commitStateChange: setState,
-      showMessage: _controllers.ui.showMessage,
-      seedEnvironment: buildSeedEnvironment,
-      updateEnvironment: _controllers.environment.updateEnvironment,
-      replaceWorkspace: _controllers.environment.replaceWorkspace,
-      saveEnvironment: _saveEnvironment,
-      newId: _controllers.geometry.newId,
-      colorFromDigest: _controllers.geometry.colorFromDigest,
-      activeWorkspace: () => _derived.activeWorkspaceOrNull,
-      workspaces: () => _derived.workspaces,
-      openWorkspaces: () => _derived.openWorkspaces,
-      focusedWindowOrNull: _controllers.windowHistory.focusedWindowOrNull,
-      setWorkspaceViewport: _controllers.geometry.setWorkspaceViewport,
-      showWorkspaceScreen: _controllers.navigation.showWorkspaceScreen,
-      showLibraryScreen: _controllers.navigation.showLibraryScreen,
-      toggleExpose: _controllers.environment.toggleExpose,
-      toggleVideoPlayback: _controllers.window.toggleVideoPlayback,
+      AppShellRuntimeConfig(
+        isRunningInWidgetTest: _isRunningInWidgetTest,
+        dependencies: _dependencies,
+        shell: AppShellRuntimeShellConfig(
+          windowTitle: () => _derived.windowTitle,
+          context: () => context,
+          mounted: () => mounted,
+          commitStateChange: setState,
+          showMessage: _controllers.ui.showMessage,
+        ),
+        environment: AppShellRuntimeEnvironmentConfig(
+          seedEnvironment: buildSeedEnvironment,
+          updateEnvironment: _controllers.environment.updateEnvironment,
+          replaceWorkspace: _controllers.environment.replaceWorkspace,
+          saveEnvironment: _saveEnvironment,
+        ),
+        workspace: AppShellRuntimeWorkspaceConfig(
+          newId: _controllers.geometry.newId,
+          colorFromDigest: _controllers.geometry.colorFromDigest,
+          activeWorkspace: () => _derived.activeWorkspaceOrNull,
+          workspaces: () => _derived.workspaces,
+          openWorkspaces: () => _derived.openWorkspaces,
+          focusedWindowOrNull: _controllers.windowHistory.focusedWindowOrNull,
+          setWorkspaceViewport: _controllers.geometry.setWorkspaceViewport,
+          showWorkspaceScreen: _controllers.navigation.showWorkspaceScreen,
+          showLibraryScreen: _controllers.navigation.showLibraryScreen,
+          toggleExpose: _controllers.environment.toggleExpose,
+          toggleVideoPlayback: _controllers.window.toggleVideoPlayback,
+        ),
+      ),
     );
     _restoreEnvironment();
   }

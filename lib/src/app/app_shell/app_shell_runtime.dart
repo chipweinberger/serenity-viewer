@@ -44,63 +44,8 @@ class AppShellRuntime {
   final Timer autosaveTimer;
   final AppLifecycleListener appLifecycleListener;
 
-  static AppShellRuntime create({
-    required bool isRunningInWidgetTest,
-    required ShellDependencies dependencies,
-    required String Function() windowTitle,
-    required BuildContext Function() context,
-    required bool Function() mounted,
-    required StateSetter commitStateChange,
-    required ValueChanged<String> showMessage,
-    required Environment Function() seedEnvironment,
-    required ValueChanged<Environment> updateEnvironment,
-    required void Function(Workspace workspace, {bool queueThumbnail}) replaceWorkspace,
-    required Future<void> Function() saveEnvironment,
-    required String Function(String prefix) newId,
-    required int Function(String value) colorFromDigest,
-    required Workspace? Function() activeWorkspace,
-    required List<Workspace> Function() workspaces,
-    required List<Workspace> Function() openWorkspaces,
-    required Window? Function() focusedWindowOrNull,
-    required void Function({required String workspaceId, Offset? center, double? zoom, bool queueThumbnail})
-    setWorkspaceViewport,
-    required SerenityShowWorkspaceScreen showWorkspaceScreen,
-    required SerenityShowLibraryScreen showLibraryScreen,
-    required VoidCallback toggleExpose,
-    required ValueChanged<String> toggleVideoPlayback,
-  }) {
-    return AppShellRuntimeFactory(
-      AppShellRuntimeConfig(
-        isRunningInWidgetTest: isRunningInWidgetTest,
-        dependencies: dependencies,
-        shell: AppShellRuntimeShellConfig(
-          windowTitle: windowTitle,
-          context: context,
-          mounted: mounted,
-          commitStateChange: commitStateChange,
-          showMessage: showMessage,
-        ),
-        environment: AppShellRuntimeEnvironmentConfig(
-          seedEnvironment: seedEnvironment,
-          updateEnvironment: updateEnvironment,
-          replaceWorkspace: replaceWorkspace,
-          saveEnvironment: saveEnvironment,
-        ),
-        workspace: AppShellRuntimeWorkspaceConfig(
-          newId: newId,
-          colorFromDigest: colorFromDigest,
-          activeWorkspace: activeWorkspace,
-          workspaces: workspaces,
-          openWorkspaces: openWorkspaces,
-          focusedWindowOrNull: focusedWindowOrNull,
-          setWorkspaceViewport: setWorkspaceViewport,
-          showWorkspaceScreen: showWorkspaceScreen,
-          showLibraryScreen: showLibraryScreen,
-          toggleExpose: toggleExpose,
-          toggleVideoPlayback: toggleVideoPlayback,
-        ),
-      ),
-    ).create();
+  static AppShellRuntime create(AppShellRuntimeConfig config) {
+    return AppShellRuntimeFactory(config).create();
   }
 
   void dispose() {
