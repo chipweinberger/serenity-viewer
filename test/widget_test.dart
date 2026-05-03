@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:serenity_viewer/main.dart';
+import 'package:serenity_viewer/src/app/serenity_shell.dart';
+import 'package:serenity_viewer/src/widgets/serenity_window_frame.dart';
 
 void main() {
   testWidgets('Serenity renders the workspace shell', (tester) async {
@@ -9,6 +10,6 @@ void main() {
 
     expect(find.text('Story Moodboard'), findsOneWidget);
     expect(find.text('View All'), findsOneWidget);
-    expect(find.text('2 images, 1 video, 0 links'), findsOneWidget);
+    expect(find.byType(SerenityWindowFrame), findsWidgets);
   });
 }

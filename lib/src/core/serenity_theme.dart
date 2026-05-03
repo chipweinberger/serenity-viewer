@@ -1,4 +1,4 @@
-part of '../../main.dart';
+import 'package:flutter/material.dart';
 
 class SerenityTheme {
   static const Color background = Color(0xFFEEE3CE);

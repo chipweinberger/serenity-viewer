@@ -1,7 +1,12 @@
-part of '../../main.dart';
+import 'dart:math' as math;
 
-class _SerenityDemoArt extends StatelessWidget {
-  const _SerenityDemoArt({required this.asset});
+import 'package:flutter/material.dart';
+
+import 'package:serenity_viewer/src/core/serenity_core.dart';
+import 'package:serenity_viewer/src/models/workspace_asset.dart';
+
+class SerenityDemoArt extends StatelessWidget {
+  const SerenityDemoArt({super.key, required this.asset});
 
   final WorkspaceAsset asset;
 

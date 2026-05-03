@@ -1,4 +1,20 @@
-part of '../../main.dart';
+import 'dart:io';
+import 'dart:math' as math;
+
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:video_player/video_player.dart';
+
+import 'package:serenity_viewer/src/core/serenity_core.dart';
+import 'package:serenity_viewer/src/models/asset_window_state.dart';
+import 'package:serenity_viewer/src/models/window_zoom_update.dart';
+import 'package:serenity_viewer/src/widgets/serenity_demo_art.dart';
+import 'package:serenity_viewer/src/widgets/serenity_image_surface.dart';
+import 'package:serenity_viewer/src/widgets/serenity_media_placeholders.dart';
+import 'package:serenity_viewer/src/widgets/serenity_media_zoom_utils.dart';
+import 'package:serenity_viewer/src/widgets/serenity_video_surface.dart';
+import 'package:serenity_viewer/src/widgets/serenity_zoom_box.dart';
 
 class SerenityMediaCanvas extends StatefulWidget {
   const SerenityMediaCanvas({
@@ -63,7 +79,7 @@ class _SerenityMediaCanvasState extends State<SerenityMediaCanvas> {
             (widget.window.asset.intrinsicWidth == null || widget.window.asset.intrinsicHeight == null)
         ? (viewportSize.width / viewportSize.height)
         : widget.window.asset.aspectRatio;
-    return _fitSizeForViewportToAspect(viewportSize, aspectRatio);
+    return fitSizeForViewportToAspect(viewportSize, aspectRatio);
   }
 
   @override
@@ -85,7 +101,7 @@ class _SerenityMediaCanvasState extends State<SerenityMediaCanvas> {
   }
 
   Widget _buildMissingPlaceholder(BuildContext context) {
-    return _SerenityMissingMediaPlaceholder(
+    return SerenityMissingMediaPlaceholder(
       filename: widget.window.asset.filename,
       windowSize: widget.window.size,
       compact: widget.compactMissingPlaceholder,
@@ -93,7 +109,7 @@ class _SerenityMediaCanvasState extends State<SerenityMediaCanvas> {
   }
 
   Widget _buildUnloadedPlaceholder() {
-    return _SerenityUnloadedMediaPlaceholder(asset: widget.window.asset, windowSize: widget.window.size);
+    return SerenityUnloadedMediaPlaceholder(asset: widget.window.asset, windowSize: widget.window.size);
   }
 
   Offset _offsetForFocalZoom({
@@ -221,7 +237,7 @@ class _SerenityMediaCanvasState extends State<SerenityMediaCanvas> {
         aspectRatio: widget.window.asset.type == AssetType.video ? (16 / 9) : (4 / 3),
         zoomBaseSize: widget.window.zoomBaseSize,
         contentOffset: widget.window.contentOffset,
-        child: _SerenityDemoArt(asset: widget.window.asset),
+        child: SerenityDemoArt(asset: widget.window.asset),
       ),
       (true, true, false, _) => _buildMissingPlaceholder(context),
       (true, true, true, AssetType.image) => SerenityImageSurface(

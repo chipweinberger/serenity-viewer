@@ -1,4 +1,12 @@
-part of '../../main.dart';
+import 'dart:async';
+import 'dart:math' as math;
+import 'dart:ui' as ui;
+
+import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
+
+import 'package:serenity_viewer/src/core/serenity_theme.dart';
+import 'package:serenity_viewer/src/widgets/serenity_zoom_box.dart';
 
 class SerenityVideoSurface extends StatefulWidget {
   const SerenityVideoSurface({

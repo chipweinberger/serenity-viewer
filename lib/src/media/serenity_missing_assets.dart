@@ -1,6 +1,6 @@
 // ignore_for_file: invalid_use_of_protected_member
 
-part of '../../main.dart';
+part of '../app/serenity_shell.dart';
 
 extension _SerenityShellMissingAssets on _SerenityShellState {
   Future<String?> _locateFile({

@@ -1,8 +1,8 @@
-part of '../../main.dart';
+import 'package:flutter/material.dart';
 
 enum WindowResizeHandle { left, right, top, bottom, topLeft, topRight, bottomLeft, bottomRight }
 
-WindowResizeHandle? _windowResizeHandleForPosition({
+WindowResizeHandle? windowResizeHandleForPosition({
   required Size windowSize,
   required Offset localPosition,
   double edgeInset = 8,
@@ -46,7 +46,7 @@ WindowResizeHandle? _windowResizeHandleForPosition({
   return null;
 }
 
-MouseCursor _mouseCursorForResizeHandle(WindowResizeHandle? handle) {
+MouseCursor mouseCursorForResizeHandle(WindowResizeHandle? handle) {
   switch (handle) {
     case WindowResizeHandle.left:
     case WindowResizeHandle.right:
@@ -65,7 +65,7 @@ MouseCursor _mouseCursorForResizeHandle(WindowResizeHandle? handle) {
   }
 }
 
-String _nativeCursorKindForResizeHandle(WindowResizeHandle? handle) {
+String nativeCursorKindForResizeHandle(WindowResizeHandle? handle) {
   switch (handle) {
     case WindowResizeHandle.left:
     case WindowResizeHandle.right:

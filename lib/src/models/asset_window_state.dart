@@ -1,4 +1,6 @@
-part of '../../main.dart';
+import 'package:flutter/material.dart';
+
+import 'package:serenity_viewer/src/models/workspace_asset.dart';
 
 @immutable
 class AssetWindowState {

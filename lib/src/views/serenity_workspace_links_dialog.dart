@@ -1,4 +1,4 @@
-part of '../../main.dart';
+part of '../app/serenity_shell.dart';
 
 extension _SerenityShellWorkspaceLinksDialog on _SerenityShellState {
   Future<void> _openWorkspaceLinksDialog(WorkspaceState initialWorkspace) async {

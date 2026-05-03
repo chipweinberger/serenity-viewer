@@ -1,6 +1,6 @@
 // ignore_for_file: invalid_use_of_protected_member
 
-part of '../../main.dart';
+part of 'serenity_shell.dart';
 
 extension _SerenityShellWorkspaceViews on _SerenityShellState {
   static const Duration _workspaceViewThreshold = Duration(seconds: 30);

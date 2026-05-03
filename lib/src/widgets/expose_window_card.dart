@@ -1,4 +1,14 @@
-part of '../../main.dart';
+import 'dart:async';
+import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:video_player/video_player.dart';
+
+import 'package:serenity_viewer/src/core/serenity_core.dart';
+import 'package:serenity_viewer/src/core/serenity_theme.dart';
+import 'package:serenity_viewer/src/models/asset_window_state.dart';
+import 'package:serenity_viewer/src/widgets/serenity_media_canvas.dart';
 
 class ExposeWindowCard extends StatefulWidget {
   const ExposeWindowCard({

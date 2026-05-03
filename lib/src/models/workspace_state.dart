@@ -1,8 +1,14 @@
-part of '../../main.dart';
+import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
+
+import 'package:serenity_viewer/src/core/serenity_core.dart';
+import 'package:serenity_viewer/src/models/asset_window_state.dart';
+import 'package:serenity_viewer/src/models/workspace_link.dart';
 
 Offset _workspaceViewportCenterForWindows(List<AssetWindowState> windows) {
   if (windows.isEmpty) {
-    return _defaultWorkspaceCenter;
+    return defaultWorkspaceCenter;
   }
 
   var minX = windows.first.position.dx;
@@ -17,8 +23,8 @@ Offset _workspaceViewportCenterForWindows(List<AssetWindowState> windows) {
   }
 
   return Offset(
-    ((minX + maxX) / 2).clamp(_workspaceMinCoordinate, _workspaceMaxCoordinate),
-    ((minY + maxY) / 2).clamp(_workspaceMinCoordinate, _workspaceMaxCoordinate),
+    ((minX + maxX) / 2).clamp(workspaceMinCoordinate, workspaceMaxCoordinate),
+    ((minY + maxY) / 2).clamp(workspaceMinCoordinate, workspaceMaxCoordinate),
   );
 }
 

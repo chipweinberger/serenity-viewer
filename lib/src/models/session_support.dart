@@ -1,4 +1,6 @@
-part of '../../main.dart';
+import 'package:flutter/foundation.dart';
+
+import 'package:serenity_viewer/src/models/asset_window_state.dart';
 
 @immutable
 class SerenitySettingsResult {
@@ -62,11 +64,11 @@ class WorkspaceMediaCounts {
   int get videos => shortVideos + longVideos;
 }
 
-enum _StartupEnvironmentChoice { open, create }
+enum StartupEnvironmentChoice { open, create }
 
 @immutable
-class _VideoProbeResult {
-  const _VideoProbeResult({this.durationMs, this.width, this.height, this.frameCount});
+class VideoProbeResult {
+  const VideoProbeResult({this.durationMs, this.width, this.height, this.frameCount});
 
   final int? durationMs;
   final int? width;
@@ -77,8 +79,8 @@ class _VideoProbeResult {
 }
 
 @immutable
-class _VideoConversionResult {
-  const _VideoConversionResult({
+class VideoConversionResult {
+  const VideoConversionResult({
     required this.path,
     required this.filename,
     required this.md5,

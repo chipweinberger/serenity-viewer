@@ -1,4 +1,11 @@
-part of '../../main.dart';
+import 'dart:async';
+import 'dart:ui' as ui;
+
+import 'package:file_selector/file_selector.dart';
+import 'package:flutter/material.dart';
+
+import 'package:serenity_viewer/src/core/serenity_theme.dart';
+import 'package:serenity_viewer/src/models/session_support.dart';
 
 class SerenitySettingsDialog extends StatefulWidget {
   const SerenitySettingsDialog({

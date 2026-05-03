@@ -1,6 +1,6 @@
 // ignore_for_file: invalid_use_of_protected_member
 
-part of '../../main.dart';
+part of 'serenity_shell.dart';
 
 extension _SerenityShellWorkspaceGeometry on _SerenityShellState {
   AssetType? _assetTypeForPath(String path) {
@@ -19,11 +19,11 @@ extension _SerenityShellWorkspaceGeometry on _SerenityShellState {
   }
 
   int _colorFromDigest(String value) {
-    return _assetColorFromMd5(value).toARGB32();
+    return assetColorFromMd5(value).toARGB32();
   }
 
   double _clampWorkspaceZoom(double zoom) {
-    return zoom.clamp(_workspaceMinZoom, _workspaceMaxZoom);
+    return zoom.clamp(workspaceMinZoom, workspaceMaxZoom);
   }
 
   Offset _clampWorkspaceCenter({required Offset center, required double zoom, required Size viewportSize}) {
@@ -31,10 +31,10 @@ extension _SerenityShellWorkspaceGeometry on _SerenityShellState {
     final halfVisibleWidth = viewportSize.width <= 0 ? 0.0 : viewportSize.width / (2 * safeZoom);
     final halfVisibleHeight = viewportSize.height <= 0 ? 0.0 : viewportSize.height / (2 * safeZoom);
 
-    final minCenterX = halfVisibleWidth >= _workspaceExtent ? 0.0 : _workspaceMinCoordinate + halfVisibleWidth;
-    final maxCenterX = halfVisibleWidth >= _workspaceExtent ? 0.0 : _workspaceMaxCoordinate - halfVisibleWidth;
-    final minCenterY = halfVisibleHeight >= _workspaceExtent ? 0.0 : _workspaceMinCoordinate + halfVisibleHeight;
-    final maxCenterY = halfVisibleHeight >= _workspaceExtent ? 0.0 : _workspaceMaxCoordinate - halfVisibleHeight;
+    final minCenterX = halfVisibleWidth >= workspaceExtent ? 0.0 : workspaceMinCoordinate + halfVisibleWidth;
+    final maxCenterX = halfVisibleWidth >= workspaceExtent ? 0.0 : workspaceMaxCoordinate - halfVisibleWidth;
+    final minCenterY = halfVisibleHeight >= workspaceExtent ? 0.0 : workspaceMinCoordinate + halfVisibleHeight;
+    final maxCenterY = halfVisibleHeight >= workspaceExtent ? 0.0 : workspaceMaxCoordinate - halfVisibleHeight;
 
     return Offset(center.dx.clamp(minCenterX, maxCenterX), center.dy.clamp(minCenterY, maxCenterY));
   }
@@ -84,14 +84,8 @@ extension _SerenityShellWorkspaceGeometry on _SerenityShellState {
 
   Offset _clampWindowPosition(Offset position, Size size) {
     return Offset(
-      position.dx.clamp(
-        _workspaceMinCoordinate,
-        math.max(_workspaceMinCoordinate, _workspaceMaxCoordinate - size.width),
-      ),
-      position.dy.clamp(
-        _workspaceMinCoordinate,
-        math.max(_workspaceMinCoordinate, _workspaceMaxCoordinate - size.height),
-      ),
+      position.dx.clamp(workspaceMinCoordinate, math.max(workspaceMinCoordinate, workspaceMaxCoordinate - size.width)),
+      position.dy.clamp(workspaceMinCoordinate, math.max(workspaceMinCoordinate, workspaceMaxCoordinate - size.height)),
     );
   }
 

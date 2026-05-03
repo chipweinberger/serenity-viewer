@@ -1,7 +1,18 @@
-part of '../../main.dart';
+import 'dart:math' as math;
 
-class _SerenityMissingMediaPlaceholder extends StatelessWidget {
-  const _SerenityMissingMediaPlaceholder({required this.filename, required this.windowSize, required this.compact});
+import 'package:flutter/material.dart';
+
+import 'package:serenity_viewer/src/core/serenity_core.dart';
+import 'package:serenity_viewer/src/core/serenity_theme.dart';
+import 'package:serenity_viewer/src/models/workspace_asset.dart';
+
+class SerenityMissingMediaPlaceholder extends StatelessWidget {
+  const SerenityMissingMediaPlaceholder({
+    super.key,
+    required this.filename,
+    required this.windowSize,
+    required this.compact,
+  });
 
   final String filename;
   final Size windowSize;
@@ -63,8 +74,8 @@ class _SerenityMissingMediaPlaceholder extends StatelessWidget {
   }
 }
 
-class _SerenityUnloadedMediaPlaceholder extends StatelessWidget {
-  const _SerenityUnloadedMediaPlaceholder({required this.asset, required this.windowSize});
+class SerenityUnloadedMediaPlaceholder extends StatelessWidget {
+  const SerenityUnloadedMediaPlaceholder({super.key, required this.asset, required this.windowSize});
 
   final WorkspaceAsset asset;
   final Size windowSize;

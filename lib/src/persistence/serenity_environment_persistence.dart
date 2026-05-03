@@ -1,6 +1,6 @@
 // ignore_for_file: invalid_use_of_protected_member
 
-part of '../../main.dart';
+part of '../app/serenity_shell.dart';
 
 extension _SerenityShellEnvironmentPersistence on _SerenityShellState {
   Map<String, dynamic> _environmentManifest() {
@@ -215,7 +215,7 @@ extension _SerenityShellEnvironmentPersistence on _SerenityShellState {
         if (!mounted) {
           return;
         }
-        final choice = await showDialog<_StartupEnvironmentChoice>(
+        final choice = await showDialog<StartupEnvironmentChoice>(
           context: context,
           barrierDismissible: false,
           builder: (context) {
@@ -226,11 +226,11 @@ extension _SerenityShellEnvironmentPersistence on _SerenityShellState {
               ),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.of(context).pop(_StartupEnvironmentChoice.open),
+                  onPressed: () => Navigator.of(context).pop(StartupEnvironmentChoice.open),
                   child: const Text('Open Existing'),
                 ),
                 FilledButton(
-                  onPressed: () => Navigator.of(context).pop(_StartupEnvironmentChoice.create),
+                  onPressed: () => Navigator.of(context).pop(StartupEnvironmentChoice.create),
                   child: const Text('Create New'),
                 ),
               ],
@@ -238,7 +238,7 @@ extension _SerenityShellEnvironmentPersistence on _SerenityShellState {
           },
         );
 
-        if (choice == _StartupEnvironmentChoice.open) {
+        if (choice == StartupEnvironmentChoice.open) {
           final opened = await _openEnvironment(showSuccessMessage: false);
           if (opened) {
             return;
@@ -246,7 +246,7 @@ extension _SerenityShellEnvironmentPersistence on _SerenityShellState {
           continue;
         }
 
-        if (choice == _StartupEnvironmentChoice.create) {
+        if (choice == StartupEnvironmentChoice.create) {
           final created = await _createEnvironment();
           if (created) {
             return;

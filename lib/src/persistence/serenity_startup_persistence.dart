@@ -1,6 +1,6 @@
 // ignore_for_file: invalid_use_of_protected_member
 
-part of '../../main.dart';
+part of '../app/serenity_shell.dart';
 
 extension _SerenityShellStartupPersistence on _SerenityShellState {
   Future<Directory> _thumbnailDirectory() async {
@@ -132,7 +132,7 @@ extension _SerenityShellStartupPersistence on _SerenityShellState {
     }
 
     try {
-      return await _bookmarkChannel.invokeMethod<String>('createBookmark', {'path': path});
+      return await bookmarkChannel.invokeMethod<String>('createBookmark', {'path': path});
     } catch (_) {
       return null;
     }
@@ -144,7 +144,7 @@ extension _SerenityShellStartupPersistence on _SerenityShellState {
     }
 
     try {
-      return await _bookmarkChannel.invokeMethod<String>('resolveBookmark', {'bookmark': bookmark});
+      return await bookmarkChannel.invokeMethod<String>('resolveBookmark', {'bookmark': bookmark});
     } catch (_) {
       return null;
     }
@@ -156,7 +156,7 @@ extension _SerenityShellStartupPersistence on _SerenityShellState {
     }
 
     try {
-      await _windowChannel.invokeMethod<void>('setWindowTitle', {'title': _windowTitle});
+      await windowChannel.invokeMethod<void>('setWindowTitle', {'title': _windowTitle});
     } catch (_) {
       // Ignore title updates if the platform hook is unavailable.
     }
@@ -168,7 +168,7 @@ extension _SerenityShellStartupPersistence on _SerenityShellState {
     }
 
     try {
-      return await _preferencesChannel.invokeMethod<String>('getLastEnvironmentPath');
+      return await preferencesChannel.invokeMethod<String>('getLastEnvironmentPath');
     } catch (_) {
       return null;
     }
@@ -181,9 +181,9 @@ extension _SerenityShellStartupPersistence on _SerenityShellState {
 
     try {
       if (path == null || path.isEmpty) {
-        await _preferencesChannel.invokeMethod<void>('clearLastEnvironmentPath');
+        await preferencesChannel.invokeMethod<void>('clearLastEnvironmentPath');
       } else {
-        await _preferencesChannel.invokeMethod<void>('setLastEnvironmentPath', {'path': path});
+        await preferencesChannel.invokeMethod<void>('setLastEnvironmentPath', {'path': path});
       }
     } catch (_) {
       // Ignore preferences persistence failures.

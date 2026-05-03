@@ -1,6 +1,6 @@
 // ignore_for_file: invalid_use_of_protected_member
 
-part of '../../main.dart';
+part of 'serenity_shell.dart';
 
 extension _SerenityShellMenus on _SerenityShellState {
   String _middleTruncatedLabel(String value, {int maxLength = 42}) {

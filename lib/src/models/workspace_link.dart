@@ -1,4 +1,4 @@
-part of '../../main.dart';
+import 'package:flutter/foundation.dart';
 
 @immutable
 class WorkspaceLink {

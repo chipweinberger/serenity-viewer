@@ -1,4 +1,6 @@
-part of '../../main.dart';
+import 'package:flutter/material.dart';
+
+import 'package:serenity_viewer/src/core/serenity_core.dart';
 
 @immutable
 class WorkspaceAsset {
@@ -38,7 +40,7 @@ class WorkspaceAsset {
     return videoDurationMs! < 120000 ? VideoLengthCategory.short : VideoLengthCategory.long;
   }
 
-  Color get color => _assetColorFromMd5(md5, fallbackColorValue: colorValue);
+  Color get color => assetColorFromMd5(md5, fallbackColorValue: colorValue);
 
   double get aspectRatio {
     if (intrinsicWidth != null && intrinsicHeight != null && intrinsicWidth! > 0 && intrinsicHeight! > 0) {

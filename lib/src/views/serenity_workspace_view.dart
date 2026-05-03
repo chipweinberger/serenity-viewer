@@ -1,6 +1,6 @@
 // ignore_for_file: invalid_use_of_protected_member
 
-part of '../../main.dart';
+part of '../app/serenity_shell.dart';
 
 List<({AssetWindowState window, Rect rect})> _computeExposeLayoutRects({
   required List<AssetWindowState> windows,

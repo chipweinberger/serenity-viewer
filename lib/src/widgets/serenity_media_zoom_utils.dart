@@ -1,6 +1,10 @@
-part of '../../main.dart';
+import 'dart:math' as math;
 
-Size _fitSizeForViewportToAspect(Size viewportSize, double aspectRatio) {
+import 'package:flutter/material.dart';
+
+import 'package:serenity_viewer/src/models/asset_window_state.dart';
+
+Size fitSizeForViewportToAspect(Size viewportSize, double aspectRatio) {
   if (viewportSize.width <= 0 || viewportSize.height <= 0 || aspectRatio <= 0) {
     return Size.zero;
   }
@@ -14,9 +18,9 @@ Size _fitSizeForViewportToAspect(Size viewportSize, double aspectRatio) {
   return Size(fittedWidth, fittedHeight);
 }
 
-Rect _normalizedVisibleRectForWindow(AssetWindowState window, Size sourceSize) {
+Rect normalizedVisibleRectForWindow(AssetWindowState window, Size sourceSize) {
   final viewportSize = window.size;
-  final fitSize = _fitSizeForViewportToAspect(viewportSize, sourceSize.width / sourceSize.height);
+  final fitSize = fitSizeForViewportToAspect(viewportSize, sourceSize.width / sourceSize.height);
   final baseSize = window.zoom > 1.0 && window.zoomBaseSize != null ? window.zoomBaseSize! : fitSize;
   final zoomedWidth = baseSize.width * window.zoom;
   final zoomedHeight = baseSize.height * window.zoom;

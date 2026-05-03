@@ -1,4 +1,19 @@
-part of '../../main.dart';
+import 'dart:async';
+import 'dart:io';
+import 'dart:math' as math;
+import 'dart:ui' as ui;
+
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:video_player/video_player.dart';
+
+import 'package:serenity_viewer/src/core/serenity_core.dart';
+import 'package:serenity_viewer/src/models/asset_window_state.dart';
+import 'package:serenity_viewer/src/models/window_zoom_update.dart';
+import 'package:serenity_viewer/src/widgets/serenity_media_canvas.dart';
+import 'package:serenity_viewer/src/widgets/serenity_window_overlay.dart';
+import 'package:serenity_viewer/src/widgets/window_resize_helpers.dart';
 
 class SerenityWindowFrame extends StatefulWidget {
   const SerenityWindowFrame({
@@ -283,7 +298,7 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> with SingleTi
       return const SizedBox.shrink();
     }
 
-    return _SerenityWindowOverlay(
+    return SerenityWindowOverlay(
       workspaceZoom: widget.workspaceZoom,
       filename: widget.window.asset.filename,
       isSelected: widget.isSelected,
@@ -296,15 +311,15 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> with SingleTi
   }
 
   WindowResizeHandle? _resizeHandleForPosition(Offset localPosition) {
-    return _windowResizeHandleForPosition(windowSize: widget.window.size, localPosition: localPosition);
+    return windowResizeHandleForPosition(windowSize: widget.window.size, localPosition: localPosition);
   }
 
   MouseCursor _cursorForHandle(WindowResizeHandle? handle) {
-    return _mouseCursorForResizeHandle(handle);
+    return mouseCursorForResizeHandle(handle);
   }
 
   String _nativeCursorKindForHandle(WindowResizeHandle? handle) {
-    return _nativeCursorKindForResizeHandle(handle);
+    return nativeCursorKindForResizeHandle(handle);
   }
 
   void _syncNativeCursor(WindowResizeHandle? handle) {
@@ -318,7 +333,7 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> with SingleTi
     }
 
     _lastNativeCursorKind = nextKind;
-    unawaited(_cursorChannel.invokeMethod<void>('setCursor', {'kind': nextKind}).catchError((_) {}));
+    unawaited(cursorChannel.invokeMethod<void>('setCursor', {'kind': nextKind}).catchError((_) {}));
   }
 
   void _updateHoverPosition(Offset localPosition) {

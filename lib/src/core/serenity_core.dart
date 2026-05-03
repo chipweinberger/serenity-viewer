@@ -1,17 +1,17 @@
-part of '../../main.dart';
+import 'package:flutter/services.dart';
 
-const MethodChannel _bookmarkChannel = MethodChannel('serenity/file_bookmarks');
-const MethodChannel _cursorChannel = MethodChannel('serenity/mouse_cursor');
-const MethodChannel _fileActionsChannel = MethodChannel('serenity/file_actions');
-const MethodChannel _preferencesChannel = MethodChannel('serenity/preferences');
-const MethodChannel _videoToolsChannel = MethodChannel('serenity/video_tools');
-const MethodChannel _windowChannel = MethodChannel('serenity/window');
-const double _workspaceExtent = 4000;
-const double _workspaceMinCoordinate = -_workspaceExtent;
-const double _workspaceMaxCoordinate = _workspaceExtent;
-const double _workspaceMinZoom = 0.32;
-const double _workspaceMaxZoom = 4;
-const Offset _defaultWorkspaceCenter = Offset.zero;
+const MethodChannel bookmarkChannel = MethodChannel('serenity/file_bookmarks');
+const MethodChannel cursorChannel = MethodChannel('serenity/mouse_cursor');
+const MethodChannel fileActionsChannel = MethodChannel('serenity/file_actions');
+const MethodChannel preferencesChannel = MethodChannel('serenity/preferences');
+const MethodChannel videoToolsChannel = MethodChannel('serenity/video_tools');
+const MethodChannel windowChannel = MethodChannel('serenity/window');
+const double workspaceExtent = 4000;
+const double workspaceMinCoordinate = -workspaceExtent;
+const double workspaceMaxCoordinate = workspaceExtent;
+const double workspaceMinZoom = 0.32;
+const double workspaceMaxZoom = 4;
+const Offset defaultWorkspaceCenter = Offset.zero;
 
 enum SerenityScreen { workspace, library }
 
@@ -38,7 +38,7 @@ const List<Color> _assetColorPalette = [
   Color(0xFFB29A84),
 ];
 
-Color _assetColorFromMd5(String md5, {int? fallbackColorValue}) {
+Color assetColorFromMd5(String md5, {int? fallbackColorValue}) {
   final normalized = md5.trim().toLowerCase();
   final safeDigest = normalized.length >= 8 ? normalized.substring(0, 8) : normalized;
   final paletteIndex = int.tryParse(safeDigest, radix: 16);

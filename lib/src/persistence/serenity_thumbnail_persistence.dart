@@ -1,6 +1,6 @@
 // ignore_for_file: invalid_use_of_protected_member
 
-part of '../../main.dart';
+part of '../app/serenity_shell.dart';
 
 extension _SerenityShellThumbnailPersistence on _SerenityShellState {
   ({Rect mediaRect, Rect visibleRect}) _thumbnailMediaLayoutForWindow({
@@ -8,7 +8,7 @@ extension _SerenityShellThumbnailPersistence on _SerenityShellState {
     required Rect windowRect,
   }) {
     final scale = window.size.width <= 0 ? 1.0 : windowRect.width / window.size.width;
-    final fitSize = _fitSizeForViewportToAspect(windowRect.size, window.asset.aspectRatio);
+    final fitSize = fitSizeForViewportToAspect(windowRect.size, window.asset.aspectRatio);
     final baseSize = window.zoom > 1.0 && window.zoomBaseSize != null
         ? Size(window.zoomBaseSize!.width * scale, window.zoomBaseSize!.height * scale)
         : fitSize;
@@ -71,9 +71,9 @@ extension _SerenityShellThumbnailPersistence on _SerenityShellState {
       final sourceWidth = window.asset.intrinsicWidth;
       final sourceHeight = window.asset.intrinsicHeight;
       final normalizedCrop = sourceWidth != null && sourceHeight != null && sourceWidth > 0 && sourceHeight > 0
-          ? _normalizedVisibleRectForWindow(window, Size(sourceWidth, sourceHeight))
+          ? normalizedVisibleRectForWindow(window, Size(sourceWidth, sourceHeight))
           : const Rect.fromLTWH(0, 0, 1, 1);
-      final bytes = await _videoToolsChannel.invokeMethod<Uint8List>('renderVideoThumbnail', {
+      final bytes = await videoToolsChannel.invokeMethod<Uint8List>('renderVideoThumbnail', {
         'sourcePath': path,
         'positionMs': window.videoPositionMs ?? 0,
         'targetWidth': targetWidth,

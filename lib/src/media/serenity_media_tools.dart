@@ -1,6 +1,6 @@
 // ignore_for_file: invalid_use_of_protected_member
 
-part of '../../main.dart';
+part of '../app/serenity_shell.dart';
 
 class _SharedVideoControllerEntry {
   _SharedVideoControllerEntry({required this.path, required this.controller, required this.initialization});
@@ -96,18 +96,18 @@ extension _SerenityShellMediaTools on _SerenityShellState {
     }
   }
 
-  Future<_VideoProbeResult?> _probeVideoFile(File file) async {
+  Future<VideoProbeResult?> _probeVideoFile(File file) async {
     if (_isRunningInWidgetTest || !Platform.isMacOS) {
       return null;
     }
 
     try {
-      final result = await _videoToolsChannel.invokeMapMethod<String, dynamic>('probeVideo', {'path': file.path});
+      final result = await videoToolsChannel.invokeMapMethod<String, dynamic>('probeVideo', {'path': file.path});
       if (result == null) {
         return null;
       }
 
-      return _VideoProbeResult(
+      return VideoProbeResult(
         durationMs: (result['durationMs'] as num?)?.toInt(),
         width: (result['width'] as num?)?.toInt(),
         height: (result['height'] as num?)?.toInt(),
@@ -135,7 +135,7 @@ extension _SerenityShellMediaTools on _SerenityShellState {
     }
 
     try {
-      final revealed = await _fileActionsChannel.invokeMethod<bool>('revealInFinder', {'path': path});
+      final revealed = await fileActionsChannel.invokeMethod<bool>('revealInFinder', {'path': path});
       if (revealed == false && mounted) {
         _showMessage('Serenity could not reveal that file in Finder.');
       }

@@ -1,4 +1,10 @@
-part of '../../main.dart';
+import 'dart:async';
+import 'dart:io';
+import 'dart:ui' as ui;
+
+import 'package:flutter/material.dart';
+
+import 'package:serenity_viewer/src/widgets/serenity_zoom_box.dart';
 
 class SerenityImageSurface extends StatefulWidget {
   const SerenityImageSurface({

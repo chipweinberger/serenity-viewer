@@ -1,6 +1,6 @@
 // ignore_for_file: invalid_use_of_protected_member
 
-part of '../../main.dart';
+part of '../app/serenity_shell.dart';
 
 extension _SerenityShellWorkspaceChrome on _SerenityShellState {
   static const double _workspaceHudGap = 10;
@@ -396,17 +396,17 @@ extension _SerenityShellWorkspaceChrome on _SerenityShellState {
   }
 
   double _workspaceZoomSliderValue(double zoom) {
-    final safeZoom = zoom.clamp(_workspaceMinZoom, _workspaceMaxZoom);
-    final minLog = math.log(_workspaceMinZoom);
-    final maxLog = math.log(_workspaceMaxZoom);
+    final safeZoom = zoom.clamp(workspaceMinZoom, workspaceMaxZoom);
+    final minLog = math.log(workspaceMinZoom);
+    final maxLog = math.log(workspaceMaxZoom);
     final zoomLog = math.log(safeZoom);
     return (zoomLog - minLog) / (maxLog - minLog);
   }
 
   double _workspaceZoomForSliderValue(double value) {
     final clampedValue = value.clamp(0.0, 1.0);
-    final minLog = math.log(_workspaceMinZoom);
-    final maxLog = math.log(_workspaceMaxZoom);
+    final minLog = math.log(workspaceMinZoom);
+    final maxLog = math.log(workspaceMaxZoom);
     final zoomLog = minLog + ((maxLog - minLog) * clampedValue);
     return math.exp(zoomLog);
   }

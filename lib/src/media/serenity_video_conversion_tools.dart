@@ -1,6 +1,6 @@
 // ignore_for_file: invalid_use_of_protected_member
 
-part of '../../main.dart';
+part of '../app/serenity_shell.dart';
 
 extension _SerenityVideoConversionTools on _SerenityShellState {
   Future<bool> _confirmOverwriteJpeg(String filename) async {
@@ -39,9 +39,9 @@ extension _SerenityVideoConversionTools on _SerenityShellState {
     return shouldConvert == true;
   }
 
-  Future<_VideoConversionResult?> _exportVideoFrameToJpeg({
+  Future<VideoConversionResult?> _exportVideoFrameToJpeg({
     required String sourcePath,
-    required _VideoProbeResult probe,
+    required VideoProbeResult probe,
     int? positionMs,
     Rect? normalizedCrop,
     bool promptBeforeOverwrite = true,
@@ -73,7 +73,7 @@ extension _SerenityVideoConversionTools on _SerenityShellState {
     final crop = normalizedCrop ?? const Rect.fromLTWH(0, 0, 1, 1);
 
     try {
-      final result = await _videoToolsChannel.invokeMapMethod<String, dynamic>('exportVideoFrameToJpeg', {
+      final result = await videoToolsChannel.invokeMapMethod<String, dynamic>('exportVideoFrameToJpeg', {
         'sourcePath': sourcePath,
         'destinationPath': outputPath,
         'positionMs': positionMs,
@@ -92,7 +92,7 @@ extension _SerenityVideoConversionTools on _SerenityShellState {
         return null;
       }
 
-      return _VideoConversionResult(
+      return VideoConversionResult(
         path: outputPath,
         filename: result['filename'] as String? ?? outputFile.uri.pathSegments.last,
         md5: digest,
@@ -135,7 +135,7 @@ extension _SerenityVideoConversionTools on _SerenityShellState {
       sourcePath: sourcePath,
       probe: probe,
       positionMs: window.videoPositionMs,
-      normalizedCrop: _normalizedVisibleRectForWindow(window, Size(probe.width!.toDouble(), probe.height!.toDouble())),
+      normalizedCrop: normalizedVisibleRectForWindow(window, Size(probe.width!.toDouble(), probe.height!.toDouble())),
     );
     if (conversion == null) {
       return;

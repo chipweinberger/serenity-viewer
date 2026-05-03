@@ -1,6 +1,6 @@
 // ignore_for_file: invalid_use_of_protected_member
 
-part of '../../main.dart';
+part of 'serenity_shell.dart';
 
 extension _SerenityShellSeedAndSettings on _SerenityShellState {
   void _showAboutSerenity() {
@@ -114,8 +114,8 @@ extension _SerenityShellSeedAndSettings on _SerenityShellState {
           views: 0,
           links: const [],
           isOpen: true,
-          viewportCenterDx: _defaultWorkspaceCenter.dx,
-          viewportCenterDy: _defaultWorkspaceCenter.dy,
+          viewportCenterDx: defaultWorkspaceCenter.dx,
+          viewportCenterDy: defaultWorkspaceCenter.dy,
           viewportZoom: 1,
           windows: [
             buildWindow(
@@ -168,8 +168,8 @@ extension _SerenityShellSeedAndSettings on _SerenityShellState {
           views: 0,
           links: const [],
           isOpen: true,
-          viewportCenterDx: _defaultWorkspaceCenter.dx,
-          viewportCenterDy: _defaultWorkspaceCenter.dy,
+          viewportCenterDx: defaultWorkspaceCenter.dx,
+          viewportCenterDy: defaultWorkspaceCenter.dy,
           viewportZoom: 1,
           windows: [
             buildWindow(
@@ -209,8 +209,8 @@ extension _SerenityShellSeedAndSettings on _SerenityShellState {
           views: 0,
           links: const [],
           isOpen: false,
-          viewportCenterDx: _defaultWorkspaceCenter.dx,
-          viewportCenterDy: _defaultWorkspaceCenter.dy,
+          viewportCenterDx: defaultWorkspaceCenter.dx,
+          viewportCenterDy: defaultWorkspaceCenter.dy,
           viewportZoom: 1,
           windows: const [],
         ),

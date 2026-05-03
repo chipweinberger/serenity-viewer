@@ -1,6 +1,6 @@
 // ignore_for_file: invalid_use_of_protected_member
 
-part of '../../main.dart';
+part of 'serenity_shell.dart';
 
 extension _SerenityShellWindowActions on _SerenityShellState {
   static const List<double> _videoPlaybackSpeeds = [0.25, 0.5, 0.75, 1.0];
@@ -124,10 +124,8 @@ extension _SerenityShellWindowActions on _SerenityShellState {
       window.position.dx + (window.size.width / 2),
       window.position.dy + (window.size.height / 2),
     );
-    final nextWidth = (window.size.width * clampedScaleDelta).clamp(_minWindowWidth, _workspaceExtent * 2).toDouble();
-    final nextHeight = (window.size.height * clampedScaleDelta)
-        .clamp(_minWindowHeight, _workspaceExtent * 2)
-        .toDouble();
+    final nextWidth = (window.size.width * clampedScaleDelta).clamp(_minWindowWidth, workspaceExtent * 2).toDouble();
+    final nextHeight = (window.size.height * clampedScaleDelta).clamp(_minWindowHeight, workspaceExtent * 2).toDouble();
     final nextSize = Size(nextWidth, nextHeight);
     final nextPosition = _clampWindowPosition(
       Offset(focalWorldPoint.dx - (nextWidth / 2), focalWorldPoint.dy - (nextHeight / 2)),
@@ -160,7 +158,7 @@ extension _SerenityShellWindowActions on _SerenityShellState {
   }
 
   ({Rect visibleRect, Size zoomedContentSize}) _visibleContentRectForWindow(AssetWindowState window) {
-    final fitSize = _fitSizeForViewportToAspect(window.size, window.asset.aspectRatio);
+    final fitSize = fitSizeForViewportToAspect(window.size, window.asset.aspectRatio);
     final baseSize = window.zoom > 1.0 && window.zoomBaseSize != null ? window.zoomBaseSize! : fitSize;
     final zoomedContentSize = Size(baseSize.width * window.zoom, baseSize.height * window.zoom);
     final left = ((window.size.width - zoomedContentSize.width) / 2) + window.contentOffset.dx;
@@ -198,7 +196,7 @@ extension _SerenityShellWindowActions on _SerenityShellState {
             return window;
           }
 
-          final targetSize = _fitSizeForViewportToAspect(_collateTargetBox, window.asset.aspectRatio);
+          final targetSize = fitSizeForViewportToAspect(_collateTargetBox, window.asset.aspectRatio);
           if (targetSize.width <= 0 || targetSize.height <= 0) {
             return window;
           }
@@ -322,10 +320,10 @@ extension _SerenityShellWindowActions on _SerenityShellState {
             height = _minWindowHeight;
           }
 
-          width = width.clamp(_minWindowWidth, _workspaceExtent * 2);
-          height = height.clamp(_minWindowHeight, _workspaceExtent * 2);
-          left = left.clamp(_workspaceMinCoordinate, _workspaceMaxCoordinate - width);
-          top = top.clamp(_workspaceMinCoordinate, _workspaceMaxCoordinate - height);
+          width = width.clamp(_minWindowWidth, workspaceExtent * 2);
+          height = height.clamp(_minWindowHeight, workspaceExtent * 2);
+          left = left.clamp(workspaceMinCoordinate, workspaceMaxCoordinate - width);
+          top = top.clamp(workspaceMinCoordinate, workspaceMaxCoordinate - height);
 
           return window.copyWith(position: Offset(left, top), size: Size(width, height));
         }).toList(),
@@ -364,8 +362,8 @@ extension _SerenityShellWindowActions on _SerenityShellState {
     final visibleWidth = math.max(1.0, visibleRect.width);
     final visibleHeight = math.max(1.0, visibleRect.height);
     final nextSize = Size(
-      visibleWidth.clamp(_minWindowWidth, _workspaceExtent * 2),
-      visibleHeight.clamp(_minWindowHeight, _workspaceExtent * 2),
+      visibleWidth.clamp(_minWindowWidth, workspaceExtent * 2),
+      visibleHeight.clamp(_minWindowHeight, workspaceExtent * 2),
     );
     final nextPosition = _clampWindowPosition(currentWindow.position + visibleRect.topLeft, nextSize);
     final nextLeft =
@@ -406,7 +404,7 @@ extension _SerenityShellWindowActions on _SerenityShellState {
     }
 
     if (_workspaceViewportSize.width <= 0 || _workspaceViewportSize.height <= 0 || workspace.windows.isEmpty) {
-      _setWorkspaceViewport(workspaceId: workspace.id, center: _defaultWorkspaceCenter, zoom: 1, queueThumbnail: true);
+      _setWorkspaceViewport(workspaceId: workspace.id, center: defaultWorkspaceCenter, zoom: 1, queueThumbnail: true);
       return;
     }
 

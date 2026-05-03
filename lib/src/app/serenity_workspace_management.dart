@@ -1,6 +1,6 @@
 // ignore_for_file: invalid_use_of_protected_member
 
-part of '../../main.dart';
+part of 'serenity_shell.dart';
 
 extension _SerenityShellWorkspaceManagement on _SerenityShellState {
   int _nextWorkspaceOrdinal() {
@@ -129,8 +129,8 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
         links: const [],
         windows: const [],
         isOpen: true,
-        viewportCenterDx: _defaultWorkspaceCenter.dx,
-        viewportCenterDy: _defaultWorkspaceCenter.dy,
+        viewportCenterDx: defaultWorkspaceCenter.dx,
+        viewportCenterDy: defaultWorkspaceCenter.dy,
         viewportZoom: 1,
       );
       _updateSession(session.copyWith(workspaces: [replacementWorkspace], activeWorkspaceId: replacementWorkspace.id));
@@ -311,8 +311,8 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
       views: 0,
       links: const [],
       isOpen: true,
-      viewportCenterDx: _defaultWorkspaceCenter.dx,
-      viewportCenterDy: _defaultWorkspaceCenter.dy,
+      viewportCenterDx: defaultWorkspaceCenter.dx,
+      viewportCenterDy: defaultWorkspaceCenter.dy,
       viewportZoom: 1,
       windows: const [],
     );
