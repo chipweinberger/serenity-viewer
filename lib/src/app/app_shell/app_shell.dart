@@ -14,6 +14,7 @@ import 'package:serenity_viewer/src/app/environment/app_environment_bookmark_syn
 import 'package:serenity_viewer/src/app/environment/app_environment_controller.dart';
 import 'package:serenity_viewer/src/app/environment/app_environment_state.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_menu_builder.dart';
+import 'package:serenity_viewer/src/app/app_shell/app_shell_window_history_controller.dart';
 import 'package:serenity_viewer/src/app/platform/app_shell_platform_bridge.dart';
 import 'package:serenity_viewer/src/app/runtime/app_shell_runtime.dart';
 import 'package:serenity_viewer/src/app/sry_document/sry_document_coordinator.dart';
@@ -52,7 +53,6 @@ part 'app_shell_media_import_actions.dart';
 part 'app_shell_navigation_actions.dart';
 part 'app_shell_startup_seed_and_settings.dart';
 part 'app_shell_window_actions.dart';
-part 'app_shell_window_history_actions.dart';
 part 'app_shell_workspace_geometry.dart';
 
 class AppShell extends StatefulWidget {
@@ -175,9 +175,25 @@ class _AppShellState extends State<AppShell> {
     }
   }
 
+  AppShellWindowHistoryController get _windowHistoryController {
+    return AppShellWindowHistoryController(
+      environment: () => _persistenceState.environment,
+      workspaces: () => _workspaces,
+      activeWorkspace: () => _activeWorkspaceOrNull,
+      recentlyClosedWindows: _recentlyClosedWindows,
+      workspaceController: _workspaceController,
+      updateEnvironment: _updateEnvironment,
+      replaceWorkspace: _replaceWorkspace,
+      commitStateChange: setState,
+      showMessage: _showMessage,
+      showWorkspaceScreen: _showWorkspaceScreen,
+      screen: () => _uiState.screen,
+      maxRecentlyClosedWindows: _AppShellState._maxRecentlyClosedWindows,
+    );
+  }
+
   List<PlatformMenuItem> _buildMenus() {
-    final activeWorkspace = _activeWorkspaceOrNull;
-    final focusedWindow = _focusedWindowOrNull();
+    final focusedWindow = _windowHistoryController.focusedWindowOrNull();
     final focusedWindowIsSelected =
         focusedWindow != null && _windowInteractionState.selectedExposeWindowIds.contains(focusedWindow.asset.id);
 
@@ -194,7 +210,7 @@ class _AppShellState extends State<AppShell> {
       fitWindowToContent: _fitWindowToContent,
       restorePreviousWindowZOrder: _restorePreviousWindowZOrder,
       convertVideoWindowToJpeg: (windowId) => _videoConversionCoordinator.convertVideoWindowToJpeg(windowId),
-      closeWindow: _removeWindow,
+      closeWindow: _windowHistoryController.removeWindow,
       toggleExpose: _toggleExpose,
       toggleWorkspaceOverview: _workspaceShellController.navigation.toggleOverview,
       createWorkspace: _workspaceShellController.management.createWorkspace,
@@ -207,10 +223,9 @@ class _AppShellState extends State<AppShell> {
       renameWorkspace: _workspaceShellController.management.renameWorkspace,
       showNoWorkspaceToDeleteMessage: () => _showMessage('There is no workspace to delete.'),
       confirmDeleteWorkspace: _workspaceShellController.management.confirmDeleteWorkspace,
-      restoreRecentlyClosedWindow: _restoreRecentlyClosedWindow,
+      restoreRecentlyClosedWindow: _windowHistoryController.restoreRecentlyClosedWindow,
     ).build(
       activeWorkspaceId: _persistenceState.environment?.activeWorkspaceId,
-      activeWorkspaceName: activeWorkspace?.name,
       focusedWindow: focusedWindow,
       focusedWindowIsSelected: focusedWindowIsSelected,
       recentlyClosedWindows: _recentlyClosedWindows,
@@ -237,7 +252,7 @@ class _AppShellState extends State<AppShell> {
       activeWorkspace: () => _activeWorkspaceOrNull,
       workspaces: () => _workspaces,
       openWorkspaces: () => _openWorkspaces,
-      focusedWindowOrNull: _focusedWindowOrNull,
+      focusedWindowOrNull: _windowHistoryController.focusedWindowOrNull,
       setWorkspaceViewport: _setWorkspaceViewport,
       showWorkspaceScreen: _showWorkspaceScreen,
       showLibraryScreen: _showLibraryScreen,

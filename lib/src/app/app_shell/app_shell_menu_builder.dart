@@ -68,7 +68,6 @@ class AppShellMenuBuilder {
 
   List<PlatformMenuItem> build({
     required String? activeWorkspaceId,
-    required String? activeWorkspaceName,
     required Window? focusedWindow,
     required bool focusedWindowIsSelected,
     required List<RecentlyClosedWindowEntry> recentlyClosedWindows,
