@@ -7,7 +7,7 @@ import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/workspace/operations/workspace_environment_operations.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
-import 'package:serenity_viewer/src/app/app_environment_state.dart';
+import 'package:serenity_viewer/src/app/environment/app_environment_state.dart';
 
 typedef SerenityEnvironmentCommit = void Function(VoidCallback update);
 typedef SerenityWorkspaceThumbnailMarker = void Function(String workspaceId);

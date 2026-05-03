@@ -1,6 +1,6 @@
 // ignore_for_file: invalid_use_of_protected_member
 
-part of 'package:serenity_viewer/src/app/app_shell.dart';
+part of 'package:serenity_viewer/src/app/app_shell/app_shell.dart';
 
 extension _AppShellWorkspaceGeometry on _AppShellState {
   String _newId(String prefix) {
@@ -9,10 +9,6 @@ extension _AppShellWorkspaceGeometry on _AppShellState {
 
   int _colorFromDigest(String value) {
     return assetColorFromMd5(value).toARGB32();
-  }
-
-  double _clampWorkspaceZoom(double zoom) {
-    return WorkspaceLayout.clampWorkspaceZoom(zoom);
   }
 
   void _setWorkspaceViewport({required String workspaceId, Offset? center, double? zoom, bool queueThumbnail = false}) {
@@ -45,9 +41,5 @@ extension _AppShellWorkspaceGeometry on _AppShellState {
     if (!queueThumbnail) {
       _thumbnailController.markWorkspaceDirty(workspaceId);
     }
-  }
-
-  Offset _clampWindowPosition(Offset position, Size size) {
-    return WorkspaceLayout.clampWindowPosition(position, size);
   }
 }

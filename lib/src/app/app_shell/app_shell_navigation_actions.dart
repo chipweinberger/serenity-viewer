@@ -1,6 +1,6 @@
 // ignore_for_file: invalid_use_of_protected_member
 
-part of 'package:serenity_viewer/src/app/app_shell.dart';
+part of 'package:serenity_viewer/src/app/app_shell/app_shell.dart';
 
 extension _AppShellNavigationActions on _AppShellState {
   void _showWorkspaceScreen({

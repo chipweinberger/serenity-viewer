@@ -3,11 +3,11 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/app/app_environment_bookmark_synchronizer.dart';
-import 'package:serenity_viewer/src/app/app_environment_controller.dart';
-import 'package:serenity_viewer/src/app/app_environment_state.dart';
-import 'package:serenity_viewer/src/app/app_shell_platform_bridge.dart';
-import 'package:serenity_viewer/src/app/shell_dependencies.dart';
+import 'package:serenity_viewer/src/app/dependencies/shell_dependencies.dart';
+import 'package:serenity_viewer/src/app/environment/app_environment_bookmark_synchronizer.dart';
+import 'package:serenity_viewer/src/app/environment/app_environment_controller.dart';
+import 'package:serenity_viewer/src/app/environment/app_environment_state.dart';
+import 'package:serenity_viewer/src/app/platform/app_shell_platform_bridge.dart';
 import 'package:serenity_viewer/src/app/sry_document/sry_document_coordinator.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/window.dart';

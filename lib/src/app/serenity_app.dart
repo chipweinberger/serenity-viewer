@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/app/app_shell.dart';
+import 'package:serenity_viewer/src/app/app_shell/app_shell.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
 
 class SerenityApp extends StatelessWidget {

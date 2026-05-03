@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/app/app_environment_controller.dart';
-import 'package:serenity_viewer/src/app/app_environment_state.dart';
+import 'package:serenity_viewer/src/app/environment/app_environment_controller.dart';
+import 'package:serenity_viewer/src/app/environment/app_environment_state.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/file_resolution/missing_asset_resolution.dart';

@@ -4,7 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:serenity_viewer/src/app/app_environment_state.dart';
+import 'package:serenity_viewer/src/app/environment/app_environment_state.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';

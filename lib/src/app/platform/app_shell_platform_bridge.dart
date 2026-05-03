@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 
-import 'package:serenity_viewer/src/app/app_environment_state.dart';
+import 'package:serenity_viewer/src/app/environment/app_environment_state.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 
 class AppShellPlatformBridge {
