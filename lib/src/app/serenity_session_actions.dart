@@ -3,7 +3,7 @@
 part of '../../main.dart';
 
 extension _SerenityShellSessionActions on _SerenityShellState {
-  static const double _appliedExposeViewportZoomFactor = 0.5;
+  static const double _appliedExposeViewportZoomFactor = 0.0625;
 
   void _updateSession(SerenitySessionState nextSession) {
     setState(() {

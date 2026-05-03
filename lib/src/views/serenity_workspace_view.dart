@@ -9,7 +9,7 @@ List<({AssetWindowState window, Rect rect})> _computeExposeLayoutRects({
   const horizontalPadding = 28.0;
   const topPadding = 86.0;
   const bottomPadding = 92.0;
-  const spacing = 22.0;
+  const spacing = 10.78;
   const maxCardHeight = 220.0;
   const minCardHeight = 56.0;
 

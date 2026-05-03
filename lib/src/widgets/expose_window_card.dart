@@ -33,6 +33,8 @@ class ExposeWindowCard extends StatefulWidget {
 }
 
 class _ExposeWindowCardState extends State<ExposeWindowCard> {
+  static const double _maxCardCornerRadius = 20.0;
+
   bool _isHovered = false;
   bool _isCommandPressed = false;
 
@@ -199,22 +201,32 @@ class _ExposeWindowCardState extends State<ExposeWindowCard> {
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: widget.onOpen,
-          borderRadius: BorderRadius.circular(20),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: const [BoxShadow(color: SerenityTheme.shadow, blurRadius: 18, offset: Offset(0, 10))],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final cornerRadius = math.min(
+            _maxCardCornerRadius,
+            math.min(constraints.maxWidth, constraints.maxHeight) * 0.08,
+          );
+          final borderRadius = BorderRadius.circular(cornerRadius);
+
+          return Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: widget.onOpen,
+              borderRadius: borderRadius,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: borderRadius,
+                  boxShadow: const [BoxShadow(color: SerenityTheme.shadow, blurRadius: 18, offset: Offset(0, 10))],
+                ),
+                child: ClipRRect(
+                  borderRadius: borderRadius,
+                  child: Stack(fit: StackFit.expand, children: [_buildMediaPreview(), _buildHoverOverlay(context)]),
+                ),
+              ),
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: Stack(fit: StackFit.expand, children: [_buildMediaPreview(), _buildHoverOverlay(context)]),
-            ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

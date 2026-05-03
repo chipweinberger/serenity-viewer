@@ -263,7 +263,7 @@ extension _SerenityShellWorkspaceChrome on _SerenityShellState {
           const SizedBox(width: 10),
         ],
         _buildWorkspaceHudAction(
-          tooltip: 'Open workspace links',
+          tooltip: 'Links',
           onTap: () => unawaited(_openWorkspaceLinksDialog(_activeWorkspace)),
           child: const SizedBox(
             width: 38,
