@@ -1,49 +1,31 @@
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/environment/environment.dart';
-import 'package:serenity_viewer/src/environment/workspace.dart';
-import 'package:serenity_viewer/src/settings/behavior/chrome_controller.dart';
-import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
+import 'package:serenity_viewer/src/app/app_shell/builders/app_shell_content_scope.dart';
 import 'package:serenity_viewer/src/workspace/screen/workspace_chrome_overlay.dart';
-import 'package:serenity_viewer/src/workspace/shell/workspace_shell_controller.dart';
 
 class AppShellChromeOverlayBuilder {
-  const AppShellChromeOverlayBuilder({
-    required this.windowTitle,
-    required this.environment,
-    required this.openWorkspaces,
-    required this.uiState,
-    required this.chromeController,
-    required this.workspaceShellController,
-    required this.tabScrollController,
-  });
+  const AppShellChromeOverlayBuilder({required this.state});
 
-  final String windowTitle;
-  final Environment environment;
-  final List<Workspace> openWorkspaces;
-  final ChromeState uiState;
-  final ChromeController chromeController;
-  final WorkspaceShellController workspaceShellController;
-  final ScrollController tabScrollController;
+  final AppShellContentState state;
 
   Widget build() {
     return WorkspaceChromeOverlay(
-      windowTitle: windowTitle,
-      openWorkspaces: openWorkspaces,
-      activeWorkspaceId: environment.activeWorkspaceId,
-      isLibraryScreen: chromeController.isLibraryScreen,
-      shouldMoveSelectedWindows: chromeController.shouldMoveSelectedWindowsToWorkspaceOnTap,
-      draggingTabWorkspaceId: uiState.draggingTabWorkspaceId,
-      tabScrollController: tabScrollController,
+      windowTitle: state.windowTitle,
+      openWorkspaces: state.openWorkspaces,
+      activeWorkspaceId: state.environment.activeWorkspaceId,
+      isLibraryScreen: state.chromeController.isLibraryScreen,
+      shouldMoveSelectedWindows: state.chromeController.shouldMoveSelectedWindowsToWorkspaceOnTap,
+      draggingTabWorkspaceId: state.uiState.draggingTabWorkspaceId,
+      tabScrollController: state.tabScrollController,
       actions: WorkspaceChromeOverlayActions(
-        onShowWorkspaceOverview: workspaceShellController.navigation.showOverview,
-        onSetDraggingTabWorkspaceId: chromeController.setDraggingTabWorkspaceId,
-        onReorderOpenWorkspace: workspaceShellController.management.reorderOpenWorkspace,
+        onShowWorkspaceOverview: state.workspaceShellController.navigation.showOverview,
+        onSetDraggingTabWorkspaceId: state.chromeController.setDraggingTabWorkspaceId,
+        onReorderOpenWorkspace: state.workspaceShellController.management.reorderOpenWorkspace,
         onMoveSelectedExposeWindowsToWorkspace:
-            workspaceShellController.management.moveSelectedExposeWindowsToWorkspace,
-        onSetActiveWorkspace: workspaceShellController.navigation.setActiveWorkspace,
-        onConfirmCloseTab: workspaceShellController.management.confirmCloseTab,
-        onCreateWorkspace: workspaceShellController.management.createWorkspace,
+            state.workspaceShellController.management.moveSelectedExposeWindowsToWorkspace,
+        onSetActiveWorkspace: state.workspaceShellController.navigation.setActiveWorkspace,
+        onConfirmCloseTab: state.workspaceShellController.management.confirmCloseTab,
+        onCreateWorkspace: state.workspaceShellController.management.createWorkspace,
       ),
     );
   }
