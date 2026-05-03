@@ -11,6 +11,8 @@ import 'package:serenity_viewer/src/app/app_shell/app_shell_content_builder.dart
 import 'package:serenity_viewer/src/app/app_shell/app_shell_media_import_controller.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_menu_builder.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_navigation_controller.dart';
+import 'package:serenity_viewer/src/app/app_shell/app_shell_seed_environment.dart';
+import 'package:serenity_viewer/src/app/app_shell/app_shell_ui_controller.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_window_controller.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_window_history_controller.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_workspace_geometry_controller.dart';
@@ -22,21 +24,15 @@ import 'package:serenity_viewer/src/video_tools/media_bridge.dart';
 import 'package:serenity_viewer/src/video_tools/video_conversion_coordinator.dart';
 import 'package:serenity_viewer/src/workspace/shell/workspace_shell_controller.dart';
 import 'package:serenity_viewer/src/workspace/controller/workspace_controller.dart';
-import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/workspace/session/recently_closed_window_entry.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
-import 'package:serenity_viewer/src/video_tools/settings_and_video_models.dart';
-import 'package:serenity_viewer/src/environment/asset.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
 import 'package:serenity_viewer/src/links/workspace_links_controller.dart';
-import 'package:serenity_viewer/src/settings/behavior/settings_dialog.dart';
 import 'package:serenity_viewer/src/thumbnails/thumbnail_controller.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 
 part 'app_shell_environment_actions.dart';
-part 'app_shell_startup_seed_and_settings.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -105,7 +101,7 @@ class _AppShellState extends State<AppShell> {
 
   Future<void> _restoreEnvironment() async {
     if (_isRunningInWidgetTest) {
-      _environmentController.restoreWidgetTestEnvironment(_seedEnvironment());
+      _environmentController.restoreWidgetTestEnvironment(buildSeedEnvironment());
       return;
     }
 
@@ -168,7 +164,7 @@ class _AppShellState extends State<AppShell> {
       updateEnvironment: _updateEnvironment,
       replaceWorkspace: _replaceWorkspace,
       commitStateChange: setState,
-      showMessage: _showMessage,
+      showMessage: _uiController.showMessage,
       showWorkspaceScreen: _navigationController.showWorkspaceScreen,
       screen: () => _uiState.screen,
       maxRecentlyClosedWindows: _AppShellState._maxRecentlyClosedWindows,
@@ -184,7 +180,7 @@ class _AppShellState extends State<AppShell> {
       activeWorkspace: () => _activeWorkspace,
       activeWorkspaceOrNull: () => _activeWorkspaceOrNull,
       workspaceController: _workspaceController,
-      showMessage: _showMessage,
+      showMessage: _uiController.showMessage,
     );
   }
 
@@ -210,12 +206,20 @@ class _AppShellState extends State<AppShell> {
       colorFromDigest: _workspaceGeometryController.colorFromDigest,
       updateEnvironment: _updateEnvironment,
       thumbnailController: _thumbnailController,
-      showMessage: _showMessage,
+      showMessage: _uiController.showMessage,
     );
   }
 
   AppShellNavigationController get _navigationController {
     return AppShellNavigationController(chromeController: _chromeController);
+  }
+
+  AppShellUiController get _uiController {
+    return AppShellUiController(
+      context: () => context,
+      persistenceState: _persistenceState,
+      updateEnvironment: _updateEnvironment,
+    );
   }
 
   List<PlatformMenuItem> _buildMenus() {
@@ -224,8 +228,8 @@ class _AppShellState extends State<AppShell> {
         focusedWindow != null && _windowInteractionState.selectedExposeWindowIds.contains(focusedWindow.asset.id);
 
     return AppShellMenuBuilder(
-      showAboutSerenity: _showAboutSerenity,
-      openSettings: _openSettings,
+      showAboutSerenity: _uiController.showAboutSerenity,
+      openSettings: _uiController.openSettings,
       createEnvironment: _sryDocumentCoordinator.createDocument,
       openEnvironment: _sryDocumentCoordinator.openDocument,
       openAssets: _mediaImportController.pickAndImportAssets,
@@ -245,9 +249,9 @@ class _AppShellState extends State<AppShell> {
       fitWorkspaceViewportToContent: _windowController.fitWorkspaceViewportToContent,
       confirmCollateWorkspaceWindows: _windowController.confirmCollateWorkspaceWindows,
       pauseAllVideos: _windowController.pauseAllVideos,
-      showNoWorkspaceToRenameMessage: () => _showMessage('There is no workspace to rename.'),
+      showNoWorkspaceToRenameMessage: () => _uiController.showMessage('There is no workspace to rename.'),
       renameWorkspace: _workspaceShellController.management.renameWorkspace,
-      showNoWorkspaceToDeleteMessage: () => _showMessage('There is no workspace to delete.'),
+      showNoWorkspaceToDeleteMessage: () => _uiController.showMessage('There is no workspace to delete.'),
       confirmDeleteWorkspace: _workspaceShellController.management.confirmDeleteWorkspace,
       restoreRecentlyClosedWindow: _windowHistoryController.restoreRecentlyClosedWindow,
     ).build(
@@ -321,8 +325,8 @@ class _AppShellState extends State<AppShell> {
       context: () => context,
       mounted: () => mounted,
       commitStateChange: setState,
-      showMessage: _showMessage,
-      seedEnvironment: _seedEnvironment,
+      showMessage: _uiController.showMessage,
+      seedEnvironment: buildSeedEnvironment,
       updateEnvironment: _updateEnvironment,
       replaceWorkspace: _replaceWorkspace,
       saveEnvironment: _saveEnvironment,
