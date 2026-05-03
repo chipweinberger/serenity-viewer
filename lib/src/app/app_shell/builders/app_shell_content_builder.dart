@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:serenity_viewer/src/asset_window/frame/asset_window_resize_helpers.dart';
 import 'package:serenity_viewer/src/asset_window/interaction/asset_window_interaction_state.dart';
 import 'package:serenity_viewer/src/asset_window/interaction/asset_window_zoom_update.dart';
-import 'package:serenity_viewer/src/app/app_shell/app_shell_window_history_controller.dart';
+import 'package:serenity_viewer/src/app/app_shell/controllers/app_shell_window_history_controller.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
