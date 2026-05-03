@@ -1,7 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-import 'package:serenity_viewer/src/models/asset_window_state.dart';
-
 @immutable
 class SerenitySettingsResult {
   const SerenitySettingsResult({
@@ -17,51 +15,6 @@ class SerenitySettingsResult {
   final int longVideoLoadLimit;
   final List<String> knownFolders;
   final Map<String, int> folderPopularity;
-}
-
-class SerenityLoadPlan {
-  const SerenityLoadPlan({
-    required this.loadedAssetIds,
-    required this.loadedImages,
-    required this.loadedShortVideos,
-    required this.loadedLongVideos,
-  });
-
-  final Set<String> loadedAssetIds;
-  final int loadedImages;
-  final int loadedShortVideos;
-  final int loadedLongVideos;
-}
-
-@immutable
-class RecentlyClosedWindowEntry {
-  const RecentlyClosedWindowEntry({
-    required this.workspaceId,
-    required this.workspaceName,
-    required this.window,
-    required this.closedAt,
-  });
-
-  final String workspaceId;
-  final String workspaceName;
-  final AssetWindowState window;
-  final DateTime closedAt;
-}
-
-class WorkspaceMediaCounts {
-  const WorkspaceMediaCounts({
-    required this.images,
-    required this.shortVideos,
-    required this.longVideos,
-    required this.links,
-  });
-
-  final int images;
-  final int shortVideos;
-  final int longVideos;
-  final int links;
-
-  int get videos => shortVideos + longVideos;
 }
 
 enum StartupEnvironmentChoice { open, create }
