@@ -3,18 +3,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/dependencies/shell_dependencies.dart';
+import 'package:serenity_viewer/src/app/app_shell/app_shell_controllers.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_derived_state.dart';
 import 'package:serenity_viewer/src/app/app_shell/builders/app_shell_content_builder.dart';
 import 'package:serenity_viewer/src/app/app_shell/builders/app_shell_content_scope.dart';
 import 'package:serenity_viewer/src/app/app_shell/builders/app_shell_menu_builder.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_seed_environment.dart';
-import 'package:serenity_viewer/src/app/app_shell/controllers/app_shell_environment_controller.dart';
-import 'package:serenity_viewer/src/app/app_shell/controllers/app_shell_media_import_controller.dart';
-import 'package:serenity_viewer/src/app/app_shell/controllers/app_shell_navigation_controller.dart';
-import 'package:serenity_viewer/src/app/app_shell/controllers/app_shell_ui_controller.dart';
-import 'package:serenity_viewer/src/app/app_shell/controllers/app_shell_window_controller.dart';
-import 'package:serenity_viewer/src/app/app_shell/controllers/app_shell_window_history_controller.dart';
-import 'package:serenity_viewer/src/app/app_shell/controllers/app_shell_workspace_geometry_controller.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_runtime.dart';
 import 'package:serenity_viewer/src/workspace/session/recently_closed_window_entry.dart';
 
@@ -39,6 +33,22 @@ class _AppShellState extends State<AppShell> {
   AppShellRuntimeFoundationServices get _foundation => _runtime.foundation;
   AppShellRuntimeDocumentServices get _documents => _runtime.documents;
   AppShellRuntimeWorkspaceServices get _workspaceRuntime => _runtime.workspace;
+  AppShellControllers get _controllers {
+    return AppShellControllers(
+      context: () => context,
+      mounted: () => mounted,
+      commitStateChange: setState,
+      recentlyClosedWindows: _recentlyClosedWindows,
+      maxRecentlyClosedWindows: _AppShellState._maxRecentlyClosedWindows,
+      imageExtensions: _AppShellState._imageExtensions,
+      videoExtensions: _AppShellState._videoExtensions,
+      state: _state,
+      derived: _derived,
+      foundation: _foundation,
+      documents: _documents,
+      workspace: _workspaceRuntime,
+    );
+  }
 
   bool get _isRunningInWidgetTest {
     return Platform.environment.containsKey('FLUTTER_TEST') ||
@@ -100,114 +110,39 @@ class _AppShellState extends State<AppShell> {
     }
   }
 
-  AppShellWindowHistoryController get _windowHistoryController {
-    return AppShellWindowHistoryController(
-      environment: () => _state.persistenceState.environment,
-      workspaces: () => _derived.workspaces,
-      activeWorkspace: () => _derived.activeWorkspaceOrNull,
-      recentlyClosedWindows: _recentlyClosedWindows,
-      workspaceController: _workspaceRuntime.workspaceController,
-      updateEnvironment: _environmentActions.updateEnvironment,
-      replaceWorkspace: _environmentActions.replaceWorkspace,
-      commitStateChange: setState,
-      showMessage: _uiController.showMessage,
-      showWorkspaceScreen: _navigationController.showWorkspaceScreen,
-      screen: () => _state.chromeState.screen,
-      maxRecentlyClosedWindows: _AppShellState._maxRecentlyClosedWindows,
-    );
-  }
-
-  AppShellWindowController get _windowController {
-    return AppShellWindowController(
-      context: () => context,
-      mounted: () => mounted,
-      chromeState: _state.chromeState,
-      environment: () => _state.persistenceState.environment,
-      activeWorkspace: () => _derived.activeWorkspace,
-      activeWorkspaceOrNull: () => _derived.activeWorkspaceOrNull,
-      workspaceController: _workspaceRuntime.workspaceController,
-      showMessage: _uiController.showMessage,
-    );
-  }
-
-  AppShellWorkspaceGeometryController get _workspaceGeometryController {
-    return AppShellWorkspaceGeometryController(
-      persistenceState: _state.persistenceState,
-      workspaceViewportState: _state.workspaceViewportState,
-      thumbnailController: _workspaceRuntime.thumbnailController,
-      replaceWorkspace: _environmentActions.replaceWorkspace,
-    );
-  }
-
-  AppShellMediaImportController get _mediaImportController {
-    return AppShellMediaImportController(
-      imageExtensions: _AppShellState._imageExtensions,
-      videoExtensions: _AppShellState._videoExtensions,
-      persistenceState: _state.persistenceState,
-      activeWorkspace: () => _derived.activeWorkspace,
-      videoConversionCoordinator: _workspaceRuntime.videoConversionCoordinator,
-      createFileBookmark: _foundation.appShellPlatformBridge.createFileBookmark,
-      mediaBridge: _foundation.mediaBridge,
-      newId: _workspaceGeometryController.newId,
-      colorFromDigest: _workspaceGeometryController.colorFromDigest,
-      updateEnvironment: _environmentActions.updateEnvironment,
-      thumbnailController: _workspaceRuntime.thumbnailController,
-      showMessage: _uiController.showMessage,
-    );
-  }
-
-  AppShellNavigationController get _navigationController {
-    return AppShellNavigationController(chromeController: _foundation.chromeController);
-  }
-
-  AppShellUiController get _uiController {
-    return AppShellUiController(
-      context: () => context,
-      persistenceState: _state.persistenceState,
-      updateEnvironment: _environmentActions.updateEnvironment,
-    );
-  }
-
-  AppShellEnvironmentController get _environmentActions {
-    return AppShellEnvironmentController(
-      environmentController: _foundation.environmentController,
-      chromeController: _foundation.chromeController,
-    );
-  }
-
   List<PlatformMenuItem> _buildMenus() {
-    final focusedWindow = _windowHistoryController.focusedWindowOrNull();
+    final focusedWindow = _controllers.windowHistory.focusedWindowOrNull();
     final focusedWindowIsSelected =
         focusedWindow != null && _workspaceRuntime.workspaceController.expose.isWindowSelected(focusedWindow.asset.id);
 
     return AppShellMenuBuilder(
-      showAboutSerenity: _uiController.showAboutSerenity,
-      openSettings: _uiController.openSettings,
+      showAboutSerenity: _controllers.ui.showAboutSerenity,
+      openSettings: _controllers.ui.openSettings,
       createEnvironment: _documents.sryDocumentCoordinator.createDocument,
       openEnvironment: _documents.sryDocumentCoordinator.openDocument,
-      openAssets: _mediaImportController.pickAndImportAssets,
+      openAssets: _controllers.mediaImport.pickAndImportAssets,
       saveEnvironment: _documents.sryDocumentCoordinator.saveDocument,
       saveEnvironmentAs: _documents.sryDocumentCoordinator.saveDocumentAs,
       revealAssetInFinder: _foundation.mediaBridge.revealAssetInFinder,
       toggleWindowSelected: _workspaceRuntime.workspaceShellController.navigation.toggleSelectedWindow,
-      fitWindowToContent: _windowController.fitWindowToContent,
-      restorePreviousWindowZOrder: _windowController.restorePreviousWindowZOrder,
+      fitWindowToContent: _controllers.window.fitWindowToContent,
+      restorePreviousWindowZOrder: _controllers.window.restorePreviousWindowZOrder,
       convertVideoWindowToJpeg: (windowId) =>
           _workspaceRuntime.videoConversionCoordinator.convertVideoWindowToJpeg(windowId),
-      closeWindow: _windowHistoryController.removeWindow,
-      toggleExpose: _environmentActions.toggleExpose,
+      closeWindow: _controllers.windowHistory.removeWindow,
+      toggleExpose: _controllers.environment.toggleExpose,
       toggleWorkspaceOverview: _workspaceRuntime.workspaceShellController.navigation.toggleOverview,
       createWorkspace: _workspaceRuntime.workspaceShellController.management.createWorkspace,
       switchToPreviousWorkspace: () => _workspaceRuntime.workspaceShellController.navigation.switchWorkspace(-1),
       switchToNextWorkspace: () => _workspaceRuntime.workspaceShellController.navigation.switchWorkspace(1),
-      fitWorkspaceViewportToContent: _windowController.fitWorkspaceViewportToContent,
-      confirmCollateWorkspaceWindows: _windowController.confirmCollateWorkspaceWindows,
-      pauseAllVideos: _windowController.pauseAllVideos,
-      showNoWorkspaceToRenameMessage: () => _uiController.showMessage('There is no workspace to rename.'),
+      fitWorkspaceViewportToContent: _controllers.window.fitWorkspaceViewportToContent,
+      confirmCollateWorkspaceWindows: _controllers.window.confirmCollateWorkspaceWindows,
+      pauseAllVideos: _controllers.window.pauseAllVideos,
+      showNoWorkspaceToRenameMessage: () => _controllers.ui.showMessage('There is no workspace to rename.'),
       renameWorkspace: _workspaceRuntime.workspaceShellController.management.renameWorkspace,
-      showNoWorkspaceToDeleteMessage: () => _uiController.showMessage('There is no workspace to delete.'),
+      showNoWorkspaceToDeleteMessage: () => _controllers.ui.showMessage('There is no workspace to delete.'),
       confirmDeleteWorkspace: _workspaceRuntime.workspaceShellController.management.confirmDeleteWorkspace,
-      restoreRecentlyClosedWindow: _windowHistoryController.restoreRecentlyClosedWindow,
+      restoreRecentlyClosedWindow: _controllers.windowHistory.restoreRecentlyClosedWindow,
     ).build(
       activeWorkspaceId: _state.persistenceState.environment?.activeWorkspaceId,
       focusedWindow: focusedWindow,
@@ -239,37 +174,37 @@ class _AppShellState extends State<AppShell> {
         workspaceShellController: _workspaceRuntime.workspaceShellController,
         workspaceLinksController: _workspaceRuntime.workspaceLinksController,
         thumbnailController: _workspaceRuntime.thumbnailController,
-        windowHistoryController: _windowHistoryController,
+        windowHistoryController: _controllers.windowHistory,
         searchController: _state.handles.searchController,
         tabScrollController: _state.handles.tabScrollController,
       ),
       actions: AppShellContentActions(
         commitStateChange: setState,
-        importFiles: _mediaImportController.importFiles,
-        handleOptionGestureHover: _windowController.handleOptionGestureHover,
-        handleWorkspacePanZoomStart: _windowController.handleWorkspacePanZoomStart,
-        handleWorkspacePanZoomUpdate: _windowController.handleWorkspacePanZoomUpdate,
-        handleWorkspacePanZoomEnd: _windowController.handleWorkspacePanZoomEnd,
-        focusWindow: _windowController.focusWindow,
-        restorePreviousWindowZOrder: _windowController.restorePreviousWindowZOrder,
-        moveWindow: _windowController.moveWindow,
-        resizeWindow: _windowController.resizeWindow,
-        transformWindowFromTrackpad: _windowController.transformWindowFromTrackpad,
-        fitWindowToContent: _windowController.fitWindowToContent,
-        setWindowZoom: _windowController.setWindowZoom,
-        setVideoPosition: _windowController.setVideoPosition,
-        cycleVideoPlaybackSpeed: _windowController.cycleVideoPlaybackSpeed,
-        setWindowIntrinsicSize: _windowController.setWindowIntrinsicSize,
-        isVideoWindowPaused: _windowController.isVideoWindowPaused,
-        toggleVideoPlayback: _windowController.toggleVideoPlayback,
-        toggleExpose: _environmentActions.toggleExpose,
-        setPinnedHoverWindow: _windowController.setPinnedHoverWindow,
-        clearPinnedHoverWindow: _windowController.clearPinnedHoverWindow,
-        flashWindow: (windowId) => _windowController.flashWindow(windowId, mounted: mounted),
-        setActiveGestureWindow: _windowController.setActiveGestureWindow,
-        fitWorkspaceViewportToContent: _windowController.fitWorkspaceViewportToContent,
-        confirmCollateWorkspaceWindows: _windowController.confirmCollateWorkspaceWindows,
-        setWorkspaceViewport: _workspaceGeometryController.setWorkspaceViewport,
+        importFiles: _controllers.mediaImport.importFiles,
+        handleOptionGestureHover: _controllers.window.handleOptionGestureHover,
+        handleWorkspacePanZoomStart: _controllers.window.handleWorkspacePanZoomStart,
+        handleWorkspacePanZoomUpdate: _controllers.window.handleWorkspacePanZoomUpdate,
+        handleWorkspacePanZoomEnd: _controllers.window.handleWorkspacePanZoomEnd,
+        focusWindow: _controllers.window.focusWindow,
+        restorePreviousWindowZOrder: _controllers.window.restorePreviousWindowZOrder,
+        moveWindow: _controllers.window.moveWindow,
+        resizeWindow: _controllers.window.resizeWindow,
+        transformWindowFromTrackpad: _controllers.window.transformWindowFromTrackpad,
+        fitWindowToContent: _controllers.window.fitWindowToContent,
+        setWindowZoom: _controllers.window.setWindowZoom,
+        setVideoPosition: _controllers.window.setVideoPosition,
+        cycleVideoPlaybackSpeed: _controllers.window.cycleVideoPlaybackSpeed,
+        setWindowIntrinsicSize: _controllers.window.setWindowIntrinsicSize,
+        isVideoWindowPaused: _controllers.window.isVideoWindowPaused,
+        toggleVideoPlayback: _controllers.window.toggleVideoPlayback,
+        toggleExpose: _controllers.environment.toggleExpose,
+        setPinnedHoverWindow: _controllers.window.setPinnedHoverWindow,
+        clearPinnedHoverWindow: _controllers.window.clearPinnedHoverWindow,
+        flashWindow: (windowId) => _controllers.window.flashWindow(windowId, mounted: mounted),
+        setActiveGestureWindow: _controllers.window.setActiveGestureWindow,
+        fitWorkspaceViewportToContent: _controllers.window.fitWorkspaceViewportToContent,
+        confirmCollateWorkspaceWindows: _controllers.window.confirmCollateWorkspaceWindows,
+        setWorkspaceViewport: _controllers.geometry.setWorkspaceViewport,
       ),
     ).build();
   }
@@ -284,22 +219,22 @@ class _AppShellState extends State<AppShell> {
       context: () => context,
       mounted: () => mounted,
       commitStateChange: setState,
-      showMessage: _uiController.showMessage,
+      showMessage: _controllers.ui.showMessage,
       seedEnvironment: buildSeedEnvironment,
-      updateEnvironment: _environmentActions.updateEnvironment,
-      replaceWorkspace: _environmentActions.replaceWorkspace,
+      updateEnvironment: _controllers.environment.updateEnvironment,
+      replaceWorkspace: _controllers.environment.replaceWorkspace,
       saveEnvironment: _saveEnvironment,
-      newId: _workspaceGeometryController.newId,
-      colorFromDigest: _workspaceGeometryController.colorFromDigest,
+      newId: _controllers.geometry.newId,
+      colorFromDigest: _controllers.geometry.colorFromDigest,
       activeWorkspace: () => _derived.activeWorkspaceOrNull,
       workspaces: () => _derived.workspaces,
       openWorkspaces: () => _derived.openWorkspaces,
-      focusedWindowOrNull: _windowHistoryController.focusedWindowOrNull,
-      setWorkspaceViewport: _workspaceGeometryController.setWorkspaceViewport,
-      showWorkspaceScreen: _navigationController.showWorkspaceScreen,
-      showLibraryScreen: _navigationController.showLibraryScreen,
-      toggleExpose: _environmentActions.toggleExpose,
-      toggleVideoPlayback: _windowController.toggleVideoPlayback,
+      focusedWindowOrNull: _controllers.windowHistory.focusedWindowOrNull,
+      setWorkspaceViewport: _controllers.geometry.setWorkspaceViewport,
+      showWorkspaceScreen: _controllers.navigation.showWorkspaceScreen,
+      showLibraryScreen: _controllers.navigation.showLibraryScreen,
+      toggleExpose: _controllers.environment.toggleExpose,
+      toggleVideoPlayback: _controllers.window.toggleVideoPlayback,
     );
     _restoreEnvironment();
   }
