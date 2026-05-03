@@ -8,6 +8,7 @@ import 'package:serenity_viewer/src/app/environment/app_environment_bookmark_syn
 import 'package:serenity_viewer/src/app/environment/app_environment_controller.dart';
 import 'package:serenity_viewer/src/app/environment/app_environment_state.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_content_builder.dart';
+import 'package:serenity_viewer/src/app/app_shell/app_shell_environment_controller.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_media_import_controller.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_menu_builder.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_navigation_controller.dart';
@@ -25,14 +26,11 @@ import 'package:serenity_viewer/src/video_tools/video_conversion_coordinator.dar
 import 'package:serenity_viewer/src/workspace/shell/workspace_shell_controller.dart';
 import 'package:serenity_viewer/src/workspace/controller/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/session/recently_closed_window_entry.dart';
-import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
 import 'package:serenity_viewer/src/links/workspace_links_controller.dart';
 import 'package:serenity_viewer/src/thumbnails/thumbnail_controller.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
-
-part 'app_shell_environment_actions.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -161,8 +159,8 @@ class _AppShellState extends State<AppShell> {
       activeWorkspace: () => _activeWorkspaceOrNull,
       recentlyClosedWindows: _recentlyClosedWindows,
       workspaceController: _workspaceController,
-      updateEnvironment: _updateEnvironment,
-      replaceWorkspace: _replaceWorkspace,
+      updateEnvironment: _environmentActions.updateEnvironment,
+      replaceWorkspace: _environmentActions.replaceWorkspace,
       commitStateChange: setState,
       showMessage: _uiController.showMessage,
       showWorkspaceScreen: _navigationController.showWorkspaceScreen,
@@ -189,7 +187,7 @@ class _AppShellState extends State<AppShell> {
       persistenceState: _persistenceState,
       workspaceViewportState: _workspaceViewportState,
       thumbnailController: _thumbnailController,
-      replaceWorkspace: _replaceWorkspace,
+      replaceWorkspace: _environmentActions.replaceWorkspace,
     );
   }
 
@@ -204,7 +202,7 @@ class _AppShellState extends State<AppShell> {
       mediaBridge: _mediaBridge,
       newId: _workspaceGeometryController.newId,
       colorFromDigest: _workspaceGeometryController.colorFromDigest,
-      updateEnvironment: _updateEnvironment,
+      updateEnvironment: _environmentActions.updateEnvironment,
       thumbnailController: _thumbnailController,
       showMessage: _uiController.showMessage,
     );
@@ -218,7 +216,14 @@ class _AppShellState extends State<AppShell> {
     return AppShellUiController(
       context: () => context,
       persistenceState: _persistenceState,
-      updateEnvironment: _updateEnvironment,
+      updateEnvironment: _environmentActions.updateEnvironment,
+    );
+  }
+
+  AppShellEnvironmentController get _environmentActions {
+    return AppShellEnvironmentController(
+      environmentController: _environmentController,
+      chromeController: _chromeController,
     );
   }
 
@@ -241,7 +246,7 @@ class _AppShellState extends State<AppShell> {
       restorePreviousWindowZOrder: _windowController.restorePreviousWindowZOrder,
       convertVideoWindowToJpeg: (windowId) => _videoConversionCoordinator.convertVideoWindowToJpeg(windowId),
       closeWindow: _windowHistoryController.removeWindow,
-      toggleExpose: _toggleExpose,
+      toggleExpose: _environmentActions.toggleExpose,
       toggleWorkspaceOverview: _workspaceShellController.navigation.toggleOverview,
       createWorkspace: _workspaceShellController.management.createWorkspace,
       switchToPreviousWorkspace: () => _workspaceShellController.navigation.switchWorkspace(-1),
@@ -304,7 +309,7 @@ class _AppShellState extends State<AppShell> {
       setWindowIntrinsicSize: _windowController.setWindowIntrinsicSize,
       isVideoWindowPaused: _windowController.isVideoWindowPaused,
       toggleVideoPlayback: _windowController.toggleVideoPlayback,
-      toggleExpose: _toggleExpose,
+      toggleExpose: _environmentActions.toggleExpose,
       setPinnedHoverWindow: _windowController.setPinnedHoverWindow,
       clearPinnedHoverWindow: _windowController.clearPinnedHoverWindow,
       flashWindow: (windowId) => _windowController.flashWindow(windowId, mounted: mounted),
@@ -327,8 +332,8 @@ class _AppShellState extends State<AppShell> {
       commitStateChange: setState,
       showMessage: _uiController.showMessage,
       seedEnvironment: buildSeedEnvironment,
-      updateEnvironment: _updateEnvironment,
-      replaceWorkspace: _replaceWorkspace,
+      updateEnvironment: _environmentActions.updateEnvironment,
+      replaceWorkspace: _environmentActions.replaceWorkspace,
       saveEnvironment: _saveEnvironment,
       newId: _workspaceGeometryController.newId,
       colorFromDigest: _workspaceGeometryController.colorFromDigest,
@@ -339,7 +344,7 @@ class _AppShellState extends State<AppShell> {
       setWorkspaceViewport: _workspaceGeometryController.setWorkspaceViewport,
       showWorkspaceScreen: _navigationController.showWorkspaceScreen,
       showLibraryScreen: _navigationController.showLibraryScreen,
-      toggleExpose: _toggleExpose,
+      toggleExpose: _environmentActions.toggleExpose,
       toggleVideoPlayback: _windowController.toggleVideoPlayback,
     );
     _restoreEnvironment();
