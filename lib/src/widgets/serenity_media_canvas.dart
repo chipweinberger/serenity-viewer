@@ -3,10 +3,10 @@ import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 
 import 'package:serenity_viewer/src/core/serenity_core.dart';
+import 'package:serenity_viewer/src/core/serenity_keyboard_modifiers.dart';
 import 'package:serenity_viewer/src/models/asset_window_state.dart';
 import 'package:serenity_viewer/src/models/window_zoom_update.dart';
 import 'package:serenity_viewer/src/widgets/serenity_demo_art.dart';
@@ -126,8 +126,7 @@ class _SerenityMediaCanvasState extends State<SerenityMediaCanvas> {
   }
 
   bool get _isCommandPressed {
-    final pressedKeys = HardwareKeyboard.instance.logicalKeysPressed;
-    return pressedKeys.contains(LogicalKeyboardKey.metaLeft) || pressedKeys.contains(LogicalKeyboardKey.metaRight);
+    return isCommandPressed();
   }
 
   bool get _shouldHandleContentGesture {

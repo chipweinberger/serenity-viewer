@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 
 import 'package:serenity_viewer/src/core/serenity_core.dart';
+import 'package:serenity_viewer/src/core/serenity_keyboard_modifiers.dart';
 import 'package:serenity_viewer/src/models/asset_window_state.dart';
 import 'package:serenity_viewer/src/models/window_zoom_update.dart';
 import 'package:serenity_viewer/src/widgets/serenity_window_frame_chrome.dart';
@@ -108,10 +109,8 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> with SingleTi
 
   bool _handleHardwareKey(KeyEvent event) {
     final pressedKeys = HardwareKeyboard.instance.logicalKeysPressed;
-    final nextIsCommandPressed =
-        pressedKeys.contains(LogicalKeyboardKey.metaLeft) || pressedKeys.contains(LogicalKeyboardKey.metaRight);
-    final nextIsOptionPressed =
-        pressedKeys.contains(LogicalKeyboardKey.altLeft) || pressedKeys.contains(LogicalKeyboardKey.altRight);
+    final nextIsCommandPressed = isCommandPressed(pressedKeys);
+    final nextIsOptionPressed = isOptionPressed(pressedKeys);
     if ((nextIsCommandPressed == _isCommandPressed && nextIsOptionPressed == _isOptionPressed) || !mounted) {
       return false;
     }
@@ -150,10 +149,8 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> with SingleTi
     ]).animate(_flashController);
     HardwareKeyboard.instance.addHandler(_handleHardwareKey);
     final pressedKeys = HardwareKeyboard.instance.logicalKeysPressed;
-    _isCommandPressed =
-        pressedKeys.contains(LogicalKeyboardKey.metaLeft) || pressedKeys.contains(LogicalKeyboardKey.metaRight);
-    _isOptionPressed =
-        pressedKeys.contains(LogicalKeyboardKey.altLeft) || pressedKeys.contains(LogicalKeyboardKey.altRight);
+    _isCommandPressed = isCommandPressed(pressedKeys);
+    _isOptionPressed = isOptionPressed(pressedKeys);
     if (widget.flashNonce != 0) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) {

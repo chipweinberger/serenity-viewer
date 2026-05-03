@@ -6,13 +6,11 @@ extension _SerenityShellWindowActions on _SerenityShellState {
   static const Size _collateTargetBox = Size(700, 700);
 
   bool get _isCommandPressedForContentGesture {
-    final pressedKeys = HardwareKeyboard.instance.logicalKeysPressed;
-    return pressedKeys.contains(LogicalKeyboardKey.metaLeft) || pressedKeys.contains(LogicalKeyboardKey.metaRight);
+    return isCommandPressed();
   }
 
   bool get _isOptionPressedForWindowGesture {
-    final pressedKeys = HardwareKeyboard.instance.logicalKeysPressed;
-    return pressedKeys.contains(LogicalKeyboardKey.altLeft) || pressedKeys.contains(LogicalKeyboardKey.altRight);
+    return isOptionPressed();
   }
 
   void _setOptionGestureWindowId(String? windowId) {
