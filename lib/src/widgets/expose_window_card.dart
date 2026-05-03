@@ -93,6 +93,7 @@ class _ExposeWindowCardState extends State<ExposeWindowCard> {
             onTogglePlayback: () {},
             showVideoControls: false,
             showExpandedVideoControls: false,
+            workspaceZoom: 1,
             onVideoControlInteractionChanged: (_) {},
             onVideoPositionChanged: (_) {},
             onCycleVideoPlaybackSpeed: () {},

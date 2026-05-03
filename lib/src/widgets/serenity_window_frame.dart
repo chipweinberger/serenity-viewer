@@ -11,6 +11,7 @@ class SerenityWindowFrame extends StatefulWidget {
     required this.isSelected,
     required this.isEditing,
     required this.isPinnedHover,
+    required this.workspaceZoom,
     required this.flashNonce,
     required this.onTap,
     required this.onPinnedHoverRequested,
@@ -42,6 +43,7 @@ class SerenityWindowFrame extends StatefulWidget {
   final bool isSelected;
   final bool isEditing;
   final bool isPinnedHover;
+  final double workspaceZoom;
   final int flashNonce;
   final VoidCallback onTap;
   final VoidCallback onPinnedHoverRequested;
@@ -254,6 +256,7 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> with SingleTi
           onTogglePlayback: widget.onTogglePlayback,
           showVideoControls: true,
           showExpandedVideoControls: showExpandedVideoControls,
+          workspaceZoom: widget.workspaceZoom,
           onVideoControlInteractionChanged: (isInteracting) {
             if (_isInteractingWithVideoControls == isInteracting) {
               return;
@@ -281,6 +284,7 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> with SingleTi
     }
 
     return _SerenityWindowOverlay(
+      workspaceZoom: widget.workspaceZoom,
       filename: widget.window.asset.filename,
       isSelected: widget.isSelected,
       onToggleSelected: widget.onToggleSelected,

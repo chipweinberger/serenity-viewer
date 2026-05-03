@@ -14,6 +14,7 @@ class SerenityMediaCanvas extends StatefulWidget {
     required this.onTogglePlayback,
     required this.showVideoControls,
     this.showExpandedVideoControls = false,
+    this.workspaceZoom = 1,
     required this.onVideoControlInteractionChanged,
     required this.onVideoPositionChanged,
     required this.onCycleVideoPlaybackSpeed,
@@ -33,6 +34,7 @@ class SerenityMediaCanvas extends StatefulWidget {
   final VoidCallback onTogglePlayback;
   final bool showVideoControls;
   final bool showExpandedVideoControls;
+  final double workspaceZoom;
   final ValueChanged<bool> onVideoControlInteractionChanged;
   final ValueChanged<int> onVideoPositionChanged;
   final VoidCallback onCycleVideoPlaybackSpeed;
@@ -247,6 +249,7 @@ class _SerenityMediaCanvasState extends State<SerenityMediaCanvas> {
         onCyclePlaybackSpeed: widget.onCycleVideoPlaybackSpeed,
         showControls: widget.showVideoControls,
         showExpandedControls: widget.showExpandedVideoControls,
+        workspaceZoom: widget.workspaceZoom,
         onControlInteractionChanged: widget.onVideoControlInteractionChanged,
         previewMode: widget.videoPreviewMode,
       ),

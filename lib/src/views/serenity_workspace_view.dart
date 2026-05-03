@@ -187,6 +187,7 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
                               isSelected: _selectedExposeWindowIds.contains(window.asset.id),
                               isEditing: false,
                               isPinnedHover: _pinnedHoverWindowId == window.asset.id,
+                              workspaceZoom: workspace.viewportZoom,
                               onTap: () {
                                 if (_pinnedHoverWindowId == window.asset.id) {
                                   _clearPinnedHoverWindow();

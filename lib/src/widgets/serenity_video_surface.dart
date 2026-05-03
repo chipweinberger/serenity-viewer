@@ -18,6 +18,7 @@ class SerenityVideoSurface extends StatefulWidget {
     required this.onCyclePlaybackSpeed,
     required this.showControls,
     this.showExpandedControls = false,
+    this.workspaceZoom = 1,
     required this.onControlInteractionChanged,
     this.previewMode = false,
   });
@@ -37,6 +38,7 @@ class SerenityVideoSurface extends StatefulWidget {
   final VoidCallback onCyclePlaybackSpeed;
   final bool showControls;
   final bool showExpandedControls;
+  final double workspaceZoom;
   final ValueChanged<bool> onControlInteractionChanged;
   final bool previewMode;
 
@@ -88,6 +90,11 @@ class _SerenityVideoSurfaceState extends State<SerenityVideoSurface> {
       return '1.0x';
     }
     return '${speed.toString()}x';
+  }
+
+  double get _uiScale {
+    final safeZoom = widget.workspaceZoom <= 0 ? 1.0 : widget.workspaceZoom;
+    return (1 / safeZoom).clamp(0.85, 2.1);
   }
 
   void _handleControllerTick() {
@@ -185,6 +192,7 @@ class _SerenityVideoSurfaceState extends State<SerenityVideoSurface> {
     return ValueListenableBuilder<VideoPlayerValue>(
       valueListenable: controller,
       builder: (context, value, child) {
+        final uiScale = _uiScale;
         final durationMs = value.duration.inMilliseconds;
         final positionMs = value.position.inMilliseconds.clamp(0, durationMs <= 0 ? 0 : durationMs);
         final elapsedLabel = _formatDuration(value.position);
@@ -203,9 +211,9 @@ class _SerenityVideoSurfaceState extends State<SerenityVideoSurface> {
             ),
             if (widget.showControls && durationMs > 0)
               Positioned(
-                left: 10,
-                right: 10,
-                bottom: widget.showExpandedControls ? 42 : 10,
+                left: 10 * uiScale,
+                right: 10 * uiScale,
+                bottom: widget.showExpandedControls ? 42 * uiScale : 10 * uiScale,
                 child: widget.showExpandedControls
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -217,9 +225,9 @@ class _SerenityVideoSurfaceState extends State<SerenityVideoSurface> {
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(999),
                                 child: BackdropFilter(
-                                  filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                                  filter: ui.ImageFilter.blur(sigmaX: 12 * uiScale, sigmaY: 12 * uiScale),
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    padding: EdgeInsets.symmetric(horizontal: 10 * uiScale, vertical: 4 * uiScale),
                                     decoration: BoxDecoration(
                                       color: Colors.black.withValues(alpha: 0.42),
                                       borderRadius: BorderRadius.circular(999),
@@ -230,28 +238,30 @@ class _SerenityVideoSurfaceState extends State<SerenityVideoSurface> {
                                         color: Colors.white,
                                         fontWeight: FontWeight.w700,
                                         letterSpacing: 0.1,
+                                        fontSize: 11 * uiScale,
                                       ),
                                     ),
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 6),
+                              SizedBox(width: 6 * uiScale),
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(999),
                                 child: BackdropFilter(
-                                  filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                                  filter: ui.ImageFilter.blur(sigmaX: 12 * uiScale, sigmaY: 12 * uiScale),
                                   child: Material(
                                     color: Colors.black.withValues(alpha: 0.42),
                                     child: InkWell(
                                       onTap: widget.onCyclePlaybackSpeed,
                                       child: Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                        padding: EdgeInsets.symmetric(horizontal: 10 * uiScale, vertical: 4 * uiScale),
                                         child: Text(
                                           speedLabel,
                                           style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                             color: Colors.white,
                                             fontWeight: FontWeight.w700,
                                             letterSpacing: 0.1,
+                                            fontSize: 11 * uiScale,
                                           ),
                                         ),
                                       ),
@@ -261,11 +271,21 @@ class _SerenityVideoSurfaceState extends State<SerenityVideoSurface> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 6),
-                          _buildBottomControlsRow(context, positionMs: positionMs, durationMs: durationMs),
+                          SizedBox(height: 6 * uiScale),
+                          _buildBottomControlsRow(
+                            context,
+                            positionMs: positionMs,
+                            durationMs: durationMs,
+                            uiScale: uiScale,
+                          ),
                         ],
                       )
-                    : _buildBottomControlsRow(context, positionMs: positionMs, durationMs: durationMs),
+                    : _buildBottomControlsRow(
+                        context,
+                        positionMs: positionMs,
+                        durationMs: durationMs,
+                        uiScale: uiScale,
+                      ),
               ),
           ],
         );
@@ -273,23 +293,28 @@ class _SerenityVideoSurfaceState extends State<SerenityVideoSurface> {
     );
   }
 
-  Widget _buildBottomControlsRow(BuildContext context, {required int positionMs, required int durationMs}) {
+  Widget _buildBottomControlsRow(
+    BuildContext context, {
+    required int positionMs,
+    required int durationMs,
+    required double uiScale,
+  }) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(999),
       child: Row(
         children: [
           ClipOval(
             child: BackdropFilter(
-              filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+              filter: ui.ImageFilter.blur(sigmaX: 12 * uiScale, sigmaY: 12 * uiScale),
               child: Material(
                 color: Colors.black.withValues(alpha: 0.42),
                 child: InkWell(
                   onTap: widget.onTogglePlayback,
                   child: Padding(
-                    padding: const EdgeInsets.all(6),
+                    padding: EdgeInsets.all(6 * uiScale),
                     child: Icon(
                       widget.isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
-                      size: 14,
+                      size: 14 * uiScale,
                       color: Colors.white,
                     ),
                   ),
@@ -297,14 +322,14 @@ class _SerenityVideoSurfaceState extends State<SerenityVideoSurface> {
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8 * uiScale),
           Expanded(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(999),
               child: BackdropFilter(
-                filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                filter: ui.ImageFilter.blur(sigmaX: 12 * uiScale, sigmaY: 12 * uiScale),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: EdgeInsets.symmetric(horizontal: 8 * uiScale, vertical: 2 * uiScale),
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.42),
                     borderRadius: BorderRadius.circular(999),
@@ -315,9 +340,9 @@ class _SerenityVideoSurfaceState extends State<SerenityVideoSurface> {
                     onPointerCancel: (_) => widget.onControlInteractionChanged(false),
                     child: SliderTheme(
                       data: SliderTheme.of(context).copyWith(
-                        trackHeight: 3,
-                        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-                        overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
+                        trackHeight: 3 * uiScale,
+                        thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6 * uiScale),
+                        overlayShape: RoundSliderOverlayShape(overlayRadius: 12 * uiScale),
                         activeTrackColor: Colors.white,
                         inactiveTrackColor: Colors.white.withValues(alpha: 0.28),
                         thumbColor: Colors.white,
