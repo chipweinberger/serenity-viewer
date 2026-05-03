@@ -14,6 +14,7 @@ import 'package:image/image.dart' as img;
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:serenity_viewer/src/app/serenity_chrome_controller.dart';
+import 'package:serenity_viewer/src/app/serenity_environment_coordinator.dart';
 import 'package:serenity_viewer/src/app/serenity_import_coordinator.dart';
 import 'package:serenity_viewer/src/app/serenity_import_result.dart';
 import 'package:serenity_viewer/src/app/serenity_media_bridge.dart';
@@ -34,9 +35,7 @@ import 'package:serenity_viewer/src/models/window_zoom_update.dart';
 import 'package:serenity_viewer/src/models/workspace_asset.dart';
 import 'package:serenity_viewer/src/models/workspace_link.dart';
 import 'package:serenity_viewer/src/models/workspace_state.dart';
-import 'package:serenity_viewer/src/persistence/serenity_environment_archive.dart';
 import 'package:serenity_viewer/src/media/serenity_workspace_load_plan.dart';
-import 'package:serenity_viewer/src/media/serenity_missing_asset_resolution.dart';
 import 'package:serenity_viewer/src/state/serenity_chrome_state.dart';
 import 'package:serenity_viewer/src/state/serenity_shell_persistence_state.dart';
 import 'package:serenity_viewer/src/state/serenity_thumbnail_refresh_state.dart';
@@ -66,7 +65,6 @@ part '../views/serenity_workspace_links_dialog.dart';
 part '../views/serenity_library_view.dart';
 part '../persistence/serenity_startup_persistence.dart';
 part '../persistence/serenity_thumbnail_persistence.dart';
-part '../persistence/serenity_environment_persistence.dart';
 part '../media/serenity_import_and_load_plan.dart';
 part '../media/serenity_video_conversion_tools.dart';
 
@@ -111,6 +109,7 @@ class _SerenityShellState extends State<SerenityShell> {
   AppLifecycleListener? _appLifecycleListener;
   Timer? _autosaveTimer;
   late final SerenityChromeController _chromeController;
+  late final SerenityEnvironmentCoordinator _environmentCoordinator;
   late final SerenityMediaBridge _mediaBridge;
   late final SerenityWorkspaceController _workspaceController;
   late final SerenitySessionController _sessionController;
@@ -176,6 +175,22 @@ class _SerenityShellState extends State<SerenityShell> {
       commitStateChange: setState,
       refreshWorkspaceTracking: _refreshWorkspaceViewTracking,
       syncWindowTitle: _syncWindowTitle,
+    );
+    _environmentCoordinator = SerenityEnvironmentCoordinator(
+      persistenceState: _persistenceState,
+      sessionController: _sessionController,
+      context: () => context,
+      mounted: () => mounted,
+      seedSession: _seedSession,
+      showMessage: _showMessage,
+      refreshActiveWorkspaceThumbnailIfNeeded: _refreshActiveWorkspaceThumbnailIfNeeded,
+      storeLastEnvironmentPath: _storeLastEnvironmentPath,
+      syncWindowTitle: _syncWindowTitle,
+      resolveFileBookmark: _resolveFileBookmark,
+      createFileBookmark: _createFileBookmark,
+      thumbnailDirectory: _thumbnailDirectory,
+      updateSession: _updateSession,
+      saveSession: _saveSession,
     );
     _workspaceController = SerenityWorkspaceController(
       chromeState: _uiState,

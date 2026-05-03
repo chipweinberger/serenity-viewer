@@ -56,12 +56,12 @@ extension _SerenityShellMenus on _SerenityShellState {
         menus: [
           PlatformMenuItem(
             label: 'New Environment…',
-            onSelected: () => unawaited(_createEnvironment()),
+            onSelected: () => unawaited(_environmentCoordinator.createEnvironment()),
             shortcut: const SingleActivator(LogicalKeyboardKey.keyN, meta: true, shift: true),
           ),
           PlatformMenuItem(
             label: 'Open Environment…',
-            onSelected: () => unawaited(_openEnvironment()),
+            onSelected: () => unawaited(_environmentCoordinator.openEnvironment()),
             shortcut: const SingleActivator(LogicalKeyboardKey.keyO, meta: true, shift: true),
           ),
           PlatformMenuItem(
@@ -71,12 +71,12 @@ extension _SerenityShellMenus on _SerenityShellState {
           ),
           PlatformMenuItem(
             label: 'Save',
-            onSelected: () => unawaited(_saveEnvironment()),
+            onSelected: () => unawaited(_environmentCoordinator.saveEnvironment()),
             shortcut: const SingleActivator(LogicalKeyboardKey.keyS, meta: true),
           ),
           PlatformMenuItem(
             label: 'Save As…',
-            onSelected: () => unawaited(_saveEnvironmentAs()),
+            onSelected: () => unawaited(_environmentCoordinator.saveEnvironmentAs()),
             shortcut: const SingleActivator(LogicalKeyboardKey.keyS, meta: true, shift: true),
           ),
         ],

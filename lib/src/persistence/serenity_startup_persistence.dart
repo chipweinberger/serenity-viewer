@@ -20,7 +20,11 @@ extension _SerenityShellStartupPersistence on _SerenityShellState {
     try {
       final lastEnvironmentPath = await _loadLastEnvironmentPath();
       if (lastEnvironmentPath != null && lastEnvironmentPath.isNotEmpty && await File(lastEnvironmentPath).exists()) {
-        await _loadEnvironmentFromPath(lastEnvironmentPath, showSuccessMessage: false, persistAsLastOpened: true);
+        await _environmentCoordinator.loadEnvironmentFromPath(
+          lastEnvironmentPath,
+          showSuccessMessage: false,
+          persistAsLastOpened: true,
+        );
         return;
       }
       await _storeLastEnvironmentPath(null);
@@ -30,7 +34,7 @@ extension _SerenityShellStartupPersistence on _SerenityShellState {
 
     _sessionController.showMissingStartupState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(_promptForStartupEnvironment());
+      unawaited(_environmentCoordinator.promptForStartupEnvironment());
     });
   }
 
@@ -92,7 +96,11 @@ extension _SerenityShellStartupPersistence on _SerenityShellState {
         savedSession: sessionToSave,
         mounted: mounted,
       );
-      await _saveEnvironmentToPath(environmentPath, sessionOverride: sessionToSave, showMessageOnFailure: false);
+      await _environmentCoordinator.saveEnvironmentToPath(
+        environmentPath,
+        sessionOverride: sessionToSave,
+        showMessageOnFailure: false,
+      );
       await _syncWindowTitle();
     } catch (_) {
       // Widget tests and unsupported platforms can skip local persistence.
