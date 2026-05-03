@@ -126,6 +126,7 @@ class _SerenityShellState extends State<SerenityShell> {
   final Set<String> _selectedExposeWindowIds = {};
   final Map<String, _SharedVideoControllerEntry> _sharedVideoControllers = {};
   String? _optionGestureWindowId;
+  String? _pinnedHoverWindowId;
   String? _flashedWindowId;
   int _windowFlashNonce = 0;
   Timer? _windowFlashTimer;

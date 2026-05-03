@@ -42,6 +42,19 @@ extension _SerenityShellSessionActions on _SerenityShellState {
     _refreshWorkspaceViewTracking();
   }
 
+  void _setPinnedHoverWindow(String? windowId) {
+    if (_pinnedHoverWindowId == windowId) {
+      return;
+    }
+    setState(() {
+      _pinnedHoverWindowId = windowId;
+    });
+  }
+
+  void _clearPinnedHoverWindow() {
+    _setPinnedHoverWindow(null);
+  }
+
   void _flashWindow(String windowId) {
     _windowFlashTimer?.cancel();
     setState(() {

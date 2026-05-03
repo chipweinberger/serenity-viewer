@@ -440,6 +440,10 @@ extension _SerenityShellWindowActions on _SerenityShellState {
       _isWorkspaceGestureActive = false;
       return;
     }
+    if (_pinnedHoverWindowId != null) {
+      _isWorkspaceGestureActive = false;
+      return;
+    }
     if (_isCommandPressedForContentGesture || _isOptionPressedForWindowGesture) {
       _isWorkspaceGestureActive = false;
       return;

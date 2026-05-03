@@ -16,6 +16,7 @@ class SerenityMediaCanvas extends StatefulWidget {
     required this.onVideoControlInteractionChanged,
     required this.onVideoPositionChanged,
     required this.onCycleVideoPlaybackSpeed,
+    this.allowDirectContentGestures = false,
     this.compactMissingPlaceholder = false,
     this.videoPreviewMode = false,
   });
@@ -33,6 +34,7 @@ class SerenityMediaCanvas extends StatefulWidget {
   final ValueChanged<bool> onVideoControlInteractionChanged;
   final ValueChanged<int> onVideoPositionChanged;
   final VoidCallback onCycleVideoPlaybackSpeed;
+  final bool allowDirectContentGestures;
   final bool compactMissingPlaceholder;
   final bool videoPreviewMode;
 
@@ -108,6 +110,10 @@ class _SerenityMediaCanvasState extends State<SerenityMediaCanvas> {
     return pressedKeys.contains(LogicalKeyboardKey.metaLeft) || pressedKeys.contains(LogicalKeyboardKey.metaRight);
   }
 
+  bool get _shouldHandleContentGesture {
+    return widget.allowDirectContentGestures || _isCommandPressed;
+  }
+
   void _applyZoomFromPoint({
     required Size viewportSize,
     required Offset focalPoint,
@@ -138,7 +144,7 @@ class _SerenityMediaCanvasState extends State<SerenityMediaCanvas> {
   }
 
   void _handlePointerSignal(PointerSignalEvent event) {
-    if (event is! PointerScrollEvent || !_isCommandPressed) {
+    if (event is! PointerScrollEvent || !_shouldHandleContentGesture) {
       return;
     }
 
@@ -149,7 +155,7 @@ class _SerenityMediaCanvasState extends State<SerenityMediaCanvas> {
   }
 
   void _handlePointerPanZoomStart(PointerPanZoomStartEvent event) {
-    if (!_isCommandPressed) {
+    if (!_shouldHandleContentGesture) {
       return;
     }
 
@@ -161,7 +167,7 @@ class _SerenityMediaCanvasState extends State<SerenityMediaCanvas> {
   }
 
   void _handlePointerPanZoomUpdate(PointerPanZoomUpdateEvent event) {
-    if (!_isCommandPressed) {
+    if (!_shouldHandleContentGesture) {
       return;
     }
 

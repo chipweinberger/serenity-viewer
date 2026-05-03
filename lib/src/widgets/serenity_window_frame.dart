@@ -10,8 +10,11 @@ class SerenityWindowFrame extends StatefulWidget {
     required this.isFocused,
     required this.isSelected,
     required this.isEditing,
+    required this.isPinnedHover,
     required this.flashNonce,
     required this.onTap,
+    required this.onPinnedHoverRequested,
+    required this.onPinnedHoverDismissed,
     required this.onToggleSelected,
     required this.onPanUpdate,
     required this.onTrackpadWindowScale,
@@ -38,8 +41,11 @@ class SerenityWindowFrame extends StatefulWidget {
   final bool isFocused;
   final bool isSelected;
   final bool isEditing;
+  final bool isPinnedHover;
   final int flashNonce;
   final VoidCallback onTap;
+  final VoidCallback onPinnedHoverRequested;
+  final VoidCallback onPinnedHoverDismissed;
   final VoidCallback onToggleSelected;
   final ValueChanged<Offset> onPanUpdate;
   final void Function(double scaleDelta, Offset localFocalPoint) onTrackpadWindowScale;
@@ -64,6 +70,9 @@ class SerenityWindowFrame extends StatefulWidget {
 
 class _SerenityWindowFrameState extends State<SerenityWindowFrame> with SingleTickerProviderStateMixin {
   static bool _anyWindowResizing = false;
+  static const Duration _doubleClickThreshold = Duration(milliseconds: 275);
+  static String? _lastTappedWindowId;
+  static DateTime? _lastContentTapAt;
 
   bool _isHovered = false;
   bool _isResizing = false;
@@ -97,6 +106,9 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> with SingleTi
         _claimedOptionGestureTarget = false;
       }
     });
+    if (nextIsCommandPressed && widget.isPinnedHover) {
+      widget.onPinnedHoverDismissed();
+    }
     if (!wasOptionPressed && nextIsOptionPressed && _isHovered) {
       _claimedOptionGestureTarget = true;
       widget.onOptionGestureWindowRequested();
@@ -147,17 +159,61 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> with SingleTi
     return _isOptionPressed && !_isCommandPressed && (widget.isOptionGestureTarget || _claimedOptionGestureTarget);
   }
 
-  Widget _buildContent() {
+  void _handleContentTap() {
+    if (widget.isPinnedHover) {
+      widget.onPinnedHoverDismissed();
+      _lastTappedWindowId = null;
+      _lastContentTapAt = null;
+      return;
+    }
+
+    final now = DateTime.now();
+    final isDoubleClick =
+        _lastTappedWindowId == widget.window.asset.id &&
+        _lastContentTapAt != null &&
+        now.difference(_lastContentTapAt!) <= _doubleClickThreshold;
+    widget.onTap();
+    if (isDoubleClick) {
+      _lastTappedWindowId = null;
+      _lastContentTapAt = null;
+      widget.onPinnedHoverRequested();
+      return;
+    }
+
+    _lastTappedWindowId = widget.window.asset.id;
+    _lastContentTapAt = now;
+  }
+
+  AssetWindowState _windowForHoverPreview({required bool shrinkContent, required double inset}) {
+    if (!shrinkContent || inset <= 0 || widget.window.size.width <= 0 || widget.window.size.height <= 0) {
+      return widget.window;
+    }
+
+    final innerWidth = math.max(1.0, widget.window.size.width - (inset * 2));
+    final innerHeight = math.max(1.0, widget.window.size.height - (inset * 2));
+    final scale = math.min(innerWidth / widget.window.size.width, innerHeight / widget.window.size.height);
+
+    return widget.window.copyWith(
+      zoomBaseWidth: widget.window.zoomBaseWidth == null ? null : widget.window.zoomBaseWidth! * scale,
+      zoomBaseHeight: widget.window.zoomBaseHeight == null ? null : widget.window.zoomBaseHeight! * scale,
+      contentOffsetDx: widget.window.contentOffset.dx * scale,
+      contentOffsetDy: widget.window.contentOffset.dy * scale,
+    );
+  }
+
+  Widget _buildContent({required bool shrinkContent, required double inset}) {
+    final previewWindow = _windowForHoverPreview(shrinkContent: shrinkContent, inset: inset);
+
     return Positioned.fill(
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: SerenityMediaCanvas(
           key: ValueKey(widget.window.asset.id),
-          window: widget.window,
+          window: previewWindow,
           isLoaded: widget.isLoaded,
           sharedVideoController: widget.sharedVideoController,
           sharedVideoInitialization: widget.sharedVideoInitialization,
-          onTap: widget.onTap,
+          onTap: _handleContentTap,
           onZoomChanged: widget.onZoomChanged,
           onIntrinsicSizeResolved: widget.onIntrinsicSizeResolved,
           isVideoPaused: widget.isVideoPaused,
@@ -176,13 +232,15 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> with SingleTi
           },
           onVideoPositionChanged: widget.onVideoPositionChanged,
           onCycleVideoPlaybackSpeed: widget.onCycleVideoPlaybackSpeed,
+          allowDirectContentGestures: widget.isPinnedHover,
         ),
       ),
     );
   }
 
   Widget _buildOverlay() {
-    final shouldShowCommandOverlay = _isCommandPressed && (_isHovered || _isResizing || widget.isSelected);
+    final shouldShowCommandOverlay =
+        widget.isPinnedHover || (_isCommandPressed && (_isHovered || _isResizing || widget.isSelected));
     if (!shouldShowCommandOverlay) {
       return const SizedBox.shrink();
     }
@@ -388,6 +446,12 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> with SingleTi
             final focusShadowAlpha = widget.isFocused ? 0.26 : 0.18;
             final focusBlurRadius = widget.isFocused ? 34.0 : 22.0;
             final flashScale = 1 + (0.035 * flashValue);
+            final showHoverFrame =
+                widget.isPinnedHover || (_isCommandPressed && (_isHovered || _isResizing || widget.isSelected));
+            const hoverInset = 3.0;
+            final assetColor = widget.window.asset.color;
+            final assetColorLight = HSLColor.fromColor(assetColor).withLightness(0.82).toColor();
+            final assetColorDeep = HSLColor.fromColor(assetColor).withLightness(0.46).toColor();
 
             return Transform.scale(
               scale: flashScale,
@@ -405,7 +469,33 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> with SingleTi
                     ),
                   ],
                 ),
-                child: Stack(children: [_buildContent(), _buildOverlay()]),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: showHoverFrame
+                        ? LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [assetColorLight, assetColor, assetColorDeep],
+                            stops: const [0.0, 0.42, 1.0],
+                          )
+                        : null,
+                  ),
+                  child: AnimatedPadding(
+                    duration: const Duration(milliseconds: 120),
+                    curve: Curves.easeOutCubic,
+                    padding: EdgeInsets.all(showHoverFrame ? hoverInset : 0),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(showHoverFrame ? 13 : 16),
+                      child: Stack(
+                        children: [
+                          _buildContent(shrinkContent: showHoverFrame, inset: hoverInset),
+                          _buildOverlay(),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ),
             );
           },

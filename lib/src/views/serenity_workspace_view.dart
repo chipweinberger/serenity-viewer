@@ -155,6 +155,13 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
             onPointerPanZoomEnd: (_) => _handleWorkspacePanZoomEnd(),
             child: Stack(
               children: [
+                Positioned.fill(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: _clearPinnedHoverWindow,
+                    child: const SizedBox.expand(),
+                  ),
+                ),
                 for (final window in windows)
                   Builder(
                     builder: (context) {
@@ -179,7 +186,17 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
                               isFocused: window.asset.id == focusedWindowId,
                               isSelected: _selectedExposeWindowIds.contains(window.asset.id),
                               isEditing: false,
-                              onTap: () => _focusWindow(window.asset.id),
+                              isPinnedHover: _pinnedHoverWindowId == window.asset.id,
+                              onTap: () {
+                                if (_pinnedHoverWindowId == window.asset.id) {
+                                  _clearPinnedHoverWindow();
+                                  return;
+                                }
+                                _clearPinnedHoverWindow();
+                                _focusWindow(window.asset.id);
+                              },
+                              onPinnedHoverRequested: () => _setPinnedHoverWindow(window.asset.id),
+                              onPinnedHoverDismissed: _clearPinnedHoverWindow,
                               onToggleSelected: () => _toggleExposeWindowSelected(window.asset.id),
                               flashNonce: window.asset.id == _flashedWindowId ? _windowFlashNonce : 0,
                               onPanUpdate: (delta) => _moveWindow(window.asset.id, delta / workspace.viewportZoom),
