@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:serenity_viewer/src/workspace/windows/workspace_window_state.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_zoom_update.dart';
 
-double previewWindowScaleForInset(AssetWindowState window, double inset) {
+double previewWindowScaleForInset(WorkspaceWindowState window, double inset) {
   if (inset <= 0 || window.size.width <= 0 || window.size.height <= 0) {
     return 1.0;
   }
@@ -15,7 +15,7 @@ double previewWindowScaleForInset(AssetWindowState window, double inset) {
   return math.min(innerWidth / window.size.width, innerHeight / window.size.height);
 }
 
-double previewWindowScaleForSize(AssetWindowState window, Size previewSize) {
+double previewWindowScaleForSize(WorkspaceWindowState window, Size previewSize) {
   if (previewSize.width <= 0 || previewSize.height <= 0 || window.size.width <= 0 || window.size.height <= 0) {
     return 1.0;
   }
@@ -25,7 +25,7 @@ double previewWindowScaleForSize(AssetWindowState window, Size previewSize) {
   return math.min(widthScale, heightScale);
 }
 
-AssetWindowState scalePreviewWindow(AssetWindowState window, double scale, {Size? size}) {
+WorkspaceWindowState scalePreviewWindow(WorkspaceWindowState window, double scale, {Size? size}) {
   if (scale == 1.0 && size == null) {
     return window;
   }

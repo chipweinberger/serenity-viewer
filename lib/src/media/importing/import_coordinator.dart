@@ -28,8 +28,8 @@ typedef SerenityVideoProbeReader = Future<VideoProbeResult?> Function(File file)
 typedef SerenityIdGenerator = String Function(String prefix);
 typedef SerenityDigestColorResolver = int Function(String digest);
 
-class SerenityImportCoordinator {
-  SerenityImportCoordinator({
+class ImportCoordinator {
+  ImportCoordinator({
     required List<String> imageExtensions,
     required List<String> videoExtensions,
     required this.confirmSingleFrameConversion,
@@ -58,14 +58,14 @@ class SerenityImportCoordinator {
   final SerenityIdGenerator newId;
   final SerenityDigestColorResolver colorFromDigest;
 
-  Future<SerenityImportResult> importFiles({
-    required SerenitySessionState session,
+  Future<ImportResult> importFiles({
+    required SessionState session,
     required WorkspaceState workspace,
     required List<XFile> files,
   }) async {
     final supported = files.where((file) => _assetTypeForPath(file.path) != null).toList();
     if (supported.isEmpty) {
-      return SerenityImportResult(
+      return ImportResult(
         session: session,
         importedCount: 0,
         skippedDuplicateCount: 0,
@@ -121,7 +121,7 @@ class SerenityImportCoordinator {
     }
 
     if (importedCount == 0) {
-      return SerenityImportResult(
+      return ImportResult(
         session: nextSession,
         importedCount: 0,
         skippedDuplicateCount: skippedDuplicateCount,
@@ -133,7 +133,7 @@ class SerenityImportCoordinator {
         .map((entry) => entry.id == workspace.id ? entry.copyWith(windows: nextWindows, isOpen: true) : entry)
         .toList();
 
-    return SerenityImportResult(
+    return ImportResult(
       session: nextSession.copyWith(workspaces: nextWorkspaces),
       importedCount: importedCount,
       skippedDuplicateCount: skippedDuplicateCount,
@@ -157,7 +157,7 @@ class SerenityImportCoordinator {
     return null;
   }
 
-  SerenitySessionState _recordFolder(SerenitySessionState session, String path, {int weight = 1}) {
+  SessionState _recordFolder(SessionState session, String path, {int weight = 1}) {
     final normalized = Directory(path).absolute.path;
     final nextKnownFolders = [...session.knownFolders];
     if (!nextKnownFolders.contains(normalized)) {
@@ -230,7 +230,7 @@ class SerenityImportCoordinator {
 
     return _PreparedImportedAsset(
       directory: importFile.parent.path,
-      window: AssetWindowState(
+      window: WorkspaceWindowState(
         asset: WorkspaceAsset(
           id: newId('asset'),
           filename: importFilename,
@@ -263,6 +263,6 @@ class _PreparedImportedAsset {
   const _PreparedImportedAsset.duplicate() : directory = '', window = null, wasDuplicate = true;
 
   final String directory;
-  final AssetWindowState? window;
+  final WorkspaceWindowState? window;
   final bool wasDuplicate;
 }

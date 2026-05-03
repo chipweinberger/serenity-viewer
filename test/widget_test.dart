@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:serenity_viewer/src/app/app_shell.dart';
+import 'package:serenity_viewer/src/app/serenity_app.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_frame.dart';
 
 void main() {
@@ -10,6 +10,6 @@ void main() {
 
     expect(find.text('Story Moodboard'), findsOneWidget);
     expect(find.text('View All'), findsOneWidget);
-    expect(find.byType(SerenityWindowFrame), findsWidgets);
+    expect(find.byType(WindowFrame), findsWidgets);
   });
 }

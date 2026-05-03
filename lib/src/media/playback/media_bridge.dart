@@ -14,22 +14,22 @@ import 'package:serenity_viewer/src/media/conversion/settings_and_video_models.d
 import 'package:serenity_viewer/src/media/assets/workspace_asset.dart';
 
 @immutable
-class SerenitySharedVideoState {
-  const SerenitySharedVideoState({required this.controller, required this.initialization});
+class SharedVideoState {
+  const SharedVideoState({required this.controller, required this.initialization});
 
   final VideoPlayerController controller;
   final Future<void> initialization;
 }
 
-class SerenityMediaBridge {
-  SerenityMediaBridge({required this.isRunningInWidgetTest, required this.showMessage, required this.isMounted});
+class MediaBridge {
+  MediaBridge({required this.isRunningInWidgetTest, required this.showMessage, required this.isMounted});
 
   final bool isRunningInWidgetTest;
   final ValueChanged<String> showMessage;
   final ValueGetter<bool> isMounted;
   final Map<String, _SharedVideoControllerEntry> _sharedVideoControllers = {};
 
-  SerenitySharedVideoState? sharedVideoForWindow(AssetWindowState window, {required bool isLoaded}) {
+  SharedVideoState? sharedVideoForWindow(WorkspaceWindowState window, {required bool isLoaded}) {
     if (!isLoaded || window.asset.type != AssetType.video) {
       return null;
     }
@@ -42,7 +42,7 @@ class SerenityMediaBridge {
     final existing = _sharedVideoControllers[window.asset.id];
     if (existing != null) {
       if (existing.path == path) {
-        return SerenitySharedVideoState(controller: existing.controller, initialization: existing.initialization);
+        return SharedVideoState(controller: existing.controller, initialization: existing.initialization);
       }
       _sharedVideoControllers.remove(window.asset.id);
       unawaited(existing.controller.dispose());
@@ -55,10 +55,10 @@ class SerenityMediaBridge {
     });
     final entry = _SharedVideoControllerEntry(path: path, controller: controller, initialization: initialization);
     _sharedVideoControllers[window.asset.id] = entry;
-    return SerenitySharedVideoState(controller: controller, initialization: initialization);
+    return SharedVideoState(controller: controller, initialization: initialization);
   }
 
-  void syncSharedVideoControllers({required SerenityLoadPlan loadPlan, required SerenitySessionState? session}) {
+  void syncSharedVideoControllers({required MediaLoadPlan loadPlan, required SessionState? session}) {
     if (session == null) {
       return;
     }

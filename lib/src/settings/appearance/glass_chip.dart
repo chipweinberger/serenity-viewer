@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
 
-class SerenityGlassChip extends StatelessWidget {
-  const SerenityGlassChip({super.key, required this.child, required this.onTap, this.selected = false, this.trailing});
+class GlassChip extends StatelessWidget {
+  const GlassChip({super.key, required this.child, required this.onTap, this.selected = false, this.trailing});
 
   final Widget child;
   final VoidCallback onTap;
@@ -28,10 +28,10 @@ class SerenityGlassChip extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.fromLTRB(11, 8, trailing == null ? 11 : 8, 8),
                 child: IconTheme(
-                  data: IconThemeData(color: selected ? Colors.white : SerenityTheme.textPrimary),
+                  data: IconThemeData(color: selected ? Colors.white : AppTheme.textPrimary),
                   child: DefaultTextStyle(
                     style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                      color: selected ? Colors.white : SerenityTheme.textPrimary,
+                      color: selected ? Colors.white : AppTheme.textPrimary,
                       fontWeight: FontWeight.w600,
                     ),
                     child: Row(

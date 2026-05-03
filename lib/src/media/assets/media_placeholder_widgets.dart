@@ -6,8 +6,8 @@ import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
 import 'package:serenity_viewer/src/media/assets/workspace_asset.dart';
 
-class SerenityMissingMediaPlaceholder extends StatelessWidget {
-  const SerenityMissingMediaPlaceholder({
+class MissingMediaPlaceholder extends StatelessWidget {
+  const MissingMediaPlaceholder({
     super.key,
     required this.filename,
     required this.windowSize,
@@ -38,18 +38,18 @@ class SerenityMissingMediaPlaceholder extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.84),
               borderRadius: BorderRadius.circular(22),
-              border: Border.all(color: SerenityTheme.border.withValues(alpha: 0.25)),
+              border: Border.all(color: AppTheme.border.withValues(alpha: 0.25)),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.location_searching_rounded, size: 48, color: SerenityTheme.accent),
+                const Icon(Icons.location_searching_rounded, size: 48, color: AppTheme.accent),
                 const SizedBox(height: 14),
                 Text(
                   'File missing',
                   style: Theme.of(
                     context,
-                  ).textTheme.titleMedium?.copyWith(color: SerenityTheme.textPrimary, fontWeight: FontWeight.w800),
+                  ).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary, fontWeight: FontWeight.w800),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -57,13 +57,13 @@ class SerenityMissingMediaPlaceholder extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: Theme.of(
                     context,
-                  ).textTheme.bodyLarge?.copyWith(color: SerenityTheme.textPrimary, fontWeight: FontWeight.w700),
+                  ).textTheme.bodyLarge?.copyWith(color: AppTheme.textPrimary, fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Serenity will keep trying known folders when the session loads again.',
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: SerenityTheme.textMuted, height: 1.4),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppTheme.textMuted, height: 1.4),
                 ),
               ],
             ),
@@ -74,8 +74,8 @@ class SerenityMissingMediaPlaceholder extends StatelessWidget {
   }
 }
 
-class SerenityUnloadedMediaPlaceholder extends StatelessWidget {
-  const SerenityUnloadedMediaPlaceholder({super.key, required this.asset, required this.windowSize});
+class UnloadedMediaPlaceholder extends StatelessWidget {
+  const UnloadedMediaPlaceholder({super.key, required this.asset, required this.windowSize});
 
   final WorkspaceAsset asset;
   final Size windowSize;
@@ -95,18 +95,18 @@ class SerenityUnloadedMediaPlaceholder extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.84),
           borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: SerenityTheme.border.withValues(alpha: 0.25)),
+          border: Border.all(color: AppTheme.border.withValues(alpha: 0.25)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.inventory_2_outlined, size: 48, color: SerenityTheme.accent),
+            const Icon(Icons.inventory_2_outlined, size: 48, color: AppTheme.accent),
             const SizedBox(height: 14),
             Text(
               'Temporarily unloaded',
               style: Theme.of(
                 context,
-              ).textTheme.titleMedium?.copyWith(color: SerenityTheme.textPrimary, fontWeight: FontWeight.w800),
+              ).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 8),
             Text(
@@ -114,13 +114,13 @@ class SerenityUnloadedMediaPlaceholder extends StatelessWidget {
               textAlign: TextAlign.center,
               style: Theme.of(
                 context,
-              ).textTheme.bodyLarge?.copyWith(color: SerenityTheme.textPrimary, fontWeight: FontWeight.w700),
+              ).textTheme.bodyLarge?.copyWith(color: AppTheme.textPrimary, fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 8),
             Text(
               '$categoryLabel was parked to stay inside the current loaded-asset limits. It will load again when its workspace becomes active.',
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: SerenityTheme.textMuted, height: 1.4),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppTheme.textMuted, height: 1.4),
             ),
           ],
         ),

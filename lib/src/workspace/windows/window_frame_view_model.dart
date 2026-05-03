@@ -4,8 +4,8 @@ import 'package:video_player/video_player.dart';
 import 'package:serenity_viewer/src/workspace/windows/workspace_window_state.dart';
 
 @immutable
-class SerenityWindowFrameViewModel {
-  const SerenityWindowFrameViewModel({
+class WindowFrameViewModel {
+  const WindowFrameViewModel({
     required this.window,
     required this.isLoaded,
     required this.sharedVideoController,
@@ -19,7 +19,7 @@ class SerenityWindowFrameViewModel {
     required this.isOptionGestureTarget,
   });
 
-  final AssetWindowState window;
+  final WorkspaceWindowState window;
   final bool isLoaded;
   final VideoPlayerController? sharedVideoController;
   final Future<void>? sharedVideoInitialization;

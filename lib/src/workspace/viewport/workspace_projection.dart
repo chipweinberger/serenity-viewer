@@ -5,7 +5,7 @@ import 'package:serenity_viewer/src/workspace/workspace_state.dart';
 
 Offset workspaceScreenOffsetForWindow(
   WorkspaceState workspace,
-  AssetWindowState window,
+  WorkspaceWindowState window,
   Size viewportSize, {
   Offset viewportOffset = Offset.zero,
   double viewportScale = 1.0,
@@ -23,7 +23,7 @@ Offset workspaceScreenOffsetForWindow(
 
 Rect workspaceScreenRectForWindow(
   WorkspaceState workspace,
-  AssetWindowState window,
+  WorkspaceWindowState window,
   Size viewportSize, {
   Offset viewportOffset = Offset.zero,
   double viewportScale = 1.0,

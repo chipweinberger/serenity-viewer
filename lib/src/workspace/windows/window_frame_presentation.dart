@@ -2,7 +2,7 @@
 
 part of 'window_frame.dart';
 
-extension on _SerenityWindowFrameState {
+extension on _WindowFrameState {
   bool get _isOptionGestureTargetActive {
     return _isOptionPressed &&
         !_isCommandPressed &&
@@ -33,30 +33,30 @@ extension on _SerenityWindowFrameState {
   void _handleContentTap() {
     if (widget.viewModel.isPinnedHover) {
       widget.onPinnedHoverDismissed();
-      _SerenityWindowFrameState._lastTappedWindowId = null;
-      _SerenityWindowFrameState._lastContentTapAt = null;
+      _WindowFrameState._lastTappedWindowId = null;
+      _WindowFrameState._lastContentTapAt = null;
       return;
     }
 
     final now = DateTime.now();
     final isDoubleClick =
-        _SerenityWindowFrameState._lastTappedWindowId == widget.viewModel.window.asset.id &&
-        _SerenityWindowFrameState._lastContentTapAt != null &&
-        now.difference(_SerenityWindowFrameState._lastContentTapAt!) <= _SerenityWindowFrameState._doubleClickThreshold;
+        _WindowFrameState._lastTappedWindowId == widget.viewModel.window.asset.id &&
+        _WindowFrameState._lastContentTapAt != null &&
+        now.difference(_WindowFrameState._lastContentTapAt!) <= _WindowFrameState._doubleClickThreshold;
     widget.onTap();
     if (isDoubleClick) {
-      _SerenityWindowFrameState._lastTappedWindowId = null;
-      _SerenityWindowFrameState._lastContentTapAt = null;
+      _WindowFrameState._lastTappedWindowId = null;
+      _WindowFrameState._lastContentTapAt = null;
       widget.onPinnedHoverRequested();
       return;
     }
 
-    _SerenityWindowFrameState._lastTappedWindowId = widget.viewModel.window.asset.id;
-    _SerenityWindowFrameState._lastContentTapAt = now;
+    _WindowFrameState._lastTappedWindowId = widget.viewModel.window.asset.id;
+    _WindowFrameState._lastContentTapAt = now;
   }
 
   Widget _buildContent({required bool shrinkContent, required double inset}) {
-    return SerenityWindowFrameContent(
+    return WindowFrameContent(
       viewModel: widget.viewModel,
       showExpandedVideoControls: _showExpandedVideoControls,
       shrinkContent: shrinkContent,
@@ -86,7 +86,7 @@ extension on _SerenityWindowFrameState {
       return const SizedBox.shrink();
     }
 
-    return SerenityWindowOverlay(
+    return WindowOverlay(
       workspaceZoom: widget.viewModel.workspaceZoom,
       filename: widget.viewModel.window.asset.filename,
       isSelected: widget.viewModel.isSelected,
@@ -101,7 +101,7 @@ extension on _SerenityWindowFrameState {
   Widget _buildFramedWindow() {
     const hoverInset = 3.0;
 
-    return SerenityWindowFrameChrome(
+    return WindowFrameChrome(
       flashValue: _flashAnimation.value,
       isFocused: widget.viewModel.isFocused,
       showHoverFrame: _showHoverFrame,

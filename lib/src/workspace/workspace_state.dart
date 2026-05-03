@@ -6,7 +6,7 @@ import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/workspace/windows/workspace_window_state.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_link.dart';
 
-Offset _workspaceViewportCenterForWindows(List<AssetWindowState> windows) {
+Offset _workspaceViewportCenterForWindows(List<WorkspaceWindowState> windows) {
   if (windows.isEmpty) {
     return defaultWorkspaceCenter;
   }
@@ -52,7 +52,7 @@ class WorkspaceState {
   final DateTime lastViewedAt;
   final int views;
   final List<WorkspaceLink> links;
-  final List<AssetWindowState> windows;
+  final List<WorkspaceWindowState> windows;
   final bool isOpen;
   final double viewportCenterDx;
   final double viewportCenterDy;
@@ -69,7 +69,7 @@ class WorkspaceState {
     DateTime? lastViewedAt,
     int? views,
     List<WorkspaceLink>? links,
-    List<AssetWindowState>? windows,
+    List<WorkspaceWindowState>? windows,
     bool? isOpen,
     double? viewportCenterDx,
     double? viewportCenterDy,
@@ -117,7 +117,7 @@ class WorkspaceState {
         .map((entry) => WorkspaceLink.fromJson(entry as Map<String, dynamic>))
         .toList();
     final windows = (json['windows'] as List<dynamic>)
-        .map((entry) => AssetWindowState.fromJson(entry as Map<String, dynamic>))
+        .map((entry) => WorkspaceWindowState.fromJson(entry as Map<String, dynamic>))
         .toList();
     final fallbackCenter = _workspaceViewportCenterForWindows(windows);
     return WorkspaceState(

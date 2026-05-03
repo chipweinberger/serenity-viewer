@@ -1,5 +1,5 @@
-class SerenityLoadPlan {
-  const SerenityLoadPlan({
+class MediaLoadPlan {
+  const MediaLoadPlan({
     required this.loadedAssetIds,
     required this.loadedImages,
     required this.loadedShortVideos,

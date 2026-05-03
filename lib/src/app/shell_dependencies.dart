@@ -7,17 +7,17 @@ import 'package:serenity_viewer/src/workspace/windows/window_interaction_state.d
 import 'package:serenity_viewer/src/workspace/workspace_view_tracking_state.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 
-class SerenityShellDependencies {
-  final SerenityShellHandles handles = SerenityShellHandles();
-  final SerenityShellPersistenceState persistenceState = SerenityShellPersistenceState();
-  final SerenityChromeState chromeState = SerenityChromeState();
-  final SerenityWindowInteractionState windowInteractionState = SerenityWindowInteractionState();
-  final SerenityWorkspaceViewTrackingState workspaceViewTrackingState = SerenityWorkspaceViewTrackingState();
-  final SerenityWorkspaceViewportState workspaceViewportState = SerenityWorkspaceViewportState();
-  final SerenityThumbnailRefreshState thumbnailRefreshState = SerenityThumbnailRefreshState();
+class ShellDependencies {
+  final ShellHandles handles = ShellHandles();
+  final ShellPersistenceState persistenceState = ShellPersistenceState();
+  final ChromeState chromeState = ChromeState();
+  final WindowInteractionState windowInteractionState = WindowInteractionState();
+  final WorkspaceViewTrackingState workspaceViewTrackingState = WorkspaceViewTrackingState();
+  final WorkspaceViewportState workspaceViewportState = WorkspaceViewportState();
+  final ThumbnailRefreshState thumbnailRefreshState = ThumbnailRefreshState();
 }
 
-class SerenityShellHandles {
+class ShellHandles {
   final FocusNode focusNode = FocusNode();
   final TextEditingController searchController = TextEditingController();
   final ScrollController tabScrollController = ScrollController();

@@ -2,7 +2,7 @@
 
 part of 'package:serenity_viewer/src/app/app_shell.dart';
 
-extension _SerenityShellUiState on _SerenityShellState {
+extension _AppShellNavigationActions on _AppShellState {
   void _showWorkspaceScreen({
     WorkspaceLayoutMode workspaceLayoutMode = WorkspaceLayoutMode.freeform,
     bool resetEditMode = true,

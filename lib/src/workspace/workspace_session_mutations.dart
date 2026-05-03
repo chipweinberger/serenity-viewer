@@ -1,26 +1,26 @@
 part of 'workspace_mutations.dart';
 
-WorkspaceState? _workspaceById(SerenitySessionState session, String workspaceId) {
+WorkspaceState? _workspaceById(SessionState session, String workspaceId) {
   return session.workspaces.where((workspace) => workspace.id == workspaceId).firstOrNull;
 }
 
-AssetWindowState? _windowById(WorkspaceState workspace, String windowId) {
+WorkspaceWindowState? _windowById(WorkspaceState workspace, String windowId) {
   return workspace.windows.where((window) => window.asset.id == windowId).firstOrNull;
 }
 
-WorkspaceState _mapWindows(WorkspaceState workspace, AssetWindowState Function(AssetWindowState window) transform) {
+WorkspaceState _mapWindows(WorkspaceState workspace, WorkspaceWindowState Function(WorkspaceWindowState window) transform) {
   return workspace.copyWith(windows: workspace.windows.map(transform).toList());
 }
 
 WorkspaceState _updateWindowById(
   WorkspaceState workspace,
   String windowId,
-  AssetWindowState Function(AssetWindowState window) transform,
+  WorkspaceWindowState Function(WorkspaceWindowState window) transform,
 ) {
   return _mapWindows(workspace, (window) => window.asset.id == windowId ? transform(window) : window);
 }
 
-SerenitySessionState _toggleWorkspaceOpen(SerenitySessionState session, String workspaceId) {
+SessionState _toggleWorkspaceOpen(SessionState session, String workspaceId) {
   final nextWorkspaces = session.workspaces
       .map((workspace) => workspace.id == workspaceId ? workspace.copyWith(isOpen: !workspace.isOpen) : workspace)
       .toList();
@@ -69,8 +69,8 @@ List<WorkspaceState> _reorderOpenWorkspaces(
   }).toList();
 }
 
-SerenitySessionState _moveSelectedWindowsToWorkspace(
-  SerenitySessionState session, {
+SessionState _moveSelectedWindowsToWorkspace(
+  SessionState session, {
   required String sourceWorkspaceId,
   required String destinationWorkspaceId,
   required Set<String> selectedWindowIds,
@@ -156,7 +156,7 @@ WorkspaceState _restorePreviousWindowZOrder(WorkspaceState workspace, String win
   );
 }
 
-AssetWindowState? _videoWindowById(WorkspaceState workspace, String windowId) {
+WorkspaceWindowState? _videoWindowById(WorkspaceState workspace, String windowId) {
   final window = _windowById(workspace, windowId);
   if (window == null || window.asset.type != AssetType.video) {
     return null;

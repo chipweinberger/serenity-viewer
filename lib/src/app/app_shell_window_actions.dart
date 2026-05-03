@@ -2,7 +2,7 @@
 
 part of 'app_shell.dart';
 
-extension _SerenityShellWindowActions on _SerenityShellState {
+extension _AppShellWindowActions on _AppShellState {
   bool get _isCommandPressedForContentGesture {
     return isCommandPressed();
   }
@@ -64,8 +64,8 @@ extension _SerenityShellWindowActions on _SerenityShellState {
           title: const Text('Collate Windows?'),
           content: Text(
             'Center and resize $collatableWindowCount image/video window'
-            '${collatableWindowCount == 1 ? '' : 's'} into a fixed ${SerenityWorkspaceController.collateTargetBox.width.toInt()} × '
-            '${SerenityWorkspaceController.collateTargetBox.height.toInt()} box?',
+            '${collatableWindowCount == 1 ? '' : 's'} into a fixed ${WorkspaceController.collateTargetBox.width.toInt()} × '
+            '${WorkspaceController.collateTargetBox.height.toInt()} box?',
           ),
           actions: [
             TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),

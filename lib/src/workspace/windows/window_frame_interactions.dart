@@ -2,7 +2,7 @@
 
 part of 'window_frame.dart';
 
-extension on _SerenityWindowFrameState {
+extension on _WindowFrameState {
   bool _handleHardwareKey(KeyEvent event) {
     final pressedKeys = HardwareKeyboard.instance.logicalKeysPressed;
     final nextIsCommandPressed = isCommandPressed(pressedKeys);
@@ -76,7 +76,7 @@ extension on _SerenityWindowFrameState {
       return;
     }
     if (!mounted) {
-      _SerenityWindowFrameState._anyWindowResizing = false;
+      _WindowFrameState._anyWindowResizing = false;
       return;
     }
     setState(() {
@@ -86,7 +86,7 @@ extension on _SerenityWindowFrameState {
         _hoverPosition = null;
       }
     });
-    _SerenityWindowFrameState._anyWindowResizing = false;
+    _WindowFrameState._anyWindowResizing = false;
     _isDraggingWindow = false;
     _syncNativeCursor(preserveHover && _hoverPosition != null ? _resizeHandleForPosition(_hoverPosition!) : null);
   }
@@ -103,7 +103,7 @@ extension on _SerenityWindowFrameState {
   }
 
   void _handleMouseEnter(PointerEnterEvent event) {
-    if (_SerenityWindowFrameState._anyWindowResizing && !_isResizing) {
+    if (_WindowFrameState._anyWindowResizing && !_isResizing) {
       return;
     }
     _syncNativeCursor(_resizeHandleForPosition(event.localPosition));
@@ -117,7 +117,7 @@ extension on _SerenityWindowFrameState {
   }
 
   void _handleMouseHover(PointerHoverEvent event) {
-    if (_SerenityWindowFrameState._anyWindowResizing && !_isResizing) {
+    if (_WindowFrameState._anyWindowResizing && !_isResizing) {
       if (_isHovered || _hoverPosition != null) {
         _clearHoverState();
       }
@@ -135,7 +135,7 @@ extension on _SerenityWindowFrameState {
 
   void _beginResize(PointerDownEvent event, WindowResizeHandle handle) {
     _syncNativeCursor(handle);
-    _SerenityWindowFrameState._anyWindowResizing = true;
+    _WindowFrameState._anyWindowResizing = true;
     if (!mounted) {
       return;
     }

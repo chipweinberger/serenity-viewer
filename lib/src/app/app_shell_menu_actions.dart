@@ -2,7 +2,7 @@
 
 part of 'app_shell.dart';
 
-extension _SerenityShellMenus on _SerenityShellState {
+extension _AppShellMenuActions on _AppShellState {
   String _middleTruncatedLabel(String value, {int maxLength = 42}) {
     if (value.length <= maxLength) {
       return value;

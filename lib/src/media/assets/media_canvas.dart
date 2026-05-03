@@ -16,8 +16,8 @@ import 'package:serenity_viewer/src/media/assets/media_zoom_utils.dart';
 import 'package:serenity_viewer/src/media/assets/video_surface.dart';
 import 'package:serenity_viewer/src/media/assets/zoom_box.dart';
 
-class SerenityMediaCanvas extends StatefulWidget {
-  const SerenityMediaCanvas({
+class MediaCanvas extends StatefulWidget {
+  const MediaCanvas({
     super.key,
     required this.window,
     required this.isLoaded,
@@ -39,7 +39,7 @@ class SerenityMediaCanvas extends StatefulWidget {
     this.videoPreviewMode = false,
   });
 
-  final AssetWindowState window;
+  final WorkspaceWindowState window;
   final bool isLoaded;
   final VideoPlayerController? sharedVideoController;
   final Future<void>? sharedVideoInitialization;
@@ -59,10 +59,10 @@ class SerenityMediaCanvas extends StatefulWidget {
   final bool videoPreviewMode;
 
   @override
-  State<SerenityMediaCanvas> createState() => _SerenityMediaCanvasState();
+  State<MediaCanvas> createState() => _SerenityMediaCanvasState();
 }
 
-class _SerenityMediaCanvasState extends State<SerenityMediaCanvas> {
+class _SerenityMediaCanvasState extends State<MediaCanvas> {
   static const double _maxZoom = 30.0;
   double _gestureStartZoom = 1;
   Offset _gestureStartContentOffset = Offset.zero;
@@ -83,7 +83,7 @@ class _SerenityMediaCanvasState extends State<SerenityMediaCanvas> {
   }
 
   @override
-  void didUpdateWidget(covariant SerenityMediaCanvas oldWidget) {
+  void didUpdateWidget(covariant MediaCanvas oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.window.asset.id != widget.window.asset.id) {
       _gestureStartZoom = 1;
@@ -101,7 +101,7 @@ class _SerenityMediaCanvasState extends State<SerenityMediaCanvas> {
   }
 
   Widget _buildMissingPlaceholder(BuildContext context) {
-    return SerenityMissingMediaPlaceholder(
+    return MissingMediaPlaceholder(
       filename: widget.window.asset.filename,
       windowSize: widget.window.size,
       compact: widget.compactMissingPlaceholder,
@@ -109,7 +109,7 @@ class _SerenityMediaCanvasState extends State<SerenityMediaCanvas> {
   }
 
   Widget _buildUnloadedPlaceholder() {
-    return SerenityUnloadedMediaPlaceholder(asset: widget.window.asset, windowSize: widget.window.size);
+    return UnloadedMediaPlaceholder(asset: widget.window.asset, windowSize: widget.window.size);
   }
 
   Offset _offsetForFocalZoom({
@@ -231,15 +231,15 @@ class _SerenityMediaCanvasState extends State<SerenityMediaCanvas> {
 
     final media = switch ((widget.isLoaded, hasLinkedFile, exists, widget.window.asset.type)) {
       (false, _, _, _) => _buildUnloadedPlaceholder(),
-      (true, false, _, _) => SerenityZoomBox(
+      (true, false, _, _) => ZoomBox(
         zoom: widget.window.zoom,
         aspectRatio: widget.window.asset.type == AssetType.video ? (16 / 9) : (4 / 3),
         zoomBaseSize: widget.window.zoomBaseSize,
         contentOffset: widget.window.contentOffset,
-        child: SerenityDemoArt(asset: widget.window.asset),
+        child: DemoArtWidget(asset: widget.window.asset),
       ),
       (true, true, false, _) => _buildMissingPlaceholder(context),
-      (true, true, true, AssetType.image) => SerenityImageSurface(
+      (true, true, true, AssetType.image) => ImageSurface(
         path: filePath!,
         zoom: widget.window.zoom,
         zoomBaseSize: widget.window.zoomBaseSize,
@@ -248,7 +248,7 @@ class _SerenityMediaCanvasState extends State<SerenityMediaCanvas> {
         intrinsicHeight: widget.window.asset.intrinsicHeight,
         errorBuilder: (context) => _buildMissingPlaceholder(context),
       ),
-      (true, true, true, AssetType.video) => SerenityVideoSurface(
+      (true, true, true, AssetType.video) => VideoSurface(
         controller: widget.sharedVideoController!,
         initialization: widget.sharedVideoInitialization!,
         path: filePath!,

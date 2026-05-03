@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 
 @immutable
-class SerenityWorkspaceChromeViewModel {
-  const SerenityWorkspaceChromeViewModel({
+class WorkspaceChromeViewModel {
+  const WorkspaceChromeViewModel({
     required this.imageLabel,
     required this.videoLabel,
     required this.linkLabel,

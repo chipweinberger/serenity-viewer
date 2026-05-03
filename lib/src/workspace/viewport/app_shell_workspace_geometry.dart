@@ -2,7 +2,7 @@
 
 part of 'package:serenity_viewer/src/app/app_shell.dart';
 
-extension _SerenityShellWorkspaceGeometry on _SerenityShellState {
+extension _AppShellWorkspaceGeometry on _AppShellState {
   String _newId(String prefix) {
     return '$prefix-${DateTime.now().microsecondsSinceEpoch}-${math.Random().nextInt(9999)}';
   }
@@ -12,7 +12,7 @@ extension _SerenityShellWorkspaceGeometry on _SerenityShellState {
   }
 
   double _clampWorkspaceZoom(double zoom) {
-    return SerenityWorkspaceMutations.clampWorkspaceZoom(zoom);
+    return WorkspaceMutations.clampWorkspaceZoom(zoom);
   }
 
   void _setWorkspaceViewport({required String workspaceId, Offset? center, double? zoom, bool queueThumbnail = false}) {
@@ -27,7 +27,7 @@ extension _SerenityShellWorkspaceGeometry on _SerenityShellState {
     }
 
     final workspace = workspaceMatches.first;
-    final nextWorkspace = SerenityWorkspaceMutations.setWorkspaceViewport(
+    final nextWorkspace = WorkspaceMutations.setWorkspaceViewport(
       workspace,
       viewportSize: _workspaceViewportState.viewportSize,
       center: center,
@@ -48,6 +48,6 @@ extension _SerenityShellWorkspaceGeometry on _SerenityShellState {
   }
 
   Offset _clampWindowPosition(Offset position, Size size) {
-    return SerenityWorkspaceMutations.clampWindowPosition(position, size);
+    return WorkspaceMutations.clampWindowPosition(position, size);
   }
 }

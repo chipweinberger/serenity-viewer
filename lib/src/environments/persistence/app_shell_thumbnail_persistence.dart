@@ -2,9 +2,9 @@
 
 part of 'package:serenity_viewer/src/app/app_shell.dart';
 
-extension _SerenityShellThumbnailPersistence on _SerenityShellState {
+extension _AppShellThumbnailPersistence on _AppShellState {
   ({Rect mediaRect, Rect visibleRect}) _thumbnailMediaLayoutForWindow({
-    required AssetWindowState window,
+    required WorkspaceWindowState window,
     required Rect windowRect,
   }) {
     final scale = window.size.width <= 0 ? 1.0 : windowRect.width / window.size.width;
@@ -57,7 +57,7 @@ extension _SerenityShellThumbnailPersistence on _SerenityShellState {
     }
   }
 
-  Future<ui.Image?> _decodeThumbnailVideoFrame(AssetWindowState window, {int targetWidth = 320}) async {
+  Future<ui.Image?> _decodeThumbnailVideoFrame(WorkspaceWindowState window, {int targetWidth = 320}) async {
     if (_isRunningInWidgetTest || !Platform.isMacOS) {
       return null;
     }
@@ -197,10 +197,10 @@ extension _SerenityShellThumbnailPersistence on _SerenityShellState {
 
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder, const Rect.fromLTWH(0, 0, canvasWidth, canvasHeight));
-    canvas.drawColor(SerenityTheme.background, BlendMode.src);
+    canvas.drawColor(AppTheme.background, BlendMode.src);
 
     if (workspace.windows.isEmpty) {
-      final emptyPaint = Paint()..color = SerenityTheme.background;
+      final emptyPaint = Paint()..color = AppTheme.background;
       canvas.drawRect(const Rect.fromLTWH(0, 0, canvasWidth, canvasHeight), emptyPaint);
     } else {
       final sortedWindows = [...workspace.windows]..sort((a, b) => a.zIndex.compareTo(b.zIndex));

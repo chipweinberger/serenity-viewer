@@ -1,6 +1,6 @@
 import 'dart:async';
 
-class SerenityWorkspaceViewTrackingState {
+class WorkspaceViewTrackingState {
   Timer? timer;
   bool isAppForeground = true;
   String? candidateWorkspaceId;

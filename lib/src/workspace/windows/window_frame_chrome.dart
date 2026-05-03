@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class SerenityWindowFrameChrome extends StatelessWidget {
-  const SerenityWindowFrameChrome({
+class WindowFrameChrome extends StatelessWidget {
+  const WindowFrameChrome({
     super.key,
     required this.flashValue,
     required this.isFocused,

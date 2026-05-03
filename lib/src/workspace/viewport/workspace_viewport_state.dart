@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 
-class SerenityWorkspaceViewportState {
+class WorkspaceViewportState {
   Size viewportSize = Size.zero;
   bool isGestureActive = false;
   Offset gestureStartCenter = defaultWorkspaceCenter;

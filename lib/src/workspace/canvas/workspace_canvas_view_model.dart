@@ -5,8 +5,8 @@ import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
 import 'package:serenity_viewer/src/workspace/workspace_state.dart';
 
 @immutable
-class SerenityWorkspaceCanvasViewModel {
-  const SerenityWorkspaceCanvasViewModel({
+class WorkspaceCanvasViewModel {
+  const WorkspaceCanvasViewModel({
     required this.workspace,
     required this.isExposeMode,
     required this.windows,
@@ -17,8 +17,8 @@ class SerenityWorkspaceCanvasViewModel {
 
   final WorkspaceState workspace;
   final bool isExposeMode;
-  final List<AssetWindowState> windows;
+  final List<WorkspaceWindowState> windows;
   final String? focusedWindowId;
-  final SerenityLoadPlan loadPlan;
+  final MediaLoadPlan loadPlan;
   final bool isDropTargetActive;
 }

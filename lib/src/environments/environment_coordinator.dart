@@ -12,8 +12,8 @@ import 'package:serenity_viewer/src/workspace/workspace_state.dart';
 import 'package:serenity_viewer/src/environments/archive/environment_archive.dart';
 import 'package:serenity_viewer/src/environments/session/shell_persistence_state.dart';
 
-class SerenityEnvironmentCoordinator {
-  SerenityEnvironmentCoordinator({
+class EnvironmentCoordinator {
+  EnvironmentCoordinator({
     required this.persistenceState,
     required this.sessionController,
     required this.context,
@@ -30,11 +30,11 @@ class SerenityEnvironmentCoordinator {
     required this.saveSession,
   });
 
-  final SerenityShellPersistenceState persistenceState;
-  final SerenitySessionController sessionController;
+  final ShellPersistenceState persistenceState;
+  final SessionController sessionController;
   final BuildContext Function() context;
   final bool Function() mounted;
-  final SerenitySessionState Function() seedSession;
+  final SessionState Function() seedSession;
   final ValueChanged<String> showMessage;
   final Future<void> Function() refreshActiveWorkspaceThumbnailIfNeeded;
   final Future<void> Function(String? path) storeLastEnvironmentPath;
@@ -42,12 +42,12 @@ class SerenityEnvironmentCoordinator {
   final Future<String?> Function(String bookmark) resolveFileBookmark;
   final Future<String?> Function(String path) createFileBookmark;
   final Future<Directory> Function() thumbnailDirectory;
-  final ValueChanged<SerenitySessionState> updateSession;
+  final ValueChanged<SessionState> updateSession;
   final Future<void> Function() saveSession;
 
   Future<void> saveEnvironmentToPath(
     String path, {
-    SerenitySessionState? sessionOverride,
+    SessionState? sessionOverride,
     bool showMessageOnFailure = true,
   }) async {
     final session = sessionOverride ?? persistenceState.session;
@@ -253,7 +253,7 @@ class SerenityEnvironmentCoordinator {
 
   Future<void> restoreEnvironmentThumbnails(
     Map<String, List<int>> thumbnailBytesByWorkspaceId,
-    SerenitySessionState session,
+    SessionState session,
   ) async {
     final thumbnailDir = await thumbnailDirectory();
     final nextWorkspaces = <WorkspaceState>[];

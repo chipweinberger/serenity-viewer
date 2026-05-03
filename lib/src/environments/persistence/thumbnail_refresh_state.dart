@@ -1,6 +1,6 @@
 import 'dart:async';
 
-class SerenityThumbnailRefreshState {
+class ThumbnailRefreshState {
   final Map<String, Timer> debounces = {};
   final Set<String> refreshInFlight = {};
   final Set<String> dirtyWorkspaces = {};

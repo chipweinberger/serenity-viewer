@@ -11,8 +11,8 @@ import 'package:serenity_viewer/src/settings/appearance/glass_chip.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/workspace_thumbnail_card.dart';
 
 @immutable
-class SerenityLibraryScreenActions {
-  const SerenityLibraryScreenActions({
+class LibraryScreenActions {
+  const LibraryScreenActions({
     required this.onSearchChanged,
     required this.onWorkspaceSortChanged,
     required this.onToggleWorkspaceOpen,
@@ -29,8 +29,8 @@ class SerenityLibraryScreenActions {
   final Future<void> Function(String workspaceId) onSetActiveWorkspace;
 }
 
-class SerenityLibraryScreen extends StatelessWidget {
-  const SerenityLibraryScreen({
+class LibraryScreen extends StatelessWidget {
+  const LibraryScreen({
     super.key,
     required this.allWorkspaces,
     required this.openWorkspaces,
@@ -43,11 +43,11 @@ class SerenityLibraryScreen extends StatelessWidget {
 
   final List<WorkspaceState> allWorkspaces;
   final List<WorkspaceState> openWorkspaces;
-  final SerenityLoadPlan loadPlan;
+  final MediaLoadPlan loadPlan;
   final TextEditingController searchController;
   final WorkspaceSort workspaceSort;
   final Set<String> refreshingWorkspaceIds;
-  final SerenityLibraryScreenActions actions;
+  final LibraryScreenActions actions;
 
   static const double _thumbnailWidth = 224;
   static const double _thumbnailHeight = 192;
@@ -177,22 +177,22 @@ class SerenityLibraryScreen extends StatelessWidget {
       spacing: 10,
       runSpacing: 10,
       children: [
-        SerenityGlassChip(
+        GlassChip(
           selected: workspaceSort == WorkspaceSort.recentlyCreated,
           onTap: () => actions.onWorkspaceSortChanged(WorkspaceSort.recentlyCreated),
           child: const Text('Date created'),
         ),
-        SerenityGlassChip(
+        GlassChip(
           selected: workspaceSort == WorkspaceSort.name,
           onTap: () => actions.onWorkspaceSortChanged(WorkspaceSort.name),
           child: const Text('Alphabetical'),
         ),
-        SerenityGlassChip(
+        GlassChip(
           selected: workspaceSort == WorkspaceSort.views,
           onTap: () => actions.onWorkspaceSortChanged(WorkspaceSort.views),
           child: const Text('Most views'),
         ),
-        SerenityGlassChip(
+        GlassChip(
           selected: workspaceSort == WorkspaceSort.recentlyViewed,
           onTap: () => actions.onWorkspaceSortChanged(WorkspaceSort.recentlyViewed),
           child: const Text('Recently viewed'),
@@ -228,7 +228,7 @@ class SerenityLibraryScreen extends StatelessWidget {
                     Text(
                       'Open Now • ${visibleOpenWorkspaces.length}',
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: SerenityTheme.textPrimary,
+                        color: AppTheme.textPrimary,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -247,7 +247,7 @@ class SerenityLibraryScreen extends StatelessWidget {
                         Text(
                           'All Workspaces • $knownWorkspaceCount',
                           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            color: SerenityTheme.textPrimary,
+                            color: AppTheme.textPrimary,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
@@ -262,7 +262,7 @@ class SerenityLibraryScreen extends StatelessWidget {
                               isDense: true,
                               contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                               filled: true,
-                              fillColor: SerenityTheme.panel,
+                              fillColor: AppTheme.panel,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(18),
                                 borderSide: BorderSide.none,

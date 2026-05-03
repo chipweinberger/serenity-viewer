@@ -42,13 +42,13 @@ class _WorkspaceThumbnailCardState extends State<WorkspaceThumbnailCard> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.add_photo_alternate_outlined, size: 26, color: SerenityTheme.textMuted.withValues(alpha: 0.8)),
+            Icon(Icons.add_photo_alternate_outlined, size: 26, color: AppTheme.textMuted.withValues(alpha: 0.8)),
             const SizedBox(height: 8),
             Text(
               'Empty workspace',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: SerenityTheme.textPrimary.withValues(alpha: 0.88),
+                color: AppTheme.textPrimary.withValues(alpha: 0.88),
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -119,14 +119,14 @@ class _WorkspaceThumbnailCardState extends State<WorkspaceThumbnailCard> {
       children: [
         Transform.translate(
           offset: const Offset(0, 1),
-          child: Icon(icon, size: 13, color: SerenityTheme.textMuted),
+          child: Icon(icon, size: 13, color: AppTheme.textMuted),
         ),
         const SizedBox(width: 4),
         Text(
           value,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.labelMedium?.copyWith(color: SerenityTheme.textMuted, height: 1.0),
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppTheme.textMuted, height: 1.0),
         ),
       ],
     );
@@ -145,18 +145,18 @@ class _WorkspaceThumbnailCardState extends State<WorkspaceThumbnailCard> {
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: Material(
-        color: SerenityTheme.panel,
+        color: AppTheme.panel,
         borderRadius: BorderRadius.circular(18),
         child: InkWell(
           onTap: widget.onTap,
           borderRadius: BorderRadius.circular(18),
           child: Container(
             decoration: BoxDecoration(
-              color: SerenityTheme.panel,
+              color: AppTheme.panel,
               borderRadius: BorderRadius.circular(18),
               boxShadow: [
                 BoxShadow(
-                  color: SerenityTheme.shadow.withValues(alpha: 0.24),
+                  color: AppTheme.shadow.withValues(alpha: 0.24),
                   blurRadius: 8,
                   offset: const Offset(0, 3),
                 ),
@@ -256,7 +256,7 @@ class _WorkspaceThumbnailCardState extends State<WorkspaceThumbnailCard> {
                     ),
                   ),
                   DecoratedBox(
-                    decoration: const BoxDecoration(color: SerenityTheme.panel),
+                    decoration: const BoxDecoration(color: AppTheme.panel),
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(10, 5, 8, 4),
                       child: Column(
@@ -268,7 +268,7 @@ class _WorkspaceThumbnailCardState extends State<WorkspaceThumbnailCard> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              color: SerenityTheme.textPrimary,
+                              color: AppTheme.textPrimary,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
@@ -276,7 +276,7 @@ class _WorkspaceThumbnailCardState extends State<WorkspaceThumbnailCard> {
                           DefaultTextStyle(
                             style: Theme.of(
                               context,
-                            ).textTheme.labelMedium!.copyWith(color: SerenityTheme.textMuted, height: 1.0),
+                            ).textTheme.labelMedium!.copyWith(color: AppTheme.textMuted, height: 1.0),
                             child: Row(
                               children: [
                                 _buildFooterMetric(context, Icons.visibility_outlined, '${workspace.views}'),

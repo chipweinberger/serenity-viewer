@@ -12,7 +12,7 @@ import 'package:serenity_viewer/src/workspace/workspace_state.dart';
 Future<void> showSerenityWorkspaceLinksDialog({
   required BuildContext context,
   required WorkspaceState initialWorkspace,
-  required SerenityWorkspaceLinksController controller,
+  required WorkspaceLinksController controller,
 }) async {
   var workspace = initialWorkspace;
   final pasteController = TextEditingController();
@@ -66,13 +66,13 @@ Future<void> showSerenityWorkspaceLinksDialog({
                       isDense: true,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
                       hintStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                        color: SerenityTheme.textMuted.withValues(alpha: 0.9),
+                        color: AppTheme.textMuted.withValues(alpha: 0.9),
                         height: 1.0,
                       ),
                     ),
                     style: Theme.of(
                       context,
-                    ).textTheme.bodyMedium!.copyWith(color: SerenityTheme.textPrimary, height: 1.0),
+                    ).textTheme.bodyMedium!.copyWith(color: AppTheme.textPrimary, height: 1.0),
                   ),
                 );
               }
@@ -107,7 +107,7 @@ Future<void> showSerenityWorkspaceLinksDialog({
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                                    color: SerenityTheme.textPrimary,
+                                    color: AppTheme.textPrimary,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
@@ -118,7 +118,7 @@ Future<void> showSerenityWorkspaceLinksDialog({
                                   overflow: TextOverflow.ellipsis,
                                   style: Theme.of(
                                     context,
-                                  ).textTheme.bodySmall!.copyWith(color: SerenityTheme.textMuted, height: 1.35),
+                                  ).textTheme.bodySmall!.copyWith(color: AppTheme.textMuted, height: 1.35),
                                 ),
                               ],
                             ),
@@ -194,7 +194,7 @@ Future<void> showSerenityWorkspaceLinksDialog({
                                 borderRadius: BorderRadius.circular(30),
                                 border: Border.all(color: Colors.white.withValues(alpha: 0.42)),
                                 boxShadow: const [
-                                  BoxShadow(color: SerenityTheme.shadow, blurRadius: 40, offset: Offset(0, 16)),
+                                  BoxShadow(color: AppTheme.shadow, blurRadius: 40, offset: Offset(0, 16)),
                                 ],
                               ),
                               child: Column(
@@ -206,7 +206,7 @@ Future<void> showSerenityWorkspaceLinksDialog({
                                         child: Text(
                                           '${workspace.links.length} Link${workspace.links.length == 1 ? '' : 's'}',
                                           style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                                            color: SerenityTheme.textPrimary,
+                                            color: AppTheme.textPrimary,
                                             fontWeight: FontWeight.w800,
                                           ),
                                         ),
@@ -231,7 +231,7 @@ Future<void> showSerenityWorkspaceLinksDialog({
                                                   child: DefaultTextStyle(
                                                     style: Theme.of(context).textTheme.labelLarge!.copyWith(
                                                       color: workspace.links.isEmpty
-                                                          ? SerenityTheme.textMuted.withValues(alpha: 0.6)
+                                                          ? AppTheme.textMuted.withValues(alpha: 0.6)
                                                           : const Color(0xFF4C78C8),
                                                       fontWeight: FontWeight.w600,
                                                     ),
@@ -257,7 +257,7 @@ Future<void> showSerenityWorkspaceLinksDialog({
                                                 child: Icon(
                                                   Icons.close_rounded,
                                                   size: 18,
-                                                  color: SerenityTheme.textPrimary,
+                                                  color: AppTheme.textPrimary,
                                                 ),
                                               ),
                                             ),
@@ -283,7 +283,7 @@ Future<void> showSerenityWorkspaceLinksDialog({
                                                   'No links yet.',
                                                   style: Theme.of(
                                                     context,
-                                                  ).textTheme.titleMedium!.copyWith(color: SerenityTheme.textMuted),
+                                                  ).textTheme.titleMedium!.copyWith(color: AppTheme.textMuted),
                                                 ),
                                               ),
                                             )

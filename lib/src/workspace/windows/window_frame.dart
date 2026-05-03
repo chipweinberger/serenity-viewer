@@ -18,8 +18,8 @@ import 'package:serenity_viewer/src/workspace/windows/window_resize_helpers.dart
 part 'window_frame_interactions.dart';
 part 'window_frame_presentation.dart';
 
-class SerenityWindowFrame extends StatefulWidget {
-  const SerenityWindowFrame({
+class WindowFrame extends StatefulWidget {
+  const WindowFrame({
     super.key,
     required this.viewModel,
     required this.onTap,
@@ -42,7 +42,7 @@ class SerenityWindowFrame extends StatefulWidget {
     required this.onOptionGestureReleased,
   });
 
-  final SerenityWindowFrameViewModel viewModel;
+  final WindowFrameViewModel viewModel;
   final VoidCallback onTap;
   final VoidCallback onPinnedHoverRequested;
   final VoidCallback onPinnedHoverDismissed;
@@ -63,10 +63,10 @@ class SerenityWindowFrame extends StatefulWidget {
   final VoidCallback onOptionGestureReleased;
 
   @override
-  State<SerenityWindowFrame> createState() => _SerenityWindowFrameState();
+  State<WindowFrame> createState() => _WindowFrameState();
 }
 
-class _SerenityWindowFrameState extends State<SerenityWindowFrame> with SingleTickerProviderStateMixin {
+class _WindowFrameState extends State<WindowFrame> with SingleTickerProviderStateMixin {
   static bool _anyWindowResizing = false;
   static const Duration _doubleClickThreshold = Duration(milliseconds: 275);
   static String? _lastTappedWindowId;
@@ -113,7 +113,7 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> with SingleTi
   }
 
   @override
-  void didUpdateWidget(covariant SerenityWindowFrame oldWidget) {
+  void didUpdateWidget(covariant WindowFrame oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.viewModel.flashNonce != 0 && widget.viewModel.flashNonce != oldWidget.viewModel.flashNonce) {
       unawaited(_flashController.forward(from: 0));

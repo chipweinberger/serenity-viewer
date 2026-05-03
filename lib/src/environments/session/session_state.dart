@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/workspace/workspace_state.dart';
 
-SerenitySessionState _normalizeSessionState(SerenitySessionState session) {
+SessionState _normalizeSessionState(SessionState session) {
   final dedupedWorkspaces = <WorkspaceState>[];
   final seenWorkspaceIds = <String>{};
 
@@ -36,7 +36,7 @@ SerenitySessionState _normalizeSessionState(SerenitySessionState session) {
     return session;
   }
 
-  return SerenitySessionState(
+  return SessionState(
     workspaces: normalizedWorkspaces,
     activeWorkspaceId: nextActiveWorkspaceId,
     knownFolders: session.knownFolders,
@@ -48,8 +48,8 @@ SerenitySessionState _normalizeSessionState(SerenitySessionState session) {
 }
 
 @immutable
-class SerenitySessionState {
-  const SerenitySessionState({
+class SessionState {
+  const SessionState({
     required this.workspaces,
     required this.activeWorkspaceId,
     required this.knownFolders,
@@ -67,7 +67,7 @@ class SerenitySessionState {
   final int shortVideoLoadLimit;
   final int longVideoLoadLimit;
 
-  SerenitySessionState copyWith({
+  SessionState copyWith({
     List<WorkspaceState>? workspaces,
     String? activeWorkspaceId,
     List<String>? knownFolders,
@@ -77,7 +77,7 @@ class SerenitySessionState {
     int? longVideoLoadLimit,
   }) {
     return _normalizeSessionState(
-      SerenitySessionState(
+      SessionState(
         workspaces: workspaces ?? this.workspaces,
         activeWorkspaceId: activeWorkspaceId ?? this.activeWorkspaceId,
         knownFolders: knownFolders ?? this.knownFolders,
@@ -113,9 +113,9 @@ class SerenitySessionState {
     };
   }
 
-  factory SerenitySessionState.fromJson(Map<String, dynamic> json) {
+  factory SessionState.fromJson(Map<String, dynamic> json) {
     return _normalizeSessionState(
-      SerenitySessionState(
+      SessionState(
         workspaces: (json['workspaces'] as List<dynamic>)
             .map((entry) => WorkspaceState.fromJson(entry as Map<String, dynamic>))
             .toList(),
@@ -131,9 +131,9 @@ class SerenitySessionState {
     );
   }
 
-  factory SerenitySessionState.fromManifestJson(Map<String, dynamic> json, List<WorkspaceState> workspaces) {
+  factory SessionState.fromManifestJson(Map<String, dynamic> json, List<WorkspaceState> workspaces) {
     return _normalizeSessionState(
-      SerenitySessionState(
+      SessionState(
         workspaces: workspaces,
         activeWorkspaceId: json['activeWorkspaceId'] as String,
         knownFolders: (json['knownFolders'] as List<dynamic>? ?? const []).cast<String>(),

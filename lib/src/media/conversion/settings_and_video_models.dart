@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 
 @immutable
-class SerenitySettingsResult {
-  const SerenitySettingsResult({
+class SettingsResult {
+  const SettingsResult({
     required this.imageLoadLimit,
     required this.shortVideoLoadLimit,
     required this.longVideoLoadLimit,

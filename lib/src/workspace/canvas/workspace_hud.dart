@@ -9,8 +9,8 @@ import 'package:serenity_viewer/src/settings/appearance/theme.dart';
 import 'package:serenity_viewer/src/workspace/canvas/workspace_chrome_view_model.dart';
 
 @immutable
-class SerenityWorkspaceHudActions {
-  const SerenityWorkspaceHudActions({
+class WorkspaceHudActions {
+  const WorkspaceHudActions({
     required this.onToggleExpose,
     required this.onFitWorkspaceViewportToContent,
     required this.onConfirmCollateWorkspaceWindows,
@@ -31,13 +31,13 @@ class SerenityWorkspaceHudActions {
   final Future<void> Function() onRefreshActiveWorkspaceThumbnail;
 }
 
-class SerenityWorkspaceHud extends StatelessWidget {
-  const SerenityWorkspaceHud({super.key, required this.viewModel, required this.actions});
+class WorkspaceHud extends StatelessWidget {
+  const WorkspaceHud({super.key, required this.viewModel, required this.actions});
 
   static const double gap = 10;
 
-  final SerenityWorkspaceChromeViewModel viewModel;
-  final SerenityWorkspaceHudActions actions;
+  final WorkspaceChromeViewModel viewModel;
+  final WorkspaceHudActions actions;
 
   Widget _buildHudAction({required String tooltip, required VoidCallback? onTap, required Widget child}) {
     return Tooltip(
@@ -76,17 +76,17 @@ class SerenityWorkspaceHud extends StatelessWidget {
             child: Row(
               children: [
                 const SizedBox(width: 8),
-                Icon(Icons.remove_rounded, size: 14, color: SerenityTheme.textMuted.withValues(alpha: 0.9)),
+                Icon(Icons.remove_rounded, size: 14, color: AppTheme.textMuted.withValues(alpha: 0.9)),
                 Expanded(
                   child: SliderTheme(
                     data: SliderTheme.of(context).copyWith(
                       trackHeight: 3,
                       overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
                       thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-                      activeTrackColor: SerenityTheme.textPrimary,
-                      inactiveTrackColor: SerenityTheme.textMuted.withValues(alpha: 0.18),
-                      thumbColor: SerenityTheme.textPrimary,
-                      overlayColor: SerenityTheme.textPrimary.withValues(alpha: 0.14),
+                      activeTrackColor: AppTheme.textPrimary,
+                      inactiveTrackColor: AppTheme.textMuted.withValues(alpha: 0.18),
+                      thumbColor: AppTheme.textPrimary,
+                      overlayColor: AppTheme.textPrimary.withValues(alpha: 0.14),
                     ),
                     child: Slider(
                       value: zoomValue,
@@ -99,7 +99,7 @@ class SerenityWorkspaceHud extends StatelessWidget {
                     ),
                   ),
                 ),
-                Icon(Icons.add_rounded, size: 14, color: SerenityTheme.textMuted.withValues(alpha: 0.9)),
+                Icon(Icons.add_rounded, size: 14, color: AppTheme.textMuted.withValues(alpha: 0.9)),
                 const SizedBox(width: 8),
               ],
             ),
@@ -135,7 +135,7 @@ class SerenityWorkspaceHud extends StatelessWidget {
           child: const SizedBox(
             width: 38,
             height: 38,
-            child: Icon(Icons.fit_screen_rounded, size: 17, color: SerenityTheme.textPrimary),
+            child: Icon(Icons.fit_screen_rounded, size: 17, color: AppTheme.textPrimary),
           ),
         ),
         _buildHudAction(
@@ -144,7 +144,7 @@ class SerenityWorkspaceHud extends StatelessWidget {
           child: const SizedBox(
             width: 38,
             height: 38,
-            child: Icon(Icons.gps_fixed_rounded, size: 18, color: SerenityTheme.textPrimary),
+            child: Icon(Icons.gps_fixed_rounded, size: 18, color: AppTheme.textPrimary),
           ),
         ),
         _buildWorkspaceZoomControl(context),
@@ -155,7 +155,7 @@ class SerenityWorkspaceHud extends StatelessWidget {
           child: const SizedBox(
             width: 38,
             height: 38,
-            child: Icon(Icons.task_alt_rounded, size: 18, color: SerenityTheme.textPrimary),
+            child: Icon(Icons.task_alt_rounded, size: 18, color: AppTheme.textPrimary),
           ),
         ),
       _buildHudAction(
@@ -164,7 +164,7 @@ class SerenityWorkspaceHud extends StatelessWidget {
         child: const SizedBox(
           width: 38,
           height: 38,
-          child: Icon(Icons.menu_rounded, size: 18, color: SerenityTheme.textPrimary),
+          child: Icon(Icons.menu_rounded, size: 18, color: AppTheme.textPrimary),
         ),
       ),
     ];
@@ -181,7 +181,7 @@ class SerenityWorkspaceHud extends StatelessWidget {
             child: Icon(
               viewModel.isExposeMode ? Icons.grid_view_rounded : Icons.apps_rounded,
               size: 17,
-              color: SerenityTheme.textPrimary,
+              color: AppTheme.textPrimary,
             ),
           ),
         ),
@@ -198,7 +198,7 @@ class SerenityWorkspaceHud extends StatelessWidget {
                 border: Border.all(color: Colors.white.withValues(alpha: 0.35)),
               ),
               child: DefaultTextStyle(
-                style: Theme.of(context).textTheme.bodySmall!.copyWith(color: SerenityTheme.textMuted, height: 1.1),
+                style: Theme.of(context).textTheme.bodySmall!.copyWith(color: AppTheme.textMuted, height: 1.1),
                 child: Text('${viewModel.imageLabel} · ${viewModel.videoLabel} · ${viewModel.linkLabel}'),
               ),
             ),
@@ -227,21 +227,21 @@ class SerenityWorkspaceHud extends StatelessWidget {
                       DefaultTextStyle(
                         style: Theme.of(
                           context,
-                        ).textTheme.bodySmall!.copyWith(color: SerenityTheme.textMuted, height: 1.1),
+                        ).textTheme.bodySmall!.copyWith(color: AppTheme.textMuted, height: 1.1),
                         child: Text('${viewModel.selectedCount} selected'),
                       ),
                       const SizedBox(width: 8),
                       DefaultTextStyle(
                         style: Theme.of(
                           context,
-                        ).textTheme.bodySmall!.copyWith(color: SerenityTheme.textMuted, height: 1.1),
+                        ).textTheme.bodySmall!.copyWith(color: AppTheme.textMuted, height: 1.1),
                         child: const Text('·'),
                       ),
                       const SizedBox(width: 8),
                       DefaultTextStyle(
                         style: Theme.of(
                           context,
-                        ).textTheme.bodySmall!.copyWith(color: SerenityTheme.textMuted, height: 1.1),
+                        ).textTheme.bodySmall!.copyWith(color: AppTheme.textMuted, height: 1.1),
                         child: const Text('Click workspace to move'),
                       ),
                       const SizedBox(width: 8),
@@ -252,7 +252,7 @@ class SerenityWorkspaceHud extends StatelessWidget {
                           borderRadius: BorderRadius.circular(999),
                           child: const Padding(
                             padding: EdgeInsets.all(2),
-                            child: Icon(Icons.close_rounded, size: 14, color: SerenityTheme.textMuted),
+                            child: Icon(Icons.close_rounded, size: 14, color: AppTheme.textMuted),
                           ),
                         ),
                       ),

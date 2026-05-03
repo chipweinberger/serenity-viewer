@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:serenity_viewer/src/media/assets/workspace_asset.dart';
 
 @immutable
-class AssetWindowState {
-  const AssetWindowState({
+class WorkspaceWindowState {
+  const WorkspaceWindowState({
     required this.asset,
     required this.position,
     required this.size,
@@ -39,7 +39,7 @@ class AssetWindowState {
 
   Offset get contentOffset => Offset(contentOffsetDx ?? 0, contentOffsetDy ?? 0);
 
-  AssetWindowState copyWith({
+  WorkspaceWindowState copyWith({
     WorkspaceAsset? asset,
     Offset? position,
     Size? size,
@@ -54,7 +54,7 @@ class AssetWindowState {
     bool clearContentOffset = false,
     int? zIndex,
   }) {
-    return AssetWindowState(
+    return WorkspaceWindowState(
       asset: asset ?? this.asset,
       position: position ?? this.position,
       size: size ?? this.size,
@@ -87,8 +87,8 @@ class AssetWindowState {
     };
   }
 
-  factory AssetWindowState.fromJson(Map<String, dynamic> json) {
-    return AssetWindowState(
+  factory WorkspaceWindowState.fromJson(Map<String, dynamic> json) {
+    return WorkspaceWindowState(
       asset: WorkspaceAsset.fromJson(json['asset'] as Map<String, dynamic>),
       position: Offset((json['positionDx'] as num).toDouble(), (json['positionDy'] as num).toDouble()),
       size: Size((json['width'] as num).toDouble(), (json['height'] as num).toDouble()),

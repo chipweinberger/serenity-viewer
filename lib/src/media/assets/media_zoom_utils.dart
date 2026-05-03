@@ -18,7 +18,7 @@ Size fitSizeForViewportToAspect(Size viewportSize, double aspectRatio) {
   return Size(fittedWidth, fittedHeight);
 }
 
-Rect normalizedVisibleRectForWindow(AssetWindowState window, Size sourceSize) {
+Rect normalizedVisibleRectForWindow(WorkspaceWindowState window, Size sourceSize) {
   final viewportSize = window.size;
   final fitSize = fitSizeForViewportToAspect(viewportSize, sourceSize.width / sourceSize.height);
   final baseSize = window.zoom > 1.0 && window.zoomBaseSize != null ? window.zoomBaseSize! : fitSize;

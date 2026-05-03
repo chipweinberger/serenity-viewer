@@ -123,8 +123,8 @@ class _SerenityVideoPlaybackCoordinator {
   }
 }
 
-class SerenityVideoSurface extends StatefulWidget {
-  const SerenityVideoSurface({
+class VideoSurface extends StatefulWidget {
+  const VideoSurface({
     super.key,
     required this.controller,
     required this.initialization,
@@ -166,10 +166,10 @@ class SerenityVideoSurface extends StatefulWidget {
   final bool previewMode;
 
   @override
-  State<SerenityVideoSurface> createState() => _SerenityVideoSurfaceState();
+  State<VideoSurface> createState() => _SerenityVideoSurfaceState();
 }
 
-class _SerenityVideoSurfaceState extends State<SerenityVideoSurface> {
+class _SerenityVideoSurfaceState extends State<VideoSurface> {
   late final _SerenityVideoPlaybackCoordinator _playbackCoordinator;
 
   @override
@@ -184,7 +184,7 @@ class _SerenityVideoSurfaceState extends State<SerenityVideoSurface> {
   }
 
   @override
-  void didUpdateWidget(covariant SerenityVideoSurface oldWidget) {
+  void didUpdateWidget(covariant VideoSurface oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
       _playbackCoordinator.attach(widget.controller);
@@ -248,7 +248,7 @@ class _SerenityVideoSurfaceState extends State<SerenityVideoSurface> {
         }
 
         if (snapshot.hasError || !widget.controller.value.isInitialized) {
-          return const Center(child: Icon(Icons.error_outline_rounded, size: 40, color: SerenityTheme.accent));
+          return const Center(child: Icon(Icons.error_outline_rounded, size: 40, color: AppTheme.accent));
         }
 
         return _buildInitializedVideo(context, widget.controller);
@@ -270,7 +270,7 @@ class _SerenityVideoSurfaceState extends State<SerenityVideoSurface> {
         return Stack(
           fit: StackFit.expand,
           children: [
-            SerenityZoomBox(
+            ZoomBox(
               aspectRatio: controller.value.aspectRatio,
               zoom: widget.zoom,
               zoomBaseSize: widget.zoomBaseSize,

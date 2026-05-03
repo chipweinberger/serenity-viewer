@@ -25,12 +25,12 @@ import 'package:serenity_viewer/src/workspace/windows/window_frame.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_resize_helpers.dart';
 import 'package:serenity_viewer/src/workspace/expose/expose_layouts.dart';
 
-typedef SerenitySharedVideoLookup =
-    SerenitySharedVideoState? Function(AssetWindowState window, {required bool isLoaded});
+typedef SharedVideoLookup =
+    SharedVideoState? Function(WorkspaceWindowState window, {required bool isLoaded});
 
 @immutable
-class SerenityWorkspaceScreenActions {
-  const SerenityWorkspaceScreenActions({
+class WorkspaceScreenActions {
+  const WorkspaceScreenActions({
     required this.setDropTargetActive,
     required this.importFiles,
     required this.trackViewportSize,
@@ -90,8 +90,8 @@ class SerenityWorkspaceScreenActions {
   final Future<void> Function(WorkspaceAsset asset) revealAssetInFinder;
 }
 
-class SerenityWorkspaceScreen extends StatelessWidget {
-  const SerenityWorkspaceScreen({
+class WorkspaceScreen extends StatelessWidget {
+  const WorkspaceScreen({
     super.key,
     required this.session,
     required this.openWorkspaces,
@@ -103,13 +103,13 @@ class SerenityWorkspaceScreen extends StatelessWidget {
     required this.workspaceHud,
   });
 
-  final SerenitySessionState session;
+  final SessionState session;
   final List<WorkspaceState> openWorkspaces;
-  final SerenityChromeState chromeState;
-  final SerenityWindowInteractionState windowInteractionState;
-  final SerenityLoadPlan loadPlan;
-  final SerenitySharedVideoLookup sharedVideoLookup;
-  final SerenityWorkspaceScreenActions actions;
+  final ChromeState chromeState;
+  final WindowInteractionState windowInteractionState;
+  final MediaLoadPlan loadPlan;
+  final SharedVideoLookup sharedVideoLookup;
+  final WorkspaceScreenActions actions;
   final Widget workspaceHud;
 
   Widget _buildEmptyWorkspaceCanvasState(BuildContext context) {
@@ -125,14 +125,14 @@ class SerenityWorkspaceScreen extends StatelessWidget {
                 Icon(
                   Icons.add_photo_alternate_outlined,
                   size: 40,
-                  color: SerenityTheme.textMuted.withValues(alpha: 0.8),
+                  color: AppTheme.textMuted.withValues(alpha: 0.8),
                 ),
                 const SizedBox(height: 12),
                 Text(
                   'Empty workspace',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: SerenityTheme.textPrimary.withValues(alpha: 0.9),
+                    color: AppTheme.textPrimary.withValues(alpha: 0.9),
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -142,7 +142,7 @@ class SerenityWorkspaceScreen extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: Theme.of(
                     context,
-                  ).textTheme.titleSmall?.copyWith(color: SerenityTheme.textMuted, fontWeight: FontWeight.w600),
+                  ).textTheme.titleSmall?.copyWith(color: AppTheme.textMuted, fontWeight: FontWeight.w600),
                 ),
               ],
             ),
@@ -158,7 +158,7 @@ class SerenityWorkspaceScreen extends StatelessWidget {
         chromeState.workspaceLayoutMode == WorkspaceLayoutMode.expose;
   }
 
-  List<AssetWindowState> _sortedWorkspaceWindows(WorkspaceState workspace, {required bool isExposeMode}) {
+  List<WorkspaceWindowState> _sortedWorkspaceWindows(WorkspaceState workspace, {required bool isExposeMode}) {
     final windows = [...workspace.windows];
     if (isExposeMode) {
       windows.sort((a, b) => a.asset.filename.compareTo(b.asset.filename));
@@ -168,17 +168,17 @@ class SerenityWorkspaceScreen extends StatelessWidget {
     return windows;
   }
 
-  String? _focusedWindowIdForCanvas(List<AssetWindowState> windows, {required bool isExposeMode}) {
+  String? _focusedWindowIdForCanvas(List<WorkspaceWindowState> windows, {required bool isExposeMode}) {
     if (windows.isEmpty || isExposeMode) {
       return null;
     }
     return windows.last.asset.id;
   }
 
-  SerenityWorkspaceCanvasViewModel _buildWorkspaceCanvasViewModel(WorkspaceState workspace) {
+  WorkspaceCanvasViewModel _buildWorkspaceCanvasViewModel(WorkspaceState workspace) {
     final isExposeMode = _isExposeModeForWorkspace(workspace);
     final windows = _sortedWorkspaceWindows(workspace, isExposeMode: isExposeMode);
-    return SerenityWorkspaceCanvasViewModel(
+    return WorkspaceCanvasViewModel(
       workspace: workspace,
       isExposeMode: isExposeMode,
       windows: windows,
@@ -188,21 +188,21 @@ class SerenityWorkspaceScreen extends StatelessWidget {
     );
   }
 
-  bool _isWindowLoaded(SerenityLoadPlan loadPlan, AssetWindowState window) {
+  bool _isWindowLoaded(MediaLoadPlan loadPlan, WorkspaceWindowState window) {
     return loadPlan.loadedAssetIds.contains(window.asset.id);
   }
 
-  VoidCallback? _showInFinderCallbackForWindow(AssetWindowState window) {
+  VoidCallback? _showInFinderCallbackForWindow(WorkspaceWindowState window) {
     return window.asset.filePath == null ? null : () => unawaited(actions.revealAssetInFinder(window.asset));
   }
 
-  VoidCallback? _restorePreviousZOrderCallbackForWindow(AssetWindowState window) {
+  VoidCallback? _restorePreviousZOrderCallbackForWindow(WorkspaceWindowState window) {
     return windowInteractionState.previousWindowZOrders.containsKey(window.asset.id)
         ? () => actions.restorePreviousWindowZOrder(window.asset.id)
         : null;
   }
 
-  void _handleFreeformWindowTap(AssetWindowState window) {
+  void _handleFreeformWindowTap(WorkspaceWindowState window) {
     if (windowInteractionState.pinnedHoverWindowId == window.asset.id) {
       actions.clearPinnedHoverWindow();
       return;
@@ -218,7 +218,7 @@ class SerenityWorkspaceScreen extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [SerenityTheme.background, SerenityTheme.backgroundShade],
+            colors: [AppTheme.background, AppTheme.backgroundShade],
           ),
         ),
       ),
@@ -226,15 +226,15 @@ class SerenityWorkspaceScreen extends StatelessWidget {
   }
 
   Widget _buildFreeformWindow(
-    SerenityWorkspaceCanvasViewModel canvasViewModel,
-    AssetWindowState window,
+    WorkspaceCanvasViewModel canvasViewModel,
+    WorkspaceWindowState window,
     Size viewportSize,
   ) {
     final workspace = canvasViewModel.workspace;
     final screenOffset = workspaceScreenOffsetForWindow(workspace, window, viewportSize);
     final isLoaded = _isWindowLoaded(canvasViewModel.loadPlan, window);
     final sharedVideoState = sharedVideoLookup(window, isLoaded: isLoaded);
-    final windowViewModel = SerenityWindowFrameViewModel(
+    final windowViewModel = WindowFrameViewModel(
       window: window,
       isLoaded: isLoaded,
       sharedVideoController: sharedVideoState?.controller,
@@ -260,7 +260,7 @@ class SerenityWorkspaceScreen extends StatelessWidget {
         child: SizedBox(
           width: window.size.width,
           height: window.size.height,
-          child: SerenityWindowFrame(
+          child: WindowFrame(
             viewModel: windowViewModel,
             onTap: () => _handleFreeformWindowTap(window),
             onPinnedHoverRequested: () => actions.setPinnedHoverWindow(window.asset.id),
@@ -291,7 +291,7 @@ class SerenityWorkspaceScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFreeformWorkspaceViewport(SerenityWorkspaceCanvasViewModel canvasViewModel) {
+  Widget _buildFreeformWorkspaceViewport(WorkspaceCanvasViewModel canvasViewModel) {
     return Positioned.fill(
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -324,7 +324,7 @@ class SerenityWorkspaceScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildExposeWindowCard(SerenityWindowLayout layout, SerenityLoadPlan loadPlan) {
+  Widget _buildExposeWindowCard(SerenityWindowLayout layout, MediaLoadPlan loadPlan) {
     final window = layout.window;
     final isLoaded = _isWindowLoaded(loadPlan, window);
     final sharedVideoState = sharedVideoLookup(window, isLoaded: isLoaded);
@@ -351,7 +351,7 @@ class SerenityWorkspaceScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildExposeWorkspaceViewport(List<AssetWindowState> windows, SerenityLoadPlan loadPlan) {
+  Widget _buildExposeWorkspaceViewport(List<WorkspaceWindowState> windows, MediaLoadPlan loadPlan) {
     return Positioned.fill(
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -388,7 +388,7 @@ class SerenityWorkspaceScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildWorkspaceCanvasLayers(BuildContext context, SerenityWorkspaceCanvasViewModel canvasViewModel) {
+  Widget _buildWorkspaceCanvasLayers(BuildContext context, WorkspaceCanvasViewModel canvasViewModel) {
     return Stack(
       children: [
         _buildWorkspaceCanvasBackground(),

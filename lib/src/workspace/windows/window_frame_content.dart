@@ -6,8 +6,8 @@ import 'package:serenity_viewer/src/workspace/windows/window_zoom_update.dart';
 import 'package:serenity_viewer/src/media/assets/media_canvas.dart';
 import 'package:serenity_viewer/src/media/assets/media_preview_transforms.dart';
 
-class SerenityWindowFrameContent extends StatelessWidget {
-  const SerenityWindowFrameContent({
+class WindowFrameContent extends StatelessWidget {
+  const WindowFrameContent({
     super.key,
     required this.viewModel,
     required this.showExpandedVideoControls,
@@ -22,7 +22,7 @@ class SerenityWindowFrameContent extends StatelessWidget {
     required this.onCycleVideoPlaybackSpeed,
   });
 
-  final SerenityWindowFrameViewModel viewModel;
+  final WindowFrameViewModel viewModel;
   final bool showExpandedVideoControls;
   final bool shrinkContent;
   final double inset;
@@ -41,7 +41,7 @@ class SerenityWindowFrameContent extends StatelessWidget {
     return previewWindowScaleForInset(viewModel.window, inset);
   }
 
-  AssetWindowState _windowForHoverPreview() {
+  WorkspaceWindowState _windowForHoverPreview() {
     final scale = _hoverPreviewScale();
     return scalePreviewWindow(viewModel.window, scale);
   }
@@ -55,7 +55,7 @@ class SerenityWindowFrameContent extends StatelessWidget {
     return Positioned.fill(
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
-        child: SerenityMediaCanvas(
+        child: MediaCanvas(
           key: ValueKey(viewModel.window.asset.id),
           window: _windowForHoverPreview(),
           isLoaded: viewModel.isLoaded,

@@ -5,8 +5,8 @@ import 'package:serenity_viewer/src/environments/session/session_state.dart';
 import 'package:serenity_viewer/src/media/assets/workspace_media_counts.dart';
 import 'package:serenity_viewer/src/workspace/workspace_state.dart';
 
-SerenityLoadPlan buildWorkspaceLoadPlan({
-  required SerenitySessionState session,
+MediaLoadPlan buildWorkspaceLoadPlan({
+  required SessionState session,
   required WorkspaceState? activeWorkspace,
 }) {
   final loadedAssetIds = <String>{};
@@ -14,7 +14,7 @@ SerenityLoadPlan buildWorkspaceLoadPlan({
   var loadedShortVideos = 0;
   var loadedLongVideos = 0;
 
-  void retainWindow(AssetWindowState window) {
+  void retainWindow(WorkspaceWindowState window) {
     if (!loadedAssetIds.add(window.asset.id)) {
       return;
     }
@@ -34,7 +34,7 @@ SerenityLoadPlan buildWorkspaceLoadPlan({
   }
 
   if (activeWorkspace == null) {
-    return const SerenityLoadPlan(loadedAssetIds: {}, loadedImages: 0, loadedShortVideos: 0, loadedLongVideos: 0);
+    return const MediaLoadPlan(loadedAssetIds: {}, loadedImages: 0, loadedShortVideos: 0, loadedLongVideos: 0);
   }
 
   final activeWorkspaceId = activeWorkspace.id;
@@ -70,7 +70,7 @@ SerenityLoadPlan buildWorkspaceLoadPlan({
     }
   }
 
-  return SerenityLoadPlan(
+  return MediaLoadPlan(
     loadedAssetIds: loadedAssetIds,
     loadedImages: loadedImages,
     loadedShortVideos: loadedShortVideos,
@@ -78,7 +78,7 @@ SerenityLoadPlan buildWorkspaceLoadPlan({
   );
 }
 
-int unloadedWorkspaceWindowCount(WorkspaceState workspace, SerenityLoadPlan loadPlan) {
+int unloadedWorkspaceWindowCount(WorkspaceState workspace, MediaLoadPlan loadPlan) {
   return workspace.windows.where((window) => !loadPlan.loadedAssetIds.contains(window.asset.id)).length;
 }
 

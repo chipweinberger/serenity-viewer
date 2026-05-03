@@ -13,8 +13,8 @@ import 'package:serenity_viewer/src/environments/session/session_state.dart';
 import 'package:serenity_viewer/src/workspace/workspace_state.dart';
 import 'package:serenity_viewer/src/environments/session/shell_persistence_state.dart';
 
-class SerenitySessionPersistenceBridge {
-  SerenitySessionPersistenceBridge({
+class SessionPersistenceBridge {
+  SessionPersistenceBridge({
     required this.persistenceState,
     required this.sessionController,
     required this.isRunningInWidgetTest,
@@ -24,12 +24,12 @@ class SerenitySessionPersistenceBridge {
     required this.windowTitle,
   });
 
-  final SerenityShellPersistenceState persistenceState;
-  final SerenitySessionController sessionController;
+  final ShellPersistenceState persistenceState;
+  final SessionController sessionController;
   final bool isRunningInWidgetTest;
   final bool Function() mounted;
-  final SerenitySessionState Function() seedSession;
-  final SerenityEnvironmentCoordinator Function() environmentCoordinator;
+  final SessionState Function() seedSession;
+  final EnvironmentCoordinator Function() environmentCoordinator;
   final String Function() windowTitle;
 
   Future<Directory> thumbnailDirectory() async {
@@ -159,7 +159,7 @@ class SerenitySessionPersistenceBridge {
     }
   }
 
-  Future<SerenitySessionState> _sessionWithRefreshedBookmarks(SerenitySessionState session) async {
+  Future<SessionState> _sessionWithRefreshedBookmarks(SessionState session) async {
     if (isRunningInWidgetTest || !Platform.isMacOS) {
       return session;
     }
@@ -167,7 +167,7 @@ class SerenitySessionPersistenceBridge {
     var changed = false;
     final nextWorkspaces = <WorkspaceState>[];
     for (final workspace in session.workspaces) {
-      final nextWindows = <AssetWindowState>[];
+      final nextWindows = <WorkspaceWindowState>[];
       for (final window in workspace.windows) {
         final asset = window.asset;
         final path = asset.filePath;

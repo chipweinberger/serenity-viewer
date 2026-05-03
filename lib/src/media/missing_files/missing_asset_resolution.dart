@@ -28,8 +28,8 @@ Future<String?> locateMissingAssetFile({
   return null;
 }
 
-Future<SerenitySessionState> resolveMissingAssetsInSession({
-  required SerenitySessionState session,
+Future<SessionState> resolveMissingAssetsInSession({
+  required SessionState session,
   required BookmarkResolver resolveBookmark,
   required BookmarkCreator createBookmark,
 }) async {
@@ -41,7 +41,7 @@ Future<SerenitySessionState> resolveMissingAssetsInSession({
 
   final nextWorkspaces = <WorkspaceState>[];
   for (final workspace in session.workspaces) {
-    final nextWindows = <AssetWindowState>[];
+    final nextWindows = <WorkspaceWindowState>[];
     for (final window in workspace.windows) {
       final path = window.asset.filePath;
       if (path == null || path.isEmpty) {

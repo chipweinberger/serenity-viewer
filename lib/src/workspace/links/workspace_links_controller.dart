@@ -6,8 +6,8 @@ import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_link.dart';
 import 'package:serenity_viewer/src/workspace/workspace_state.dart';
 
-class SerenityWorkspaceLinksController {
-  SerenityWorkspaceLinksController({
+class WorkspaceLinksController {
+  WorkspaceLinksController({
     required this.screen,
     required this.hasSession,
     required this.activeWorkspace,

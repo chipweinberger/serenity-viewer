@@ -1,6 +1,6 @@
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 
-class SerenityChromeState {
+class ChromeState {
   SerenityScreen screen = SerenityScreen.workspace;
   WorkspaceLayoutMode workspaceLayoutMode = WorkspaceLayoutMode.freeform;
   WorkspaceSort workspaceSort = WorkspaceSort.recentlyViewed;

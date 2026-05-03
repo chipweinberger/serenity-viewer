@@ -5,16 +5,16 @@ import 'package:serenity_viewer/src/workspace/workspace_state.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_interaction_state.dart';
 
-class SerenityChromeController {
-  SerenityChromeController({
+class ChromeController {
+  ChromeController({
     required this.chromeState,
     required this.windowInteractionState,
     required this.commitStateChange,
     required this.refreshWorkspaceTracking,
   });
 
-  final SerenityChromeState chromeState;
-  final SerenityWindowInteractionState windowInteractionState;
+  final ChromeState chromeState;
+  final WindowInteractionState windowInteractionState;
   final StateSetter commitStateChange;
   final VoidCallback refreshWorkspaceTracking;
 
@@ -111,14 +111,14 @@ class SerenityChromeController {
     });
   }
 
-  SerenityWorkspaceSwitchTarget workspaceSwitchTarget({
+  WorkspaceSwitchTarget workspaceSwitchTarget({
     required List<WorkspaceState> openWorkspaces,
     required String activeWorkspaceId,
     required int direction,
   }) {
     final tabCount = openWorkspaces.length + 1;
     if (tabCount == 0) {
-      return const SerenityWorkspaceSwitchTarget.showLibrary();
+      return const WorkspaceSwitchTarget.showLibrary();
     }
 
     final currentIndex = isLibraryScreen
@@ -128,10 +128,10 @@ class SerenityChromeController {
     final safeIndex = nextIndex < 0 ? tabCount - 1 : nextIndex;
 
     if (safeIndex == 0) {
-      return const SerenityWorkspaceSwitchTarget.showLibrary();
+      return const WorkspaceSwitchTarget.showLibrary();
     }
 
-    return SerenityWorkspaceSwitchTarget.showWorkspace(openWorkspaces[safeIndex - 1].id);
+    return WorkspaceSwitchTarget.showWorkspace(openWorkspaces[safeIndex - 1].id);
   }
 
   void _applyUiState({
@@ -170,9 +170,9 @@ class SerenityChromeController {
   }
 }
 
-class SerenityWorkspaceSwitchTarget {
-  const SerenityWorkspaceSwitchTarget.showLibrary() : workspaceId = null;
-  const SerenityWorkspaceSwitchTarget.showWorkspace(this.workspaceId);
+class WorkspaceSwitchTarget {
+  const WorkspaceSwitchTarget.showLibrary() : workspaceId = null;
+  const WorkspaceSwitchTarget.showWorkspace(this.workspaceId);
 
   final String? workspaceId;
 

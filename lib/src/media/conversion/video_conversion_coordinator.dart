@@ -10,8 +10,8 @@ import 'package:serenity_viewer/src/media/conversion/settings_and_video_models.d
 import 'package:serenity_viewer/src/workspace/workspace_state.dart';
 import 'package:serenity_viewer/src/media/assets/media_zoom_utils.dart';
 
-class SerenityVideoConversionCoordinator {
-  SerenityVideoConversionCoordinator({
+class VideoConversionCoordinator {
+  VideoConversionCoordinator({
     required this.context,
     required this.mounted,
     required this.showMessage,
@@ -26,8 +26,8 @@ class SerenityVideoConversionCoordinator {
   final BuildContext Function() context;
   final bool Function() mounted;
   final ValueChanged<String> showMessage;
-  final SerenityMediaBridge mediaBridge;
-  final SerenitySessionPersistenceBridge sessionPersistenceBridge;
+  final MediaBridge mediaBridge;
+  final SessionPersistenceBridge sessionPersistenceBridge;
   final WorkspaceState? Function() activeWorkspace;
   final void Function(WorkspaceState workspace) replaceWorkspace;
   final int Function(String value) colorFromDigest;

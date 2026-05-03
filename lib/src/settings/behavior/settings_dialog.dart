@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
 import 'package:serenity_viewer/src/media/conversion/settings_and_video_models.dart';
 
-class SerenitySettingsDialog extends StatefulWidget {
-  const SerenitySettingsDialog({
+class SettingsDialog extends StatefulWidget {
+  const SettingsDialog({
     super.key,
     required this.imageLoadLimit,
     required this.shortVideoLoadLimit,
@@ -24,10 +24,10 @@ class SerenitySettingsDialog extends StatefulWidget {
   final Map<String, int> folderPopularity;
 
   @override
-  State<SerenitySettingsDialog> createState() => _SerenitySettingsDialogState();
+  State<SettingsDialog> createState() => _SerenitySettingsDialogState();
 }
 
-class _SerenitySettingsDialogState extends State<SerenitySettingsDialog> {
+class _SerenitySettingsDialogState extends State<SettingsDialog> {
   late final TextEditingController _imageController;
   late final TextEditingController _shortVideoController;
   late final TextEditingController _longVideoController;
@@ -52,12 +52,12 @@ class _SerenitySettingsDialogState extends State<SerenitySettingsDialog> {
     super.dispose();
   }
 
-  SerenitySettingsResult _buildResult() {
+  SettingsResult _buildResult() {
     final imageLimit = int.tryParse(_imageController.text.trim());
     final shortVideoLimit = int.tryParse(_shortVideoController.text.trim());
     final longVideoLimit = int.tryParse(_longVideoController.text.trim());
     if (imageLimit == null || shortVideoLimit == null || longVideoLimit == null) {
-      return SerenitySettingsResult(
+      return SettingsResult(
         imageLoadLimit: widget.imageLoadLimit,
         shortVideoLoadLimit: widget.shortVideoLoadLimit,
         longVideoLoadLimit: widget.longVideoLoadLimit,
@@ -66,7 +66,7 @@ class _SerenitySettingsDialogState extends State<SerenitySettingsDialog> {
       );
     }
 
-    return SerenitySettingsResult(
+    return SettingsResult(
       imageLoadLimit: imageLimit.clamp(1, 5000),
       shortVideoLoadLimit: shortVideoLimit.clamp(1, 5000),
       longVideoLoadLimit: longVideoLimit.clamp(1, 5000),
@@ -108,10 +108,10 @@ class _SerenitySettingsDialogState extends State<SerenitySettingsDialog> {
           label,
           style: Theme.of(
             context,
-          ).textTheme.titleSmall?.copyWith(color: SerenityTheme.textPrimary, fontWeight: FontWeight.w800),
+          ).textTheme.titleSmall?.copyWith(color: AppTheme.textPrimary, fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 4),
-        Text(help, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: SerenityTheme.textMuted, height: 1.3)),
+        Text(help, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppTheme.textMuted, height: 1.3)),
         const SizedBox(height: 8),
         SizedBox(
           width: 160,
@@ -125,15 +125,15 @@ class _SerenitySettingsDialogState extends State<SerenitySettingsDialog> {
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(color: SerenityTheme.border.withValues(alpha: 0.16)),
+                borderSide: BorderSide(color: AppTheme.border.withValues(alpha: 0.16)),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(color: SerenityTheme.border.withValues(alpha: 0.16)),
+                borderSide: BorderSide(color: AppTheme.border.withValues(alpha: 0.16)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(color: SerenityTheme.accent.withValues(alpha: 0.42)),
+                borderSide: BorderSide(color: AppTheme.accent.withValues(alpha: 0.42)),
               ),
             ),
           ),
@@ -165,7 +165,7 @@ class _SerenitySettingsDialogState extends State<SerenitySettingsDialog> {
               ),
               borderRadius: BorderRadius.circular(28),
               border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
-              boxShadow: const [BoxShadow(color: SerenityTheme.shadow, blurRadius: 28, offset: Offset(0, 18))],
+              boxShadow: const [BoxShadow(color: AppTheme.shadow, blurRadius: 28, offset: Offset(0, 18))],
             ),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(22, 20, 22, 18),
@@ -182,7 +182,7 @@ class _SerenitySettingsDialogState extends State<SerenitySettingsDialog> {
                             Text(
                               'Maximum loaded assets',
                               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                color: SerenityTheme.textPrimary,
+                                color: AppTheme.textPrimary,
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
@@ -191,7 +191,7 @@ class _SerenitySettingsDialogState extends State<SerenitySettingsDialog> {
                               'Serenity unloads assets from less recent workspaces first when these limits are reached.',
                               style: Theme.of(
                                 context,
-                              ).textTheme.bodyMedium?.copyWith(color: SerenityTheme.textMuted, height: 1.35),
+                              ).textTheme.bodyMedium?.copyWith(color: AppTheme.textMuted, height: 1.35),
                             ),
                           ],
                         ),
@@ -227,7 +227,7 @@ class _SerenitySettingsDialogState extends State<SerenitySettingsDialog> {
                             Text(
                               'Known folders',
                               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                color: SerenityTheme.textPrimary,
+                                color: AppTheme.textPrimary,
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
@@ -236,7 +236,7 @@ class _SerenitySettingsDialogState extends State<SerenitySettingsDialog> {
                               'Serenity searches these folders for missing files.',
                               style: Theme.of(
                                 context,
-                              ).textTheme.bodySmall?.copyWith(color: SerenityTheme.textMuted, height: 1.3),
+                              ).textTheme.bodySmall?.copyWith(color: AppTheme.textMuted, height: 1.3),
                             ),
                           ],
                         ),
@@ -253,7 +253,7 @@ class _SerenitySettingsDialogState extends State<SerenitySettingsDialog> {
                   if (sortedFolders.isEmpty)
                     Text(
                       'No known folders yet.',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: SerenityTheme.textMuted),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppTheme.textMuted),
                     )
                   else
                     for (final folder in sortedFolders)
@@ -269,7 +269,7 @@ class _SerenitySettingsDialogState extends State<SerenitySettingsDialog> {
                                   Text(
                                     folder,
                                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      color: SerenityTheme.textPrimary,
+                                      color: AppTheme.textPrimary,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -278,7 +278,7 @@ class _SerenitySettingsDialogState extends State<SerenitySettingsDialog> {
                                     'Recovery score ${_folderPopularity[folder] ?? 0}',
                                     style: Theme.of(
                                       context,
-                                    ).textTheme.bodySmall?.copyWith(color: SerenityTheme.textMuted),
+                                    ).textTheme.bodySmall?.copyWith(color: AppTheme.textMuted),
                                   ),
                                 ],
                               ),

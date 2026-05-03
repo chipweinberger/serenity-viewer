@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class SerenityTheme {
+class AppTheme {
   static const Color background = Color(0xFFEEE3CE);
   static const Color backgroundShade = Color(0xFFD7C8B1);
   static const Color panel = Color(0xFFF8F1E5);

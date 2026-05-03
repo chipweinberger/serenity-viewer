@@ -28,7 +28,7 @@ class ExposeWindowCard extends StatefulWidget {
     required this.onRemove,
   });
 
-  final AssetWindowState window;
+  final WorkspaceWindowState window;
   final bool isLoaded;
   final VideoPlayerController? sharedVideoController;
   final Future<void>? sharedVideoInitialization;
@@ -70,7 +70,7 @@ class _ExposeWindowCardState extends State<ExposeWindowCard> {
     _isCommandPressed = isCommandPressed(pressedKeys);
   }
 
-  AssetWindowState _windowForPreview(Size previewSize) {
+  WorkspaceWindowState _windowForPreview(Size previewSize) {
     final scale = previewWindowScaleForSize(widget.window, previewSize);
     return scalePreviewWindow(widget.window, scale, size: previewSize);
   }
@@ -80,7 +80,7 @@ class _ExposeWindowCardState extends State<ExposeWindowCard> {
       builder: (context, constraints) {
         final previewWindow = _windowForPreview(constraints.biggest);
         return IgnorePointer(
-          child: SerenityMediaCanvas(
+          child: MediaCanvas(
             window: previewWindow,
             isLoaded: widget.isLoaded,
             sharedVideoController: widget.sharedVideoController,
@@ -232,7 +232,7 @@ class _ExposeWindowCardState extends State<ExposeWindowCard> {
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: borderRadius,
-                  boxShadow: const [BoxShadow(color: SerenityTheme.shadow, blurRadius: 18, offset: Offset(0, 10))],
+                  boxShadow: const [BoxShadow(color: AppTheme.shadow, blurRadius: 18, offset: Offset(0, 10))],
                 ),
                 child: ClipRRect(
                   borderRadius: borderRadius,

@@ -12,8 +12,8 @@ import 'package:serenity_viewer/src/environments/persistence/thumbnail_refresh_s
 
 typedef SerenitySessionStateCommit = void Function(VoidCallback update);
 
-class SerenitySessionController {
-  SerenitySessionController({
+class SessionController {
+  SessionController({
     required this.persistenceState,
     required this.chromeState,
     required this.thumbnailRefreshState,
@@ -22,14 +22,14 @@ class SerenitySessionController {
     required this.syncWindowTitle,
   });
 
-  final SerenityShellPersistenceState persistenceState;
-  final SerenityChromeState chromeState;
-  final SerenityThumbnailRefreshState thumbnailRefreshState;
+  final ShellPersistenceState persistenceState;
+  final ChromeState chromeState;
+  final ThumbnailRefreshState thumbnailRefreshState;
   final SerenitySessionStateCommit commitStateChange;
   final VoidCallback refreshWorkspaceTracking;
   final Future<void> Function() syncWindowTitle;
 
-  void updateSession(SerenitySessionState nextSession) {
+  void updateSession(SessionState nextSession) {
     commitStateChange(() {
       persistenceState.session = nextSession;
     });
@@ -40,7 +40,7 @@ class SerenitySessionController {
 
   void replaceWorkspace(WorkspaceState nextWorkspace, {bool queueThumbnail = true}) {
     final session = persistenceState.session!;
-    updateSession(SerenityWorkspaceMutations.replaceWorkspace(session, nextWorkspace));
+    updateSession(WorkspaceMutations.replaceWorkspace(session, nextWorkspace));
     if (queueThumbnail) {
       thumbnailRefreshState.dirtyWorkspaces.add(nextWorkspace.id);
     }
@@ -54,7 +54,7 @@ class SerenitySessionController {
     }
   }
 
-  void restoreWidgetTestSession(SerenitySessionState seedSession) {
+  void restoreWidgetTestSession(SessionState seedSession) {
     commitStateChange(() {
       persistenceState.session = seedSession;
       persistenceState.isLoading = false;
@@ -81,7 +81,7 @@ class SerenitySessionController {
     persistenceState.isPromptingForStartupEnvironment = isPrompting;
   }
 
-  void applyLoadedEnvironment({required SerenitySessionState session, required String path}) {
+  void applyLoadedEnvironment({required SessionState session, required String path}) {
     commitStateChange(() {
       persistenceState.session = session;
       persistenceState.currentEnvironmentPath = path;
@@ -95,7 +95,7 @@ class SerenitySessionController {
     unawaited(syncWindowTitle());
   }
 
-  void applyCreatedEnvironment({required SerenitySessionState session, required String path}) {
+  void applyCreatedEnvironment({required SessionState session, required String path}) {
     commitStateChange(() {
       persistenceState.session = session;
       persistenceState.currentEnvironmentPath = path;
@@ -123,8 +123,8 @@ class SerenitySessionController {
   }
 
   void applySavedSessionState({
-    required SerenitySessionState originalSession,
-    required SerenitySessionState savedSession,
+    required SessionState originalSession,
+    required SessionState savedSession,
     required bool mounted,
   }) {
     if (mounted) {

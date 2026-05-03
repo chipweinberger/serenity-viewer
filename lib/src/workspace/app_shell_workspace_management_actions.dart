@@ -2,7 +2,7 @@
 
 part of 'package:serenity_viewer/src/app/app_shell.dart';
 
-extension _SerenityShellWorkspaceManagement on _SerenityShellState {
+extension _AppShellWorkspaceManagementActions on _AppShellState {
   int _nextWorkspaceOrdinal() {
     var maxOrdinal = 0;
     final idPattern = RegExp(r'^ws-(\d+)$');

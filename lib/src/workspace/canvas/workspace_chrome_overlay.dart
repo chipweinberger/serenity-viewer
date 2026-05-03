@@ -7,8 +7,8 @@ import 'package:serenity_viewer/src/workspace/workspace_state.dart';
 import 'package:serenity_viewer/src/settings/appearance/glass_chip.dart';
 
 @immutable
-class SerenityWorkspaceChromeOverlayActions {
-  const SerenityWorkspaceChromeOverlayActions({
+class WorkspaceChromeOverlayActions {
+  const WorkspaceChromeOverlayActions({
     required this.onShowWorkspaceOverview,
     required this.onSetDraggingTabWorkspaceId,
     required this.onReorderOpenWorkspace,
@@ -27,8 +27,8 @@ class SerenityWorkspaceChromeOverlayActions {
   final VoidCallback onCreateWorkspace;
 }
 
-class SerenityWorkspaceChromeOverlay extends StatelessWidget {
-  const SerenityWorkspaceChromeOverlay({
+class WorkspaceChromeOverlay extends StatelessWidget {
+  const WorkspaceChromeOverlay({
     super.key,
     required this.windowTitle,
     required this.openWorkspaces,
@@ -47,7 +47,7 @@ class SerenityWorkspaceChromeOverlay extends StatelessWidget {
   final bool shouldMoveSelectedWindows;
   final String? draggingTabWorkspaceId;
   final ScrollController tabScrollController;
-  final SerenityWorkspaceChromeOverlayActions actions;
+  final WorkspaceChromeOverlayActions actions;
 
   Widget _buildWindowTitleLabel(BuildContext context) {
     return IgnorePointer(
@@ -56,7 +56,7 @@ class SerenityWorkspaceChromeOverlay extends StatelessWidget {
         child: DefaultTextStyle(
           style: Theme.of(
             context,
-          ).textTheme.labelMedium!.copyWith(color: SerenityTheme.textMuted, fontWeight: FontWeight.w600),
+          ).textTheme.labelMedium!.copyWith(color: AppTheme.textMuted, fontWeight: FontWeight.w600),
           child: Text(windowTitle, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
         ),
       ),
@@ -71,7 +71,7 @@ class SerenityWorkspaceChromeOverlay extends StatelessWidget {
       scale: isDropTarget ? 1.04 : 1,
       child: Opacity(
         opacity: draggingTabWorkspaceId == workspace.id ? 0.7 : 1,
-        child: SerenityGlassChip(
+        child: GlassChip(
           selected: isSelected,
           onTap: () {
             if (shouldMoveSelectedWindows) {
@@ -87,7 +87,7 @@ class SerenityWorkspaceChromeOverlay extends StatelessWidget {
               borderRadius: BorderRadius.circular(999),
               child: Padding(
                 padding: const EdgeInsets.all(2),
-                child: Icon(Icons.close_rounded, size: 14, color: isSelected ? Colors.white : SerenityTheme.textMuted),
+                child: Icon(Icons.close_rounded, size: 14, color: isSelected ? Colors.white : AppTheme.textMuted),
               ),
             ),
           ),
@@ -105,7 +105,7 @@ class SerenityWorkspaceChromeOverlay extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            SerenityGlassChip(
+            GlassChip(
               selected: isLibraryScreen,
               onTap: actions.onShowWorkspaceOverview,
               child: const Row(
@@ -143,7 +143,7 @@ class SerenityWorkspaceChromeOverlay extends StatelessWidget {
               ),
             Padding(
               padding: const EdgeInsets.only(left: 10),
-              child: SerenityGlassChip(
+              child: GlassChip(
                 onTap: actions.onCreateWorkspace,
                 child: const Icon(Icons.add_rounded, size: 16),
               ),

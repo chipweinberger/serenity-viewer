@@ -13,6 +13,6 @@ class RecentlyClosedWindowEntry {
 
   final String workspaceId;
   final String workspaceName;
-  final AssetWindowState window;
+  final WorkspaceWindowState window;
   final DateTime closedAt;
 }

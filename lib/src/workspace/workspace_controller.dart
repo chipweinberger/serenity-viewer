@@ -21,8 +21,8 @@ typedef SerenityWorkspaceReplace = void Function(WorkspaceState workspace, {bool
 typedef SerenityWorkspaceViewportSetter =
     void Function({required String workspaceId, Offset? center, double? zoom, bool queueThumbnail});
 
-class SerenityWorkspaceController {
-  SerenityWorkspaceController({
+class WorkspaceController {
+  WorkspaceController({
     required this.chromeState,
     required this.windowInteractionState,
     required this.workspaceViewportState,
@@ -34,15 +34,15 @@ class SerenityWorkspaceController {
 
   static const Size collateTargetBox = Size(700, 700);
 
-  final SerenityChromeState chromeState;
-  final SerenityWindowInteractionState windowInteractionState;
-  final SerenityWorkspaceViewportState workspaceViewportState;
+  final ChromeState chromeState;
+  final WindowInteractionState windowInteractionState;
+  final WorkspaceViewportState workspaceViewportState;
   final SerenityWorkspaceStateCommit commitInteractionState;
   final SerenityWorkspaceReplace replaceWorkspace;
   final SerenityWorkspaceViewportSetter setWorkspaceViewport;
   final Future<void> Function() refreshActiveWorkspaceThumbnail;
 
-  AssetWindowState? focusedWindowOrNull(WorkspaceState? workspace) {
+  WorkspaceWindowState? focusedWindowOrNull(WorkspaceState? workspace) {
     if (workspace == null || workspace.windows.isEmpty) {
       return null;
     }
@@ -112,7 +112,7 @@ class SerenityWorkspaceController {
   }
 
   void focusWindow(WorkspaceState workspace, String windowId) {
-    final result = SerenityWorkspaceMutations.focusWindow(workspace, windowId);
+    final result = WorkspaceMutations.focusWindow(workspace, windowId);
     if (identical(result.workspace, workspace)) {
       return;
     }
@@ -130,13 +130,13 @@ class SerenityWorkspaceController {
     }
 
     replaceWorkspace(
-      SerenityWorkspaceMutations.restorePreviousWindowZOrder(workspace, windowId, previousZ),
+      WorkspaceMutations.restorePreviousWindowZOrder(workspace, windowId, previousZ),
       queueThumbnail: true,
     );
   }
 
   void moveWindow(WorkspaceState workspace, String windowId, Offset delta) {
-    replaceWorkspace(SerenityWorkspaceMutations.moveWindow(workspace, windowId, delta), queueThumbnail: true);
+    replaceWorkspace(WorkspaceMutations.moveWindow(workspace, windowId, delta), queueThumbnail: true);
   }
 
   bool canCollateWorkspaceWindows(WorkspaceState? workspace) {
@@ -153,18 +153,18 @@ class SerenityWorkspaceController {
 
   void collateWorkspaceWindows(WorkspaceState workspace) {
     replaceWorkspace(
-      SerenityWorkspaceMutations.collateWorkspaceWindows(workspace, targetBox: collateTargetBox),
+      WorkspaceMutations.collateWorkspaceWindows(workspace, targetBox: collateTargetBox),
       queueThumbnail: true,
     );
   }
 
   void resizeWindow(WorkspaceState workspace, String windowId, WindowResizeHandle handle, Offset delta) {
-    replaceWorkspace(SerenityWorkspaceMutations.resizeWindow(workspace, windowId, handle, delta), queueThumbnail: true);
+    replaceWorkspace(WorkspaceMutations.resizeWindow(workspace, windowId, handle, delta), queueThumbnail: true);
   }
 
   void transformWindowFromTrackpad(WorkspaceState workspace, String windowId, double scaleDelta) {
     replaceWorkspace(
-      SerenityWorkspaceMutations.transformWindowFromTrackpad(workspace, windowId, scaleDelta),
+      WorkspaceMutations.transformWindowFromTrackpad(workspace, windowId, scaleDelta),
       queueThumbnail: true,
     );
   }
@@ -174,7 +174,7 @@ class SerenityWorkspaceController {
       return;
     }
 
-    replaceWorkspace(SerenityWorkspaceMutations.fitWindowToContent(workspace, windowId), queueThumbnail: true);
+    replaceWorkspace(WorkspaceMutations.fitWindowToContent(workspace, windowId), queueThumbnail: true);
   }
 
   void fitWorkspaceViewportToContent(WorkspaceState? workspace) {
@@ -190,7 +190,7 @@ class SerenityWorkspaceController {
     }
 
     replaceWorkspace(
-      SerenityWorkspaceMutations.fitWorkspaceViewportToContent(workspace, workspaceViewportState.viewportSize),
+      WorkspaceMutations.fitWorkspaceViewportToContent(workspace, workspaceViewportState.viewportSize),
       queueThumbnail: true,
     );
   }
@@ -242,7 +242,7 @@ class SerenityWorkspaceController {
     }
 
     workspaceViewportState.gestureAccumulatedPan += event.panDelta;
-    final nextZoom = SerenityWorkspaceMutations.clampWorkspaceZoom(
+    final nextZoom = WorkspaceMutations.clampWorkspaceZoom(
       workspaceViewportState.gestureStartZoom * math.pow(event.scale, 1.15).toDouble(),
     );
     final viewportCenter = viewportSize.center(Offset.zero);
@@ -252,7 +252,7 @@ class SerenityWorkspaceController {
             workspaceViewportState.gestureStartZoom);
     final nextAnchorLocalPoint =
         workspaceViewportState.gestureStartLocalFocalPoint + workspaceViewportState.gestureAccumulatedPan;
-    final nextCenter = SerenityWorkspaceMutations.clampWorkspaceCenter(
+    final nextCenter = WorkspaceMutations.clampWorkspaceCenter(
       center: anchorWorldPoint - ((nextAnchorLocalPoint - viewportCenter) / nextZoom),
       zoom: nextZoom,
       viewportSize: viewportSize,
@@ -267,7 +267,7 @@ class SerenityWorkspaceController {
   }
 
   void setWindowZoom(WorkspaceState workspace, String windowId, WindowZoomUpdate update) {
-    replaceWorkspace(SerenityWorkspaceMutations.setWindowZoom(workspace, windowId, update), queueThumbnail: true);
+    replaceWorkspace(WorkspaceMutations.setWindowZoom(workspace, windowId, update), queueThumbnail: true);
   }
 
   void setVideoPosition(WorkspaceState? workspace, String windowId, int positionMs) {
@@ -281,7 +281,7 @@ class SerenityWorkspaceController {
     }
 
     replaceWorkspace(
-      SerenityWorkspaceMutations.setVideoPosition(workspace, windowId, positionMs),
+      WorkspaceMutations.setVideoPosition(workspace, windowId, positionMs),
       queueThumbnail: false,
     );
   }
@@ -294,7 +294,7 @@ class SerenityWorkspaceController {
       return;
     }
 
-    replaceWorkspace(SerenityWorkspaceMutations.cycleVideoPlaybackSpeed(workspace, windowId), queueThumbnail: false);
+    replaceWorkspace(WorkspaceMutations.cycleVideoPlaybackSpeed(workspace, windowId), queueThumbnail: false);
   }
 
   void setWindowIntrinsicSize(WorkspaceState? workspace, String windowId, Size intrinsicSize) {
@@ -307,7 +307,7 @@ class SerenityWorkspaceController {
     }
 
     replaceWorkspace(
-      SerenityWorkspaceMutations.setWindowIntrinsicSize(workspace, windowId, intrinsicSize),
+      WorkspaceMutations.setWindowIntrinsicSize(workspace, windowId, intrinsicSize),
       queueThumbnail: true,
     );
   }
@@ -330,7 +330,7 @@ class SerenityWorkspaceController {
     });
   }
 
-  void pauseAllVideos(SerenitySessionState? session) {
+  void pauseAllVideos(SessionState? session) {
     if (session == null) {
       return;
     }
@@ -359,7 +359,7 @@ class SerenityWorkspaceController {
     List<RecentlyClosedWindowEntry> recentlyClosedWindows, {
     required int maxRecentlyClosedWindows,
     required WorkspaceState workspace,
-    required AssetWindowState window,
+    required WorkspaceWindowState window,
   }) {
     recentlyClosedWindows.insert(
       0,
@@ -377,19 +377,19 @@ class SerenityWorkspaceController {
   }
 
   void toggleWorkspaceOpen(
-    SerenitySessionState session,
+    SessionState session,
     String workspaceId,
-    void Function(SerenitySessionState) updateSession,
+    void Function(SessionState) updateSession,
   ) {
-    updateSession(SerenityWorkspaceMutations.toggleWorkspaceOpen(session, workspaceId));
+    updateSession(WorkspaceMutations.toggleWorkspaceOpen(session, workspaceId));
   }
 
   void reorderOpenWorkspace(
-    SerenitySessionState? session,
+    SessionState? session,
     List<WorkspaceState> workspaces, {
     required String sourceWorkspaceId,
     required String targetWorkspaceId,
-    required void Function(SerenitySessionState) updateSession,
+    required void Function(SessionState) updateSession,
   }) {
     if (session == null || sourceWorkspaceId == targetWorkspaceId) {
       return;
@@ -397,7 +397,7 @@ class SerenityWorkspaceController {
 
     updateSession(
       session.copyWith(
-        workspaces: SerenityWorkspaceMutations.reorderOpenWorkspaces(
+        workspaces: WorkspaceMutations.reorderOpenWorkspaces(
           workspaces,
           sourceWorkspaceId: sourceWorkspaceId,
           targetWorkspaceId: targetWorkspaceId,
@@ -407,7 +407,7 @@ class SerenityWorkspaceController {
   }
 
   bool canMoveSelectedWindowsToWorkspace({
-    required SerenitySessionState? session,
+    required SessionState? session,
     required WorkspaceState? sourceWorkspace,
     required String destinationWorkspaceId,
   }) {
@@ -424,14 +424,14 @@ class SerenityWorkspaceController {
   }
 
   void moveSelectedExposeWindowsToWorkspace({
-    required SerenitySessionState session,
+    required SessionState session,
     required WorkspaceState sourceWorkspace,
     required WorkspaceState destinationWorkspace,
-    required void Function(SerenitySessionState) updateSession,
+    required void Function(SessionState) updateSession,
     required void Function(String workspaceId, {Duration delay}) queueThumbnailRefresh,
   }) {
     updateSession(
-      SerenityWorkspaceMutations.moveSelectedWindowsToWorkspace(
+      WorkspaceMutations.moveSelectedWindowsToWorkspace(
         session,
         sourceWorkspaceId: sourceWorkspace.id,
         destinationWorkspaceId: destinationWorkspace.id,

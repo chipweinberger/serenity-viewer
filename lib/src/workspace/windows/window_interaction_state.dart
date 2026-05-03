@@ -1,6 +1,6 @@
 import 'dart:async';
 
-class SerenityWindowInteractionState {
+class WindowInteractionState {
   final Map<String, bool> pausedVideoWindows = {};
   final Map<String, int> previousWindowZOrders = {};
   final Set<String> selectedExposeWindowIds = {};

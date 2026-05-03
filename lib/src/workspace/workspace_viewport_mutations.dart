@@ -33,7 +33,7 @@ WorkspaceState _setWorkspaceViewport(
   return workspace.copyWith(viewportCenterDx: nextCenter.dx, viewportCenterDy: nextCenter.dy, viewportZoom: nextZoom);
 }
 
-Rect _workspaceContentBounds(List<AssetWindowState> windows) {
+Rect _workspaceContentBounds(List<WorkspaceWindowState> windows) {
   var minX = windows.first.position.dx;
   var minY = windows.first.position.dy;
   var maxX = windows.first.position.dx + windows.first.size.width;

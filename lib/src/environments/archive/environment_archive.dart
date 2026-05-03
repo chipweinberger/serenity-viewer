@@ -7,15 +7,15 @@ import 'package:serenity_viewer/src/environments/session/session_state.dart';
 import 'package:serenity_viewer/src/workspace/workspace_state.dart';
 
 @immutable
-class SerenityDecodedEnvironment {
-  const SerenityDecodedEnvironment({required this.session, required this.thumbnailBytesByWorkspaceId});
+class DecodedEnvironment {
+  const DecodedEnvironment({required this.session, required this.thumbnailBytesByWorkspaceId});
 
-  final SerenitySessionState session;
+  final SessionState session;
   final Map<String, Uint8List> thumbnailBytesByWorkspaceId;
 }
 
 Uint8List buildEnvironmentArchiveBytes({
-  required SerenitySessionState session,
+  required SessionState session,
   Map<String, List<int>> thumbnailBytesByWorkspaceId = const {},
   DateTime? savedAt,
 }) {
@@ -49,7 +49,7 @@ Uint8List buildEnvironmentArchiveBytes({
   return Uint8List.fromList(ZipEncoder().encode(archive));
 }
 
-SerenityDecodedEnvironment decodeEnvironmentArchiveBytes(List<int> bytes) {
+DecodedEnvironment decodeEnvironmentArchiveBytes(List<int> bytes) {
   final archive = ZipDecoder().decodeBytes(bytes);
   final manifestEntry = archive.findFile('manifest.json');
   if (manifestEntry == null) {
@@ -82,8 +82,8 @@ SerenityDecodedEnvironment decodeEnvironmentArchiveBytes(List<int> bytes) {
     thumbnailBytesByWorkspaceId[workspaceId] = Uint8List.fromList(thumbnailEntry.content as List<int>);
   }
 
-  return SerenityDecodedEnvironment(
-    session: SerenitySessionState.fromManifestJson(manifestJson, workspaces),
+  return DecodedEnvironment(
+    session: SessionState.fromManifestJson(manifestJson, workspaces),
     thumbnailBytesByWorkspaceId: thumbnailBytesByWorkspaceId,
   );
 }

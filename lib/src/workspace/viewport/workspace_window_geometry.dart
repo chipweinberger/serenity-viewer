@@ -24,19 +24,19 @@ Size _windowSizeByFittingAspect({
   final currentAspectRatio = currentSize.width / currentSize.height;
 
   if (currentAspectRatio > aspectRatio) {
-    final nextWidth = math.max(SerenityWorkspaceMutations.minWindowWidth, currentSize.height * aspectRatio);
+    final nextWidth = math.max(WorkspaceMutations.minWindowWidth, currentSize.height * aspectRatio);
     return Size(math.min(currentSize.width, nextWidth), currentSize.height);
   }
 
   if (currentAspectRatio < aspectRatio) {
-    final nextHeight = math.max(SerenityWorkspaceMutations.minWindowHeight, currentSize.width / aspectRatio);
+    final nextHeight = math.max(WorkspaceMutations.minWindowHeight, currentSize.width / aspectRatio);
     return Size(currentSize.width, math.min(currentSize.height, nextHeight));
   }
 
   return currentSize;
 }
 
-_WindowEdges _windowEdges(AssetWindowState window) {
+_WindowEdges _windowEdges(WorkspaceWindowState window) {
   return (
     left: window.position.dx,
     top: window.position.dy,
@@ -100,45 +100,45 @@ _WindowBounds _clampResizedBounds(_WindowEdges edges, WindowResizeHandle handle)
   var bottom = edges.bottom;
 
   var width = right - left;
-  if (width < SerenityWorkspaceMutations.minWindowWidth) {
+  if (width < WorkspaceMutations.minWindowWidth) {
     if (_resizesFromLeft(handle)) {
-      left = right - SerenityWorkspaceMutations.minWindowWidth;
+      left = right - WorkspaceMutations.minWindowWidth;
     } else {
-      right = left + SerenityWorkspaceMutations.minWindowWidth;
+      right = left + WorkspaceMutations.minWindowWidth;
     }
-    width = SerenityWorkspaceMutations.minWindowWidth;
+    width = WorkspaceMutations.minWindowWidth;
   }
 
   var height = bottom - top;
-  if (height < SerenityWorkspaceMutations.minWindowHeight) {
+  if (height < WorkspaceMutations.minWindowHeight) {
     if (_resizesFromTop(handle)) {
-      top = bottom - SerenityWorkspaceMutations.minWindowHeight;
+      top = bottom - WorkspaceMutations.minWindowHeight;
     } else {
-      bottom = top + SerenityWorkspaceMutations.minWindowHeight;
+      bottom = top + WorkspaceMutations.minWindowHeight;
     }
-    height = SerenityWorkspaceMutations.minWindowHeight;
+    height = WorkspaceMutations.minWindowHeight;
   }
 
-  width = width.clamp(SerenityWorkspaceMutations.minWindowWidth, workspaceExtent * 2);
-  height = height.clamp(SerenityWorkspaceMutations.minWindowHeight, workspaceExtent * 2);
+  width = width.clamp(WorkspaceMutations.minWindowWidth, workspaceExtent * 2);
+  height = height.clamp(WorkspaceMutations.minWindowHeight, workspaceExtent * 2);
   left = left.clamp(workspaceMinCoordinate, workspaceMaxCoordinate - width);
   top = top.clamp(workspaceMinCoordinate, workspaceMaxCoordinate - height);
 
   return (position: Offset(left, top), size: Size(width, height));
 }
 
-_WindowBounds _resizedBoundsForWindow(AssetWindowState window, WindowResizeHandle handle, Offset delta) {
+_WindowBounds _resizedBoundsForWindow(WorkspaceWindowState window, WindowResizeHandle handle, Offset delta) {
   final resizedEdges = _applyResizeDelta(_windowEdges(window), handle, delta);
   return _clampResizedBounds(resizedEdges, handle);
 }
 
-AssetWindowState _resizeWindowState(AssetWindowState window, WindowResizeHandle handle, Offset delta) {
+WorkspaceWindowState _resizeWindowState(WorkspaceWindowState window, WindowResizeHandle handle, Offset delta) {
   final nextBounds = _resizedBoundsForWindow(window, handle, delta);
   return window.copyWith(position: nextBounds.position, size: nextBounds.size);
 }
 
-AssetWindowState _scaleWindowAroundCenter(
-  AssetWindowState window,
+WorkspaceWindowState _scaleWindowAroundCenter(
+  WorkspaceWindowState window,
   double scaleDelta, {
   required bool mirrorContentZoom,
 }) {
@@ -148,10 +148,10 @@ AssetWindowState _scaleWindowAroundCenter(
     window.position.dy + (window.size.height / 2),
   );
   final nextWidth = (window.size.width * clampedScaleDelta)
-      .clamp(SerenityWorkspaceMutations.minWindowWidth, workspaceExtent * 2)
+      .clamp(WorkspaceMutations.minWindowWidth, workspaceExtent * 2)
       .toDouble();
   final nextHeight = (window.size.height * clampedScaleDelta)
-      .clamp(SerenityWorkspaceMutations.minWindowHeight, workspaceExtent * 2)
+      .clamp(WorkspaceMutations.minWindowHeight, workspaceExtent * 2)
       .toDouble();
   final nextSize = Size(nextWidth, nextHeight);
   final nextPosition = _clampWindowPosition(
@@ -160,7 +160,7 @@ AssetWindowState _scaleWindowAroundCenter(
   );
   final shouldScaleContentZoom = mirrorContentZoom || window.zoom > 1.0 || window.zoomBaseSize != null;
   final nextZoom = shouldScaleContentZoom
-      ? (window.zoom * clampedScaleDelta).clamp(1.0, SerenityWorkspaceMutations.maxContentZoom).toDouble()
+      ? (window.zoom * clampedScaleDelta).clamp(1.0, WorkspaceMutations.maxContentZoom).toDouble()
       : window.zoom;
   final snappedZoom = (nextZoom - 1).abs() < 0.02 ? 1.0 : nextZoom;
   final nextContentOffset = snappedZoom > 1.0 ? window.contentOffset * clampedScaleDelta : Offset.zero;
@@ -184,7 +184,7 @@ AssetWindowState _scaleWindowAroundCenter(
   );
 }
 
-_VisibleWindowContent _visibleContentRectForWindow(AssetWindowState window) {
+_VisibleWindowContent _visibleContentRectForWindow(WorkspaceWindowState window) {
   final fitSize = fitSizeForViewportToAspect(window.size, window.asset.aspectRatio);
   final baseSize = window.zoom > 1.0 && window.zoomBaseSize != null ? window.zoomBaseSize! : fitSize;
   final zoomedContentSize = Size(baseSize.width * window.zoom, baseSize.height * window.zoom);
@@ -201,12 +201,12 @@ _VisibleWindowContent _visibleContentRectForWindow(AssetWindowState window) {
   );
 }
 
-AssetWindowState _fitWindowToVisibleContent(AssetWindowState currentWindow) {
+WorkspaceWindowState _fitWindowToVisibleContent(WorkspaceWindowState currentWindow) {
   final visibleContent = _visibleContentRectForWindow(currentWindow);
   final visibleRect = visibleContent.visibleRect;
   final nextSize = Size(
-    math.max(1.0, visibleRect.width).clamp(SerenityWorkspaceMutations.minWindowWidth, workspaceExtent * 2),
-    math.max(1.0, visibleRect.height).clamp(SerenityWorkspaceMutations.minWindowHeight, workspaceExtent * 2),
+    math.max(1.0, visibleRect.width).clamp(WorkspaceMutations.minWindowWidth, workspaceExtent * 2),
+    math.max(1.0, visibleRect.height).clamp(WorkspaceMutations.minWindowHeight, workspaceExtent * 2),
   );
   final nextPosition = _clampWindowPosition(currentWindow.position + visibleRect.topLeft, nextSize);
   final nextLeft =

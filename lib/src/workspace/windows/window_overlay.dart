@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class SerenityWindowOverlay extends StatelessWidget {
-  const SerenityWindowOverlay({
+class WindowOverlay extends StatelessWidget {
+  const WindowOverlay({
     super.key,
     required this.workspaceZoom,
     required this.filename,

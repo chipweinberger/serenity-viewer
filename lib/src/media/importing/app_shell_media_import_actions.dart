@@ -2,11 +2,11 @@
 
 part of 'package:serenity_viewer/src/app/app_shell.dart';
 
-extension _SerenityShellImportAndLoadPlan on _SerenityShellState {
-  SerenityImportCoordinator _buildImportCoordinator() {
-    return SerenityImportCoordinator(
-      imageExtensions: _SerenityShellState._imageExtensions,
-      videoExtensions: _SerenityShellState._videoExtensions,
+extension _AppShellMediaImportActions on _AppShellState {
+  ImportCoordinator _buildImportCoordinator() {
+    return ImportCoordinator(
+      imageExtensions: _AppShellState._imageExtensions,
+      videoExtensions: _AppShellState._videoExtensions,
       confirmSingleFrameConversion: _videoConversionCoordinator.confirmSingleFrameConversion,
       exportVideoFrameToJpeg: ({required sourcePath, required probe, positionMs}) {
         return _videoConversionCoordinator.exportVideoFrameToJpeg(
@@ -30,7 +30,7 @@ extension _SerenityShellImportAndLoadPlan on _SerenityShellState {
       acceptedTypeGroups: [
         XTypeGroup(
           label: 'Media',
-          extensions: [..._SerenityShellState._imageExtensions, ..._SerenityShellState._videoExtensions],
+          extensions: [..._AppShellState._imageExtensions, ..._AppShellState._videoExtensions],
         ),
       ],
     );
@@ -44,7 +44,7 @@ extension _SerenityShellImportAndLoadPlan on _SerenityShellState {
     }
 
     final workspace = _activeWorkspace;
-    final SerenityImportResult result = await _buildImportCoordinator().importFiles(
+    final ImportResult result = await _buildImportCoordinator().importFiles(
       session: _persistenceState.session!,
       workspace: workspace,
       files: files,

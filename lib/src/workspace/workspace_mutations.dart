@@ -15,13 +15,13 @@ part 'workspace_viewport_mutations.dart';
 part 'viewport/workspace_window_geometry.dart';
 part 'workspace_window_mutations.dart';
 
-class SerenityWorkspaceMutations {
+class WorkspaceMutations {
   static const List<double> videoPlaybackSpeeds = [0.25, 0.5, 0.75, 1.0];
   static const double minWindowWidth = 96.0;
   static const double minWindowHeight = 72.0;
   static const double maxContentZoom = 30.0;
 
-  static SerenitySessionState replaceWorkspace(SerenitySessionState session, WorkspaceState nextWorkspace) {
+  static SessionState replaceWorkspace(SessionState session, WorkspaceState nextWorkspace) {
     return session.copyWith(
       workspaces: session.workspaces
           .map((workspace) => workspace.id == nextWorkspace.id ? nextWorkspace : workspace)
@@ -29,7 +29,7 @@ class SerenityWorkspaceMutations {
     );
   }
 
-  static SerenitySessionState toggleWorkspaceOpen(SerenitySessionState session, String workspaceId) {
+  static SessionState toggleWorkspaceOpen(SessionState session, String workspaceId) {
     return _toggleWorkspaceOpen(session, workspaceId);
   }
 
@@ -45,8 +45,8 @@ class SerenityWorkspaceMutations {
     );
   }
 
-  static SerenitySessionState moveSelectedWindowsToWorkspace(
-    SerenitySessionState session, {
+  static SessionState moveSelectedWindowsToWorkspace(
+    SessionState session, {
     required String sourceWorkspaceId,
     required String destinationWorkspaceId,
     required Set<String> selectedWindowIds,
@@ -108,15 +108,15 @@ class SerenityWorkspaceMutations {
     return _moveWindow(workspace, windowId, delta);
   }
 
-  static AssetWindowState scaleWindowAroundCenter(
-    AssetWindowState window,
+  static WorkspaceWindowState scaleWindowAroundCenter(
+    WorkspaceWindowState window,
     double scaleDelta, {
     required bool mirrorContentZoom,
   }) {
     return _scaleWindowAroundCenter(window, scaleDelta, mirrorContentZoom: mirrorContentZoom);
   }
 
-  static ({Rect visibleRect, Size zoomedContentSize}) visibleContentRectForWindow(AssetWindowState window) {
+  static ({Rect visibleRect, Size zoomedContentSize}) visibleContentRectForWindow(WorkspaceWindowState window) {
     return _visibleContentRectForWindow(window);
   }
 

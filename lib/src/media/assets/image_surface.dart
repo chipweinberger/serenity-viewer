@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/media/assets/zoom_box.dart';
 
-class SerenityImageSurface extends StatefulWidget {
-  const SerenityImageSurface({
+class ImageSurface extends StatefulWidget {
+  const ImageSurface({
     super.key,
     required this.path,
     required this.zoom,
@@ -27,10 +27,10 @@ class SerenityImageSurface extends StatefulWidget {
   final WidgetBuilder errorBuilder;
 
   @override
-  State<SerenityImageSurface> createState() => _SerenityImageSurfaceState();
+  State<ImageSurface> createState() => _SerenityImageSurfaceState();
 }
 
-class _SerenityImageSurfaceState extends State<SerenityImageSurface> {
+class _SerenityImageSurfaceState extends State<ImageSurface> {
   static final Map<String, FileImage> _sharedImageProviders = {};
   static final Map<String, Future<Size?>> _sharedImageSizeFutures = {};
   static final Map<String, Size?> _sharedResolvedImageSizes = {};
@@ -50,7 +50,7 @@ class _SerenityImageSurfaceState extends State<SerenityImageSurface> {
   }
 
   @override
-  void didUpdateWidget(covariant SerenityImageSurface oldWidget) {
+  void didUpdateWidget(covariant ImageSurface oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.path != widget.path) {
       _imageProvider = _imageProviderForPath(widget.path);
@@ -114,7 +114,7 @@ class _SerenityImageSurfaceState extends State<SerenityImageSurface> {
     final size = _resolvedImageSize ?? _resolvedImageSizeFromDisk;
     final aspectRatio = size == null || size.width <= 0 || size.height <= 0 ? (4 / 3) : (size.width / size.height);
 
-    return SerenityZoomBox(
+    return ZoomBox(
       aspectRatio: aspectRatio,
       zoom: widget.zoom,
       zoomBaseSize: widget.zoomBaseSize,

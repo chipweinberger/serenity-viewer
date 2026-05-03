@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class SerenityZoomBox extends StatelessWidget {
-  const SerenityZoomBox({
+class ZoomBox extends StatelessWidget {
+  const ZoomBox({
     super.key,
     required this.aspectRatio,
     required this.zoom,

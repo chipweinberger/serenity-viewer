@@ -2,8 +2,8 @@
 
 part of 'app_shell.dart';
 
-extension _SerenityWindowHistoryActions on _SerenityShellState {
-  AssetWindowState? _focusedWindowOrNull() {
+extension _AppShellWindowHistoryActions on _AppShellState {
+  WorkspaceWindowState? _focusedWindowOrNull() {
     return _workspaceController.focusedWindowOrNull(_activeWorkspaceOrNull);
   }
 
@@ -18,7 +18,7 @@ extension _SerenityWindowHistoryActions on _SerenityShellState {
     setState(() {
       _workspaceController.rememberClosedWindow(
         _recentlyClosedWindows,
-        maxRecentlyClosedWindows: _SerenityShellState._maxRecentlyClosedWindows,
+        maxRecentlyClosedWindows: _AppShellState._maxRecentlyClosedWindows,
         workspace: workspace,
         window: window,
       );

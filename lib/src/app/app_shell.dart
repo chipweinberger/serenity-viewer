@@ -50,75 +50,51 @@ import 'package:serenity_viewer/src/workspace/expose/expose_layouts.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_dialog.dart';
 import 'package:serenity_viewer/src/workspace/canvas/workspace_screen.dart';
 
-part '../environments/session/session_actions.dart';
-part '../settings/behavior/shell_navigation_actions.dart';
-part '../app/window_actions.dart';
-part '../app/window_history_actions.dart';
-part '../workspace/workspace_management_actions.dart';
-part '../app/menu_actions.dart';
-part '../environments/startup/startup_seed_and_settings.dart';
-part '../workspace/workspace_view_tracking_actions.dart';
-part '../workspace/viewport/shell_workspace_geometry.dart';
-part '../app/shell_body.dart';
-part '../environments/persistence/thumbnail_persistence.dart';
-part '../media/importing/media_import_actions.dart';
+part '../environments/session/app_shell_session_actions.dart';
+part '../settings/behavior/app_shell_navigation_actions.dart';
+part '../app/app_shell_window_actions.dart';
+part '../app/app_shell_window_history_actions.dart';
+part '../workspace/app_shell_workspace_management_actions.dart';
+part '../app/app_shell_menu_actions.dart';
+part '../environments/startup/app_shell_startup_seed_and_settings.dart';
+part '../workspace/app_shell_workspace_view_tracking_actions.dart';
+part '../workspace/viewport/app_shell_workspace_geometry.dart';
+part '../app/app_shell_content.dart';
+part '../environments/persistence/app_shell_thumbnail_persistence.dart';
+part '../media/importing/app_shell_media_import_actions.dart';
 
-class SerenityApp extends StatelessWidget {
-  const SerenityApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = ThemeData(
-      brightness: Brightness.light,
-      scaffoldBackgroundColor: SerenityTheme.background,
-      colorScheme: const ColorScheme.light(
-        primary: SerenityTheme.accent,
-        secondary: SerenityTheme.accentSoft,
-        surface: SerenityTheme.panel,
-      ),
-      textTheme: ThemeData.light().textTheme.apply(
-        bodyColor: SerenityTheme.textPrimary,
-        displayColor: SerenityTheme.textPrimary,
-      ),
-      useMaterial3: true,
-    );
-
-    return MaterialApp(title: 'Serenity', debugShowCheckedModeBanner: false, theme: theme, home: const SerenityShell());
-  }
-}
-
-class SerenityShell extends StatefulWidget {
-  const SerenityShell({super.key});
+class AppShell extends StatefulWidget {
+  const AppShell({super.key});
 
   @override
-  State<SerenityShell> createState() => _SerenityShellState();
+  State<AppShell> createState() => _AppShellState();
 }
 
-class _SerenityShellState extends State<SerenityShell> {
+class _AppShellState extends State<AppShell> {
   static const int _maxRecentlyClosedWindows = 12;
   static const List<String> _imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tif', 'tiff'];
   static const List<String> _videoExtensions = ['mp4', 'mov', 'm4v', 'avi', 'mkv', 'webm'];
 
-  final _dependencies = SerenityShellDependencies();
+  final _dependencies = ShellDependencies();
   final List<RecentlyClosedWindowEntry> _recentlyClosedWindows = [];
   AppLifecycleListener? _appLifecycleListener;
   Timer? _autosaveTimer;
-  late final SerenityChromeController _chromeController;
-  late final SerenityEnvironmentCoordinator _environmentCoordinator;
-  late final SerenityMediaBridge _mediaBridge;
-  late final SerenityWorkspaceController _workspaceController;
-  late final SerenityWorkspaceLinksController _workspaceLinksController;
-  late final SerenitySessionController _sessionController;
-  late final SerenitySessionPersistenceBridge _sessionPersistenceBridge;
-  late final SerenityVideoConversionCoordinator _videoConversionCoordinator;
+  late final ChromeController _chromeController;
+  late final EnvironmentCoordinator _environmentCoordinator;
+  late final MediaBridge _mediaBridge;
+  late final WorkspaceController _workspaceController;
+  late final WorkspaceLinksController _workspaceLinksController;
+  late final SessionController _sessionController;
+  late final SessionPersistenceBridge _sessionPersistenceBridge;
+  late final VideoConversionCoordinator _videoConversionCoordinator;
 
-  SerenityShellHandles get _handles => _dependencies.handles;
-  SerenityShellPersistenceState get _persistenceState => _dependencies.persistenceState;
-  SerenityChromeState get _uiState => _dependencies.chromeState;
-  SerenityWindowInteractionState get _windowInteractionState => _dependencies.windowInteractionState;
-  SerenityWorkspaceViewTrackingState get _workspaceViewTrackingState => _dependencies.workspaceViewTrackingState;
-  SerenityWorkspaceViewportState get _workspaceViewportState => _dependencies.workspaceViewportState;
-  SerenityThumbnailRefreshState get _thumbnailRefreshState => _dependencies.thumbnailRefreshState;
+  ShellHandles get _handles => _dependencies.handles;
+  ShellPersistenceState get _persistenceState => _dependencies.persistenceState;
+  ChromeState get _uiState => _dependencies.chromeState;
+  WindowInteractionState get _windowInteractionState => _dependencies.windowInteractionState;
+  WorkspaceViewTrackingState get _workspaceViewTrackingState => _dependencies.workspaceViewTrackingState;
+  WorkspaceViewportState get _workspaceViewportState => _dependencies.workspaceViewportState;
+  ThumbnailRefreshState get _thumbnailRefreshState => _dependencies.thumbnailRefreshState;
 
   bool get _isRunningInWidgetTest {
     return Platform.environment.containsKey('FLUTTER_TEST') ||
@@ -155,18 +131,18 @@ class _SerenityShellState extends State<SerenityShell> {
   @override
   void initState() {
     super.initState();
-    _chromeController = SerenityChromeController(
+    _chromeController = ChromeController(
       chromeState: _uiState,
       windowInteractionState: _windowInteractionState,
       commitStateChange: setState,
       refreshWorkspaceTracking: _refreshWorkspaceViewTracking,
     );
-    _mediaBridge = SerenityMediaBridge(
+    _mediaBridge = MediaBridge(
       isRunningInWidgetTest: _isRunningInWidgetTest,
       showMessage: _showMessage,
       isMounted: () => mounted,
     );
-    _sessionController = SerenitySessionController(
+    _sessionController = SessionController(
       persistenceState: _persistenceState,
       chromeState: _uiState,
       thumbnailRefreshState: _thumbnailRefreshState,
@@ -174,7 +150,7 @@ class _SerenityShellState extends State<SerenityShell> {
       refreshWorkspaceTracking: _refreshWorkspaceViewTracking,
       syncWindowTitle: () => _sessionPersistenceBridge.syncWindowTitle(),
     );
-    _sessionPersistenceBridge = SerenitySessionPersistenceBridge(
+    _sessionPersistenceBridge = SessionPersistenceBridge(
       persistenceState: _persistenceState,
       sessionController: _sessionController,
       isRunningInWidgetTest: _isRunningInWidgetTest,
@@ -183,7 +159,7 @@ class _SerenityShellState extends State<SerenityShell> {
       environmentCoordinator: () => _environmentCoordinator,
       windowTitle: () => _windowTitle,
     );
-    _environmentCoordinator = SerenityEnvironmentCoordinator(
+    _environmentCoordinator = EnvironmentCoordinator(
       persistenceState: _persistenceState,
       sessionController: _sessionController,
       context: () => context,
@@ -199,7 +175,7 @@ class _SerenityShellState extends State<SerenityShell> {
       updateSession: _updateSession,
       saveSession: _sessionPersistenceBridge.saveSession,
     );
-    _videoConversionCoordinator = SerenityVideoConversionCoordinator(
+    _videoConversionCoordinator = VideoConversionCoordinator(
       context: () => context,
       mounted: () => mounted,
       showMessage: _showMessage,
@@ -214,7 +190,7 @@ class _SerenityShellState extends State<SerenityShell> {
         });
       },
     );
-    _workspaceLinksController = SerenityWorkspaceLinksController(
+    _workspaceLinksController = WorkspaceLinksController(
       screen: () => _uiState.screen,
       hasSession: () => _persistenceState.session != null,
       activeWorkspace: () => _activeWorkspaceOrNull,
@@ -225,7 +201,7 @@ class _SerenityShellState extends State<SerenityShell> {
       context: () => context,
       mounted: () => mounted,
     );
-    _workspaceController = SerenityWorkspaceController(
+    _workspaceController = WorkspaceController(
       chromeState: _uiState,
       windowInteractionState: _windowInteractionState,
       workspaceViewportState: _workspaceViewportState,
@@ -269,7 +245,7 @@ class _SerenityShellState extends State<SerenityShell> {
         focusNode: _handles.focusNode,
         autofocus: true,
         onKeyEvent: _onKeyEvent,
-        child: Scaffold(body: SafeArea(top: false, child: _buildBody(context))),
+        child: Scaffold(body: SafeArea(top: false, child: _buildShellContent(context))),
       ),
     );
   }

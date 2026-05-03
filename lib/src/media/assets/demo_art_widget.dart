@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/media/assets/workspace_asset.dart';
 
-class SerenityDemoArt extends StatelessWidget {
-  const SerenityDemoArt({super.key, required this.asset});
+class DemoArtWidget extends StatelessWidget {
+  const DemoArtWidget({super.key, required this.asset});
 
   final WorkspaceAsset asset;
 

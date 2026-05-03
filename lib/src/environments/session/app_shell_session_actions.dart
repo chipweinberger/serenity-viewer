@@ -2,10 +2,10 @@
 
 part of 'package:serenity_viewer/src/app/app_shell.dart';
 
-extension _SerenityShellSessionActions on _SerenityShellState {
+extension _AppShellSessionActions on _AppShellState {
   static const double _appliedExposeViewportZoomFactor = 0.0625;
 
-  void _updateSession(SerenitySessionState nextSession) {
+  void _updateSession(SessionState nextSession) {
     _sessionController.updateSession(nextSession);
   }
 
@@ -54,7 +54,7 @@ extension _SerenityShellSessionActions on _SerenityShellState {
     final viewportCenter = _workspaceViewportState.viewportSize.center(Offset.zero);
     final safeViewportZoom = workspace.viewportZoom <= 0 ? 1.0 : workspace.viewportZoom;
     final nextViewportZoom = _clampWorkspaceZoom(safeViewportZoom * _appliedExposeViewportZoomFactor);
-    final relaidOutById = <String, AssetWindowState>{};
+    final relaidOutById = <String, WorkspaceWindowState>{};
     for (final layout in exposeLayouts) {
       final rect = layout.rect;
       final nextSize = Size(rect.width / nextViewportZoom, rect.height / nextViewportZoom);

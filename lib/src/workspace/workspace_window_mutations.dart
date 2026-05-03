@@ -81,11 +81,11 @@ WorkspaceState _cycleVideoPlaybackSpeed(WorkspaceState workspace, String windowI
     return workspace;
   }
 
-  final currentIndex = SerenityWorkspaceMutations.videoPlaybackSpeeds.indexWhere(
+  final currentIndex = WorkspaceMutations.videoPlaybackSpeeds.indexWhere(
     (speed) => (speed - currentWindow.videoPlaybackSpeed).abs() < 0.001,
   );
-  final nextSpeed = SerenityWorkspaceMutations
-      .videoPlaybackSpeeds[(currentIndex + 1) % SerenityWorkspaceMutations.videoPlaybackSpeeds.length];
+  final nextSpeed = WorkspaceMutations
+      .videoPlaybackSpeeds[(currentIndex + 1) % WorkspaceMutations.videoPlaybackSpeeds.length];
 
   return _updateWindowById(workspace, windowId, (window) => window.copyWith(videoPlaybackSpeed: nextSpeed));
 }

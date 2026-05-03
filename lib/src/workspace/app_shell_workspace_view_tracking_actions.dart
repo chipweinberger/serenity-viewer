@@ -2,7 +2,7 @@
 
 part of 'package:serenity_viewer/src/app/app_shell.dart';
 
-extension _SerenityShellWorkspaceViews on _SerenityShellState {
+extension _AppShellWorkspaceViewTrackingActions on _AppShellState {
   static const Duration _workspaceViewThreshold = Duration(seconds: 30);
 
   bool get _shouldTrackWorkspaceViewSession {

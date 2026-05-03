@@ -2,7 +2,7 @@
 
 part of 'package:serenity_viewer/src/app/app_shell.dart';
 
-extension _SerenityShellSeedAndSettings on _SerenityShellState {
+extension _AppShellStartupSeedAndSettings on _AppShellState {
   void _showAboutSerenity() {
     showAboutDialog(
       context: context,
@@ -36,9 +36,9 @@ extension _SerenityShellSeedAndSettings on _SerenityShellState {
       return;
     }
 
-    final result = await showDialog<SerenitySettingsResult>(
+    final result = await showDialog<SettingsResult>(
       context: context,
-      builder: (context) => SerenitySettingsDialog(
+      builder: (context) => SettingsDialog(
         imageLoadLimit: session.imageLoadLimit,
         shortVideoLoadLimit: session.shortVideoLoadLimit,
         longVideoLoadLimit: session.longVideoLoadLimit,
@@ -62,10 +62,10 @@ extension _SerenityShellSeedAndSettings on _SerenityShellState {
     );
   }
 
-  SerenitySessionState _seedSession() {
+  SessionState _seedSession() {
     final now = DateTime.now();
 
-    AssetWindowState buildWindow({
+    WorkspaceWindowState buildWindow({
       required String id,
       required String filename,
       required String md5,
@@ -79,7 +79,7 @@ extension _SerenityShellSeedAndSettings on _SerenityShellState {
       double? intrinsicWidth,
       double? intrinsicHeight,
     }) {
-      return AssetWindowState(
+      return WorkspaceWindowState(
         asset: WorkspaceAsset(
           id: id,
           filename: filename,
@@ -98,7 +98,7 @@ extension _SerenityShellSeedAndSettings on _SerenityShellState {
       );
     }
 
-    return SerenitySessionState(
+    return SessionState(
       activeWorkspaceId: 'ws-story',
       knownFolders: const [],
       folderPopularity: const {},
