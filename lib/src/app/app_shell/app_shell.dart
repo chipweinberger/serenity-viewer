@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math' as math;
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 
@@ -15,6 +14,7 @@ import 'package:serenity_viewer/src/app/app_shell/app_shell_content_builder.dart
 import 'package:serenity_viewer/src/app/app_shell/app_shell_menu_builder.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_window_controller.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_window_history_controller.dart';
+import 'package:serenity_viewer/src/app/app_shell/app_shell_workspace_geometry_controller.dart';
 import 'package:serenity_viewer/src/app/platform/app_shell_platform_bridge.dart';
 import 'package:serenity_viewer/src/app/runtime/app_shell_runtime.dart';
 import 'package:serenity_viewer/src/app/sry_document/sry_document_coordinator.dart';
@@ -23,7 +23,6 @@ import 'package:serenity_viewer/src/video_tools/media_bridge.dart';
 import 'package:serenity_viewer/src/video_tools/video_conversion_coordinator.dart';
 import 'package:serenity_viewer/src/workspace/shell/workspace_shell_controller.dart';
 import 'package:serenity_viewer/src/workspace/controller/workspace_controller.dart';
-import 'package:serenity_viewer/src/workspace/layout/workspace_layout.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/workspace/session/recently_closed_window_entry.dart';
@@ -41,7 +40,6 @@ part 'app_shell_environment_actions.dart';
 part 'app_shell_media_import_actions.dart';
 part 'app_shell_navigation_actions.dart';
 part 'app_shell_startup_seed_and_settings.dart';
-part 'app_shell_workspace_geometry.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -193,6 +191,15 @@ class _AppShellState extends State<AppShell> {
     );
   }
 
+  AppShellWorkspaceGeometryController get _workspaceGeometryController {
+    return AppShellWorkspaceGeometryController(
+      persistenceState: _persistenceState,
+      workspaceViewportState: _workspaceViewportState,
+      thumbnailController: _thumbnailController,
+      replaceWorkspace: _replaceWorkspace,
+    );
+  }
+
   List<PlatformMenuItem> _buildMenus() {
     final focusedWindow = _windowHistoryController.focusedWindowOrNull();
     final focusedWindowIsSelected =
@@ -282,7 +289,7 @@ class _AppShellState extends State<AppShell> {
       setActiveGestureWindow: _windowController.setActiveGestureWindow,
       fitWorkspaceViewportToContent: _windowController.fitWorkspaceViewportToContent,
       confirmCollateWorkspaceWindows: _windowController.confirmCollateWorkspaceWindows,
-      setWorkspaceViewport: _setWorkspaceViewport,
+      setWorkspaceViewport: _workspaceGeometryController.setWorkspaceViewport,
     ).build();
   }
 
@@ -301,13 +308,13 @@ class _AppShellState extends State<AppShell> {
       updateEnvironment: _updateEnvironment,
       replaceWorkspace: _replaceWorkspace,
       saveEnvironment: _saveEnvironment,
-      newId: _newId,
-      colorFromDigest: _colorFromDigest,
+      newId: _workspaceGeometryController.newId,
+      colorFromDigest: _workspaceGeometryController.colorFromDigest,
       activeWorkspace: () => _activeWorkspaceOrNull,
       workspaces: () => _workspaces,
       openWorkspaces: () => _openWorkspaces,
       focusedWindowOrNull: _windowHistoryController.focusedWindowOrNull,
-      setWorkspaceViewport: _setWorkspaceViewport,
+      setWorkspaceViewport: _workspaceGeometryController.setWorkspaceViewport,
       showWorkspaceScreen: _showWorkspaceScreen,
       showLibraryScreen: _showLibraryScreen,
       toggleExpose: _toggleExpose,

@@ -20,8 +20,8 @@ extension _AppShellMediaImportActions on _AppShellState {
       imageDimensionsForFile: _mediaBridge.imageDimensionsForFile,
       videoDurationMsForFile: _mediaBridge.videoDurationMsForFile,
       probeVideoFile: _mediaBridge.probeVideoFile,
-      newId: _newId,
-      colorFromDigest: _colorFromDigest,
+      newId: _workspaceGeometryController.newId,
+      colorFromDigest: _workspaceGeometryController.colorFromDigest,
     );
   }
 
