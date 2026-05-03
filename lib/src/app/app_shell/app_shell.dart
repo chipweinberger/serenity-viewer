@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +13,7 @@ import 'package:serenity_viewer/src/app/dependencies/shell_dependencies.dart';
 import 'package:serenity_viewer/src/app/environment/app_environment_bookmark_synchronizer.dart';
 import 'package:serenity_viewer/src/app/environment/app_environment_controller.dart';
 import 'package:serenity_viewer/src/app/environment/app_environment_state.dart';
+import 'package:serenity_viewer/src/app/app_shell/app_shell_menu_builder.dart';
 import 'package:serenity_viewer/src/app/platform/app_shell_platform_bridge.dart';
 import 'package:serenity_viewer/src/app/runtime/app_shell_runtime.dart';
 import 'package:serenity_viewer/src/app/sry_document/sry_document_coordinator.dart';
@@ -49,7 +49,6 @@ import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.
 part 'app_shell_content.dart';
 part 'app_shell_environment_actions.dart';
 part 'app_shell_media_import_actions.dart';
-part 'app_shell_menu_actions.dart';
 part 'app_shell_navigation_actions.dart';
 part 'app_shell_startup_seed_and_settings.dart';
 part 'app_shell_window_actions.dart';
@@ -174,6 +173,48 @@ class _AppShellState extends State<AppShell> {
     } catch (_) {
       // Widget tests and unsupported platforms can skip local persistence.
     }
+  }
+
+  List<PlatformMenuItem> _buildMenus() {
+    final activeWorkspace = _activeWorkspaceOrNull;
+    final focusedWindow = _focusedWindowOrNull();
+    final focusedWindowIsSelected =
+        focusedWindow != null && _windowInteractionState.selectedExposeWindowIds.contains(focusedWindow.asset.id);
+
+    return AppShellMenuBuilder(
+      showAboutSerenity: _showAboutSerenity,
+      openSettings: _openSettings,
+      createEnvironment: _sryDocumentCoordinator.createDocument,
+      openEnvironment: _sryDocumentCoordinator.openDocument,
+      openAssets: _pickAndImportAssets,
+      saveEnvironment: _sryDocumentCoordinator.saveDocument,
+      saveEnvironmentAs: _sryDocumentCoordinator.saveDocumentAs,
+      revealAssetInFinder: _mediaBridge.revealAssetInFinder,
+      toggleWindowSelected: _workspaceShellController.navigation.toggleSelectedWindow,
+      fitWindowToContent: _fitWindowToContent,
+      restorePreviousWindowZOrder: _restorePreviousWindowZOrder,
+      convertVideoWindowToJpeg: (windowId) => _videoConversionCoordinator.convertVideoWindowToJpeg(windowId),
+      closeWindow: _removeWindow,
+      toggleExpose: _toggleExpose,
+      toggleWorkspaceOverview: _workspaceShellController.navigation.toggleOverview,
+      createWorkspace: _workspaceShellController.management.createWorkspace,
+      switchToPreviousWorkspace: () => _workspaceShellController.navigation.switchWorkspace(-1),
+      switchToNextWorkspace: () => _workspaceShellController.navigation.switchWorkspace(1),
+      fitWorkspaceViewportToContent: _fitWorkspaceViewportToContent,
+      confirmCollateWorkspaceWindows: _confirmCollateWorkspaceWindows,
+      pauseAllVideos: _pauseAllVideos,
+      showNoWorkspaceToRenameMessage: () => _showMessage('There is no workspace to rename.'),
+      renameWorkspace: _workspaceShellController.management.renameWorkspace,
+      showNoWorkspaceToDeleteMessage: () => _showMessage('There is no workspace to delete.'),
+      confirmDeleteWorkspace: _workspaceShellController.management.confirmDeleteWorkspace,
+      restoreRecentlyClosedWindow: _restoreRecentlyClosedWindow,
+    ).build(
+      activeWorkspaceId: _persistenceState.environment?.activeWorkspaceId,
+      activeWorkspaceName: activeWorkspace?.name,
+      focusedWindow: focusedWindow,
+      focusedWindowIsSelected: focusedWindowIsSelected,
+      recentlyClosedWindows: _recentlyClosedWindows,
+    );
   }
 
   @override
