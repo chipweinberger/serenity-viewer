@@ -187,7 +187,7 @@ extension _SerenityShellWorkspaceChrome on _SerenityShellState {
   }
 
   Widget _buildWorkspaceHud(BuildContext context) {
-    final mediaCounts = _mediaCountsForWorkspace(_activeWorkspace);
+    final mediaCounts = workspaceMediaCounts(_activeWorkspace);
     final imageLabel = '${mediaCounts.images} image${mediaCounts.images == 1 ? '' : 's'}';
     final videoLabel = '${mediaCounts.videos} video${mediaCounts.videos == 1 ? '' : 's'}';
     final linkLabel = '${mediaCounts.links} link${mediaCounts.links == 1 ? '' : 's'}';

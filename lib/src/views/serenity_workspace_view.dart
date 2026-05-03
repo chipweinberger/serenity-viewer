@@ -156,7 +156,7 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
         ? ([...workspace.windows]..sort((a, b) => a.asset.filename.compareTo(b.asset.filename)))
         : ([...workspace.windows]..sort((a, b) => a.zIndex.compareTo(b.zIndex)));
     final focusedWindowId = windows.isEmpty || isExposeMode ? null : windows.last.asset.id;
-    final loadPlan = _buildLoadPlan();
+    final loadPlan = buildWorkspaceLoadPlan(session: _session!, activeWorkspace: _activeWorkspaceOrNull);
     _syncSharedVideoControllers(loadPlan);
 
     return DropTarget(

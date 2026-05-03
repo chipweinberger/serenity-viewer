@@ -6,7 +6,7 @@ extension _SerenityShellLibraryView on _SerenityShellState {
   Widget _buildWorkspaceOverview(BuildContext context) {
     final visibleOpenWorkspaces = _openWorkspaces.where(_matchesWorkspaceSearch).toList();
     final knownWorkspaces = _sortedKnownWorkspaces();
-    final loadPlan = _buildLoadPlan();
+    final loadPlan = buildWorkspaceLoadPlan(session: _session!, activeWorkspace: _activeWorkspaceOrNull);
     const thumbnailWidth = 224.0;
     const thumbnailHeight = 192.0;
     final knownWorkspaceCount = knownWorkspaces.length;
@@ -47,8 +47,8 @@ extension _SerenityShellLibraryView on _SerenityShellState {
                             height: thumbnailHeight,
                             child: WorkspaceThumbnailCard(
                               workspace: workspace,
-                              mediaCounts: _mediaCountsForWorkspace(workspace),
-                              unloadedCount: _unloadedCountForWorkspace(workspace, loadPlan),
+                              mediaCounts: workspaceMediaCounts(workspace),
+                              unloadedCount: unloadedWorkspaceWindowCount(workspace, loadPlan),
                               isRefreshing: _thumbnailRefreshState.refreshInFlight.contains(workspace.id),
                               hoverActions: [
                                 _buildWorkspaceCardAction(
@@ -154,8 +154,8 @@ extension _SerenityShellLibraryView on _SerenityShellState {
                             height: thumbnailHeight,
                             child: WorkspaceThumbnailCard(
                               workspace: workspace,
-                              mediaCounts: _mediaCountsForWorkspace(workspace),
-                              unloadedCount: _unloadedCountForWorkspace(workspace, loadPlan),
+                              mediaCounts: workspaceMediaCounts(workspace),
+                              unloadedCount: unloadedWorkspaceWindowCount(workspace, loadPlan),
                               isRefreshing: _thumbnailRefreshState.refreshInFlight.contains(workspace.id),
                               isDimmed: workspace.isOpen,
                               statusLabel: workspace.isOpen ? 'Open' : null,
