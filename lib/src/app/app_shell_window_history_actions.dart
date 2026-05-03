@@ -4,7 +4,7 @@ part of 'app_shell.dart';
 
 extension _AppShellWindowHistoryActions on _AppShellState {
   Window? _focusedWindowOrNull() {
-    return _workspaceController.focusedWindowOrNull(_activeWorkspaceOrNull);
+    return _workspaceController.windows.focusedOrNull(_activeWorkspaceOrNull);
   }
 
   void _closeWindow(String workspaceId, String windowId) {
@@ -16,7 +16,7 @@ extension _AppShellWindowHistoryActions on _AppShellState {
     }
 
     setState(() {
-      _workspaceController.rememberClosedWindow(
+      _workspaceController.windows.rememberClosedWindow(
         _recentlyClosedWindows,
         maxRecentlyClosedWindows: _AppShellState._maxRecentlyClosedWindows,
         workspace: workspace,

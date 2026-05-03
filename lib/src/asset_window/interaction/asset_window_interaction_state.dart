@@ -6,6 +6,8 @@ class AssetWindowInteractionState {
   final Set<String> selectedExposeWindowIds = {};
 
   String? activeGestureWindowId;
+  String? get optionGestureWindowId => activeGestureWindowId;
+  set optionGestureWindowId(String? value) => activeGestureWindowId = value;
   String? pinnedHoverWindowId;
   String? flashedWindowId;
   int windowFlashNonce = 0;

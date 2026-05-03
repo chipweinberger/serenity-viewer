@@ -29,7 +29,6 @@ part 'workspace_controller_api_windows.dart';
 part 'workspace_controller_environment.dart';
 part 'workspace_controller_expose.dart';
 part 'workspace_controller_gesture.dart';
-part 'workspace_controller_legacy_api.dart';
 part 'workspace_controller_playback.dart';
 part 'workspace_controller_viewport.dart';
 part 'workspace_controller_windows.dart';

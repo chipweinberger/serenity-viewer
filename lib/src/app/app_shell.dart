@@ -13,7 +13,7 @@ import 'package:serenity_viewer/src/asset_import/import_coordinator.dart';
 import 'package:serenity_viewer/src/asset_import/import_result.dart';
 import 'package:serenity_viewer/src/app/app_shell_platform_bridge.dart';
 import 'package:serenity_viewer/src/app/shell_dependencies.dart';
-import 'package:serenity_viewer/src/app/sry_document_coordinator.dart';
+import 'package:serenity_viewer/src/app/sry_document/sry_document_coordinator.dart';
 import 'package:serenity_viewer/src/app/app_environment_bookmark_synchronizer.dart';
 import 'package:serenity_viewer/src/app/app_environment_controller.dart';
 import 'package:serenity_viewer/src/asset_window/frame/asset_window_resize_helpers.dart';
