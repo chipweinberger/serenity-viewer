@@ -21,12 +21,12 @@ extension _SerenityShellMediaTools on _SerenityShellState {
       return null;
     }
 
-    final existing = _sharedVideoControllers[window.asset.id];
+    final existing = _windowInteractionState.sharedVideoControllers[window.asset.id];
     if (existing != null) {
       if (existing.path == path) {
         return existing;
       }
-      _sharedVideoControllers.remove(window.asset.id);
+      _windowInteractionState.sharedVideoControllers.remove(window.asset.id);
       unawaited(existing.controller.dispose());
     }
 
@@ -36,7 +36,7 @@ extension _SerenityShellMediaTools on _SerenityShellState {
       await controller.setLooping(true);
     });
     final entry = _SharedVideoControllerEntry(path: path, controller: controller, initialization: initialization);
-    _sharedVideoControllers[window.asset.id] = entry;
+    _windowInteractionState.sharedVideoControllers[window.asset.id] = entry;
     return entry;
   }
 
@@ -59,9 +59,11 @@ extension _SerenityShellMediaTools on _SerenityShellState {
       }
     }
 
-    final staleIds = _sharedVideoControllers.keys.where((id) => !retainedVideoIds.contains(id)).toList();
+    final staleIds = _windowInteractionState.sharedVideoControllers.keys
+        .where((id) => !retainedVideoIds.contains(id))
+        .toList();
     for (final id in staleIds) {
-      final removed = _sharedVideoControllers.remove(id);
+      final removed = _windowInteractionState.sharedVideoControllers.remove(id);
       if (removed != null) {
         unawaited(removed.controller.dispose());
       }

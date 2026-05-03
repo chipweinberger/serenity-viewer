@@ -108,7 +108,8 @@ extension _SerenityShellWorkspaceChrome on _SerenityShellState {
 
   Widget _buildWorkspaceTabChip(BuildContext context, WorkspaceState workspace, {required bool isDropTarget}) {
     final isSelected = _screen != SerenityScreen.library && workspace.id == _session!.activeWorkspaceId;
-    final shouldMoveSelectedWindows = _screen == SerenityScreen.workspace && _selectedExposeWindowIds.isNotEmpty;
+    final shouldMoveSelectedWindows =
+        _screen == SerenityScreen.workspace && _windowInteractionState.selectedExposeWindowIds.isNotEmpty;
 
     return AnimatedScale(
       duration: const Duration(milliseconds: 120),
@@ -192,8 +193,9 @@ extension _SerenityShellWorkspaceChrome on _SerenityShellState {
     final videoLabel = '${mediaCounts.videos} video${mediaCounts.videos == 1 ? '' : 's'}';
     final linkLabel = '${mediaCounts.links} link${mediaCounts.links == 1 ? '' : 's'}';
     final isExposeMode = _screen == SerenityScreen.workspace && _workspaceLayoutMode == WorkspaceLayoutMode.expose;
-    final showExposeSelectionHud = _screen == SerenityScreen.workspace && _selectedExposeWindowIds.isNotEmpty;
-    final selectedCount = _selectedExposeWindowIds.length;
+    final showExposeSelectionHud =
+        _screen == SerenityScreen.workspace && _windowInteractionState.selectedExposeWindowIds.isNotEmpty;
+    final selectedCount = _windowInteractionState.selectedExposeWindowIds.length;
     final modeActions = <Widget>[
       if (!isExposeMode) ...[
         _buildWorkspaceHudAction(

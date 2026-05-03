@@ -116,16 +116,8 @@ class _SerenityShellState extends State<SerenityShell> {
   bool _isPromptingForStartupEnvironment = false;
   String? _draggingTabWorkspaceId;
 
+  final _SerenityWindowInteractionState _windowInteractionState = _SerenityWindowInteractionState();
   final List<RecentlyClosedWindowEntry> _recentlyClosedWindows = [];
-  final Map<String, bool> _pausedVideoWindows = {};
-  final Map<String, int> _previousWindowZOrders = {};
-  final Set<String> _selectedExposeWindowIds = {};
-  final Map<String, _SharedVideoControllerEntry> _sharedVideoControllers = {};
-  String? _optionGestureWindowId;
-  String? _pinnedHoverWindowId;
-  String? _flashedWindowId;
-  int _windowFlashNonce = 0;
-  Timer? _windowFlashTimer;
 
   Timer? _autosaveTimer;
   final _SerenityThumbnailRefreshState _thumbnailRefreshState = _SerenityThumbnailRefreshState();
@@ -194,9 +186,9 @@ class _SerenityShellState extends State<SerenityShell> {
     _autosaveTimer?.cancel();
     _appLifecycleListener?.dispose();
     _workspaceViewTrackingState.dispose();
-    _windowFlashTimer?.cancel();
+    _windowInteractionState.dispose();
     _thumbnailRefreshState.dispose();
-    for (final entry in _sharedVideoControllers.values) {
+    for (final entry in _windowInteractionState.sharedVideoControllers.values) {
       unawaited(entry.controller.dispose());
     }
     _tabScrollController.dispose();

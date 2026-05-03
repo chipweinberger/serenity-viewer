@@ -39,8 +39,8 @@ extension _SerenityWindowHistoryActions on _SerenityShellState {
 
     setState(() {
       _rememberClosedWindow(workspace, window);
-      _previousWindowZOrders.remove(windowId);
-      _pausedVideoWindows.remove(windowId);
+      _windowInteractionState.previousWindowZOrders.remove(windowId);
+      _windowInteractionState.pausedVideoWindows.remove(windowId);
     });
 
     _replaceWorkspace(
@@ -49,7 +49,7 @@ extension _SerenityWindowHistoryActions on _SerenityShellState {
   }
 
   void _removeWindow(String workspaceId, String windowId) {
-    _selectedExposeWindowIds.remove(windowId);
+    _windowInteractionState.selectedExposeWindowIds.remove(windowId);
     _closeWindow(workspaceId, windowId);
   }
 

@@ -93,12 +93,12 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
                               sharedVideoController: sharedVideoControllerEntry?.controller,
                               sharedVideoInitialization: sharedVideoControllerEntry?.initialization,
                               isFocused: window.asset.id == focusedWindowId,
-                              isSelected: _selectedExposeWindowIds.contains(window.asset.id),
+                              isSelected: _windowInteractionState.selectedExposeWindowIds.contains(window.asset.id),
                               isEditing: false,
-                              isPinnedHover: _pinnedHoverWindowId == window.asset.id,
+                              isPinnedHover: _windowInteractionState.pinnedHoverWindowId == window.asset.id,
                               workspaceZoom: workspace.viewportZoom,
                               onTap: () {
-                                if (_pinnedHoverWindowId == window.asset.id) {
+                                if (_windowInteractionState.pinnedHoverWindowId == window.asset.id) {
                                   _clearPinnedHoverWindow();
                                   return;
                                 }
@@ -108,7 +108,9 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
                               onPinnedHoverRequested: () => _setPinnedHoverWindow(window.asset.id),
                               onPinnedHoverDismissed: _clearPinnedHoverWindow,
                               onToggleSelected: () => _toggleExposeWindowSelected(window.asset.id),
-                              flashNonce: window.asset.id == _flashedWindowId ? _windowFlashNonce : 0,
+                              flashNonce: window.asset.id == _windowInteractionState.flashedWindowId
+                                  ? _windowInteractionState.windowFlashNonce
+                                  : 0,
                               onPanUpdate: (delta) => _moveWindow(window.asset.id, delta / workspace.viewportZoom),
                               onTrackpadWindowScale: (scaleDelta, localFocalPoint) => _transformWindowFromTrackpad(
                                 window.asset.id,
@@ -127,11 +129,12 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
                               onShowInFinder: window.asset.filePath == null
                                   ? null
                                   : () => unawaited(_revealAssetInFinder(window.asset)),
-                              onRestorePreviousZOrder: _previousWindowZOrders.containsKey(window.asset.id)
+                              onRestorePreviousZOrder:
+                                  _windowInteractionState.previousWindowZOrders.containsKey(window.asset.id)
                                   ? () => _restorePreviousWindowZOrder(window.asset.id)
                                   : null,
                               onClose: () => _removeWindow(_session!.activeWorkspaceId, window.asset.id),
-                              isOptionGestureTarget: _optionGestureWindowId == window.asset.id,
+                              isOptionGestureTarget: _windowInteractionState.optionGestureWindowId == window.asset.id,
                               onOptionGestureWindowRequested: () => _setOptionGestureWindowId(window.asset.id),
                               onOptionGestureReleased: () => _setOptionGestureWindowId(null),
                             ),
@@ -221,7 +224,7 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
                                 sharedVideoController: sharedVideoControllerEntry?.controller,
                                 sharedVideoInitialization: sharedVideoControllerEntry?.initialization,
                                 isVideoPaused: _isVideoWindowPaused(window.asset.id),
-                                isSelected: _selectedExposeWindowIds.contains(window.asset.id),
+                                isSelected: _windowInteractionState.selectedExposeWindowIds.contains(window.asset.id),
                                 editMode: _editMode,
                                 onOpen: () {
                                   _focusWindow(window.asset.id);

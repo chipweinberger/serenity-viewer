@@ -22,7 +22,8 @@ extension _SerenityShellMenus on _SerenityShellState {
     final activeWorkspace = _activeWorkspaceOrNull;
     final focusedWindow = _focusedWindowOrNull();
     final focusedVideoWindow = focusedWindow?.asset.type == AssetType.video ? focusedWindow : null;
-    final focusedWindowIsSelected = focusedWindow != null && _selectedExposeWindowIds.contains(focusedWindow.asset.id);
+    final focusedWindowIsSelected =
+        focusedWindow != null && _windowInteractionState.selectedExposeWindowIds.contains(focusedWindow.asset.id);
     final focusedWindowLabel = focusedWindow == null
         ? 'No Asset Selected'
         : _middleTruncatedLabel(focusedWindow.asset.filename);

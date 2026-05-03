@@ -14,16 +14,16 @@ extension _SerenityShellWindowActions on _SerenityShellState {
   }
 
   void _setOptionGestureWindowId(String? windowId) {
-    if (_optionGestureWindowId == windowId) {
+    if (_windowInteractionState.optionGestureWindowId == windowId) {
       return;
     }
     setState(() {
-      _optionGestureWindowId = windowId;
+      _windowInteractionState.optionGestureWindowId = windowId;
     });
   }
 
   void _handleOptionGestureHover(PointerHoverEvent event, WorkspaceState workspace) {
-    final targetWindowId = _optionGestureWindowId;
+    final targetWindowId = _windowInteractionState.optionGestureWindowId;
     if (_screen != SerenityScreen.workspace || _workspaceLayoutMode == WorkspaceLayoutMode.expose) {
       return;
     }
@@ -45,14 +45,14 @@ extension _SerenityShellWindowActions on _SerenityShellState {
     }
 
     if (result.previousZOrder != null) {
-      _previousWindowZOrders[windowId] = result.previousZOrder!;
+      _windowInteractionState.previousWindowZOrders[windowId] = result.previousZOrder!;
     }
     _replaceWorkspace(result.workspace);
   }
 
   void _restorePreviousWindowZOrder(String windowId) {
     final workspace = _activeWorkspace;
-    final previousZ = _previousWindowZOrders.remove(windowId);
+    final previousZ = _windowInteractionState.previousWindowZOrders.remove(windowId);
     if (previousZ == null) {
       return;
     }
@@ -166,7 +166,7 @@ extension _SerenityShellWindowActions on _SerenityShellState {
       _isWorkspaceGestureActive = false;
       return;
     }
-    if (_pinnedHoverWindowId != null) {
+    if (_windowInteractionState.pinnedHoverWindowId != null) {
       _isWorkspaceGestureActive = false;
       return;
     }
@@ -266,7 +266,7 @@ extension _SerenityShellWindowActions on _SerenityShellState {
   }
 
   bool _isVideoWindowPaused(String windowId) {
-    return _pausedVideoWindows[windowId] ?? true;
+    return _windowInteractionState.pausedVideoWindows[windowId] ?? true;
   }
 
   void _toggleVideoPlayback(String windowId) {
@@ -283,7 +283,8 @@ extension _SerenityShellWindowActions on _SerenityShellState {
     }
 
     setState(() {
-      _pausedVideoWindows[windowId] = !(_pausedVideoWindows[windowId] ?? true);
+      _windowInteractionState.pausedVideoWindows[windowId] =
+          !(_windowInteractionState.pausedVideoWindows[windowId] ?? true);
     });
   }
 
@@ -297,7 +298,7 @@ extension _SerenityShellWindowActions on _SerenityShellState {
       for (final workspace in session.workspaces) {
         for (final window in workspace.windows) {
           if (window.asset.type == AssetType.video) {
-            _pausedVideoWindows[window.asset.id] = true;
+            _windowInteractionState.pausedVideoWindows[window.asset.id] = true;
           }
         }
       }

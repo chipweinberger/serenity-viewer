@@ -34,11 +34,11 @@ extension _SerenityShellSessionActions on _SerenityShellState {
   }
 
   void _setPinnedHoverWindow(String? windowId) {
-    if (_pinnedHoverWindowId == windowId) {
+    if (_windowInteractionState.pinnedHoverWindowId == windowId) {
       return;
     }
     setState(() {
-      _pinnedHoverWindowId = windowId;
+      _windowInteractionState.pinnedHoverWindowId = windowId;
     });
   }
 
@@ -47,17 +47,17 @@ extension _SerenityShellSessionActions on _SerenityShellState {
   }
 
   void _flashWindow(String windowId) {
-    _windowFlashTimer?.cancel();
+    _windowInteractionState.windowFlashTimer?.cancel();
     setState(() {
-      _flashedWindowId = windowId;
-      _windowFlashNonce += 1;
+      _windowInteractionState.flashedWindowId = windowId;
+      _windowInteractionState.windowFlashNonce += 1;
     });
-    _windowFlashTimer = Timer(const Duration(milliseconds: 300), () {
-      if (!mounted || _flashedWindowId != windowId) {
+    _windowInteractionState.windowFlashTimer = Timer(const Duration(milliseconds: 300), () {
+      if (!mounted || _windowInteractionState.flashedWindowId != windowId) {
         return;
       }
       setState(() {
-        _flashedWindowId = null;
+        _windowInteractionState.flashedWindowId = null;
       });
     });
   }
@@ -204,20 +204,20 @@ extension _SerenityShellSessionActions on _SerenityShellState {
 
   void _toggleExposeWindowSelected(String windowId) {
     setState(() {
-      if (_selectedExposeWindowIds.contains(windowId)) {
-        _selectedExposeWindowIds.remove(windowId);
+      if (_windowInteractionState.selectedExposeWindowIds.contains(windowId)) {
+        _windowInteractionState.selectedExposeWindowIds.remove(windowId);
       } else {
-        _selectedExposeWindowIds.add(windowId);
+        _windowInteractionState.selectedExposeWindowIds.add(windowId);
       }
     });
   }
 
   void _clearExposeSelection() {
-    if (_selectedExposeWindowIds.isEmpty) {
+    if (_windowInteractionState.selectedExposeWindowIds.isEmpty) {
       return;
     }
     setState(() {
-      _selectedExposeWindowIds.clear();
+      _windowInteractionState.selectedExposeWindowIds.clear();
     });
   }
 }

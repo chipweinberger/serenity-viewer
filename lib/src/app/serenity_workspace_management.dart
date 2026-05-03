@@ -167,7 +167,7 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
 
   Future<void> _moveSelectedExposeWindowsToWorkspace(String destinationWorkspaceId) async {
     final session = _session;
-    if (session == null || _selectedExposeWindowIds.isEmpty) {
+    if (session == null || _windowInteractionState.selectedExposeWindowIds.isEmpty) {
       return;
     }
 
@@ -188,7 +188,7 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
 
     final destinationWorkspace = destinationMatches.first;
     final selectedWindows = sourceWorkspace.windows
-        .where((window) => _selectedExposeWindowIds.contains(window.asset.id))
+        .where((window) => _windowInteractionState.selectedExposeWindowIds.contains(window.asset.id))
         .toList();
     if (selectedWindows.isEmpty) {
       _clearExposeSelection();
@@ -205,13 +205,13 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
         session,
         sourceWorkspaceId: sourceWorkspace.id,
         destinationWorkspaceId: destinationWorkspace.id,
-        selectedWindowIds: _selectedExposeWindowIds,
+        selectedWindowIds: _windowInteractionState.selectedExposeWindowIds,
       ),
     );
     _queueThumbnailRefresh(sourceWorkspace.id, delay: Duration.zero);
     _queueThumbnailRefresh(destinationWorkspace.id, delay: Duration.zero);
     setState(() {
-      _selectedExposeWindowIds.clear();
+      _windowInteractionState.selectedExposeWindowIds.clear();
     });
   }
 

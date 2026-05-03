@@ -173,7 +173,7 @@ extension _SerenityVideoConversionTools on _SerenityShellState {
     );
 
     setState(() {
-      _pausedVideoWindows.remove(windowId);
+      _windowInteractionState.pausedVideoWindows.remove(windowId);
     });
     _showMessage('Converted ${window.asset.filename} to ${conversion.filename}.');
   }

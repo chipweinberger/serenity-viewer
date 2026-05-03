@@ -13,7 +13,7 @@ extension _SerenityShellUiState on _SerenityShellState {
     final nextScreen = screen ?? _screen;
     final nextWorkspaceLayoutMode = workspaceLayoutMode ?? _workspaceLayoutMode;
     final nextEditMode = resetEditMode ? false : _editMode;
-    final shouldClearSelection = clearExposeSelection && _selectedExposeWindowIds.isNotEmpty;
+    final shouldClearSelection = clearExposeSelection && _windowInteractionState.selectedExposeWindowIds.isNotEmpty;
     final changed =
         nextScreen != _screen ||
         nextWorkspaceLayoutMode != _workspaceLayoutMode ||
@@ -27,7 +27,7 @@ extension _SerenityShellUiState on _SerenityShellState {
           _editMode = false;
         }
         if (clearExposeSelection) {
-          _selectedExposeWindowIds.clear();
+          _windowInteractionState.selectedExposeWindowIds.clear();
         }
       });
     }
