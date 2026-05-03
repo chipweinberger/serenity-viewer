@@ -39,15 +39,7 @@ extension _SerenityShellEnvironmentPersistence on _SerenityShellState {
       final file = File(path);
       await file.parent.create(recursive: true);
       await file.writeAsBytes(encoded, flush: true);
-      if (mounted) {
-        setState(() {
-          _persistenceState.currentEnvironmentPath = file.path;
-          _persistenceState.hasUnsavedChanges = false;
-        });
-      } else {
-        _persistenceState.currentEnvironmentPath = file.path;
-        _persistenceState.hasUnsavedChanges = false;
-      }
+      _sessionController.noteEnvironmentPathSaved(file.path, mounted: mounted);
       await _storeLastEnvironmentPath(file.path);
       await _syncWindowTitle();
     } catch (_) {
@@ -118,19 +110,10 @@ extension _SerenityShellEnvironmentPersistence on _SerenityShellState {
         return false;
       }
 
-      setState(() {
-        _persistenceState.session = resolved;
-        _persistenceState.currentEnvironmentPath = path;
-        _uiState.screen = SerenityScreen.workspace;
-        _uiState.workspaceLayoutMode = WorkspaceLayoutMode.freeform;
-        _uiState.editMode = false;
-        _persistenceState.isLoading = false;
-      });
-      _refreshWorkspaceViewTracking();
+      _sessionController.applyLoadedEnvironment(session: resolved, path: path);
       if (persistAsLastOpened) {
         await _storeLastEnvironmentPath(path);
       }
-      await _syncWindowTitle();
       await _restoreEnvironmentThumbnails(decoded.thumbnailBytesByWorkspaceId, resolved);
       await _saveSession();
       if (mounted && showSuccessMessage) {
@@ -162,15 +145,7 @@ extension _SerenityShellEnvironmentPersistence on _SerenityShellState {
       return false;
     }
 
-    setState(() {
-      _persistenceState.session = seeded;
-      _persistenceState.currentEnvironmentPath = location.path;
-      _uiState.screen = SerenityScreen.workspace;
-      _uiState.workspaceLayoutMode = WorkspaceLayoutMode.freeform;
-      _uiState.editMode = false;
-      _persistenceState.isLoading = false;
-    });
-    _refreshWorkspaceViewTracking();
+    _sessionController.applyCreatedEnvironment(session: seeded, path: location.path);
     await _saveEnvironmentToPath(location.path, sessionOverride: seeded);
     if (!mounted) {
       return false;
@@ -180,11 +155,11 @@ extension _SerenityShellEnvironmentPersistence on _SerenityShellState {
   }
 
   Future<void> _promptForStartupEnvironment() async {
-    if (!mounted || _persistenceState.session != null || _persistenceState.isPromptingForStartupEnvironment) {
+    if (!_sessionController.shouldPromptForStartupEnvironment(mounted: mounted)) {
       return;
     }
 
-    _persistenceState.isPromptingForStartupEnvironment = true;
+    _sessionController.setStartupPromptInProgress(true);
     try {
       while (mounted && _persistenceState.session == null) {
         if (!mounted) {
@@ -230,7 +205,7 @@ extension _SerenityShellEnvironmentPersistence on _SerenityShellState {
         }
       }
     } finally {
-      _persistenceState.isPromptingForStartupEnvironment = false;
+      _sessionController.setStartupPromptInProgress(false);
     }
   }
 

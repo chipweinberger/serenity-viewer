@@ -19,6 +19,7 @@ import 'package:serenity_viewer/src/app/serenity_chrome_controller.dart';
 import 'package:serenity_viewer/src/app/serenity_import_coordinator.dart';
 import 'package:serenity_viewer/src/app/serenity_import_result.dart';
 import 'package:serenity_viewer/src/app/serenity_shell_dependencies.dart';
+import 'package:serenity_viewer/src/app/serenity_session_controller.dart';
 import 'package:serenity_viewer/src/app/serenity_workspace_controller.dart';
 import 'package:serenity_viewer/src/app/serenity_workspace_mutations.dart';
 import 'package:serenity_viewer/src/core/serenity_core.dart';
@@ -121,6 +122,7 @@ class _SerenityShellState extends State<SerenityShell> {
   Timer? _autosaveTimer;
   late final SerenityChromeController _chromeController;
   late final SerenityWorkspaceController _workspaceController;
+  late final SerenitySessionController _sessionController;
 
   SerenityShellHandles get _handles => _dependencies.handles;
   SerenityShellPersistenceState get _persistenceState => _dependencies.persistenceState;
@@ -170,6 +172,14 @@ class _SerenityShellState extends State<SerenityShell> {
       windowInteractionState: _windowInteractionState,
       commitStateChange: setState,
       refreshWorkspaceTracking: _refreshWorkspaceViewTracking,
+    );
+    _sessionController = SerenitySessionController(
+      persistenceState: _persistenceState,
+      chromeState: _uiState,
+      thumbnailRefreshState: _thumbnailRefreshState,
+      commitStateChange: setState,
+      refreshWorkspaceTracking: _refreshWorkspaceViewTracking,
+      syncWindowTitle: _syncWindowTitle,
     );
     _workspaceController = SerenityWorkspaceController(
       chromeState: _uiState,

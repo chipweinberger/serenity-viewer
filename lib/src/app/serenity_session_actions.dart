@@ -6,20 +6,11 @@ extension _SerenityShellSessionActions on _SerenityShellState {
   static const double _appliedExposeViewportZoomFactor = 0.0625;
 
   void _updateSession(SerenitySessionState nextSession) {
-    setState(() {
-      _persistenceState.session = nextSession;
-    });
-    _refreshWorkspaceViewTracking();
-    unawaited(_syncWindowTitle());
-    _queueSave();
+    _sessionController.updateSession(nextSession);
   }
 
   void _replaceWorkspace(WorkspaceState nextWorkspace, {bool queueThumbnail = true}) {
-    final session = _persistenceState.session!;
-    _updateSession(SerenityWorkspaceMutations.replaceWorkspace(session, nextWorkspace));
-    if (queueThumbnail) {
-      _thumbnailRefreshState.dirtyWorkspaces.add(nextWorkspace.id);
-    }
+    _sessionController.replaceWorkspace(nextWorkspace, queueThumbnail: queueThumbnail);
   }
 
   void _toggleExpose() {

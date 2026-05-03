@@ -13,11 +13,7 @@ extension _SerenityShellStartupPersistence on _SerenityShellState {
 
   Future<void> _restoreSession() async {
     if (_isRunningInWidgetTest) {
-      setState(() {
-        _persistenceState.session = _seedSession();
-        _persistenceState.isLoading = false;
-      });
-      _refreshWorkspaceViewTracking();
+      _sessionController.restoreWidgetTestSession(_seedSession());
       return;
     }
 
@@ -32,25 +28,10 @@ extension _SerenityShellStartupPersistence on _SerenityShellState {
       await _storeLastEnvironmentPath(null);
     }
 
-    setState(() {
-      _persistenceState.session = null;
-      _persistenceState.currentEnvironmentPath = null;
-      _persistenceState.isLoading = false;
-    });
-
-    _refreshWorkspaceViewTracking();
-    unawaited(_syncWindowTitle());
+    _sessionController.showMissingStartupState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(_promptForStartupEnvironment());
     });
-  }
-
-  void _queueSave() {
-    final shouldSyncTitle = !_persistenceState.hasUnsavedChanges;
-    _persistenceState.hasUnsavedChanges = true;
-    if (shouldSyncTitle) {
-      unawaited(_syncWindowTitle());
-    }
   }
 
   Future<SerenitySessionState> _sessionWithRefreshedBookmarks(SerenitySessionState session) async {
@@ -106,19 +87,11 @@ extension _SerenityShellStartupPersistence on _SerenityShellState {
 
     try {
       final sessionToSave = await _sessionWithRefreshedBookmarks(session);
-      if (mounted) {
-        setState(() {
-          if (!identical(sessionToSave, session)) {
-            _persistenceState.session = sessionToSave;
-          }
-          _persistenceState.hasUnsavedChanges = false;
-        });
-      } else {
-        if (!identical(sessionToSave, session)) {
-          _persistenceState.session = sessionToSave;
-        }
-        _persistenceState.hasUnsavedChanges = false;
-      }
+      _sessionController.applySavedSessionState(
+        originalSession: session,
+        savedSession: sessionToSave,
+        mounted: mounted,
+      );
       await _saveEnvironmentToPath(environmentPath, sessionOverride: sessionToSave, showMessageOnFailure: false);
       await _syncWindowTitle();
     } catch (_) {
