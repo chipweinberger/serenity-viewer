@@ -43,7 +43,7 @@ extension _AppShellWorkspaceGeometry on _AppShellState {
 
     _replaceWorkspace(nextWorkspace, queueThumbnail: queueThumbnail);
     if (!queueThumbnail) {
-      _thumbnailRefreshState.dirtyWorkspaces.add(workspaceId);
+      _thumbnailController.markWorkspaceDirty(workspaceId);
     }
   }
 

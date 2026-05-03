@@ -127,7 +127,7 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
         environment.copyWith(workspaces: [replacementWorkspace], activeWorkspaceId: replacementWorkspace.id),
       );
       _showWorkspaceScreen(resetEditMode: false, clearExposeSelection: false);
-      _queueThumbnailRefresh(replacementWorkspace.id, delay: Duration.zero);
+      _thumbnailController.queueWorkspaceRefresh(replacementWorkspace.id, delay: Duration.zero);
       return;
     }
 
@@ -221,7 +221,7 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
       sourceWorkspace: sourceWorkspace,
       destinationWorkspace: destinationWorkspace,
       updateEnvironment: _updateEnvironment,
-      queueThumbnailRefresh: _queueThumbnailRefresh,
+      queueThumbnailRefresh: _thumbnailController.queueWorkspaceRefresh,
     );
   }
 
@@ -279,7 +279,7 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
     );
 
     _showWorkspaceScreen(resetEditMode: false, clearExposeSelection: false);
-    _queueThumbnailRefresh(workspace.id, delay: Duration.zero);
+    _thumbnailController.queueWorkspaceRefresh(workspace.id, delay: Duration.zero);
   }
 
   void _handleShortcut(LogicalKeyboardKey key) {

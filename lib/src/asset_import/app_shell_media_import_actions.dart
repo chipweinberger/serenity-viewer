@@ -57,7 +57,7 @@ extension _AppShellMediaImportActions on _AppShellState {
 
     if (result.importedCount > 0) {
       _updateEnvironment(result.environment);
-      _queueThumbnailRefresh(workspace.id);
+      _thumbnailController.queueWorkspaceRefresh(workspace.id);
     }
     if (result.skippedDuplicateCount > 0) {
       _showMessage(

@@ -110,7 +110,7 @@ extension _AppShellEnvironmentActions on _AppShellState {
 
   Future<void> _toggleWorkspaceOverview() async {
     if (_chromeController.isWorkspaceScreen) {
-      unawaited(_refreshActiveWorkspaceThumbnailIfNeeded());
+      unawaited(_thumbnailController.refreshActiveWorkspaceIfNeeded());
     }
 
     if (_chromeController.isLibraryScreen) {
@@ -122,7 +122,7 @@ extension _AppShellEnvironmentActions on _AppShellState {
 
   Future<void> _showWorkspaceOverview() async {
     if (_chromeController.isWorkspaceScreen) {
-      unawaited(_refreshActiveWorkspaceThumbnailIfNeeded());
+      unawaited(_thumbnailController.refreshActiveWorkspaceIfNeeded());
     }
 
     _showLibraryScreen();
@@ -147,7 +147,7 @@ extension _AppShellEnvironmentActions on _AppShellState {
     final environment = _persistenceState.environment!;
     final currentWorkspaceId = environment.activeWorkspaceId;
     if (currentWorkspaceId != workspaceId) {
-      unawaited(_refreshActiveWorkspaceThumbnailIfNeeded());
+      unawaited(_thumbnailController.refreshActiveWorkspaceIfNeeded());
     }
 
     final shouldPreserveExpose = _chromeController.isExposeMode;

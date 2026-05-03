@@ -85,7 +85,7 @@ extension _AppShellContent on _AppShellState {
                     onClearExposeSelection: _clearExposeSelection,
                     onSetWorkspaceZoom: (workspaceId, zoom) =>
                         _setWorkspaceViewport(workspaceId: workspaceId, zoom: zoom, queueThumbnail: false),
-                    onRefreshActiveWorkspaceThumbnail: _refreshActiveWorkspaceThumbnailIfNeeded,
+                    onRefreshActiveWorkspaceThumbnail: _thumbnailController.refreshActiveWorkspaceIfNeeded,
                   ),
                 ),
               ),
@@ -95,7 +95,7 @@ extension _AppShellContent on _AppShellState {
                 loadPlan: workspaceLoadPlan,
                 searchController: _handles.searchController,
                 workspaceSort: _uiState.workspaceSort,
-                refreshingWorkspaceIds: _thumbnailRefreshState.refreshInFlight,
+                refreshingWorkspaceIds: _thumbnailController.refreshingWorkspaceIds,
                 actions: LibraryScreenActions(
                   onSearchChanged: (_) => setState(() {}),
                   onWorkspaceSortChanged: _chromeController.setWorkspaceSort,

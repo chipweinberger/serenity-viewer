@@ -41,6 +41,7 @@ import 'package:serenity_viewer/src/links/workspace_links_dialog.dart';
 import 'package:serenity_viewer/src/settings/behavior/settings_dialog.dart';
 import 'package:serenity_viewer/src/library/library_screen.dart';
 import 'package:serenity_viewer/src/thumbnails/thumbnail_refresh_state.dart';
+import 'package:serenity_viewer/src/thumbnails/thumbnail_controller.dart';
 import 'package:serenity_viewer/src/thumbnails/thumbnail_refresher.dart';
 import 'package:serenity_viewer/src/thumbnails/thumbnail_renderer.dart';
 import 'package:serenity_viewer/src/thumbnails/thumbnail_store.dart';
@@ -86,9 +87,7 @@ class _AppShellState extends State<AppShell> {
   late final AppShellPlatformBridge _appShellPlatformBridge;
   late final EnvironmentBookmarkSynchronizer _environmentBookmarkSynchronizer;
   late final EnvironmentController _environmentController;
-  late final ThumbnailRenderer _thumbnailRenderer;
-  late final ThumbnailStore _thumbnailStore;
-  late final ThumbnailRefresher _thumbnailRefresher;
+  late final ThumbnailController _thumbnailController;
   late final VideoConversionCoordinator _videoConversionCoordinator;
 
   ShellHandles get _handles => _dependencies.handles;
@@ -186,57 +185,6 @@ class _AppShellState extends State<AppShell> {
     }
   }
 
-  Future<void> _refreshActiveWorkspaceThumbnailIfNeeded() async {
-    if (_uiState.screen != SerenityScreen.workspace) {
-      return;
-    }
-
-    final workspaceId = _activeWorkspaceOrNull?.id;
-    if (workspaceId == null || !_thumbnailRefreshState.dirtyWorkspaces.contains(workspaceId)) {
-      return;
-    }
-
-    final viewportSize = _workspaceViewportState.viewportSize;
-    if (viewportSize.width <= 0 || viewportSize.height <= 0) {
-      return;
-    }
-
-    if (_thumbnailRefreshState.refreshInFlight.contains(workspaceId)) {
-      return;
-    }
-
-    if (mounted) {
-      setState(() {
-        _thumbnailRefreshState.refreshInFlight.add(workspaceId);
-      });
-    } else {
-      _thumbnailRefreshState.refreshInFlight.add(workspaceId);
-    }
-
-    try {
-      await _thumbnailRefresher.refreshWorkspace(workspaceId, viewportSize: viewportSize);
-    } finally {
-      if (!mounted) {
-        _thumbnailRefreshState.dirtyWorkspaces.remove(workspaceId);
-        _thumbnailRefreshState.refreshInFlight.remove(workspaceId);
-      } else {
-        setState(() {
-          _thumbnailRefreshState.dirtyWorkspaces.remove(workspaceId);
-          _thumbnailRefreshState.refreshInFlight.remove(workspaceId);
-        });
-      }
-    }
-  }
-
-  void _queueThumbnailRefresh(String workspaceId, {Duration delay = const Duration(milliseconds: 300)}) {
-    _thumbnailRefreshState.debounces[workspaceId]?.cancel();
-    _thumbnailRefreshState.debounces[workspaceId] = Timer(delay, () {
-      _thumbnailRefreshState.dirtyWorkspaces.add(workspaceId);
-      _thumbnailRefreshState.debounces.remove(workspaceId);
-      unawaited(_refreshActiveWorkspaceThumbnailIfNeeded());
-    });
-  }
-
   @override
   void initState() {
     super.initState();
@@ -254,7 +202,7 @@ class _AppShellState extends State<AppShell> {
     _environmentController = EnvironmentController(
       persistenceState: _persistenceState,
       chromeState: _uiState,
-      thumbnailRefreshState: _thumbnailRefreshState,
+      markWorkspaceThumbnailDirty: (workspaceId) => _thumbnailController.markWorkspaceDirty(workspaceId),
       commitStateChange: setState,
       refreshWorkspaceTracking: _refreshWorkspaceViewTracking,
       syncWindowTitle: () => _appShellPlatformBridge.syncWindowTitle(),
@@ -267,13 +215,19 @@ class _AppShellState extends State<AppShell> {
     _environmentBookmarkSynchronizer = EnvironmentBookmarkSynchronizer(
       createFileBookmark: _appShellPlatformBridge.createFileBookmark,
     );
-    _thumbnailRenderer = ThumbnailRenderer(isRunningInWidgetTest: _isRunningInWidgetTest);
-    _thumbnailStore = ThumbnailStore(thumbnailDirectory: _appShellPlatformBridge.thumbnailDirectory);
-    _thumbnailRefresher = ThumbnailRefresher(
-      persistenceState: _persistenceState,
-      environmentController: _environmentController,
-      renderer: _thumbnailRenderer,
-      store: _thumbnailStore,
+    _thumbnailController = ThumbnailController(
+      state: _thumbnailRefreshState,
+      refresher: ThumbnailRefresher(
+        persistenceState: _persistenceState,
+        updateEnvironment: _environmentController.updateEnvironment,
+        renderer: ThumbnailRenderer(isRunningInWidgetTest: _isRunningInWidgetTest),
+        store: ThumbnailStore(thumbnailDirectory: _appShellPlatformBridge.thumbnailDirectory),
+      ),
+      activeScreen: () => _uiState.screen,
+      activeWorkspaceId: () => _activeWorkspaceOrNull?.id,
+      viewportSize: () => _workspaceViewportState.viewportSize,
+      commitStateChange: setState,
+      isMounted: () => mounted,
     );
     _sryDocumentCoordinator = SryDocumentCoordinator(
       persistenceState: _persistenceState,
@@ -282,7 +236,7 @@ class _AppShellState extends State<AppShell> {
       mounted: () => mounted,
       seedEnvironment: _seedEnvironment,
       showMessage: _showMessage,
-      refreshActiveWorkspaceThumbnailIfNeeded: _refreshActiveWorkspaceThumbnailIfNeeded,
+      refreshActiveWorkspaceThumbnailIfNeeded: _thumbnailController.refreshActiveWorkspaceIfNeeded,
       storeLastEnvironmentPath: _appShellPlatformBridge.storeLastEnvironmentPath,
       syncWindowTitle: _appShellPlatformBridge.syncWindowTitle,
       resolveFileBookmark: _appShellPlatformBridge.resolveFileBookmark,
@@ -324,7 +278,7 @@ class _AppShellState extends State<AppShell> {
       commitInteractionState: setState,
       replaceWorkspace: _replaceWorkspace,
       setWorkspaceViewport: _setWorkspaceViewport,
-      refreshActiveWorkspaceThumbnail: _refreshActiveWorkspaceThumbnailIfNeeded,
+      refreshActiveWorkspaceThumbnail: _thumbnailController.refreshActiveWorkspaceIfNeeded,
     );
     _autosaveTimer = Timer.periodic(const Duration(minutes: 1), (_) {
       if (_persistenceState.hasUnsavedChanges) {
@@ -347,7 +301,7 @@ class _AppShellState extends State<AppShell> {
     _appLifecycleListener?.dispose();
     _workspaceViewTrackingState.dispose();
     _windowInteractionState.dispose();
-    _thumbnailRefreshState.dispose();
+    _thumbnailController.dispose();
     _mediaBridge.dispose();
     _handles.dispose();
     super.dispose();
