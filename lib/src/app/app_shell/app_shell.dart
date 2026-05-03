@@ -2,10 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/settings/behavior/chrome_controller.dart';
 import 'package:serenity_viewer/src/app/dependencies/shell_dependencies.dart';
-import 'package:serenity_viewer/src/app/environment/app_environment_bookmark_synchronizer.dart';
-import 'package:serenity_viewer/src/app/environment/app_environment_controller.dart';
 import 'package:serenity_viewer/src/app/environment/app_environment_state.dart';
 import 'package:serenity_viewer/src/app/app_shell/builders/app_shell_content_builder.dart';
 import 'package:serenity_viewer/src/app/app_shell/builders/app_shell_content_scope.dart';
@@ -18,19 +15,11 @@ import 'package:serenity_viewer/src/app/app_shell/controllers/app_shell_ui_contr
 import 'package:serenity_viewer/src/app/app_shell/controllers/app_shell_window_controller.dart';
 import 'package:serenity_viewer/src/app/app_shell/controllers/app_shell_window_history_controller.dart';
 import 'package:serenity_viewer/src/app/app_shell/controllers/app_shell_workspace_geometry_controller.dart';
-import 'package:serenity_viewer/src/app/platform/app_shell_platform_bridge.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_runtime.dart';
-import 'package:serenity_viewer/src/app/sry_document/sry_document_coordinator.dart';
 import 'package:serenity_viewer/src/asset_window/interaction/asset_window_interaction_state.dart';
-import 'package:serenity_viewer/src/video_tools/media_bridge.dart';
-import 'package:serenity_viewer/src/video_tools/video_conversion_coordinator.dart';
-import 'package:serenity_viewer/src/workspace/shell/workspace_shell_controller.dart';
-import 'package:serenity_viewer/src/workspace/controller/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/session/recently_closed_window_entry.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
-import 'package:serenity_viewer/src/links/workspace_links_controller.dart';
-import 'package:serenity_viewer/src/thumbnails/thumbnail_controller.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 
 class AppShell extends StatefulWidget {
@@ -50,22 +39,13 @@ class _AppShellState extends State<AppShell> {
   late final AppShellRuntime _runtime;
 
   ShellHandles get _handles => _runtime.handles;
+  AppShellRuntimeFoundationServices get _foundation => _runtime.foundation;
+  AppShellRuntimeDocumentServices get _documents => _runtime.documents;
+  AppShellRuntimeWorkspaceServices get _workspaceRuntime => _runtime.workspace;
   AppEnvironmentState get _persistenceState => _runtime.persistenceState;
   ChromeState get _uiState => _runtime.chromeState;
   AssetWindowInteractionState get _windowInteractionState => _runtime.dependencies.windowInteractionState;
   WorkspaceViewportState get _workspaceViewportState => _runtime.workspaceViewportState;
-  ChromeController get _chromeController => _runtime.foundation.chromeController;
-  SryDocumentCoordinator get _sryDocumentCoordinator => _runtime.documents.sryDocumentCoordinator;
-  MediaBridge get _mediaBridge => _runtime.foundation.mediaBridge;
-  WorkspaceController get _workspaceController => _runtime.workspace.workspaceController;
-  WorkspaceShellController get _workspaceShellController => _runtime.workspace.workspaceShellController;
-  LinksController get _workspaceLinksController => _runtime.workspace.workspaceLinksController;
-  AppShellPlatformBridge get _appShellPlatformBridge => _runtime.foundation.appShellPlatformBridge;
-  EnvironmentBookmarkSynchronizer get _environmentBookmarkSynchronizer =>
-      _runtime.foundation.environmentBookmarkSynchronizer;
-  EnvironmentController get _environmentController => _runtime.foundation.environmentController;
-  ThumbnailController get _thumbnailController => _runtime.workspace.thumbnailController;
-  VideoConversionCoordinator get _videoConversionCoordinator => _runtime.workspace.videoConversionCoordinator;
 
   bool get _isRunningInWidgetTest {
     return Platform.environment.containsKey('FLUTTER_TEST') ||
@@ -101,28 +81,28 @@ class _AppShellState extends State<AppShell> {
 
   Future<void> _restoreEnvironment() async {
     if (_isRunningInWidgetTest) {
-      _environmentController.restoreWidgetTestEnvironment(buildSeedEnvironment());
+      _foundation.environmentController.restoreWidgetTestEnvironment(buildSeedEnvironment());
       return;
     }
 
     try {
-      final lastEnvironmentPath = await _appShellPlatformBridge.loadLastEnvironmentPath();
+      final lastEnvironmentPath = await _foundation.appShellPlatformBridge.loadLastEnvironmentPath();
       if (lastEnvironmentPath != null && lastEnvironmentPath.isNotEmpty && await File(lastEnvironmentPath).exists()) {
-        await _sryDocumentCoordinator.loadDocumentFromPath(
+        await _documents.sryDocumentCoordinator.loadDocumentFromPath(
           lastEnvironmentPath,
           showSuccessMessage: false,
           persistAsLastOpened: true,
         );
         return;
       }
-      await _appShellPlatformBridge.storeLastEnvironmentPath(null);
+      await _foundation.appShellPlatformBridge.storeLastEnvironmentPath(null);
     } catch (_) {
-      await _appShellPlatformBridge.storeLastEnvironmentPath(null);
+      await _foundation.appShellPlatformBridge.storeLastEnvironmentPath(null);
     }
 
-    _environmentController.showMissingStartupState();
+    _foundation.environmentController.showMissingStartupState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(_sryDocumentCoordinator.promptForStartupDocument());
+      unawaited(_documents.sryDocumentCoordinator.promptForStartupDocument());
     });
   }
 
@@ -137,18 +117,18 @@ class _AppShellState extends State<AppShell> {
     }
 
     try {
-      final sessionToSave = await _environmentBookmarkSynchronizer.synchronize(environment);
-      _environmentController.applySavedEnvironment(
+      final sessionToSave = await _foundation.environmentBookmarkSynchronizer.synchronize(environment);
+      _foundation.environmentController.applySavedEnvironment(
         originalEnvironment: environment,
         savedEnvironment: sessionToSave,
         mounted: mounted,
       );
-      await _sryDocumentCoordinator.saveDocumentToPath(
+      await _documents.sryDocumentCoordinator.saveDocumentToPath(
         environmentPath,
         environmentOverride: sessionToSave,
         showMessageOnFailure: false,
       );
-      await _appShellPlatformBridge.syncWindowTitle();
+      await _foundation.appShellPlatformBridge.syncWindowTitle();
     } catch (_) {
       // Widget tests and unsupported platforms can skip local persistence.
     }
@@ -160,7 +140,7 @@ class _AppShellState extends State<AppShell> {
       workspaces: () => _workspaces,
       activeWorkspace: () => _activeWorkspaceOrNull,
       recentlyClosedWindows: _recentlyClosedWindows,
-      workspaceController: _workspaceController,
+      workspaceController: _workspaceRuntime.workspaceController,
       updateEnvironment: _environmentActions.updateEnvironment,
       replaceWorkspace: _environmentActions.replaceWorkspace,
       commitStateChange: setState,
@@ -179,7 +159,7 @@ class _AppShellState extends State<AppShell> {
       environment: () => _persistenceState.environment,
       activeWorkspace: () => _activeWorkspace,
       activeWorkspaceOrNull: () => _activeWorkspaceOrNull,
-      workspaceController: _workspaceController,
+      workspaceController: _workspaceRuntime.workspaceController,
       showMessage: _uiController.showMessage,
     );
   }
@@ -188,7 +168,7 @@ class _AppShellState extends State<AppShell> {
     return AppShellWorkspaceGeometryController(
       persistenceState: _persistenceState,
       workspaceViewportState: _workspaceViewportState,
-      thumbnailController: _thumbnailController,
+      thumbnailController: _workspaceRuntime.thumbnailController,
       replaceWorkspace: _environmentActions.replaceWorkspace,
     );
   }
@@ -199,19 +179,19 @@ class _AppShellState extends State<AppShell> {
       videoExtensions: _AppShellState._videoExtensions,
       persistenceState: _persistenceState,
       activeWorkspace: () => _activeWorkspace,
-      videoConversionCoordinator: _videoConversionCoordinator,
-      createFileBookmark: _appShellPlatformBridge.createFileBookmark,
-      mediaBridge: _mediaBridge,
+      videoConversionCoordinator: _workspaceRuntime.videoConversionCoordinator,
+      createFileBookmark: _foundation.appShellPlatformBridge.createFileBookmark,
+      mediaBridge: _foundation.mediaBridge,
       newId: _workspaceGeometryController.newId,
       colorFromDigest: _workspaceGeometryController.colorFromDigest,
       updateEnvironment: _environmentActions.updateEnvironment,
-      thumbnailController: _thumbnailController,
+      thumbnailController: _workspaceRuntime.thumbnailController,
       showMessage: _uiController.showMessage,
     );
   }
 
   AppShellNavigationController get _navigationController {
-    return AppShellNavigationController(chromeController: _chromeController);
+    return AppShellNavigationController(chromeController: _foundation.chromeController);
   }
 
   AppShellUiController get _uiController {
@@ -224,42 +204,43 @@ class _AppShellState extends State<AppShell> {
 
   AppShellEnvironmentController get _environmentActions {
     return AppShellEnvironmentController(
-      environmentController: _environmentController,
-      chromeController: _chromeController,
+      environmentController: _foundation.environmentController,
+      chromeController: _foundation.chromeController,
     );
   }
 
   List<PlatformMenuItem> _buildMenus() {
     final focusedWindow = _windowHistoryController.focusedWindowOrNull();
     final focusedWindowIsSelected =
-        focusedWindow != null && _workspaceController.expose.isWindowSelected(focusedWindow.asset.id);
+        focusedWindow != null && _workspaceRuntime.workspaceController.expose.isWindowSelected(focusedWindow.asset.id);
 
     return AppShellMenuBuilder(
       showAboutSerenity: _uiController.showAboutSerenity,
       openSettings: _uiController.openSettings,
-      createEnvironment: _sryDocumentCoordinator.createDocument,
-      openEnvironment: _sryDocumentCoordinator.openDocument,
+      createEnvironment: _documents.sryDocumentCoordinator.createDocument,
+      openEnvironment: _documents.sryDocumentCoordinator.openDocument,
       openAssets: _mediaImportController.pickAndImportAssets,
-      saveEnvironment: _sryDocumentCoordinator.saveDocument,
-      saveEnvironmentAs: _sryDocumentCoordinator.saveDocumentAs,
-      revealAssetInFinder: _mediaBridge.revealAssetInFinder,
-      toggleWindowSelected: _workspaceShellController.navigation.toggleSelectedWindow,
+      saveEnvironment: _documents.sryDocumentCoordinator.saveDocument,
+      saveEnvironmentAs: _documents.sryDocumentCoordinator.saveDocumentAs,
+      revealAssetInFinder: _foundation.mediaBridge.revealAssetInFinder,
+      toggleWindowSelected: _workspaceRuntime.workspaceShellController.navigation.toggleSelectedWindow,
       fitWindowToContent: _windowController.fitWindowToContent,
       restorePreviousWindowZOrder: _windowController.restorePreviousWindowZOrder,
-      convertVideoWindowToJpeg: (windowId) => _videoConversionCoordinator.convertVideoWindowToJpeg(windowId),
+      convertVideoWindowToJpeg: (windowId) =>
+          _workspaceRuntime.videoConversionCoordinator.convertVideoWindowToJpeg(windowId),
       closeWindow: _windowHistoryController.removeWindow,
       toggleExpose: _environmentActions.toggleExpose,
-      toggleWorkspaceOverview: _workspaceShellController.navigation.toggleOverview,
-      createWorkspace: _workspaceShellController.management.createWorkspace,
-      switchToPreviousWorkspace: () => _workspaceShellController.navigation.switchWorkspace(-1),
-      switchToNextWorkspace: () => _workspaceShellController.navigation.switchWorkspace(1),
+      toggleWorkspaceOverview: _workspaceRuntime.workspaceShellController.navigation.toggleOverview,
+      createWorkspace: _workspaceRuntime.workspaceShellController.management.createWorkspace,
+      switchToPreviousWorkspace: () => _workspaceRuntime.workspaceShellController.navigation.switchWorkspace(-1),
+      switchToNextWorkspace: () => _workspaceRuntime.workspaceShellController.navigation.switchWorkspace(1),
       fitWorkspaceViewportToContent: _windowController.fitWorkspaceViewportToContent,
       confirmCollateWorkspaceWindows: _windowController.confirmCollateWorkspaceWindows,
       pauseAllVideos: _windowController.pauseAllVideos,
       showNoWorkspaceToRenameMessage: () => _uiController.showMessage('There is no workspace to rename.'),
-      renameWorkspace: _workspaceShellController.management.renameWorkspace,
+      renameWorkspace: _workspaceRuntime.workspaceShellController.management.renameWorkspace,
       showNoWorkspaceToDeleteMessage: () => _uiController.showMessage('There is no workspace to delete.'),
-      confirmDeleteWorkspace: _workspaceShellController.management.confirmDeleteWorkspace,
+      confirmDeleteWorkspace: _workspaceRuntime.workspaceShellController.management.confirmDeleteWorkspace,
       restoreRecentlyClosedWindow: _windowHistoryController.restoreRecentlyClosedWindow,
     ).build(
       activeWorkspaceId: _persistenceState.environment?.activeWorkspaceId,
@@ -284,14 +265,14 @@ class _AppShellState extends State<AppShell> {
         openWorkspaces: _openWorkspaces,
         activeWorkspace: _activeWorkspace,
         activeWorkspaceOrNull: _activeWorkspaceOrNull,
-        selectedExposeWindowCount: _workspaceController.expose.selectionCount(),
+        selectedExposeWindowCount: _workspaceRuntime.workspaceController.expose.selectionCount(),
         windowInteractionState: _windowInteractionState,
         workspaceViewportState: _workspaceViewportState,
-        chromeController: _chromeController,
-        mediaBridge: _mediaBridge,
-        workspaceShellController: _workspaceShellController,
-        workspaceLinksController: _workspaceLinksController,
-        thumbnailController: _thumbnailController,
+        chromeController: _foundation.chromeController,
+        mediaBridge: _foundation.mediaBridge,
+        workspaceShellController: _workspaceRuntime.workspaceShellController,
+        workspaceLinksController: _workspaceRuntime.workspaceLinksController,
+        thumbnailController: _workspaceRuntime.thumbnailController,
         windowHistoryController: _windowHistoryController,
         searchController: _handles.searchController,
         tabScrollController: _handles.tabScrollController,
@@ -370,7 +351,7 @@ class _AppShellState extends State<AppShell> {
       child: Focus(
         focusNode: _handles.focusNode,
         autofocus: true,
-        onKeyEvent: (_, event) => _workspaceShellController.shortcuts.onKeyEvent(event),
+        onKeyEvent: (_, event) => _workspaceRuntime.workspaceShellController.shortcuts.onKeyEvent(event),
         child: Scaffold(body: SafeArea(top: false, child: _buildShellContent(context))),
       ),
     );
