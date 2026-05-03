@@ -3,11 +3,13 @@ part of 'workspace_controller.dart';
 class _WorkspaceWindowController {
   _WorkspaceWindowController({
     required this.chromeState,
+    required this.commitInteractionState,
     required this.windowInteractionState,
     required this.replaceWorkspace,
   });
 
   final ChromeState chromeState;
+  final SerenityWorkspaceCommit commitInteractionState;
   final AssetWindowInteractionState windowInteractionState;
   final SerenityWorkspaceReplace replaceWorkspace;
 
@@ -73,7 +75,7 @@ class _WorkspaceWindowController {
     required bool isCommandPressedForContentGesture,
     required bool isOptionPressedForWindowGesture,
   }) {
-    final targetWindowId = windowInteractionState.optionGestureWindowId;
+    final targetWindowId = windowInteractionState.activeGestureWindowId;
     if (chromeState.screen != SerenityScreen.workspace ||
         chromeState.workspaceLayoutMode == WorkspaceLayoutMode.expose ||
         isCommandPressedForContentGesture ||
@@ -84,6 +86,22 @@ class _WorkspaceWindowController {
     }
 
     moveWindow(workspace, targetWindowId, event.delta / workspace.viewportZoom);
+  }
+
+  void flashWindow(String windowId, {required bool mounted}) {
+    windowInteractionState.windowFlashTimer?.cancel();
+    commitInteractionState(() {
+      windowInteractionState.flashedWindowId = windowId;
+      windowInteractionState.windowFlashNonce += 1;
+    });
+    windowInteractionState.windowFlashTimer = Timer(const Duration(milliseconds: 300), () {
+      if (!mounted || windowInteractionState.flashedWindowId != windowId) {
+        return;
+      }
+      commitInteractionState(() {
+        windowInteractionState.flashedWindowId = null;
+      });
+    });
   }
 
   void setWindowZoom(Workspace workspace, String windowId, AssetWindowZoomUpdate update) {

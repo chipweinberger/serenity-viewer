@@ -11,8 +11,8 @@ extension _AppShellWindowActions on _AppShellState {
     return isOptionPressed();
   }
 
-  void _setOptionGestureWindowId(String? windowId) {
-    _workspaceController.interaction.setOptionGestureWindowId(windowId);
+  void _setActiveGestureWindow(String? windowId) {
+    _workspaceController.gesture.setActiveWindow(windowId);
   }
 
   void _handleOptionGestureHover(PointerHoverEvent event, Workspace workspace) {

@@ -6,27 +6,27 @@ extension WorkspaceControllerLegacyApi on WorkspaceController {
   }
 
   void setOptionGestureWindowId(String? windowId) {
-    interaction.setOptionGestureWindowId(windowId);
+    gesture.setActiveWindow(windowId);
   }
 
   void setPinnedHoverWindow(String? windowId) {
-    interaction.setPinnedHoverWindow(windowId);
+    gesture.setPinnedHoverWindow(windowId);
   }
 
   void clearPinnedHoverWindow() {
-    interaction.clearPinnedHoverWindow();
+    gesture.clearPinnedHoverWindow();
   }
 
   void flashWindow(String windowId, {required bool mounted}) {
-    interaction.flashWindow(windowId, mounted: mounted);
+    windows.flash(windowId, mounted: mounted);
   }
 
   void toggleExposeWindowSelected(String windowId) {
-    interaction.toggleExposeWindowSelected(windowId);
+    expose.toggleWindowSelected(windowId);
   }
 
   void clearExposeSelection() {
-    interaction.clearExposeSelection();
+    expose.clearWindowSelection();
   }
 
   void focusWindow(Workspace workspace, String windowId) {
@@ -118,11 +118,11 @@ extension WorkspaceControllerLegacyApi on WorkspaceController {
   }
 
   void removeWindowSelection(String windowId) {
-    interaction.removeWindowSelection(windowId);
+    expose.removeWindowSelection(windowId);
   }
 
   void clearWindowRuntimeState(String windowId) {
-    interaction.clearWindowRuntimeState(windowId);
+    playback.clearRuntimeState(windowId);
     windows.clearRuntimeState(windowId);
   }
 
@@ -173,7 +173,7 @@ extension WorkspaceControllerLegacyApi on WorkspaceController {
   }
 
   int selectedExposeWindowCount(Workspace workspace) {
-    return interaction.selectedExposeWindowCount(workspace);
+    return expose.selectedWindowCount(workspace);
   }
 
   void moveSelectedExposeWindowsToWorkspace({

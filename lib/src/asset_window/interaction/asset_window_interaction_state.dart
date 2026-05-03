@@ -5,7 +5,7 @@ class AssetWindowInteractionState {
   final Map<String, int> previousWindowZOrders = {};
   final Set<String> selectedExposeWindowIds = {};
 
-  String? optionGestureWindowId;
+  String? activeGestureWindowId;
   String? pinnedHoverWindowId;
   String? flashedWindowId;
   int windowFlashNonce = 0;

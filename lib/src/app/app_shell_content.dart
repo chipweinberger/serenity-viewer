@@ -65,9 +65,9 @@ extension _AppShellContent on _AppShellState {
                   setPinnedHoverWindow: _setPinnedHoverWindow,
                   clearPinnedHoverWindow: _clearPinnedHoverWindow,
                   flashWindow: _flashWindow,
-                  toggleExposeWindowSelected: _toggleExposeWindowSelected,
+                  toggleSelectedWindow: _toggleSelectedWindow,
                   removeWindow: _removeWindow,
-                  setOptionGestureWindowId: _setOptionGestureWindowId,
+                  setActiveGestureWindow: _setActiveGestureWindow,
                   revealAssetInFinder: _mediaBridge.revealAssetInFinder,
                 ),
                 workspaceHud: WorkspaceHud(

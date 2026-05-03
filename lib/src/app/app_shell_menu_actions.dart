@@ -96,7 +96,7 @@ extension _AppShellMenuActions on _AppShellState {
               ),
               PlatformMenuItem(
                 label: focusedWindowIsSelected ? 'Deselect' : 'Select',
-                onSelected: focusedWindow == null ? null : () => _toggleExposeWindowSelected(focusedWindow.asset.id),
+                onSelected: focusedWindow == null ? null : () => _toggleSelectedWindow(focusedWindow.asset.id),
                 shortcut: const SingleActivator(LogicalKeyboardKey.keyE, meta: true),
               ),
               PlatformMenuItem(

@@ -53,9 +53,9 @@ class WorkspaceScreenActions {
     required this.setPinnedHoverWindow,
     required this.clearPinnedHoverWindow,
     required this.flashWindow,
-    required this.toggleExposeWindowSelected,
+    required this.toggleSelectedWindow,
     required this.removeWindow,
-    required this.setOptionGestureWindowId,
+    required this.setActiveGestureWindow,
     required this.revealAssetInFinder,
   });
 
@@ -83,9 +83,9 @@ class WorkspaceScreenActions {
   final ValueChanged<String> setPinnedHoverWindow;
   final VoidCallback clearPinnedHoverWindow;
   final ValueChanged<String> flashWindow;
-  final ValueChanged<String> toggleExposeWindowSelected;
+  final ValueChanged<String> toggleSelectedWindow;
   final void Function(String workspaceId, String windowId) removeWindow;
-  final ValueChanged<String?> setOptionGestureWindowId;
+  final ValueChanged<String?> setActiveGestureWindow;
   final Future<void> Function(Asset asset) revealAssetInFinder;
 }
 
@@ -220,11 +220,7 @@ class WorkspaceScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFreeformWindow(
-    WorkspaceCanvasViewModel canvasViewModel,
-    Window window,
-    Size viewportSize,
-  ) {
+  Widget _buildFreeformWindow(WorkspaceCanvasViewModel canvasViewModel, Window window, Size viewportSize) {
     final workspace = canvasViewModel.workspace;
     final screenOffset = workspaceScreenOffsetForWindow(workspace, window, viewportSize);
     final isLoaded = _isWindowLoaded(canvasViewModel.loadPlan, window);
@@ -242,7 +238,7 @@ class WorkspaceScreen extends StatelessWidget {
           ? windowInteractionState.windowFlashNonce
           : 0,
       isVideoPaused: actions.isVideoWindowPaused(window.asset.id),
-      isOptionGestureTarget: windowInteractionState.optionGestureWindowId == window.asset.id,
+      isOptionGestureTarget: windowInteractionState.activeGestureWindowId == window.asset.id,
     );
 
     return Positioned(
@@ -260,7 +256,7 @@ class WorkspaceScreen extends StatelessWidget {
             onTap: () => _handleFreeformWindowTap(window),
             onPinnedHoverRequested: () => actions.setPinnedHoverWindow(window.asset.id),
             onPinnedHoverDismissed: actions.clearPinnedHoverWindow,
-            onToggleSelected: () => actions.toggleExposeWindowSelected(window.asset.id),
+            onToggleSelected: () => actions.toggleSelectedWindow(window.asset.id),
             onPanUpdate: (delta) => actions.moveWindow(window.asset.id, delta / workspace.viewportZoom),
             onTrackpadWindowScale: (scaleDelta, localFocalPoint) => actions.transformWindowFromTrackpad(
               window.asset.id,
@@ -278,8 +274,8 @@ class WorkspaceScreen extends StatelessWidget {
             onShowInFinder: _showInFinderCallbackForWindow(window),
             onRestorePreviousZOrder: _restorePreviousZOrderCallbackForWindow(window),
             onClose: () => actions.removeWindow(environment.activeWorkspaceId, window.asset.id),
-            onOptionGestureWindowRequested: () => actions.setOptionGestureWindowId(window.asset.id),
-            onOptionGestureReleased: () => actions.setOptionGestureWindowId(null),
+            onOptionGestureWindowRequested: () => actions.setActiveGestureWindow(window.asset.id),
+            onOptionGestureReleased: () => actions.setActiveGestureWindow(null),
           ),
         ),
       ),
@@ -339,7 +335,7 @@ class WorkspaceScreen extends StatelessWidget {
           actions.toggleExpose();
           actions.flashWindow(window.asset.id);
         },
-        onToggleSelected: () => actions.toggleExposeWindowSelected(window.asset.id),
+        onToggleSelected: () => actions.toggleSelectedWindow(window.asset.id),
         onShowInFinder: _showInFinderCallbackForWindow(window),
         onRemove: () => actions.removeWindow(environment.activeWorkspaceId, window.asset.id),
       ),

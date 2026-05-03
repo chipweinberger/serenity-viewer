@@ -55,6 +55,10 @@ class WorkspaceWindowApi {
     _controller._windowController.setWindowIntrinsicSize(workspace, windowId, intrinsicSize);
   }
 
+  void flash(String windowId, {required bool mounted}) {
+    _controller._windowController.flashWindow(windowId, mounted: mounted);
+  }
+
   void clearRuntimeState(String windowId) {
     _controller._windowController.clearWindowRuntimeState(windowId);
   }

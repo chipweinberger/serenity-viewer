@@ -205,7 +205,7 @@ extension _AppShellWorkspaceManagementActions on _AppShellState {
     }
 
     final destinationWorkspace = destinationMatches.first;
-    final selectedWindowCount = _workspaceController.interaction.selectedExposeWindowCount(sourceWorkspace);
+    final selectedWindowCount = _workspaceController.expose.selectedWindowCount(sourceWorkspace);
     if (selectedWindowCount == 0) {
       _clearExposeSelection();
       return;

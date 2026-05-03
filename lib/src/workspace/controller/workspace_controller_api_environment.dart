@@ -52,7 +52,7 @@ class WorkspaceEnvironmentApi {
       selectedWindowIds: _controller.windowInteractionState.selectedExposeWindowIds,
       updateEnvironment: updateEnvironment,
       queueThumbnailRefresh: queueThumbnailRefresh,
-      clearExposeSelection: _controller.clearExposeSelection,
+      clearExposeSelection: _controller.expose.clearWindowSelection,
     );
   }
 }

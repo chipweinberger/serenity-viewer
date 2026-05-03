@@ -22,7 +22,8 @@ extension _AppShellWindowHistoryActions on _AppShellState {
         workspace: workspace,
         window: window,
       );
-      _workspaceController.clearWindowRuntimeState(windowId);
+      _workspaceController.playback.clearRuntimeState(windowId);
+      _workspaceController.windows.clearRuntimeState(windowId);
     });
 
     _replaceWorkspace(
@@ -31,7 +32,7 @@ extension _AppShellWindowHistoryActions on _AppShellState {
   }
 
   void _removeWindow(String workspaceId, String windowId) {
-    _workspaceController.removeWindowSelection(windowId);
+    _workspaceController.expose.removeWindowSelection(windowId);
     _closeWindow(workspaceId, windowId);
   }
 

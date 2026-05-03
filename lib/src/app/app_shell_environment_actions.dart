@@ -18,7 +18,7 @@ extension _AppShellEnvironmentActions on _AppShellState {
   }
 
   void _setPinnedHoverWindow(String? windowId) {
-    _workspaceController.interaction.setPinnedHoverWindow(windowId);
+    _workspaceController.gesture.setPinnedHoverWindow(windowId);
   }
 
   void _clearPinnedHoverWindow() {
@@ -26,7 +26,7 @@ extension _AppShellEnvironmentActions on _AppShellState {
   }
 
   void _flashWindow(String windowId) {
-    _workspaceController.interaction.flashWindow(windowId, mounted: mounted);
+    _workspaceController.windows.flash(windowId, mounted: mounted);
   }
 
   void _applyExposeGridToWorkspace() {
@@ -165,11 +165,11 @@ extension _AppShellEnvironmentActions on _AppShellState {
     );
   }
 
-  void _toggleExposeWindowSelected(String windowId) {
-    _workspaceController.interaction.toggleExposeWindowSelected(windowId);
+  void _toggleSelectedWindow(String windowId) {
+    _workspaceController.expose.toggleWindowSelected(windowId);
   }
 
   void _clearExposeSelection() {
-    _workspaceController.interaction.clearExposeSelection();
+    _workspaceController.expose.clearWindowSelection();
   }
 }

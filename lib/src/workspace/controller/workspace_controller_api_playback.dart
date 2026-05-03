@@ -14,18 +14,22 @@ class WorkspacePlaybackApi {
   }
 
   bool isPaused(String windowId) {
-    return _controller._interactionController.isVideoWindowPaused(windowId);
+    return _controller._playbackController.isVideoWindowPaused(windowId);
   }
 
   void toggle(Workspace? workspace, String windowId) {
-    _controller._interactionController.toggleVideoPlayback(workspace, windowId);
+    _controller._playbackController.toggleVideoPlayback(workspace, windowId);
   }
 
   void pauseAll(Environment? environment) {
-    _controller._interactionController.pauseAllVideos(environment);
+    _controller._playbackController.pauseAllVideos(environment);
   }
 
   void stopAll(Environment? environment) {
     pauseAll(environment);
+  }
+
+  void clearRuntimeState(String windowId) {
+    _controller._playbackController.clearRuntimeState(windowId);
   }
 }
