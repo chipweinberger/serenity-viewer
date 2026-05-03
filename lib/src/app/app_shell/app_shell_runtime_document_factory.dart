@@ -15,18 +15,18 @@ class AppShellRuntimeDocumentFactory {
     return SryDocumentCoordinator(
       persistenceState: config.dependencies.persistenceState,
       environmentController: foundation.environmentController,
-      context: config.context,
-      mounted: config.mounted,
-      seedEnvironment: config.seedEnvironment,
-      showMessage: config.showMessage,
+      context: config.shell.context,
+      mounted: config.shell.mounted,
+      seedEnvironment: config.environment.seedEnvironment,
+      showMessage: config.shell.showMessage,
       refreshActiveWorkspaceThumbnailIfNeeded: workspace.thumbnailController.refreshActiveWorkspaceIfNeeded,
       storeLastEnvironmentPath: foundation.appShellPlatformBridge.storeLastEnvironmentPath,
       syncWindowTitle: foundation.appShellPlatformBridge.syncWindowTitle,
       resolveFileBookmark: foundation.appShellPlatformBridge.resolveFileBookmark,
       createFileBookmark: foundation.appShellPlatformBridge.createFileBookmark,
       thumbnailDirectory: foundation.appShellPlatformBridge.thumbnailDirectory,
-      updateEnvironment: config.updateEnvironment,
-      saveEnvironment: config.saveEnvironment,
+      updateEnvironment: config.environment.updateEnvironment,
+      saveEnvironment: config.environment.saveEnvironment,
     );
   }
 }

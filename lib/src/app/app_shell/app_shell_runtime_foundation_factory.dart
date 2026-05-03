@@ -23,24 +23,24 @@ class AppShellRuntimeFoundationFactory {
     final chromeController = ChromeController(
       chromeState: chromeState,
       windowInteractionState: windowInteractionState,
-      commitStateChange: config.commitStateChange,
+      commitStateChange: config.shell.commitStateChange,
       refreshWorkspaceTracking: refreshWorkspaceTracking,
     );
     final mediaBridge = MediaBridge(
       isRunningInWidgetTest: config.isRunningInWidgetTest,
-      showMessage: config.showMessage,
-      isMounted: config.mounted,
+      showMessage: config.shell.showMessage,
+      isMounted: config.shell.mounted,
     );
     final appShellPlatformBridge = AppShellPlatformBridge(
       persistenceState: persistenceState,
       isRunningInWidgetTest: config.isRunningInWidgetTest,
-      windowTitle: config.windowTitle,
+      windowTitle: config.shell.windowTitle,
     );
     final environmentController = EnvironmentController(
       persistenceState: persistenceState,
       chromeState: chromeState,
       markWorkspaceThumbnailDirty: markWorkspaceThumbnailDirty,
-      commitStateChange: config.commitStateChange,
+      commitStateChange: config.shell.commitStateChange,
       refreshWorkspaceTracking: refreshWorkspaceTracking,
       syncWindowTitle: syncWindowTitle,
     );

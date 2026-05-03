@@ -93,26 +93,32 @@ class AppShellRuntime {
       AppShellRuntimeConfig(
         isRunningInWidgetTest: isRunningInWidgetTest,
         dependencies: dependencies,
-        windowTitle: windowTitle,
-        context: context,
-        mounted: mounted,
-        commitStateChange: commitStateChange,
-        showMessage: showMessage,
-        seedEnvironment: seedEnvironment,
-        updateEnvironment: updateEnvironment,
-        replaceWorkspace: replaceWorkspace,
-        saveEnvironment: saveEnvironment,
-        newId: newId,
-        colorFromDigest: colorFromDigest,
-        activeWorkspace: activeWorkspace,
-        workspaces: workspaces,
-        openWorkspaces: openWorkspaces,
-        focusedWindowOrNull: focusedWindowOrNull,
-        setWorkspaceViewport: setWorkspaceViewport,
-        showWorkspaceScreen: showWorkspaceScreen,
-        showLibraryScreen: showLibraryScreen,
-        toggleExpose: toggleExpose,
-        toggleVideoPlayback: toggleVideoPlayback,
+        shell: AppShellRuntimeShellConfig(
+          windowTitle: windowTitle,
+          context: context,
+          mounted: mounted,
+          commitStateChange: commitStateChange,
+          showMessage: showMessage,
+        ),
+        environment: AppShellRuntimeEnvironmentConfig(
+          seedEnvironment: seedEnvironment,
+          updateEnvironment: updateEnvironment,
+          replaceWorkspace: replaceWorkspace,
+          saveEnvironment: saveEnvironment,
+        ),
+        workspace: AppShellRuntimeWorkspaceConfig(
+          newId: newId,
+          colorFromDigest: colorFromDigest,
+          activeWorkspace: activeWorkspace,
+          workspaces: workspaces,
+          openWorkspaces: openWorkspaces,
+          focusedWindowOrNull: focusedWindowOrNull,
+          setWorkspaceViewport: setWorkspaceViewport,
+          showWorkspaceScreen: showWorkspaceScreen,
+          showLibraryScreen: showLibraryScreen,
+          toggleExpose: toggleExpose,
+          toggleVideoPlayback: toggleVideoPlayback,
+        ),
       ),
     ).create();
   }
@@ -133,15 +139,50 @@ class AppShellRuntimeConfig {
   const AppShellRuntimeConfig({
     required this.isRunningInWidgetTest,
     required this.dependencies,
+    required this.shell,
+    required this.environment,
+    required this.workspace,
+  });
+
+  final bool isRunningInWidgetTest;
+  final ShellDependencies dependencies;
+  final AppShellRuntimeShellConfig shell;
+  final AppShellRuntimeEnvironmentConfig environment;
+  final AppShellRuntimeWorkspaceConfig workspace;
+}
+
+class AppShellRuntimeShellConfig {
+  const AppShellRuntimeShellConfig({
     required this.windowTitle,
     required this.context,
     required this.mounted,
     required this.commitStateChange,
     required this.showMessage,
+  });
+
+  final String Function() windowTitle;
+  final BuildContext Function() context;
+  final bool Function() mounted;
+  final StateSetter commitStateChange;
+  final ValueChanged<String> showMessage;
+}
+
+class AppShellRuntimeEnvironmentConfig {
+  const AppShellRuntimeEnvironmentConfig({
     required this.seedEnvironment,
     required this.updateEnvironment,
     required this.replaceWorkspace,
     required this.saveEnvironment,
+  });
+
+  final Environment Function() seedEnvironment;
+  final ValueChanged<Environment> updateEnvironment;
+  final void Function(Workspace workspace, {bool queueThumbnail}) replaceWorkspace;
+  final Future<void> Function() saveEnvironment;
+}
+
+class AppShellRuntimeWorkspaceConfig {
+  const AppShellRuntimeWorkspaceConfig({
     required this.newId,
     required this.colorFromDigest,
     required this.activeWorkspace,
@@ -155,17 +196,6 @@ class AppShellRuntimeConfig {
     required this.toggleVideoPlayback,
   });
 
-  final bool isRunningInWidgetTest;
-  final ShellDependencies dependencies;
-  final String Function() windowTitle;
-  final BuildContext Function() context;
-  final bool Function() mounted;
-  final StateSetter commitStateChange;
-  final ValueChanged<String> showMessage;
-  final Environment Function() seedEnvironment;
-  final ValueChanged<Environment> updateEnvironment;
-  final void Function(Workspace workspace, {bool queueThumbnail}) replaceWorkspace;
-  final Future<void> Function() saveEnvironment;
   final String Function(String prefix) newId;
   final int Function(String value) colorFromDigest;
   final Workspace? Function() activeWorkspace;

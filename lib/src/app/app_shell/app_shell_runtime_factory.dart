@@ -33,13 +33,13 @@ class AppShellRuntimeFactory {
     ).create(foundation: foundation, workspace: workspace);
     final autosaveTimer = Timer.periodic(const Duration(minutes: 1), (_) {
       if (persistenceState.hasUnsavedChanges) {
-        unawaited(config.saveEnvironment());
+        unawaited(config.environment.saveEnvironment());
       }
     });
     final appLifecycleListener = AppLifecycleListener(
       onStateChange: workspace.workspaceShellController.tracking.handleAppLifecycleStateChanged,
       onExitRequested: () async {
-        await config.saveEnvironment();
+        await config.environment.saveEnvironment();
         return ui.AppExitResponse.exit;
       },
     );
