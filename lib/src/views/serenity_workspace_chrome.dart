@@ -266,7 +266,7 @@ extension _SerenityShellWorkspaceChrome on _SerenityShellState {
               ),
               child: DefaultTextStyle(
                 style: Theme.of(context).textTheme.bodySmall!.copyWith(color: SerenityTheme.textMuted, height: 1.1),
-                child: Text('$imageLabel, $videoLabel, $linkLabel'),
+                child: Text('$imageLabel · $videoLabel · $linkLabel'),
               ),
             ),
           ),
