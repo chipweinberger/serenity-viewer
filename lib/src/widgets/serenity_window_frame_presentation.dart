@@ -4,11 +4,14 @@ part of 'serenity_window_frame.dart';
 
 extension on _SerenityWindowFrameState {
   bool get _isOptionGestureTargetActive {
-    return _isOptionPressed && !_isCommandPressed && (widget.isOptionGestureTarget || _claimedOptionGestureTarget);
+    return _isOptionPressed &&
+        !_isCommandPressed &&
+        (widget.viewModel.isOptionGestureTarget || _claimedOptionGestureTarget);
   }
 
   bool get _shouldShowCommandOverlay {
-    return widget.isPinnedHover || (_isCommandPressed && (_isHovered || _isResizing || widget.isSelected));
+    return widget.viewModel.isPinnedHover ||
+        (_isCommandPressed && (_isHovered || _isResizing || widget.viewModel.isSelected));
   }
 
   bool get _showExpandedVideoControls => _shouldShowCommandOverlay;
@@ -28,7 +31,7 @@ extension on _SerenityWindowFrameState {
   }
 
   void _handleContentTap() {
-    if (widget.isPinnedHover) {
+    if (widget.viewModel.isPinnedHover) {
       widget.onPinnedHoverDismissed();
       _SerenityWindowFrameState._lastTappedWindowId = null;
       _SerenityWindowFrameState._lastContentTapAt = null;
@@ -37,7 +40,7 @@ extension on _SerenityWindowFrameState {
 
     final now = DateTime.now();
     final isDoubleClick =
-        _SerenityWindowFrameState._lastTappedWindowId == widget.window.asset.id &&
+        _SerenityWindowFrameState._lastTappedWindowId == widget.viewModel.window.asset.id &&
         _SerenityWindowFrameState._lastContentTapAt != null &&
         now.difference(_SerenityWindowFrameState._lastContentTapAt!) <= _SerenityWindowFrameState._doubleClickThreshold;
     widget.onTap();
@@ -48,25 +51,19 @@ extension on _SerenityWindowFrameState {
       return;
     }
 
-    _SerenityWindowFrameState._lastTappedWindowId = widget.window.asset.id;
+    _SerenityWindowFrameState._lastTappedWindowId = widget.viewModel.window.asset.id;
     _SerenityWindowFrameState._lastContentTapAt = now;
   }
 
   Widget _buildContent({required bool shrinkContent, required double inset}) {
     return SerenityWindowFrameContent(
-      window: widget.window,
-      isLoaded: widget.isLoaded,
-      sharedVideoController: widget.sharedVideoController,
-      sharedVideoInitialization: widget.sharedVideoInitialization,
-      isPinnedHover: widget.isPinnedHover,
+      viewModel: widget.viewModel,
       showExpandedVideoControls: _showExpandedVideoControls,
-      workspaceZoom: widget.workspaceZoom,
       shrinkContent: shrinkContent,
       inset: inset,
       onTap: _handleContentTap,
       onZoomChanged: widget.onZoomChanged,
       onIntrinsicSizeResolved: widget.onIntrinsicSizeResolved,
-      isVideoPaused: widget.isVideoPaused,
       onTogglePlayback: widget.onTogglePlayback,
       onVideoControlInteractionChanged: (isInteracting) {
         if (_isInteractingWithVideoControls == isInteracting) {
@@ -90,9 +87,9 @@ extension on _SerenityWindowFrameState {
     }
 
     return SerenityWindowOverlay(
-      workspaceZoom: widget.workspaceZoom,
-      filename: widget.window.asset.filename,
-      isSelected: widget.isSelected,
+      workspaceZoom: widget.viewModel.workspaceZoom,
+      filename: widget.viewModel.window.asset.filename,
+      isSelected: widget.viewModel.isSelected,
       onToggleSelected: widget.onToggleSelected,
       onShowInFinder: widget.onShowInFinder,
       onClose: widget.onClose,
@@ -106,9 +103,9 @@ extension on _SerenityWindowFrameState {
 
     return SerenityWindowFrameChrome(
       flashValue: _flashAnimation.value,
-      isFocused: widget.isFocused,
+      isFocused: widget.viewModel.isFocused,
       showHoverFrame: _showHoverFrame,
-      assetColor: widget.window.asset.color,
+      assetColor: widget.viewModel.window.asset.color,
       child: Stack(
         children: [
           _buildContent(shrinkContent: _showHoverFrame, inset: hoverInset),

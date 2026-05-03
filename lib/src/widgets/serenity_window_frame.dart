@@ -5,11 +5,10 @@ import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:video_player/video_player.dart';
 
 import 'package:serenity_viewer/src/core/serenity_core.dart';
 import 'package:serenity_viewer/src/core/serenity_keyboard_modifiers.dart';
-import 'package:serenity_viewer/src/models/asset_window_state.dart';
+import 'package:serenity_viewer/src/models/serenity_window_frame_view_model.dart';
 import 'package:serenity_viewer/src/models/window_zoom_update.dart';
 import 'package:serenity_viewer/src/widgets/serenity_window_frame_chrome.dart';
 import 'package:serenity_viewer/src/widgets/serenity_window_frame_content.dart';
@@ -22,16 +21,7 @@ part 'serenity_window_frame_presentation.dart';
 class SerenityWindowFrame extends StatefulWidget {
   const SerenityWindowFrame({
     super.key,
-    required this.window,
-    required this.isLoaded,
-    required this.sharedVideoController,
-    required this.sharedVideoInitialization,
-    required this.isFocused,
-    required this.isSelected,
-    required this.isEditing,
-    required this.isPinnedHover,
-    required this.workspaceZoom,
-    required this.flashNonce,
+    required this.viewModel,
     required this.onTap,
     required this.onPinnedHoverRequested,
     required this.onPinnedHoverDismissed,
@@ -41,7 +31,6 @@ class SerenityWindowFrame extends StatefulWidget {
     required this.onResizeUpdate,
     required this.onZoomChanged,
     required this.onIntrinsicSizeResolved,
-    required this.isVideoPaused,
     required this.onVideoPositionChanged,
     required this.onCycleVideoPlaybackSpeed,
     required this.onTogglePlayback,
@@ -49,21 +38,11 @@ class SerenityWindowFrame extends StatefulWidget {
     this.onShowInFinder,
     this.onRestorePreviousZOrder,
     required this.onClose,
-    required this.isOptionGestureTarget,
     required this.onOptionGestureWindowRequested,
     required this.onOptionGestureReleased,
   });
 
-  final AssetWindowState window;
-  final bool isLoaded;
-  final VideoPlayerController? sharedVideoController;
-  final Future<void>? sharedVideoInitialization;
-  final bool isFocused;
-  final bool isSelected;
-  final bool isEditing;
-  final bool isPinnedHover;
-  final double workspaceZoom;
-  final int flashNonce;
+  final SerenityWindowFrameViewModel viewModel;
   final VoidCallback onTap;
   final VoidCallback onPinnedHoverRequested;
   final VoidCallback onPinnedHoverDismissed;
@@ -73,7 +52,6 @@ class SerenityWindowFrame extends StatefulWidget {
   final void Function(WindowResizeHandle handle, Offset delta) onResizeUpdate;
   final ValueChanged<WindowZoomUpdate> onZoomChanged;
   final ValueChanged<Size> onIntrinsicSizeResolved;
-  final bool isVideoPaused;
   final ValueChanged<int> onVideoPositionChanged;
   final VoidCallback onCycleVideoPlaybackSpeed;
   final VoidCallback onTogglePlayback;
@@ -81,7 +59,6 @@ class SerenityWindowFrame extends StatefulWidget {
   final VoidCallback? onShowInFinder;
   final VoidCallback? onRestorePreviousZOrder;
   final VoidCallback onClose;
-  final bool isOptionGestureTarget;
   final VoidCallback onOptionGestureWindowRequested;
   final VoidCallback onOptionGestureReleased;
 
@@ -125,7 +102,7 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> with SingleTi
     final pressedKeys = HardwareKeyboard.instance.logicalKeysPressed;
     _isCommandPressed = isCommandPressed(pressedKeys);
     _isOptionPressed = isOptionPressed(pressedKeys);
-    if (widget.flashNonce != 0) {
+    if (widget.viewModel.flashNonce != 0) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) {
           return;
@@ -138,7 +115,7 @@ class _SerenityWindowFrameState extends State<SerenityWindowFrame> with SingleTi
   @override
   void didUpdateWidget(covariant SerenityWindowFrame oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.flashNonce != 0 && widget.flashNonce != oldWidget.flashNonce) {
+    if (widget.viewModel.flashNonce != 0 && widget.viewModel.flashNonce != oldWidget.viewModel.flashNonce) {
       unawaited(_flashController.forward(from: 0));
     }
   }

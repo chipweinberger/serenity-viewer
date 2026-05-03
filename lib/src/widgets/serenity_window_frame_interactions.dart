@@ -18,7 +18,7 @@ extension on _SerenityWindowFrameState {
         _claimedOptionGestureTarget = false;
       }
     });
-    if (nextIsCommandPressed && widget.isPinnedHover) {
+    if (nextIsCommandPressed && widget.viewModel.isPinnedHover) {
       widget.onPinnedHoverDismissed();
     }
     if (!wasOptionPressed && nextIsOptionPressed && _isHovered) {
@@ -33,7 +33,7 @@ extension on _SerenityWindowFrameState {
   }
 
   WindowResizeHandle? _resizeHandleForPosition(Offset localPosition) {
-    return windowResizeHandleForPosition(windowSize: widget.window.size, localPosition: localPosition);
+    return windowResizeHandleForPosition(windowSize: widget.viewModel.window.size, localPosition: localPosition);
   }
 
   MouseCursor _cursorForHandle(WindowResizeHandle? handle) {

@@ -74,6 +74,19 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
     return loadPlan;
   }
 
+  SerenityWorkspaceCanvasViewModel _buildWorkspaceCanvasViewModel(WorkspaceState workspace) {
+    final isExposeMode = _isExposeModeForWorkspace(workspace);
+    final windows = _sortedWorkspaceWindows(workspace, isExposeMode: isExposeMode);
+    return SerenityWorkspaceCanvasViewModel(
+      workspace: workspace,
+      isExposeMode: isExposeMode,
+      windows: windows,
+      focusedWindowId: _focusedWindowIdForCanvas(windows, isExposeMode: isExposeMode),
+      loadPlan: _buildCanvasLoadPlan(),
+      isDropTargetActive: _uiState.isDropTargetActive,
+    );
+  }
+
   void _handleWorkspaceDropEntered(DropEventDetails details) {
     setState(() {
       _uiState.isDropTargetActive = true;
@@ -139,15 +152,29 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
   }
 
   Widget _buildFreeformWindow(
-    WorkspaceState workspace,
+    SerenityWorkspaceCanvasViewModel canvasViewModel,
     AssetWindowState window,
-    SerenityLoadPlan loadPlan,
     Size viewportSize,
-    String? focusedWindowId,
   ) {
+    final workspace = canvasViewModel.workspace;
     final screenOffset = workspaceScreenOffsetForWindow(workspace, window, viewportSize);
-    final isLoaded = _isWindowLoaded(loadPlan, window);
-    final sharedVideoControllerEntry = _sharedVideoEntryForWindow(window, loadPlan);
+    final isLoaded = _isWindowLoaded(canvasViewModel.loadPlan, window);
+    final sharedVideoControllerEntry = _sharedVideoEntryForWindow(window, canvasViewModel.loadPlan);
+    final windowViewModel = SerenityWindowFrameViewModel(
+      window: window,
+      isLoaded: isLoaded,
+      sharedVideoController: sharedVideoControllerEntry?.controller,
+      sharedVideoInitialization: sharedVideoControllerEntry?.initialization,
+      isFocused: window.asset.id == canvasViewModel.focusedWindowId,
+      isSelected: _windowInteractionState.selectedExposeWindowIds.contains(window.asset.id),
+      isPinnedHover: _windowInteractionState.pinnedHoverWindowId == window.asset.id,
+      workspaceZoom: workspace.viewportZoom,
+      flashNonce: window.asset.id == _windowInteractionState.flashedWindowId
+          ? _windowInteractionState.windowFlashNonce
+          : 0,
+      isVideoPaused: _isVideoWindowPaused(window.asset.id),
+      isOptionGestureTarget: _windowInteractionState.optionGestureWindowId == window.asset.id,
+    );
 
     return Positioned(
       key: ValueKey(window.asset.id),
@@ -160,29 +187,17 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
           width: window.size.width,
           height: window.size.height,
           child: SerenityWindowFrame(
-            window: window,
-            isLoaded: isLoaded,
-            sharedVideoController: sharedVideoControllerEntry?.controller,
-            sharedVideoInitialization: sharedVideoControllerEntry?.initialization,
-            isFocused: window.asset.id == focusedWindowId,
-            isSelected: _windowInteractionState.selectedExposeWindowIds.contains(window.asset.id),
-            isEditing: false,
-            isPinnedHover: _windowInteractionState.pinnedHoverWindowId == window.asset.id,
-            workspaceZoom: workspace.viewportZoom,
+            viewModel: windowViewModel,
             onTap: () => _handleFreeformWindowTap(window),
             onPinnedHoverRequested: () => _setPinnedHoverWindow(window.asset.id),
             onPinnedHoverDismissed: _clearPinnedHoverWindow,
             onToggleSelected: () => _toggleExposeWindowSelected(window.asset.id),
-            flashNonce: window.asset.id == _windowInteractionState.flashedWindowId
-                ? _windowInteractionState.windowFlashNonce
-                : 0,
             onPanUpdate: (delta) => _moveWindow(window.asset.id, delta / workspace.viewportZoom),
             onTrackpadWindowScale: (scaleDelta, localFocalPoint) =>
                 _transformWindowFromTrackpad(window.asset.id, scaleDelta, localFocalPoint / workspace.viewportZoom),
             onResizeUpdate: (handle, delta) => _resizeWindow(window.asset.id, handle, delta / workspace.viewportZoom),
             onZoomChanged: (update) => _setWindowZoom(window.asset.id, update),
             onIntrinsicSizeResolved: (size) => _setWindowIntrinsicSize(window.asset.id, size),
-            isVideoPaused: _isVideoWindowPaused(window.asset.id),
             onVideoPositionChanged: (positionMs) => _setVideoPosition(window.asset.id, positionMs),
             onCycleVideoPlaybackSpeed: () => _cycleVideoPlaybackSpeed(window.asset.id),
             onTogglePlayback: () => _toggleVideoPlayback(window.asset.id),
@@ -190,7 +205,6 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
             onShowInFinder: _showInFinderCallbackForWindow(window),
             onRestorePreviousZOrder: _restorePreviousZOrderCallbackForWindow(window),
             onClose: () => _removeWindow(_session.activeWorkspaceId, window.asset.id),
-            isOptionGestureTarget: _windowInteractionState.optionGestureWindowId == window.asset.id,
             onOptionGestureWindowRequested: () => _setOptionGestureWindowId(window.asset.id),
             onOptionGestureReleased: () => _setOptionGestureWindowId(null),
           ),
@@ -199,17 +213,13 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
     );
   }
 
-  Widget _buildFreeformWorkspaceViewport(
-    WorkspaceState workspace,
-    List<AssetWindowState> windows,
-    SerenityLoadPlan loadPlan,
-    String? focusedWindowId,
-  ) {
+  Widget _buildFreeformWorkspaceViewport(SerenityWorkspaceCanvasViewModel canvasViewModel) {
     return Positioned.fill(
       child: LayoutBuilder(
         builder: (context, constraints) {
           final viewportSize = constraints.biggest;
           _trackViewportSize(viewportSize);
+          final workspace = canvasViewModel.workspace;
 
           return Listener(
             behavior: HitTestBehavior.translucent,
@@ -226,8 +236,8 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
                     child: const SizedBox.expand(),
                   ),
                 ),
-                for (final window in windows)
-                  _buildFreeformWindow(workspace, window, loadPlan, viewportSize, focusedWindowId),
+                for (final window in canvasViewModel.windows)
+                  _buildFreeformWindow(canvasViewModel, window, viewportSize),
               ],
             ),
           );
@@ -300,46 +310,30 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
     );
   }
 
-  Widget _buildWorkspaceCanvasLayers(
-    BuildContext context,
-    WorkspaceState workspace, {
-    required bool isExposeMode,
-    required List<AssetWindowState> windows,
-    required SerenityLoadPlan loadPlan,
-    required String? focusedWindowId,
-  }) {
+  Widget _buildWorkspaceCanvasLayers(BuildContext context, SerenityWorkspaceCanvasViewModel canvasViewModel) {
     return Stack(
       children: [
         _buildWorkspaceCanvasBackground(),
-        if (isExposeMode)
-          _buildExposeWorkspaceViewport(windows, loadPlan)
+        if (canvasViewModel.isExposeMode)
+          _buildExposeWorkspaceViewport(canvasViewModel.windows, canvasViewModel.loadPlan)
         else
-          _buildFreeformWorkspaceViewport(workspace, windows, loadPlan, focusedWindowId),
-        if (!isExposeMode && windows.isEmpty) Positioned.fill(child: _buildEmptyWorkspaceCanvasState(context)),
-        if (_uiState.isDropTargetActive) _buildWorkspaceDropOverlay(),
+          _buildFreeformWorkspaceViewport(canvasViewModel),
+        if (!canvasViewModel.isExposeMode && canvasViewModel.windows.isEmpty)
+          Positioned.fill(child: _buildEmptyWorkspaceCanvasState(context)),
+        if (canvasViewModel.isDropTargetActive) _buildWorkspaceDropOverlay(),
         Positioned(left: 18, bottom: 18, child: _buildWorkspaceHud(context)),
       ],
     );
   }
 
   Widget _buildWorkspaceCanvas(BuildContext context, WorkspaceState workspace) {
-    final isExposeMode = _isExposeModeForWorkspace(workspace);
-    final windows = _sortedWorkspaceWindows(workspace, isExposeMode: isExposeMode);
-    final focusedWindowId = _focusedWindowIdForCanvas(windows, isExposeMode: isExposeMode);
-    final loadPlan = _buildCanvasLoadPlan();
+    final canvasViewModel = _buildWorkspaceCanvasViewModel(workspace);
 
     return DropTarget(
       onDragEntered: _handleWorkspaceDropEntered,
       onDragExited: _handleWorkspaceDropExited,
       onDragDone: _handleWorkspaceDropDone,
-      child: _buildWorkspaceCanvasLayers(
-        context,
-        workspace,
-        isExposeMode: isExposeMode,
-        windows: windows,
-        loadPlan: loadPlan,
-        focusedWindowId: focusedWindowId,
-      ),
+      child: _buildWorkspaceCanvasLayers(context, canvasViewModel),
     );
   }
 

@@ -1,16 +1,24 @@
 part of '../app/serenity_shell.dart';
 
 extension _SerenityShellWorkspaceChromeHud on _SerenityShellState {
-  Widget _buildWorkspaceHud(BuildContext context) {
+  SerenityWorkspaceChromeViewModel _buildWorkspaceChromeViewModel() {
     final mediaCounts = workspaceMediaCounts(_activeWorkspace);
-    final imageLabel = '${mediaCounts.images} image${mediaCounts.images == 1 ? '' : 's'}';
-    final videoLabel = '${mediaCounts.videos} video${mediaCounts.videos == 1 ? '' : 's'}';
-    final linkLabel = '${mediaCounts.links} link${mediaCounts.links == 1 ? '' : 's'}';
-    final isExposeMode = _chromeController.isExposeMode;
-    final showExposeSelectionHud = _chromeController.shouldMoveSelectedWindowsToWorkspaceOnTap;
-    final selectedCount = _windowInteractionState.selectedExposeWindowIds.length;
+    return SerenityWorkspaceChromeViewModel(
+      imageLabel: '${mediaCounts.images} image${mediaCounts.images == 1 ? '' : 's'}',
+      videoLabel: '${mediaCounts.videos} video${mediaCounts.videos == 1 ? '' : 's'}',
+      linkLabel: '${mediaCounts.links} link${mediaCounts.links == 1 ? '' : 's'}',
+      isExposeMode: _chromeController.isExposeMode,
+      showExposeSelectionHud: _chromeController.shouldMoveSelectedWindowsToWorkspaceOnTap,
+      selectedCount: _windowInteractionState.selectedExposeWindowIds.length,
+      workspaceId: _activeWorkspace.id,
+      workspaceZoom: _activeWorkspace.viewportZoom,
+    );
+  }
+
+  Widget _buildWorkspaceHud(BuildContext context) {
+    final viewModel = _buildWorkspaceChromeViewModel();
     final modeActions = <Widget>[
-      if (!isExposeMode) ...[
+      if (!viewModel.isExposeMode) ...[
         _buildWorkspaceHudAction(
           tooltip: 'Zoom to fit',
           onTap: _fitWorkspaceViewportToContent,
@@ -55,13 +63,13 @@ extension _SerenityShellWorkspaceChromeHud on _SerenityShellState {
       mainAxisSize: MainAxisSize.min,
       children: [
         _buildWorkspaceHudAction(
-          tooltip: _chromeController.isExposeMode ? 'Freeform' : 'Expose',
+          tooltip: viewModel.isExposeMode ? 'Freeform' : 'Expose',
           onTap: _toggleExpose,
           child: SizedBox(
             width: 38,
             height: 38,
             child: Icon(
-              _chromeController.isExposeMode ? Icons.grid_view_rounded : Icons.apps_rounded,
+              viewModel.isExposeMode ? Icons.grid_view_rounded : Icons.apps_rounded,
               size: 17,
               color: SerenityTheme.textPrimary,
             ),
@@ -81,7 +89,7 @@ extension _SerenityShellWorkspaceChromeHud on _SerenityShellState {
               ),
               child: DefaultTextStyle(
                 style: Theme.of(context).textTheme.bodySmall!.copyWith(color: SerenityTheme.textMuted, height: 1.1),
-                child: Text('$imageLabel · $videoLabel · $linkLabel'),
+                child: Text('${viewModel.imageLabel} · ${viewModel.videoLabel} · ${viewModel.linkLabel}'),
               ),
             ),
           ),
@@ -91,7 +99,7 @@ extension _SerenityShellWorkspaceChromeHud on _SerenityShellState {
           if (i > 0) const SizedBox(width: _SerenityShellWorkspaceChrome._workspaceHudGap),
           modeActions[i],
         ],
-        if (showExposeSelectionHud) ...[
+        if (viewModel.showExposeSelectionHud) ...[
           const SizedBox(width: _SerenityShellWorkspaceChrome._workspaceHudGap),
           ClipRRect(
             borderRadius: BorderRadius.circular(18),
@@ -113,7 +121,7 @@ extension _SerenityShellWorkspaceChromeHud on _SerenityShellState {
                         style: Theme.of(
                           context,
                         ).textTheme.bodySmall!.copyWith(color: SerenityTheme.textMuted, height: 1.1),
-                        child: Text('$selectedCount selected'),
+                        child: Text('${viewModel.selectedCount} selected'),
                       ),
                       const SizedBox(width: 8),
                       DefaultTextStyle(
@@ -153,7 +161,8 @@ extension _SerenityShellWorkspaceChromeHud on _SerenityShellState {
   }
 
   Widget _buildWorkspaceZoomControl(BuildContext context) {
-    final zoomValue = _workspaceZoomSliderValue(_activeWorkspace.viewportZoom);
+    final viewModel = _buildWorkspaceChromeViewModel();
+    final zoomValue = _workspaceZoomSliderValue(viewModel.workspaceZoom);
 
     return Tooltip(
       message: 'Workspace zoom',
@@ -191,7 +200,7 @@ extension _SerenityShellWorkspaceChromeHud on _SerenityShellState {
                       max: 1,
                       onChanged: (value) {
                         _setWorkspaceViewport(
-                          workspaceId: _activeWorkspace.id,
+                          workspaceId: viewModel.workspaceId,
                           zoom: _workspaceZoomForSliderValue(value),
                           queueThumbnail: false,
                         );
