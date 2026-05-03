@@ -54,17 +54,18 @@ class _AppShellState extends State<AppShell> {
   ChromeState get _uiState => _runtime.chromeState;
   AssetWindowInteractionState get _windowInteractionState => _runtime.dependencies.windowInteractionState;
   WorkspaceViewportState get _workspaceViewportState => _runtime.workspaceViewportState;
-  ChromeController get _chromeController => _runtime.chromeController;
-  SryDocumentCoordinator get _sryDocumentCoordinator => _runtime.sryDocumentCoordinator;
-  MediaBridge get _mediaBridge => _runtime.mediaBridge;
-  WorkspaceController get _workspaceController => _runtime.workspaceController;
-  WorkspaceShellController get _workspaceShellController => _runtime.workspaceShellController;
-  LinksController get _workspaceLinksController => _runtime.workspaceLinksController;
-  AppShellPlatformBridge get _appShellPlatformBridge => _runtime.appShellPlatformBridge;
-  EnvironmentBookmarkSynchronizer get _environmentBookmarkSynchronizer => _runtime.environmentBookmarkSynchronizer;
-  EnvironmentController get _environmentController => _runtime.environmentController;
-  ThumbnailController get _thumbnailController => _runtime.thumbnailController;
-  VideoConversionCoordinator get _videoConversionCoordinator => _runtime.videoConversionCoordinator;
+  ChromeController get _chromeController => _runtime.foundation.chromeController;
+  SryDocumentCoordinator get _sryDocumentCoordinator => _runtime.documents.sryDocumentCoordinator;
+  MediaBridge get _mediaBridge => _runtime.foundation.mediaBridge;
+  WorkspaceController get _workspaceController => _runtime.workspace.workspaceController;
+  WorkspaceShellController get _workspaceShellController => _runtime.workspace.workspaceShellController;
+  LinksController get _workspaceLinksController => _runtime.workspace.workspaceLinksController;
+  AppShellPlatformBridge get _appShellPlatformBridge => _runtime.foundation.appShellPlatformBridge;
+  EnvironmentBookmarkSynchronizer get _environmentBookmarkSynchronizer =>
+      _runtime.foundation.environmentBookmarkSynchronizer;
+  EnvironmentController get _environmentController => _runtime.foundation.environmentController;
+  ThumbnailController get _thumbnailController => _runtime.workspace.thumbnailController;
+  VideoConversionCoordinator get _videoConversionCoordinator => _runtime.workspace.videoConversionCoordinator;
 
   bool get _isRunningInWidgetTest {
     return Platform.environment.containsKey('FLUTTER_TEST') ||

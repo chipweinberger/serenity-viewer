@@ -46,17 +46,21 @@ class AppShellRuntimeFactory {
 
     return AppShellRuntime.assembled(
       dependencies: dependencies,
-      chromeController: foundation.chromeController,
-      sryDocumentCoordinator: sryDocumentCoordinator,
-      mediaBridge: foundation.mediaBridge,
-      workspaceController: workspace.workspaceController,
-      workspaceShellController: workspace.workspaceShellController,
-      workspaceLinksController: workspace.workspaceLinksController,
-      appShellPlatformBridge: foundation.appShellPlatformBridge,
-      environmentBookmarkSynchronizer: foundation.environmentBookmarkSynchronizer,
-      environmentController: foundation.environmentController,
-      thumbnailController: workspace.thumbnailController,
-      videoConversionCoordinator: workspace.videoConversionCoordinator,
+      foundation: AppShellRuntimeFoundationServices(
+        chromeController: foundation.chromeController,
+        mediaBridge: foundation.mediaBridge,
+        appShellPlatformBridge: foundation.appShellPlatformBridge,
+        environmentBookmarkSynchronizer: foundation.environmentBookmarkSynchronizer,
+        environmentController: foundation.environmentController,
+      ),
+      documents: AppShellRuntimeDocumentServices(sryDocumentCoordinator: sryDocumentCoordinator),
+      workspace: AppShellRuntimeWorkspaceServices(
+        thumbnailController: workspace.thumbnailController,
+        videoConversionCoordinator: workspace.videoConversionCoordinator,
+        workspaceLinksController: workspace.workspaceLinksController,
+        workspaceController: workspace.workspaceController,
+        workspaceShellController: workspace.workspaceShellController,
+      ),
       autosaveTimer: autosaveTimer,
       appLifecycleListener: appLifecycleListener,
     );

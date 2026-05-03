@@ -27,33 +27,17 @@ import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.
 class AppShellRuntime {
   AppShellRuntime.assembled({
     required this.dependencies,
-    required this.chromeController,
-    required this.sryDocumentCoordinator,
-    required this.mediaBridge,
-    required this.workspaceController,
-    required this.workspaceShellController,
-    required this.workspaceLinksController,
-    required this.appShellPlatformBridge,
-    required this.environmentBookmarkSynchronizer,
-    required this.environmentController,
-    required this.thumbnailController,
-    required this.videoConversionCoordinator,
+    required this.foundation,
+    required this.documents,
+    required this.workspace,
     required this.autosaveTimer,
     required this.appLifecycleListener,
   });
 
   final ShellDependencies dependencies;
-  final ChromeController chromeController;
-  final SryDocumentCoordinator sryDocumentCoordinator;
-  final MediaBridge mediaBridge;
-  final WorkspaceController workspaceController;
-  final WorkspaceShellController workspaceShellController;
-  final LinksController workspaceLinksController;
-  final AppShellPlatformBridge appShellPlatformBridge;
-  final EnvironmentBookmarkSynchronizer environmentBookmarkSynchronizer;
-  final EnvironmentController environmentController;
-  final ThumbnailController thumbnailController;
-  final VideoConversionCoordinator videoConversionCoordinator;
+  final AppShellRuntimeFoundationServices foundation;
+  final AppShellRuntimeDocumentServices documents;
+  final AppShellRuntimeWorkspaceServices workspace;
   final Timer autosaveTimer;
   final AppLifecycleListener appLifecycleListener;
 
@@ -126,13 +110,51 @@ class AppShellRuntime {
   void dispose() {
     autosaveTimer.cancel();
     appLifecycleListener.dispose();
-    workspaceShellController.tracking.cancel();
+    workspace.workspaceShellController.tracking.cancel();
     dependencies.workspaceViewTrackingState.dispose();
     dependencies.windowInteractionState.dispose();
-    thumbnailController.dispose();
-    mediaBridge.dispose();
+    workspace.thumbnailController.dispose();
+    foundation.mediaBridge.dispose();
     handles.dispose();
   }
+}
+
+class AppShellRuntimeFoundationServices {
+  const AppShellRuntimeFoundationServices({
+    required this.chromeController,
+    required this.mediaBridge,
+    required this.appShellPlatformBridge,
+    required this.environmentBookmarkSynchronizer,
+    required this.environmentController,
+  });
+
+  final ChromeController chromeController;
+  final MediaBridge mediaBridge;
+  final AppShellPlatformBridge appShellPlatformBridge;
+  final EnvironmentBookmarkSynchronizer environmentBookmarkSynchronizer;
+  final EnvironmentController environmentController;
+}
+
+class AppShellRuntimeDocumentServices {
+  const AppShellRuntimeDocumentServices({required this.sryDocumentCoordinator});
+
+  final SryDocumentCoordinator sryDocumentCoordinator;
+}
+
+class AppShellRuntimeWorkspaceServices {
+  const AppShellRuntimeWorkspaceServices({
+    required this.thumbnailController,
+    required this.videoConversionCoordinator,
+    required this.workspaceLinksController,
+    required this.workspaceController,
+    required this.workspaceShellController,
+  });
+
+  final ThumbnailController thumbnailController;
+  final VideoConversionCoordinator videoConversionCoordinator;
+  final LinksController workspaceLinksController;
+  final WorkspaceController workspaceController;
+  final WorkspaceShellController workspaceShellController;
 }
 
 class AppShellRuntimeConfig {
