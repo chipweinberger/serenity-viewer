@@ -1,7 +1,13 @@
-part of 'workspace_shell_controller.dart';
+import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
+
+import 'package:serenity_viewer/src/environment/workspace.dart';
+import 'package:serenity_viewer/src/foundation/app_constants.dart';
+import 'package:serenity_viewer/src/workspace/shell/workspace_shell_controller.dart';
 
 class WorkspaceShellManagementApi {
-  WorkspaceShellManagementApi._(this._controller);
+  WorkspaceShellManagementApi(this._controller);
 
   final WorkspaceShellController _controller;
 

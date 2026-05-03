@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,10 +14,10 @@ import 'package:serenity_viewer/src/settings/behavior/chrome_controller.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
 import 'package:serenity_viewer/src/workspace/controller/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/layout/workspace_layout.dart';
+import 'package:serenity_viewer/src/workspace/shell/workspace_shell_management.dart';
 import 'package:serenity_viewer/src/workspace/session/workspace_view_tracking_state.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 
-part 'workspace_shell_management.dart';
 part 'workspace_shell_navigation.dart';
 part 'workspace_shell_shortcuts.dart';
 part 'workspace_shell_tracking.dart';
@@ -67,7 +66,7 @@ class WorkspaceShellController {
     required this.toggleVideoPlayback,
   }) {
     navigation = WorkspaceShellNavigationApi._(this);
-    management = WorkspaceShellManagementApi._(this);
+    management = WorkspaceShellManagementApi(this);
     shortcuts = WorkspaceShellShortcutsApi._(this);
     tracking = WorkspaceShellTrackingApi._(this);
   }
