@@ -6,10 +6,8 @@ extension _SerenityShellWorkspaceChromeHud on _SerenityShellState {
     final imageLabel = '${mediaCounts.images} image${mediaCounts.images == 1 ? '' : 's'}';
     final videoLabel = '${mediaCounts.videos} video${mediaCounts.videos == 1 ? '' : 's'}';
     final linkLabel = '${mediaCounts.links} link${mediaCounts.links == 1 ? '' : 's'}';
-    final isExposeMode =
-        _uiState.screen == SerenityScreen.workspace && _uiState.workspaceLayoutMode == WorkspaceLayoutMode.expose;
-    final showExposeSelectionHud =
-        _uiState.screen == SerenityScreen.workspace && _windowInteractionState.selectedExposeWindowIds.isNotEmpty;
+    final isExposeMode = _chromeController.isExposeMode;
+    final showExposeSelectionHud = _chromeController.shouldMoveSelectedWindowsToWorkspaceOnTap;
     final selectedCount = _windowInteractionState.selectedExposeWindowIds.length;
     final modeActions = <Widget>[
       if (!isExposeMode) ...[
@@ -57,13 +55,13 @@ extension _SerenityShellWorkspaceChromeHud on _SerenityShellState {
       mainAxisSize: MainAxisSize.min,
       children: [
         _buildWorkspaceHudAction(
-          tooltip: _uiState.workspaceLayoutMode == WorkspaceLayoutMode.expose ? 'Freeform' : 'Expose',
+          tooltip: _chromeController.isExposeMode ? 'Freeform' : 'Expose',
           onTap: _toggleExpose,
           child: SizedBox(
             width: 38,
             height: 38,
             child: Icon(
-              _uiState.workspaceLayoutMode == WorkspaceLayoutMode.expose ? Icons.grid_view_rounded : Icons.apps_rounded,
+              _chromeController.isExposeMode ? Icons.grid_view_rounded : Icons.apps_rounded,
               size: 17,
               color: SerenityTheme.textPrimary,
             ),

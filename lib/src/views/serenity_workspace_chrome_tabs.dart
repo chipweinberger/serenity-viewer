@@ -15,7 +15,7 @@ extension _SerenityShellWorkspaceChromeTabs on _SerenityShellState {
           children: [
             _buildGlassChip(
               context: context,
-              selected: _uiState.screen == SerenityScreen.library,
+              selected: _chromeController.isLibraryScreen,
               onTap: _showWorkspaceOverview,
               child: const Row(
                 mainAxisSize: MainAxisSize.min,
@@ -34,9 +34,9 @@ extension _SerenityShellWorkspaceChromeTabs on _SerenityShellState {
                       data: workspace.id,
                       maxSimultaneousDrags: 1,
                       dragAnchorStrategy: pointerDragAnchorStrategy,
-                      onDragStarted: () => setState(() => _uiState.draggingTabWorkspaceId = workspace.id),
-                      onDragEnd: (_) => setState(() => _uiState.draggingTabWorkspaceId = null),
-                      onDraggableCanceled: (_, __) => setState(() => _uiState.draggingTabWorkspaceId = null),
+                      onDragStarted: () => _chromeController.setDraggingTabWorkspaceId(workspace.id),
+                      onDragEnd: (_) => _chromeController.setDraggingTabWorkspaceId(null),
+                      onDraggableCanceled: (_, __) => _chromeController.setDraggingTabWorkspaceId(null),
                       feedback: Material(
                         color: Colors.transparent,
                         child: _buildWorkspaceTabChip(context, workspace, isDropTarget: false),
@@ -65,16 +65,17 @@ extension _SerenityShellWorkspaceChromeTabs on _SerenityShellState {
   }
 
   Widget _buildWorkspaceTabChip(BuildContext context, WorkspaceState workspace, {required bool isDropTarget}) {
-    final isSelected =
-        _uiState.screen != SerenityScreen.library && workspace.id == _persistenceState.session!.activeWorkspaceId;
-    final shouldMoveSelectedWindows =
-        _uiState.screen == SerenityScreen.workspace && _windowInteractionState.selectedExposeWindowIds.isNotEmpty;
+    final isSelected = _chromeController.isWorkspaceTabSelected(
+      workspaceId: workspace.id,
+      activeWorkspaceId: _persistenceState.session!.activeWorkspaceId,
+    );
+    final shouldMoveSelectedWindows = _chromeController.shouldMoveSelectedWindowsToWorkspaceOnTap;
 
     return AnimatedScale(
       duration: const Duration(milliseconds: 120),
       scale: isDropTarget ? 1.04 : 1,
       child: Opacity(
-        opacity: _uiState.draggingTabWorkspaceId == workspace.id ? 0.7 : 1,
+        opacity: _chromeController.isWorkspaceTabDragging(workspace.id) ? 0.7 : 1,
         child: _buildGlassChip(
           context: context,
           selected: isSelected,

@@ -23,14 +23,7 @@ extension _SerenityShellSessionActions on _SerenityShellState {
   }
 
   void _toggleExpose() {
-    final nextWorkspaceLayoutMode = _uiState.workspaceLayoutMode == WorkspaceLayoutMode.expose
-        ? WorkspaceLayoutMode.freeform
-        : WorkspaceLayoutMode.expose;
-    _showWorkspaceScreen(
-      workspaceLayoutMode: nextWorkspaceLayoutMode,
-      resetEditMode: nextWorkspaceLayoutMode != WorkspaceLayoutMode.expose,
-      clearExposeSelection: nextWorkspaceLayoutMode != WorkspaceLayoutMode.expose,
-    );
+    _chromeController.toggleExpose();
   }
 
   void _setPinnedHoverWindow(String? windowId) {
@@ -142,12 +135,11 @@ extension _SerenityShellSessionActions on _SerenityShellState {
   }
 
   Future<void> _toggleWorkspaceOverview() async {
-    if (_uiState.screen == SerenityScreen.workspace) {
+    if (_chromeController.isWorkspaceScreen) {
       unawaited(_refreshActiveWorkspaceThumbnailIfNeeded());
     }
 
-    final showingLibrary = _uiState.screen == SerenityScreen.library;
-    if (showingLibrary) {
+    if (_chromeController.isLibraryScreen) {
       _showWorkspaceScreen();
     } else {
       _showLibraryScreen();
@@ -155,7 +147,7 @@ extension _SerenityShellSessionActions on _SerenityShellState {
   }
 
   Future<void> _showWorkspaceOverview() async {
-    if (_uiState.screen == SerenityScreen.workspace) {
+    if (_chromeController.isWorkspaceScreen) {
       unawaited(_refreshActiveWorkspaceThumbnailIfNeeded());
     }
 
@@ -164,24 +156,17 @@ extension _SerenityShellSessionActions on _SerenityShellState {
 
   Future<void> _switchWorkspace(int direction) async {
     final openWorkspaces = _openWorkspaces;
-    final tabCount = openWorkspaces.length + 1;
-    if (tabCount == 0) {
-      return;
-    }
-
-    final currentIndex = _uiState.screen == SerenityScreen.library
-        ? 0
-        : openWorkspaces.indexWhere((workspace) => workspace.id == _persistenceState.session!.activeWorkspaceId) + 1;
-    final nextIndex = (currentIndex + direction) % tabCount;
-    final safeIndex = nextIndex < 0 ? tabCount - 1 : nextIndex;
-
-    if (safeIndex == 0) {
+    final target = _chromeController.workspaceSwitchTarget(
+      openWorkspaces: openWorkspaces,
+      activeWorkspaceId: _persistenceState.session!.activeWorkspaceId,
+      direction: direction,
+    );
+    if (target.showsLibrary) {
       unawaited(_showWorkspaceOverview());
       return;
     }
 
-    final nextWorkspace = openWorkspaces[safeIndex - 1];
-    unawaited(_setActiveWorkspace(nextWorkspace.id));
+    unawaited(_setActiveWorkspace(target.workspaceId!));
   }
 
   Future<void> _setActiveWorkspace(String workspaceId) async {
@@ -191,8 +176,7 @@ extension _SerenityShellSessionActions on _SerenityShellState {
       unawaited(_refreshActiveWorkspaceThumbnailIfNeeded());
     }
 
-    final shouldPreserveExpose =
-        _uiState.screen == SerenityScreen.workspace && _uiState.workspaceLayoutMode == WorkspaceLayoutMode.expose;
+    final shouldPreserveExpose = _chromeController.isExposeMode;
     _updateSession(
       session.copyWith(
         activeWorkspaceId: workspaceId,

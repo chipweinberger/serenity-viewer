@@ -15,6 +15,7 @@ import 'package:image/image.dart' as img;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
 
+import 'package:serenity_viewer/src/app/serenity_chrome_controller.dart';
 import 'package:serenity_viewer/src/app/serenity_import_coordinator.dart';
 import 'package:serenity_viewer/src/app/serenity_import_result.dart';
 import 'package:serenity_viewer/src/app/serenity_shell_dependencies.dart';
@@ -114,6 +115,7 @@ class _SerenityShellState extends State<SerenityShell> {
   final List<RecentlyClosedWindowEntry> _recentlyClosedWindows = [];
   AppLifecycleListener? _appLifecycleListener;
   Timer? _autosaveTimer;
+  late final SerenityChromeController _chromeController;
 
   SerenityShellHandles get _handles => _dependencies.handles;
   SerenityShellPersistenceState get _persistenceState => _dependencies.persistenceState;
@@ -158,6 +160,12 @@ class _SerenityShellState extends State<SerenityShell> {
   @override
   void initState() {
     super.initState();
+    _chromeController = SerenityChromeController(
+      chromeState: _uiState,
+      windowInteractionState: _windowInteractionState,
+      commitStateChange: setState,
+      refreshWorkspaceTracking: _refreshWorkspaceViewTracking,
+    );
     _autosaveTimer = Timer.periodic(const Duration(minutes: 1), (_) {
       if (_persistenceState.hasUnsavedChanges) {
         unawaited(_saveSession());
