@@ -1,37 +1,36 @@
+// ignore_for_file: invalid_use_of_protected_member
+
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+import 'package:serenity_viewer/src/app/app_shell/controllers/app_shell_window_history_controller.dart';
 import 'package:serenity_viewer/src/asset_window/frame/asset_window_resize_helpers.dart';
 import 'package:serenity_viewer/src/asset_window/interaction/asset_window_interaction_state.dart';
 import 'package:serenity_viewer/src/asset_window/interaction/asset_window_zoom_update.dart';
-import 'package:serenity_viewer/src/app/app_shell/controllers/app_shell_window_history_controller.dart';
-import 'package:serenity_viewer/src/app/app_shell/builders/app_shell_chrome_overlay_builder.dart';
-import 'package:serenity_viewer/src/app/app_shell/builders/app_shell_library_content_builder.dart';
-import 'package:serenity_viewer/src/app/app_shell/builders/app_shell_workspace_content_builder.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
-import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/links/workspace_links_controller.dart';
+import 'package:serenity_viewer/src/links/workspace_links_dialog.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_controller.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
 import 'package:serenity_viewer/src/thumbnails/thumbnail_controller.dart';
 import 'package:serenity_viewer/src/video_tools/media_bridge.dart';
+import 'package:serenity_viewer/src/workspace/screen/workspace_chrome_view_model.dart';
+import 'package:serenity_viewer/src/workspace/screen/workspace_hud.dart';
+import 'package:serenity_viewer/src/workspace/screen/workspace_screen.dart';
 import 'package:serenity_viewer/src/workspace/shell/workspace_shell_controller.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 import 'package:serenity_viewer/src/workspace_loading/media_load_plan.dart';
 import 'package:serenity_viewer/src/workspace_loading/workspace_load_plan.dart';
 
-class AppShellContentBuilder {
-  const AppShellContentBuilder({
+class AppShellWorkspaceContentBuilder {
+  const AppShellWorkspaceContentBuilder({
     required this.context,
     required this.uiState,
     required this.environment,
-    required this.windowTitle,
-    required this.workspaces,
     required this.openWorkspaces,
     required this.activeWorkspace,
-    required this.activeWorkspaceOrNull,
     required this.selectedExposeWindowCount,
     required this.windowInteractionState,
     required this.workspaceViewportState,
@@ -41,8 +40,6 @@ class AppShellContentBuilder {
     required this.workspaceLinksController,
     required this.thumbnailController,
     required this.windowHistoryController,
-    required this.searchController,
-    required this.tabScrollController,
     required this.commitStateChange,
     required this.importFiles,
     required this.handleOptionGestureHover,
@@ -74,11 +71,8 @@ class AppShellContentBuilder {
   final BuildContext context;
   final ChromeState uiState;
   final Environment environment;
-  final String windowTitle;
-  final List<Workspace> workspaces;
   final List<Workspace> openWorkspaces;
   final Workspace activeWorkspace;
-  final Workspace? activeWorkspaceOrNull;
   final int selectedExposeWindowCount;
   final AssetWindowInteractionState windowInteractionState;
   final WorkspaceViewportState workspaceViewportState;
@@ -88,8 +82,6 @@ class AppShellContentBuilder {
   final LinksController workspaceLinksController;
   final ThumbnailController thumbnailController;
   final AppShellWindowHistoryController windowHistoryController;
-  final TextEditingController searchController;
-  final ScrollController tabScrollController;
   final void Function(VoidCallback fn) commitStateChange;
   final Future<void> Function(List<XFile> files) importFiles;
   final void Function(PointerHoverEvent event, Workspace workspace) handleOptionGestureHover;
@@ -119,97 +111,77 @@ class AppShellContentBuilder {
   final void Function({required String workspaceId, Offset? center, double? zoom, bool queueThumbnail})
   setWorkspaceViewport;
 
-  Widget build() {
-    final workspaceLoadPlan = buildWorkspaceLoadPlan(environment: environment, activeWorkspace: activeWorkspaceOrNull);
-    mediaBridge.syncSharedVideoControllers(loadPlan: workspaceLoadPlan, environment: environment);
-
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: IndexedStack(
-            index: _activeScreenIndex,
-            children: [_buildWorkspaceScreen(workspaceLoadPlan), _buildLibraryScreen(workspaceLoadPlan)],
-          ),
-        ),
-        _buildWorkspaceChromeOverlay(),
-      ],
+  WorkspaceChromeViewModel _buildWorkspaceChromeViewModel() {
+    final mediaCounts = workspaceMediaCounts(activeWorkspace);
+    return WorkspaceChromeViewModel(
+      imageLabel: '${mediaCounts.images} image${mediaCounts.images == 1 ? '' : 's'}',
+      videoLabel: '${mediaCounts.videos} video${mediaCounts.videos == 1 ? '' : 's'}',
+      linkLabel: '${mediaCounts.links} link${mediaCounts.links == 1 ? '' : 's'}',
+      isExposeMode: chromeController.isExposeMode,
+      showExposeSelectionHud: chromeController.shouldMoveSelectedWindowsToWorkspaceOnTap,
+      selectedCount: selectedExposeWindowCount,
+      workspaceId: activeWorkspace.id,
+      workspaceZoom: activeWorkspace.viewportZoom,
     );
   }
 
-  int get _activeScreenIndex {
-    return switch (uiState.screen) {
-      SerenityScreen.workspace => 0,
-      SerenityScreen.library => 1,
-    };
-  }
+  Widget build(MediaLoadPlan workspaceLoadPlan) {
+    final workspaceChromeViewModel = _buildWorkspaceChromeViewModel();
 
-  Widget _buildWorkspaceScreen(MediaLoadPlan workspaceLoadPlan) {
-    return AppShellWorkspaceContentBuilder(
-      context: context,
-      uiState: uiState,
+    return WorkspaceScreen(
       environment: environment,
       openWorkspaces: openWorkspaces,
-      activeWorkspace: activeWorkspace,
-      selectedExposeWindowCount: selectedExposeWindowCount,
+      chromeState: uiState,
       windowInteractionState: windowInteractionState,
-      workspaceViewportState: workspaceViewportState,
-      chromeController: chromeController,
-      mediaBridge: mediaBridge,
-      workspaceShellController: workspaceShellController,
-      workspaceLinksController: workspaceLinksController,
-      thumbnailController: thumbnailController,
-      windowHistoryController: windowHistoryController,
-      commitStateChange: commitStateChange,
-      importFiles: importFiles,
-      handleOptionGestureHover: handleOptionGestureHover,
-      handleWorkspacePanZoomStart: handleWorkspacePanZoomStart,
-      handleWorkspacePanZoomUpdate: handleWorkspacePanZoomUpdate,
-      handleWorkspacePanZoomEnd: handleWorkspacePanZoomEnd,
-      focusWindow: focusWindow,
-      restorePreviousWindowZOrder: restorePreviousWindowZOrder,
-      moveWindow: moveWindow,
-      resizeWindow: resizeWindow,
-      transformWindowFromTrackpad: transformWindowFromTrackpad,
-      fitWindowToContent: fitWindowToContent,
-      setWindowZoom: setWindowZoom,
-      setVideoPosition: setVideoPosition,
-      cycleVideoPlaybackSpeed: cycleVideoPlaybackSpeed,
-      setWindowIntrinsicSize: setWindowIntrinsicSize,
-      isVideoWindowPaused: isVideoWindowPaused,
-      toggleVideoPlayback: toggleVideoPlayback,
-      toggleExpose: toggleExpose,
-      setPinnedHoverWindow: setPinnedHoverWindow,
-      clearPinnedHoverWindow: clearPinnedHoverWindow,
-      flashWindow: flashWindow,
-      setActiveGestureWindow: setActiveGestureWindow,
-      fitWorkspaceViewportToContent: fitWorkspaceViewportToContent,
-      confirmCollateWorkspaceWindows: confirmCollateWorkspaceWindows,
-      setWorkspaceViewport: setWorkspaceViewport,
-    ).build(workspaceLoadPlan);
-  }
-
-  Widget _buildLibraryScreen(MediaLoadPlan workspaceLoadPlan) {
-    return AppShellLibraryContentBuilder(
-      uiState: uiState,
-      workspaces: workspaces,
-      openWorkspaces: openWorkspaces,
-      thumbnailController: thumbnailController,
-      workspaceShellController: workspaceShellController,
-      chromeController: chromeController,
-      searchController: searchController,
-      commitStateChange: commitStateChange,
-    ).build(workspaceLoadPlan);
-  }
-
-  Widget _buildWorkspaceChromeOverlay() {
-    return AppShellChromeOverlayBuilder(
-      windowTitle: windowTitle,
-      environment: environment,
-      openWorkspaces: openWorkspaces,
-      uiState: uiState,
-      chromeController: chromeController,
-      workspaceShellController: workspaceShellController,
-      tabScrollController: tabScrollController,
-    ).build();
+      loadPlan: workspaceLoadPlan,
+      sharedVideoLookup: mediaBridge.sharedVideoForWindow,
+      actions: WorkspaceScreenActions(
+        setDropTargetActive: (isActive) => commitStateChange(() => uiState.isDropTargetActive = isActive),
+        importFiles: importFiles,
+        trackViewportSize: (viewportSize) => workspaceViewportState.viewportSize = viewportSize,
+        handleOptionGestureHover: handleOptionGestureHover,
+        handleWorkspacePanZoomStart: handleWorkspacePanZoomStart,
+        handleWorkspacePanZoomUpdate: handleWorkspacePanZoomUpdate,
+        handleWorkspacePanZoomEnd: handleWorkspacePanZoomEnd,
+        focusWindow: focusWindow,
+        restorePreviousWindowZOrder: restorePreviousWindowZOrder,
+        moveWindow: moveWindow,
+        resizeWindow: resizeWindow,
+        transformWindowFromTrackpad: transformWindowFromTrackpad,
+        fitWindowToContent: fitWindowToContent,
+        setWindowZoom: setWindowZoom,
+        setVideoPosition: setVideoPosition,
+        cycleVideoPlaybackSpeed: cycleVideoPlaybackSpeed,
+        setWindowIntrinsicSize: setWindowIntrinsicSize,
+        isVideoWindowPaused: isVideoWindowPaused,
+        toggleVideoPlayback: toggleVideoPlayback,
+        toggleExpose: toggleExpose,
+        setPinnedHoverWindow: setPinnedHoverWindow,
+        clearPinnedHoverWindow: clearPinnedHoverWindow,
+        flashWindow: flashWindow,
+        toggleSelectedWindow: workspaceShellController.navigation.toggleSelectedWindow,
+        removeWindow: windowHistoryController.removeWindow,
+        setActiveGestureWindow: setActiveGestureWindow,
+        revealAssetInFinder: mediaBridge.revealAssetInFinder,
+      ),
+      workspaceHud: WorkspaceHud(
+        viewModel: workspaceChromeViewModel,
+        actions: WorkspaceHudActions(
+          onToggleExpose: toggleExpose,
+          onFitWorkspaceViewportToContent: fitWorkspaceViewportToContent,
+          onConfirmCollateWorkspaceWindows: confirmCollateWorkspaceWindows,
+          onConfirmApplyExposeGridToWorkspace: workspaceShellController.navigation.confirmApplyExposeGridToWorkspace,
+          onOpenLinks: () => showSerenityLinksDialog(
+            context: context,
+            initialWorkspace: activeWorkspace,
+            controller: workspaceLinksController,
+          ),
+          onClearExposeSelection: workspaceShellController.navigation.clearExposeSelection,
+          onSetWorkspaceZoom: (workspaceId, zoom) =>
+              setWorkspaceViewport(workspaceId: workspaceId, zoom: zoom, queueThumbnail: false),
+          onRefreshActiveWorkspaceThumbnail: thumbnailController.refreshActiveWorkspaceIfNeeded,
+        ),
+      ),
+    );
   }
 }
