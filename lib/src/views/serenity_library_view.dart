@@ -77,7 +77,11 @@ extension _SerenityShellLibraryView on _SerenityShellState {
                     onFitWorkspaceViewportToContent: _fitWorkspaceViewportToContent,
                     onConfirmCollateWorkspaceWindows: _confirmCollateWorkspaceWindows,
                     onConfirmApplyExposeGridToWorkspace: _confirmApplyExposeGridToWorkspace,
-                    onOpenWorkspaceLinks: () => _openWorkspaceLinksDialog(activeWorkspace),
+                    onOpenWorkspaceLinks: () => showSerenityWorkspaceLinksDialog(
+                      context: context,
+                      initialWorkspace: activeWorkspace,
+                      controller: _workspaceLinksController,
+                    ),
                     onClearExposeSelection: _clearExposeSelection,
                     onSetWorkspaceZoom: (workspaceId, zoom) =>
                         _setWorkspaceViewport(workspaceId: workspaceId, zoom: zoom, queueThumbnail: false),

@@ -4,12 +4,10 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:file_selector/file_selector.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
-import 'package:url_launcher/url_launcher.dart';
 
 import 'package:serenity_viewer/src/app/serenity_chrome_controller.dart';
 import 'package:serenity_viewer/src/app/serenity_environment_coordinator.dart';
@@ -19,6 +17,7 @@ import 'package:serenity_viewer/src/app/serenity_media_bridge.dart';
 import 'package:serenity_viewer/src/app/serenity_shell_dependencies.dart';
 import 'package:serenity_viewer/src/app/serenity_session_controller.dart';
 import 'package:serenity_viewer/src/app/serenity_session_persistence_bridge.dart';
+import 'package:serenity_viewer/src/app/serenity_workspace_links_controller.dart';
 import 'package:serenity_viewer/src/app/serenity_workspace_controller.dart';
 import 'package:serenity_viewer/src/app/serenity_workspace_mutations.dart';
 import 'package:serenity_viewer/src/core/serenity_core.dart';
@@ -32,7 +31,6 @@ import 'package:serenity_viewer/src/models/serenity_workspace_chrome_view_model.
 import 'package:serenity_viewer/src/models/session_support.dart';
 import 'package:serenity_viewer/src/models/window_zoom_update.dart';
 import 'package:serenity_viewer/src/models/workspace_asset.dart';
-import 'package:serenity_viewer/src/models/workspace_link.dart';
 import 'package:serenity_viewer/src/models/workspace_state.dart';
 import 'package:serenity_viewer/src/media/serenity_workspace_load_plan.dart';
 import 'package:serenity_viewer/src/state/serenity_chrome_state.dart';
@@ -48,6 +46,7 @@ import 'package:serenity_viewer/src/views/serenity_library_screen.dart';
 import 'package:serenity_viewer/src/views/serenity_workspace_chrome_overlay.dart';
 import 'package:serenity_viewer/src/views/serenity_workspace_hud.dart';
 import 'package:serenity_viewer/src/views/serenity_workspace_layouts.dart';
+import 'package:serenity_viewer/src/views/serenity_workspace_links_dialog.dart';
 import 'package:serenity_viewer/src/views/serenity_workspace_screen.dart';
 
 part '../app/serenity_session_actions.dart';
@@ -55,12 +54,10 @@ part '../app/serenity_shell_ui_state.dart';
 part '../app/serenity_window_actions.dart';
 part '../app/serenity_window_history_actions.dart';
 part '../app/serenity_workspace_management.dart';
-part '../app/serenity_workspace_links.dart';
 part '../app/serenity_menus.dart';
 part '../app/serenity_seed_and_settings.dart';
 part '../app/serenity_workspace_views.dart';
 part '../app/serenity_workspace_geometry.dart';
-part '../views/serenity_workspace_links_dialog.dart';
 part '../views/serenity_library_view.dart';
 part '../persistence/serenity_thumbnail_persistence.dart';
 part '../media/serenity_import_and_load_plan.dart';
@@ -110,6 +107,7 @@ class _SerenityShellState extends State<SerenityShell> {
   late final SerenityEnvironmentCoordinator _environmentCoordinator;
   late final SerenityMediaBridge _mediaBridge;
   late final SerenityWorkspaceController _workspaceController;
+  late final SerenityWorkspaceLinksController _workspaceLinksController;
   late final SerenitySessionController _sessionController;
   late final SerenitySessionPersistenceBridge _sessionPersistenceBridge;
 
@@ -199,6 +197,17 @@ class _SerenityShellState extends State<SerenityShell> {
       thumbnailDirectory: _sessionPersistenceBridge.thumbnailDirectory,
       updateSession: _updateSession,
       saveSession: _sessionPersistenceBridge.saveSession,
+    );
+    _workspaceLinksController = SerenityWorkspaceLinksController(
+      screen: () => _uiState.screen,
+      hasSession: () => _persistenceState.session != null,
+      activeWorkspace: () => _activeWorkspaceOrNull,
+      workspaces: () => _workspaces,
+      replaceWorkspace: _replaceWorkspace,
+      newId: _newId,
+      showMessage: _showMessage,
+      context: () => context,
+      mounted: () => mounted,
     );
     _workspaceController = SerenityWorkspaceController(
       chromeState: _uiState,

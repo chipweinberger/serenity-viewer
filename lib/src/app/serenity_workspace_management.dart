@@ -303,8 +303,8 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
       return KeyEventResult.ignored;
     }
 
-    if (_shouldHandlePasteLinksShortcut(event)) {
-      unawaited(_pasteLinksFromClipboard());
+    if (_workspaceLinksController.shouldHandlePasteLinksShortcut(event)) {
+      unawaited(_workspaceLinksController.pasteLinksFromClipboard());
       return KeyEventResult.handled;
     }
 
