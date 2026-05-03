@@ -6,12 +6,12 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/media/playback/media_bridge.dart';
+import 'package:serenity_viewer/src/media/controllers/media_bridge.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_projection.dart';
 import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
-import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
+import 'package:serenity_viewer/src/media/models/media_load_plan.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_frame_view_model.dart';
 import 'package:serenity_viewer/src/workspace/canvas/workspace_canvas_view_model.dart';

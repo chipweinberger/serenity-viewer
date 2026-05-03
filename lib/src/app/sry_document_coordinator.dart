@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:serenity_viewer/src/app/app_environment_controller.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/app/app_environment_state.dart';
-import 'package:serenity_viewer/src/media/conversion/settings_and_video_models.dart';
-import 'package:serenity_viewer/src/media/missing_files/missing_asset_resolution.dart';
+import 'package:serenity_viewer/src/media/models/settings_and_video_models.dart';
+import 'package:serenity_viewer/src/media/utils/missing_asset_resolution.dart';
 import 'package:serenity_viewer/src/sry_document/sry_document_codec.dart';
 import 'package:serenity_viewer/src/environment/workspace_state.dart';
 

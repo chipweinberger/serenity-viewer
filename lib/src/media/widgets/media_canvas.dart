@@ -9,12 +9,12 @@ import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/foundation/keyboard_modifiers.dart';
 import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_zoom_update.dart';
-import 'package:serenity_viewer/src/media/assets/demo_art_widget.dart';
-import 'package:serenity_viewer/src/media/assets/image_surface.dart';
-import 'package:serenity_viewer/src/media/assets/media_placeholder_widgets.dart';
-import 'package:serenity_viewer/src/media/assets/media_zoom_utils.dart';
-import 'package:serenity_viewer/src/media/assets/video_surface.dart';
-import 'package:serenity_viewer/src/media/assets/zoom_box.dart';
+import 'package:serenity_viewer/src/media/utils/media_zoom_utils.dart';
+import 'package:serenity_viewer/src/media/widgets/demo_art_widget.dart';
+import 'package:serenity_viewer/src/media/widgets/image_surface.dart';
+import 'package:serenity_viewer/src/media/widgets/media_placeholder_widgets.dart';
+import 'package:serenity_viewer/src/media/widgets/video_surface.dart';
+import 'package:serenity_viewer/src/media/widgets/zoom_box.dart';
 
 class MediaCanvas extends StatefulWidget {
   const MediaCanvas({

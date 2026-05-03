@@ -7,7 +7,7 @@ import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_zoom_update.dart';
 import 'package:serenity_viewer/src/environment/workspace_state.dart';
-import 'package:serenity_viewer/src/media/assets/media_zoom_utils.dart';
+import 'package:serenity_viewer/src/media/utils/media_zoom_utils.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_resize_helpers.dart';
 
 part 'workspace_environment_mutations.dart';

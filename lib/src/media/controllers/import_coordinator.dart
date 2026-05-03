@@ -4,12 +4,12 @@ import 'dart:math' as math;
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/media/importing/import_result.dart';
+import 'package:serenity_viewer/src/media/models/import_result.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/media/importing/import_window_layout.dart';
+import 'package:serenity_viewer/src/media/utils/import_window_layout.dart';
 import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
-import 'package:serenity_viewer/src/media/conversion/settings_and_video_models.dart';
+import 'package:serenity_viewer/src/media/models/settings_and_video_models.dart';
 import 'package:serenity_viewer/src/environment/workspace_asset.dart';
 import 'package:serenity_viewer/src/environment/workspace_state.dart';
 

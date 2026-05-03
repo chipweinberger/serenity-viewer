@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_frame_view_model.dart';
 import 'package:serenity_viewer/src/workspace/windows/window_zoom_update.dart';
-import 'package:serenity_viewer/src/media/assets/media_canvas.dart';
-import 'package:serenity_viewer/src/media/assets/media_preview_transforms.dart';
+import 'package:serenity_viewer/src/media/utils/media_preview_transforms.dart';
+import 'package:serenity_viewer/src/media/widgets/media_canvas.dart';
 
 class WindowFrameContent extends StatelessWidget {
   const WindowFrameContent({
