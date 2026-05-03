@@ -108,7 +108,7 @@ class SerenityWorkspaceScreen extends StatelessWidget {
     required this.loadPlan,
     required this.sharedVideoLookup,
     required this.actions,
-    required this.buildWorkspaceHud,
+    required this.workspaceHud,
   });
 
   final SerenitySessionState session;
@@ -118,7 +118,7 @@ class SerenityWorkspaceScreen extends StatelessWidget {
   final SerenityLoadPlan loadPlan;
   final SerenitySharedVideoLookup sharedVideoLookup;
   final SerenityWorkspaceScreenActions actions;
-  final WidgetBuilder buildWorkspaceHud;
+  final Widget workspaceHud;
 
   Widget _buildEmptyWorkspaceCanvasState(BuildContext context) {
     return IgnorePointer(
@@ -407,7 +407,7 @@ class SerenityWorkspaceScreen extends StatelessWidget {
         if (!canvasViewModel.isExposeMode && canvasViewModel.windows.isEmpty)
           Positioned.fill(child: _buildEmptyWorkspaceCanvasState(context)),
         if (canvasViewModel.isDropTargetActive) _buildWorkspaceDropOverlay(),
-        Positioned(left: 18, bottom: 18, child: buildWorkspaceHud(context)),
+        Positioned(left: 18, bottom: 18, child: workspaceHud),
       ],
     );
   }

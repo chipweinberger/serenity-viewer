@@ -47,7 +47,9 @@ import 'package:serenity_viewer/src/state/serenity_workspace_viewport_state.dart
 import 'package:serenity_viewer/src/widgets/serenity_media_zoom_utils.dart';
 import 'package:serenity_viewer/src/widgets/serenity_settings_dialog.dart';
 import 'package:serenity_viewer/src/widgets/window_resize_helpers.dart';
-import 'package:serenity_viewer/src/widgets/workspace_thumbnail_card.dart';
+import 'package:serenity_viewer/src/views/serenity_library_screen.dart';
+import 'package:serenity_viewer/src/views/serenity_workspace_chrome_overlay.dart';
+import 'package:serenity_viewer/src/views/serenity_workspace_hud.dart';
 import 'package:serenity_viewer/src/views/serenity_workspace_layouts.dart';
 import 'package:serenity_viewer/src/views/serenity_workspace_screen.dart';
 
@@ -62,9 +64,6 @@ part '../app/serenity_menus.dart';
 part '../app/serenity_seed_and_settings.dart';
 part '../app/serenity_workspace_views.dart';
 part '../app/serenity_workspace_geometry.dart';
-part '../views/serenity_workspace_chrome.dart';
-part '../views/serenity_workspace_chrome_tabs.dart';
-part '../views/serenity_workspace_chrome_hud.dart';
 part '../views/serenity_workspace_links_dialog.dart';
 part '../views/serenity_library_view.dart';
 part '../persistence/serenity_startup_persistence.dart';

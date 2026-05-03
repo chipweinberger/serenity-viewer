@@ -322,31 +322,4 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
 
     return KeyEventResult.ignored;
   }
-
-  List<WorkspaceState> _sortedKnownWorkspaces() {
-    final query = _handles.searchController.text.trim().toLowerCase();
-    final filtered = _workspaces.where((workspace) {
-      if (query.isEmpty) {
-        return true;
-      }
-      return workspace.name.toLowerCase().contains(query);
-    }).toList();
-
-    switch (_uiState.workspaceSort) {
-      case WorkspaceSort.views:
-        filtered.sort((a, b) => b.views.compareTo(a.views));
-        break;
-      case WorkspaceSort.recentlyViewed:
-        filtered.sort((a, b) => b.lastViewedAt.compareTo(a.lastViewedAt));
-        break;
-      case WorkspaceSort.recentlyCreated:
-        filtered.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-        break;
-      case WorkspaceSort.name:
-        filtered.sort((a, b) => a.name.compareTo(b.name));
-        break;
-    }
-
-    return filtered;
-  }
 }
