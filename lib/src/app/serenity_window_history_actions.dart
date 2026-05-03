@@ -92,10 +92,7 @@ extension _SerenityWindowHistoryActions on _SerenityShellState {
     );
 
     if (_screen == SerenityScreen.library) {
-      setState(() {
-        _screen = SerenityScreen.workspace;
-        _workspaceLayoutMode = WorkspaceLayoutMode.freeform;
-      });
+      _showWorkspaceScreen(resetEditMode: false, clearExposeSelection: false, refreshWorkspaceTracking: false);
     }
   }
 }

@@ -121,11 +121,7 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
         viewportZoom: 1,
       );
       _updateSession(session.copyWith(workspaces: [replacementWorkspace], activeWorkspaceId: replacementWorkspace.id));
-      setState(() {
-        _screen = SerenityScreen.workspace;
-        _workspaceLayoutMode = WorkspaceLayoutMode.freeform;
-      });
-      _refreshWorkspaceViewTracking();
+      _showWorkspaceScreen(resetEditMode: false, clearExposeSelection: false);
       _queueThumbnailRefresh(replacementWorkspace.id, delay: Duration.zero);
       return;
     }
@@ -146,12 +142,7 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
     _updateSession(session.copyWith(workspaces: normalizedWorkspaces, activeWorkspaceId: nextActiveWorkspace.id));
 
     if (_screen != SerenityScreen.library && nextActiveWorkspace.id != workspaceId) {
-      setState(() {
-        _screen = SerenityScreen.workspace;
-        _workspaceLayoutMode = WorkspaceLayoutMode.freeform;
-        _selectedExposeWindowIds.clear();
-      });
-      _refreshWorkspaceViewTracking();
+      _showWorkspaceScreen(resetEditMode: false);
     }
   }
 
@@ -278,34 +269,20 @@ extension _SerenityShellWorkspaceManagement on _SerenityShellState {
 
     _updateSession(session.copyWith(workspaces: [workspace, ...session.workspaces], activeWorkspaceId: workspace.id));
 
-    setState(() {
-      _screen = SerenityScreen.workspace;
-      _workspaceLayoutMode = WorkspaceLayoutMode.freeform;
-    });
-    _refreshWorkspaceViewTracking();
+    _showWorkspaceScreen(resetEditMode: false, clearExposeSelection: false);
     _queueThumbnailRefresh(workspace.id, delay: Duration.zero);
   }
 
   void _handleShortcut(LogicalKeyboardKey key) {
     if (key == LogicalKeyboardKey.arrowUp) {
       if (_screen == SerenityScreen.library) {
-        setState(() {
-          _screen = SerenityScreen.workspace;
-          _workspaceLayoutMode = WorkspaceLayoutMode.freeform;
-          _editMode = false;
-        });
-        _refreshWorkspaceViewTracking();
+        _showWorkspaceScreen(clearExposeSelection: false);
       } else if (_screen == SerenityScreen.workspace && _workspaceLayoutMode != WorkspaceLayoutMode.expose) {
         _toggleExpose();
       }
     } else if (key == LogicalKeyboardKey.arrowDown) {
       if (_screen == SerenityScreen.workspace && _workspaceLayoutMode == WorkspaceLayoutMode.expose) {
-        setState(() {
-          _screen = SerenityScreen.workspace;
-          _workspaceLayoutMode = WorkspaceLayoutMode.freeform;
-          _editMode = false;
-        });
-        _refreshWorkspaceViewTracking();
+        _showWorkspaceScreen(clearExposeSelection: false);
       } else if (_screen == SerenityScreen.workspace) {
         unawaited(_toggleWorkspaceOverview());
       }

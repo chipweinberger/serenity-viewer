@@ -23,17 +23,14 @@ extension _SerenityShellSessionActions on _SerenityShellState {
   }
 
   void _toggleExpose() {
-    setState(() {
-      _screen = SerenityScreen.workspace;
-      _workspaceLayoutMode = _workspaceLayoutMode == WorkspaceLayoutMode.expose
-          ? WorkspaceLayoutMode.freeform
-          : WorkspaceLayoutMode.expose;
-      if (_workspaceLayoutMode != WorkspaceLayoutMode.expose) {
-        _editMode = false;
-        _selectedExposeWindowIds.clear();
-      }
-    });
-    _refreshWorkspaceViewTracking();
+    final nextWorkspaceLayoutMode = _workspaceLayoutMode == WorkspaceLayoutMode.expose
+        ? WorkspaceLayoutMode.freeform
+        : WorkspaceLayoutMode.expose;
+    _showWorkspaceScreen(
+      workspaceLayoutMode: nextWorkspaceLayoutMode,
+      resetEditMode: nextWorkspaceLayoutMode != WorkspaceLayoutMode.expose,
+      clearExposeSelection: nextWorkspaceLayoutMode != WorkspaceLayoutMode.expose,
+    );
   }
 
   void _setPinnedHoverWindow(String? windowId) {
@@ -106,12 +103,7 @@ extension _SerenityShellSessionActions on _SerenityShellState {
       ),
     );
 
-    setState(() {
-      _workspaceLayoutMode = WorkspaceLayoutMode.freeform;
-      _editMode = false;
-      _selectedExposeWindowIds.clear();
-    });
-    _refreshWorkspaceViewTracking();
+    _showWorkspaceScreen();
   }
 
   Future<void> _confirmApplyExposeGridToWorkspace() async {
@@ -149,14 +141,12 @@ extension _SerenityShellSessionActions on _SerenityShellState {
       unawaited(_refreshActiveWorkspaceThumbnailIfNeeded());
     }
 
-    setState(() {
-      final showingLibrary = _screen == SerenityScreen.library;
-      _screen = showingLibrary ? SerenityScreen.workspace : SerenityScreen.library;
-      _workspaceLayoutMode = WorkspaceLayoutMode.freeform;
-      _editMode = false;
-      _selectedExposeWindowIds.clear();
-    });
-    _refreshWorkspaceViewTracking();
+    final showingLibrary = _screen == SerenityScreen.library;
+    if (showingLibrary) {
+      _showWorkspaceScreen();
+    } else {
+      _showLibraryScreen();
+    }
   }
 
   Future<void> _showWorkspaceOverview() async {
@@ -164,13 +154,7 @@ extension _SerenityShellSessionActions on _SerenityShellState {
       unawaited(_refreshActiveWorkspaceThumbnailIfNeeded());
     }
 
-    setState(() {
-      _screen = SerenityScreen.library;
-      _workspaceLayoutMode = WorkspaceLayoutMode.freeform;
-      _editMode = false;
-      _selectedExposeWindowIds.clear();
-    });
-    _refreshWorkspaceViewTracking();
+    _showLibraryScreen();
   }
 
   Future<void> _switchWorkspace(int direction) async {
@@ -213,13 +197,9 @@ extension _SerenityShellSessionActions on _SerenityShellState {
       ),
     );
 
-    setState(() {
-      _screen = SerenityScreen.workspace;
-      _workspaceLayoutMode = shouldPreserveExpose ? WorkspaceLayoutMode.expose : WorkspaceLayoutMode.freeform;
-      _editMode = false;
-      _selectedExposeWindowIds.clear();
-    });
-    _refreshWorkspaceViewTracking();
+    _showWorkspaceScreen(
+      workspaceLayoutMode: shouldPreserveExpose ? WorkspaceLayoutMode.expose : WorkspaceLayoutMode.freeform,
+    );
   }
 
   void _toggleExposeWindowSelected(String windowId) {

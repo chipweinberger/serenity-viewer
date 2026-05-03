@@ -37,6 +37,7 @@ import 'package:serenity_viewer/src/widgets/workspace_thumbnail_card.dart';
 import 'package:serenity_viewer/src/views/serenity_workspace_layouts.dart';
 
 part '../app/serenity_session_actions.dart';
+part '../app/serenity_shell_ui_state.dart';
 part '../app/serenity_window_actions.dart';
 part '../app/serenity_window_history_actions.dart';
 part '../app/serenity_workspace_management.dart';
