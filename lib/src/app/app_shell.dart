@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
-import 'dart:ui' as ui;
-
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +10,7 @@ import 'package:serenity_viewer/src/settings/behavior/chrome_controller.dart';
 import 'package:serenity_viewer/src/asset_import/import_coordinator.dart';
 import 'package:serenity_viewer/src/asset_import/import_result.dart';
 import 'package:serenity_viewer/src/app/app_shell_platform_bridge.dart';
+import 'package:serenity_viewer/src/app/app_shell_runtime/app_shell_runtime.dart';
 import 'package:serenity_viewer/src/app/shell_dependencies.dart';
 import 'package:serenity_viewer/src/app/sry_document/sry_document_coordinator.dart';
 import 'package:serenity_viewer/src/app/app_environment_bookmark_synchronizer.dart';
@@ -42,9 +41,6 @@ import 'package:serenity_viewer/src/settings/behavior/settings_dialog.dart';
 import 'package:serenity_viewer/src/library/library_screen.dart';
 import 'package:serenity_viewer/src/thumbnails/thumbnail_refresh_state.dart';
 import 'package:serenity_viewer/src/thumbnails/thumbnail_controller.dart';
-import 'package:serenity_viewer/src/thumbnails/thumbnail_refresher.dart';
-import 'package:serenity_viewer/src/thumbnails/thumbnail_renderer.dart';
-import 'package:serenity_viewer/src/thumbnails/thumbnail_store.dart';
 import 'package:serenity_viewer/src/workspace/screen/workspace_chrome_overlay.dart';
 import 'package:serenity_viewer/src/workspace/screen/workspace_chrome_view_model.dart';
 import 'package:serenity_viewer/src/workspace/screen/workspace_hud.dart';
@@ -75,27 +71,24 @@ class _AppShellState extends State<AppShell> {
 
   final _dependencies = ShellDependencies();
   final List<RecentlyClosedWindowEntry> _recentlyClosedWindows = [];
-  AppLifecycleListener? _appLifecycleListener;
-  Timer? _autosaveTimer;
-  late final ChromeController _chromeController;
-  late final SryDocumentCoordinator _sryDocumentCoordinator;
-  late final MediaBridge _mediaBridge;
-  late final WorkspaceController _workspaceController;
-  late final WorkspaceShellController _workspaceShellController;
-  late final LinksController _workspaceLinksController;
-  late final AppShellPlatformBridge _appShellPlatformBridge;
-  late final EnvironmentBookmarkSynchronizer _environmentBookmarkSynchronizer;
-  late final EnvironmentController _environmentController;
-  late final ThumbnailController _thumbnailController;
-  late final VideoConversionCoordinator _videoConversionCoordinator;
+  late final AppShellRuntime _runtime;
 
-  ShellHandles get _handles => _dependencies.handles;
-  AppEnvironmentState get _persistenceState => _dependencies.persistenceState;
-  ChromeState get _uiState => _dependencies.chromeState;
-  AssetWindowInteractionState get _windowInteractionState => _dependencies.windowInteractionState;
-  WorkspaceViewTrackingState get _workspaceViewTrackingState => _dependencies.workspaceViewTrackingState;
-  WorkspaceViewportState get _workspaceViewportState => _dependencies.workspaceViewportState;
-  ThumbnailRefreshState get _thumbnailRefreshState => _dependencies.thumbnailRefreshState;
+  ShellHandles get _handles => _runtime.handles;
+  AppEnvironmentState get _persistenceState => _runtime.persistenceState;
+  ChromeState get _uiState => _runtime.chromeState;
+  AssetWindowInteractionState get _windowInteractionState => _runtime.dependencies.windowInteractionState;
+  WorkspaceViewportState get _workspaceViewportState => _runtime.workspaceViewportState;
+  ChromeController get _chromeController => _runtime.chromeController;
+  SryDocumentCoordinator get _sryDocumentCoordinator => _runtime.sryDocumentCoordinator;
+  MediaBridge get _mediaBridge => _runtime.mediaBridge;
+  WorkspaceController get _workspaceController => _runtime.workspaceController;
+  WorkspaceShellController get _workspaceShellController => _runtime.workspaceShellController;
+  LinksController get _workspaceLinksController => _runtime.workspaceLinksController;
+  AppShellPlatformBridge get _appShellPlatformBridge => _runtime.appShellPlatformBridge;
+  EnvironmentBookmarkSynchronizer get _environmentBookmarkSynchronizer => _runtime.environmentBookmarkSynchronizer;
+  EnvironmentController get _environmentController => _runtime.environmentController;
+  ThumbnailController get _thumbnailController => _runtime.thumbnailController;
+  VideoConversionCoordinator get _videoConversionCoordinator => _runtime.videoConversionCoordinator;
 
   bool get _isRunningInWidgetTest {
     return Platform.environment.containsKey('FLUTTER_TEST') ||
@@ -187,148 +180,36 @@ class _AppShellState extends State<AppShell> {
   @override
   void initState() {
     super.initState();
-    _chromeController = ChromeController(
-      chromeState: _uiState,
-      windowInteractionState: _windowInteractionState,
-      commitStateChange: setState,
-      refreshWorkspaceTracking: () => _workspaceShellController.tracking.refresh(),
-    );
-    _mediaBridge = MediaBridge(
+    _runtime = AppShellRuntime.create(
       isRunningInWidgetTest: _isRunningInWidgetTest,
-      showMessage: _showMessage,
-      isMounted: () => mounted,
-    );
-    _environmentController = EnvironmentController(
-      persistenceState: _persistenceState,
-      chromeState: _uiState,
-      markWorkspaceThumbnailDirty: (workspaceId) => _thumbnailController.markWorkspaceDirty(workspaceId),
-      commitStateChange: setState,
-      refreshWorkspaceTracking: () => _workspaceShellController.tracking.refresh(),
-      syncWindowTitle: () => _appShellPlatformBridge.syncWindowTitle(),
-    );
-    _appShellPlatformBridge = AppShellPlatformBridge(
-      persistenceState: _persistenceState,
-      isRunningInWidgetTest: _isRunningInWidgetTest,
+      dependencies: _dependencies,
       windowTitle: () => _windowTitle,
-    );
-    _environmentBookmarkSynchronizer = EnvironmentBookmarkSynchronizer(
-      createFileBookmark: _appShellPlatformBridge.createFileBookmark,
-    );
-    _thumbnailController = ThumbnailController(
-      state: _thumbnailRefreshState,
-      refresher: ThumbnailRefresher(
-        persistenceState: _persistenceState,
-        updateEnvironment: _environmentController.updateEnvironment,
-        renderer: ThumbnailRenderer(isRunningInWidgetTest: _isRunningInWidgetTest),
-        store: ThumbnailStore(thumbnailDirectory: _appShellPlatformBridge.thumbnailDirectory),
-      ),
-      activeScreen: () => _uiState.screen,
-      activeWorkspaceId: () => _activeWorkspaceOrNull?.id,
-      viewportSize: () => _workspaceViewportState.viewportSize,
+      context: () => context,
+      mounted: () => mounted,
       commitStateChange: setState,
-      isMounted: () => mounted,
-    );
-    _sryDocumentCoordinator = SryDocumentCoordinator(
-      persistenceState: _persistenceState,
-      environmentController: _environmentController,
-      context: () => context,
-      mounted: () => mounted,
+      showMessage: _showMessage,
       seedEnvironment: _seedEnvironment,
-      showMessage: _showMessage,
-      refreshActiveWorkspaceThumbnailIfNeeded: _thumbnailController.refreshActiveWorkspaceIfNeeded,
-      storeLastEnvironmentPath: _appShellPlatformBridge.storeLastEnvironmentPath,
-      syncWindowTitle: _appShellPlatformBridge.syncWindowTitle,
-      resolveFileBookmark: _appShellPlatformBridge.resolveFileBookmark,
-      createFileBookmark: _appShellPlatformBridge.createFileBookmark,
-      thumbnailDirectory: _appShellPlatformBridge.thumbnailDirectory,
       updateEnvironment: _updateEnvironment,
+      replaceWorkspace: _replaceWorkspace,
       saveEnvironment: _saveEnvironment,
-    );
-    _videoConversionCoordinator = VideoConversionCoordinator(
-      context: () => context,
-      mounted: () => mounted,
-      showMessage: _showMessage,
-      mediaBridge: _mediaBridge,
-      createFileBookmark: _appShellPlatformBridge.createFileBookmark,
-      activeWorkspace: () => _activeWorkspaceOrNull,
-      replaceWorkspace: _replaceWorkspace,
-      colorFromDigest: _colorFromDigest,
-      removePausedVideoWindow: (windowId) {
-        setState(() {
-          _windowInteractionState.pausedVideoWindows.remove(windowId);
-        });
-      },
-    );
-    _workspaceLinksController = LinksController(
-      screen: () => _uiState.screen,
-      hasSession: () => _persistenceState.environment != null,
-      activeWorkspace: () => _activeWorkspaceOrNull,
-      workspaces: () => _workspaces,
-      replaceWorkspace: _replaceWorkspace,
       newId: _newId,
-      showMessage: _showMessage,
-      context: () => context,
-      mounted: () => mounted,
-    );
-    _workspaceController = WorkspaceController(
-      chromeState: _uiState,
-      windowInteractionState: _windowInteractionState,
-      workspaceViewportState: _workspaceViewportState,
-      commitInteractionState: setState,
-      replaceWorkspace: _replaceWorkspace,
-      setWorkspaceViewport: _setWorkspaceViewport,
-      refreshActiveWorkspaceThumbnail: _thumbnailController.refreshActiveWorkspaceIfNeeded,
-    );
-    _workspaceShellController = WorkspaceShellController(
-      persistenceState: _persistenceState,
-      chromeState: _uiState,
-      workspaceViewTrackingState: _workspaceViewTrackingState,
-      workspaceViewportState: _workspaceViewportState,
-      workspaceController: _workspaceController,
-      workspaceLinksController: _workspaceLinksController,
-      context: () => context,
-      mounted: () => mounted,
+      colorFromDigest: _colorFromDigest,
+      activeWorkspace: () => _activeWorkspaceOrNull,
       workspaces: () => _workspaces,
       openWorkspaces: () => _openWorkspaces,
-      activeWorkspace: () => _activeWorkspaceOrNull,
       focusedWindowOrNull: _focusedWindowOrNull,
-      updateEnvironment: _updateEnvironment,
-      replaceWorkspace: _replaceWorkspace,
+      setWorkspaceViewport: _setWorkspaceViewport,
       showWorkspaceScreen: _showWorkspaceScreen,
       showLibraryScreen: _showLibraryScreen,
       toggleExpose: _toggleExpose,
-      showMessage: _showMessage,
-      newId: _newId,
-      workspaceSwitchTarget: _chromeController.workspaceSwitchTarget,
-      refreshActiveWorkspaceThumbnail: _thumbnailController.refreshActiveWorkspaceIfNeeded,
-      queueWorkspaceRefresh: _thumbnailController.queueWorkspaceRefresh,
       toggleVideoPlayback: _toggleVideoPlayback,
-    );
-    _autosaveTimer = Timer.periodic(const Duration(minutes: 1), (_) {
-      if (_persistenceState.hasUnsavedChanges) {
-        unawaited(_saveEnvironment());
-      }
-    });
-    _appLifecycleListener = AppLifecycleListener(
-      onStateChange: _workspaceShellController.tracking.handleAppLifecycleStateChanged,
-      onExitRequested: () async {
-        await _saveEnvironment(force: true);
-        return ui.AppExitResponse.exit;
-      },
     );
     _restoreEnvironment();
   }
 
   @override
   void dispose() {
-    _autosaveTimer?.cancel();
-    _appLifecycleListener?.dispose();
-    _workspaceShellController.tracking.cancel();
-    _workspaceViewTrackingState.dispose();
-    _windowInteractionState.dispose();
-    _thumbnailController.dispose();
-    _mediaBridge.dispose();
-    _handles.dispose();
+    _runtime.dispose();
     super.dispose();
   }
 
