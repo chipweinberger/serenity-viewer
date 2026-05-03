@@ -18,6 +18,7 @@ import 'package:video_player/video_player.dart';
 
 import 'package:serenity_viewer/src/app/serenity_workspace_mutations.dart';
 import 'package:serenity_viewer/src/core/serenity_core.dart';
+import 'package:serenity_viewer/src/core/serenity_keyboard_modifiers.dart';
 import 'package:serenity_viewer/src/core/serenity_theme.dart';
 import 'package:serenity_viewer/src/models/asset_window_state.dart';
 import 'package:serenity_viewer/src/models/serenity_session_state.dart';
@@ -32,6 +33,7 @@ import 'package:serenity_viewer/src/widgets/serenity_settings_dialog.dart';
 import 'package:serenity_viewer/src/widgets/serenity_window_frame.dart';
 import 'package:serenity_viewer/src/widgets/window_resize_helpers.dart';
 import 'package:serenity_viewer/src/widgets/workspace_thumbnail_card.dart';
+import 'package:serenity_viewer/src/views/serenity_workspace_layouts.dart';
 
 part '../app/serenity_session_actions.dart';
 part '../app/serenity_window_actions.dart';
