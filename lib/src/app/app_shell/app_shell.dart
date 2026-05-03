@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/dependencies/shell_dependencies.dart';
+import 'package:serenity_viewer/src/app/app_shell/app_shell_derived_state.dart';
 import 'package:serenity_viewer/src/app/app_shell/builders/app_shell_content_builder.dart';
 import 'package:serenity_viewer/src/app/app_shell/builders/app_shell_content_scope.dart';
 import 'package:serenity_viewer/src/app/app_shell/builders/app_shell_menu_builder.dart';
@@ -16,7 +17,6 @@ import 'package:serenity_viewer/src/app/app_shell/controllers/app_shell_window_h
 import 'package:serenity_viewer/src/app/app_shell/controllers/app_shell_workspace_geometry_controller.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_runtime.dart';
 import 'package:serenity_viewer/src/workspace/session/recently_closed_window_entry.dart';
-import 'package:serenity_viewer/src/environment/workspace.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -35,6 +35,7 @@ class _AppShellState extends State<AppShell> {
   late final AppShellRuntime _runtime;
 
   AppShellRuntimeStateServices get _state => _runtime.state;
+  AppShellDerivedState get _derived => AppShellDerivedState(_state);
   AppShellRuntimeFoundationServices get _foundation => _runtime.foundation;
   AppShellRuntimeDocumentServices get _documents => _runtime.documents;
   AppShellRuntimeWorkspaceServices get _workspaceRuntime => _runtime.workspace;
@@ -42,33 +43,6 @@ class _AppShellState extends State<AppShell> {
   bool get _isRunningInWidgetTest {
     return Platform.environment.containsKey('FLUTTER_TEST') ||
         WidgetsBinding.instance.runtimeType.toString().contains('Test');
-  }
-
-  List<Workspace> get _workspaces => _state.persistenceState.environment?.workspaces ?? const [];
-
-  List<Workspace> get _openWorkspaces => _workspaces.where((workspace) => workspace.isOpen).toList();
-
-  Workspace? get _activeWorkspaceOrNull {
-    final environment = _state.persistenceState.environment;
-    if (environment == null || environment.workspaces.isEmpty) {
-      return null;
-    }
-
-    final matches = environment.workspaces.where((workspace) => workspace.id == environment.activeWorkspaceId);
-    return matches.isNotEmpty ? matches.first : environment.workspaces.first;
-  }
-
-  Workspace get _activeWorkspace {
-    return _activeWorkspaceOrNull ?? (throw StateError('No active workspace is available.'));
-  }
-
-  String get _windowTitle {
-    final path = _state.persistenceState.currentEnvironmentPath;
-    final suffix = _state.persistenceState.hasUnsavedChanges ? ' *' : '';
-    if (path == null || path.isEmpty) {
-      return 'Serenity$suffix';
-    }
-    return '${path.split(Platform.pathSeparator).last}$suffix';
   }
 
   Future<void> _restoreEnvironment() async {
@@ -129,8 +103,8 @@ class _AppShellState extends State<AppShell> {
   AppShellWindowHistoryController get _windowHistoryController {
     return AppShellWindowHistoryController(
       environment: () => _state.persistenceState.environment,
-      workspaces: () => _workspaces,
-      activeWorkspace: () => _activeWorkspaceOrNull,
+      workspaces: () => _derived.workspaces,
+      activeWorkspace: () => _derived.activeWorkspaceOrNull,
       recentlyClosedWindows: _recentlyClosedWindows,
       workspaceController: _workspaceRuntime.workspaceController,
       updateEnvironment: _environmentActions.updateEnvironment,
@@ -149,8 +123,8 @@ class _AppShellState extends State<AppShell> {
       mounted: () => mounted,
       chromeState: _state.chromeState,
       environment: () => _state.persistenceState.environment,
-      activeWorkspace: () => _activeWorkspace,
-      activeWorkspaceOrNull: () => _activeWorkspaceOrNull,
+      activeWorkspace: () => _derived.activeWorkspace,
+      activeWorkspaceOrNull: () => _derived.activeWorkspaceOrNull,
       workspaceController: _workspaceRuntime.workspaceController,
       showMessage: _uiController.showMessage,
     );
@@ -170,7 +144,7 @@ class _AppShellState extends State<AppShell> {
       imageExtensions: _AppShellState._imageExtensions,
       videoExtensions: _AppShellState._videoExtensions,
       persistenceState: _state.persistenceState,
-      activeWorkspace: () => _activeWorkspace,
+      activeWorkspace: () => _derived.activeWorkspace,
       videoConversionCoordinator: _workspaceRuntime.videoConversionCoordinator,
       createFileBookmark: _foundation.appShellPlatformBridge.createFileBookmark,
       mediaBridge: _foundation.mediaBridge,
@@ -252,11 +226,11 @@ class _AppShellState extends State<AppShell> {
         context: context,
         uiState: _state.chromeState,
         environment: _state.persistenceState.environment!,
-        windowTitle: _windowTitle,
-        workspaces: _workspaces,
-        openWorkspaces: _openWorkspaces,
-        activeWorkspace: _activeWorkspace,
-        activeWorkspaceOrNull: _activeWorkspaceOrNull,
+        windowTitle: _derived.windowTitle,
+        workspaces: _derived.workspaces,
+        openWorkspaces: _derived.openWorkspaces,
+        activeWorkspace: _derived.activeWorkspace,
+        activeWorkspaceOrNull: _derived.activeWorkspaceOrNull,
         selectedExposeWindowCount: _workspaceRuntime.workspaceController.expose.selectionCount(),
         windowInteractionState: _state.windowInteractionState,
         workspaceViewportState: _state.workspaceViewportState,
@@ -306,7 +280,7 @@ class _AppShellState extends State<AppShell> {
     _runtime = AppShellRuntime.create(
       isRunningInWidgetTest: _isRunningInWidgetTest,
       dependencies: _dependencies,
-      windowTitle: () => _windowTitle,
+      windowTitle: () => _derived.windowTitle,
       context: () => context,
       mounted: () => mounted,
       commitStateChange: setState,
@@ -317,9 +291,9 @@ class _AppShellState extends State<AppShell> {
       saveEnvironment: _saveEnvironment,
       newId: _workspaceGeometryController.newId,
       colorFromDigest: _workspaceGeometryController.colorFromDigest,
-      activeWorkspace: () => _activeWorkspaceOrNull,
-      workspaces: () => _workspaces,
-      openWorkspaces: () => _openWorkspaces,
+      activeWorkspace: () => _derived.activeWorkspaceOrNull,
+      workspaces: () => _derived.workspaces,
+      openWorkspaces: () => _derived.openWorkspaces,
       focusedWindowOrNull: _windowHistoryController.focusedWindowOrNull,
       setWorkspaceViewport: _workspaceGeometryController.setWorkspaceViewport,
       showWorkspaceScreen: _navigationController.showWorkspaceScreen,
