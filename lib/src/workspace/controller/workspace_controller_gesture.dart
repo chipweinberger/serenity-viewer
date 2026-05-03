@@ -1,7 +1,7 @@
 part of 'workspace_controller.dart';
 
-class _WorkspaceGestureController {
-  _WorkspaceGestureController({required this.windowInteractionState, required this.commitInteractionState});
+class WorkspaceGestureControllerState {
+  WorkspaceGestureControllerState({required this.windowInteractionState, required this.commitInteractionState});
 
   final AssetWindowInteractionState windowInteractionState;
   final SerenityWorkspaceCommit commitInteractionState;

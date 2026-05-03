@@ -17,15 +17,15 @@ import 'package:serenity_viewer/src/asset_window/interaction/asset_window_intera
 import 'package:serenity_viewer/src/asset_window/interaction/asset_window_zoom_update.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
+import 'package:serenity_viewer/src/workspace/controller/workspace_controller_api_environment.dart';
+import 'package:serenity_viewer/src/workspace/controller/workspace_controller_api_expose.dart';
+import 'package:serenity_viewer/src/workspace/controller/workspace_controller_api_gesture.dart';
+import 'package:serenity_viewer/src/workspace/controller/workspace_controller_api_playback.dart';
+import 'package:serenity_viewer/src/workspace/controller/workspace_controller_api_viewport.dart';
+import 'package:serenity_viewer/src/workspace/controller/workspace_controller_api_windows.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 
 part 'workspace_collate.dart';
-part 'workspace_controller_api_environment.dart';
-part 'workspace_controller_api_expose.dart';
-part 'workspace_controller_api_gesture.dart';
-part 'workspace_controller_api_playback.dart';
-part 'workspace_controller_api_viewport.dart';
-part 'workspace_controller_api_windows.dart';
 part 'workspace_controller_environment.dart';
 part 'workspace_controller_expose.dart';
 part 'workspace_controller_gesture.dart';
@@ -48,39 +48,39 @@ class WorkspaceController {
     required this.replaceWorkspace,
     required this.setWorkspaceViewport,
     required this.refreshActiveWorkspaceThumbnail,
-  }) : _gestureController = _WorkspaceGestureController(
+  }) : gestureController = WorkspaceGestureControllerState(
          windowInteractionState: windowInteractionState,
          commitInteractionState: commitInteractionState,
        ),
-       _exposeController = _WorkspaceExposeController(
+       exposeController = WorkspaceExposeControllerState(
          windowInteractionState: windowInteractionState,
          commitInteractionState: commitInteractionState,
        ),
-       _windowController = _WorkspaceWindowController(
+       windowController = WorkspaceWindowControllerState(
          chromeState: chromeState,
          commitInteractionState: commitInteractionState,
          windowInteractionState: windowInteractionState,
          replaceWorkspace: replaceWorkspace,
        ),
-       _viewportController = _WorkspaceViewportController(
+       viewportController = WorkspaceViewportControllerState(
          chromeState: chromeState,
          windowInteractionState: windowInteractionState,
          workspaceViewportState: workspaceViewportState,
          setWorkspaceViewport: setWorkspaceViewport,
          refreshActiveWorkspaceThumbnail: refreshActiveWorkspaceThumbnail,
        ),
-       _playbackController = _WorkspacePlaybackController(
+       playbackController = WorkspacePlaybackControllerState(
          windowInteractionState: windowInteractionState,
          commitInteractionState: commitInteractionState,
          replaceWorkspace: replaceWorkspace,
        ),
-       _environmentController = _WorkspaceEnvironmentController() {
-    gesture = WorkspaceGestureApi._(this);
-    expose = WorkspaceExposeApi._(this);
-    windows = WorkspaceWindowApi._(this);
-    viewport = WorkspaceViewportApi._(this);
-    playback = WorkspacePlaybackApi._(this);
-    environment = WorkspaceEnvironmentApi._(this);
+       environmentController = WorkspaceEnvironmentControllerState() {
+    gesture = WorkspaceGestureApi(this);
+    expose = WorkspaceExposeApi(this);
+    windows = WorkspaceWindowApi(this);
+    viewport = WorkspaceViewportApi(this);
+    playback = WorkspacePlaybackApi(this);
+    environment = WorkspaceEnvironmentApi(this);
   }
 
   final ChromeState chromeState;
@@ -90,12 +90,12 @@ class WorkspaceController {
   final SerenityWorkspaceReplace replaceWorkspace;
   final SerenityWorkspaceViewportSetter setWorkspaceViewport;
   final Future<void> Function() refreshActiveWorkspaceThumbnail;
-  final _WorkspaceGestureController _gestureController;
-  final _WorkspaceExposeController _exposeController;
-  final _WorkspaceWindowController _windowController;
-  final _WorkspaceViewportController _viewportController;
-  final _WorkspacePlaybackController _playbackController;
-  final _WorkspaceEnvironmentController _environmentController;
+  final WorkspaceGestureControllerState gestureController;
+  final WorkspaceExposeControllerState exposeController;
+  final WorkspaceWindowControllerState windowController;
+  final WorkspaceViewportControllerState viewportController;
+  final WorkspacePlaybackControllerState playbackController;
+  final WorkspaceEnvironmentControllerState environmentController;
   late final WorkspaceGestureApi gesture;
   late final WorkspaceExposeApi expose;
   late final WorkspaceWindowApi windows;

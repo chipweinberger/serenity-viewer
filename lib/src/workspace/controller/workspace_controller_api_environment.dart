@@ -1,12 +1,14 @@
-part of 'workspace_controller.dart';
+import 'package:serenity_viewer/src/environment/environment.dart';
+import 'package:serenity_viewer/src/environment/workspace.dart';
+import 'package:serenity_viewer/src/workspace/controller/workspace_controller.dart';
 
 class WorkspaceEnvironmentApi {
-  WorkspaceEnvironmentApi._(this._controller);
+  WorkspaceEnvironmentApi(this._controller);
 
   final WorkspaceController _controller;
 
   void toggleWorkspaceOpen(Environment environment, String workspaceId, void Function(Environment) updateEnvironment) {
-    _controller._environmentController.toggleWorkspaceOpen(environment, workspaceId, updateEnvironment);
+    _controller.environmentController.toggleWorkspaceOpen(environment, workspaceId, updateEnvironment);
   }
 
   void reorderOpenWorkspace(
@@ -16,7 +18,7 @@ class WorkspaceEnvironmentApi {
     required String targetWorkspaceId,
     required void Function(Environment) updateEnvironment,
   }) {
-    _controller._environmentController.reorderOpenWorkspace(
+    _controller.environmentController.reorderOpenWorkspace(
       environment,
       workspaces,
       sourceWorkspaceId: sourceWorkspaceId,
@@ -30,7 +32,7 @@ class WorkspaceEnvironmentApi {
     required Workspace? sourceWorkspace,
     required String destinationWorkspaceId,
   }) {
-    return _controller._environmentController.canMoveSelectedWindowsToWorkspace(
+    return _controller.environmentController.canMoveSelectedWindowsToWorkspace(
       environment: environment,
       sourceWorkspace: sourceWorkspace,
       destinationWorkspaceId: destinationWorkspaceId,
@@ -45,7 +47,7 @@ class WorkspaceEnvironmentApi {
     required void Function(Environment) updateEnvironment,
     required void Function(String workspaceId, {Duration delay}) queueThumbnailRefresh,
   }) {
-    _controller._environmentController.moveSelectedExposeWindowsToWorkspace(
+    _controller.environmentController.moveSelectedExposeWindowsToWorkspace(
       environment: environment,
       sourceWorkspace: sourceWorkspace,
       destinationWorkspace: destinationWorkspace,

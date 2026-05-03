@@ -1,7 +1,11 @@
-part of 'workspace_controller.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+
+import 'package:serenity_viewer/src/environment/workspace.dart';
+import 'package:serenity_viewer/src/workspace/controller/workspace_controller.dart';
 
 class WorkspaceViewportApi {
-  WorkspaceViewportApi._(this._controller);
+  WorkspaceViewportApi(this._controller);
 
   final WorkspaceController _controller;
 
@@ -11,7 +15,7 @@ class WorkspaceViewportApi {
     required bool isCommandPressedForContentGesture,
     required bool isOptionPressedForWindowGesture,
   }) {
-    _controller._viewportController.handleWorkspacePanZoomStart(
+    _controller.viewportController.handleWorkspacePanZoomStart(
       event,
       workspace,
       isCommandPressedForContentGesture: isCommandPressedForContentGesture,
@@ -20,11 +24,11 @@ class WorkspaceViewportApi {
   }
 
   void handlePanZoomUpdate(PointerPanZoomUpdateEvent event, Workspace workspace, Size viewportSize) {
-    _controller._viewportController.handleWorkspacePanZoomUpdate(event, workspace, viewportSize);
+    _controller.viewportController.handleWorkspacePanZoomUpdate(event, workspace, viewportSize);
   }
 
   Future<void> handlePanZoomEnd() async {
-    await _controller._viewportController.handleWorkspacePanZoomEnd();
+    await _controller.viewportController.handleWorkspacePanZoomEnd();
   }
 
   void fitToContent(Workspace? workspace) {

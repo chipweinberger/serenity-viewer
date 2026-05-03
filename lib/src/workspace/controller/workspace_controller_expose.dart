@@ -1,7 +1,7 @@
 part of 'workspace_controller.dart';
 
-class _WorkspaceExposeController {
-  _WorkspaceExposeController({required this.windowInteractionState, required this.commitInteractionState});
+class WorkspaceExposeControllerState {
+  WorkspaceExposeControllerState({required this.windowInteractionState, required this.commitInteractionState});
 
   final AssetWindowInteractionState windowInteractionState;
   final SerenityWorkspaceCommit commitInteractionState;

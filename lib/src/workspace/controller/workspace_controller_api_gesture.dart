@@ -1,19 +1,19 @@
-part of 'workspace_controller.dart';
+import 'package:serenity_viewer/src/workspace/controller/workspace_controller.dart';
 
 class WorkspaceGestureApi {
-  WorkspaceGestureApi._(this._controller);
+  WorkspaceGestureApi(this._controller);
 
   final WorkspaceController _controller;
 
   void setActiveWindow(String? windowId) {
-    _controller._gestureController.setActiveWindow(windowId);
+    _controller.gestureController.setActiveWindow(windowId);
   }
 
   void setPinnedHoverWindow(String? windowId) {
-    _controller._gestureController.setPinnedHoverWindow(windowId);
+    _controller.gestureController.setPinnedHoverWindow(windowId);
   }
 
   void clearPinnedHoverWindow() {
-    _controller._gestureController.clearPinnedHoverWindow();
+    _controller.gestureController.clearPinnedHoverWindow();
   }
 }

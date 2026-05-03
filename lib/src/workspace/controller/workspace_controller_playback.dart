@@ -1,7 +1,7 @@
 part of 'workspace_controller.dart';
 
-class _WorkspacePlaybackController {
-  _WorkspacePlaybackController({
+class WorkspacePlaybackControllerState {
+  WorkspacePlaybackControllerState({
     required this.windowInteractionState,
     required this.commitInteractionState,
     required this.replaceWorkspace,

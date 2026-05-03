@@ -1,7 +1,7 @@
 part of 'workspace_controller.dart';
 
-class _WorkspaceViewportController {
-  _WorkspaceViewportController({
+class WorkspaceViewportControllerState {
+  WorkspaceViewportControllerState({
     required this.chromeState,
     required this.windowInteractionState,
     required this.workspaceViewportState,

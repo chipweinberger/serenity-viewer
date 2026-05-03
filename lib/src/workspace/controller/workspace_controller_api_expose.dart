@@ -1,23 +1,24 @@
-part of 'workspace_controller.dart';
+import 'package:serenity_viewer/src/environment/workspace.dart';
+import 'package:serenity_viewer/src/workspace/controller/workspace_controller.dart';
 
 class WorkspaceExposeApi {
-  WorkspaceExposeApi._(this._controller);
+  WorkspaceExposeApi(this._controller);
 
   final WorkspaceController _controller;
 
   void toggleWindowSelected(String windowId) {
-    _controller._exposeController.toggleWindowSelected(windowId);
+    _controller.exposeController.toggleWindowSelected(windowId);
   }
 
   void clearWindowSelection() {
-    _controller._exposeController.clearWindowSelection();
+    _controller.exposeController.clearWindowSelection();
   }
 
   int selectedWindowCount(Workspace workspace) {
-    return _controller._exposeController.selectedWindowCount(workspace);
+    return _controller.exposeController.selectedWindowCount(workspace);
   }
 
   void removeWindowSelection(String windowId) {
-    _controller._exposeController.removeWindowSelection(windowId);
+    _controller.exposeController.removeWindowSelection(windowId);
   }
 }

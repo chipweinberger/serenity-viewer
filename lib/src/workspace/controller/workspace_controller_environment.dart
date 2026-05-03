@@ -1,6 +1,6 @@
 part of 'workspace_controller.dart';
 
-class _WorkspaceEnvironmentController {
+class WorkspaceEnvironmentControllerState {
   bool canMoveSelectedWindowsToWorkspace({
     required Environment? environment,
     required Workspace? sourceWorkspace,
