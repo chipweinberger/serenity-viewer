@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
 import 'package:serenity_viewer/src/app/app_environment_state.dart';
 import 'package:serenity_viewer/src/asset_window/interaction/asset_window_interaction_state.dart';
-import 'package:serenity_viewer/src/workspace/workspace_view_tracking_state.dart';
+import 'package:serenity_viewer/src/workspace/session/workspace_view_tracking_state.dart';
+import 'package:serenity_viewer/src/thumbnails/thumbnail_refresh_state.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
-import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresh_state.dart';
 
 class ShellDependencies {
   final ShellHandles handles = ShellHandles();

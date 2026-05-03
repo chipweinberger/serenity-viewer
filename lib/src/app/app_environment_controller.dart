@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/workspace/workspace_mutations.dart';
+import 'package:serenity_viewer/src/workspace/layout/workspace_mutations.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/workspace_state.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
 import 'package:serenity_viewer/src/app/app_environment_state.dart';
-import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresh_state.dart';
+import 'package:serenity_viewer/src/thumbnails/thumbnail_refresh_state.dart';
 
 typedef SerenityEnvironmentCommit = void Function(VoidCallback update);
 

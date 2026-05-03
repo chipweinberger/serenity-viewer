@@ -15,15 +15,15 @@ import 'package:serenity_viewer/src/asset_window/presentation/expose_asset_windo
 import 'package:serenity_viewer/src/video_tools/media_bridge.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
-import 'package:serenity_viewer/src/workspace/viewport/workspace_projection.dart';
 import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
 import 'package:serenity_viewer/src/workspace_loading/media_load_plan.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
-import 'package:serenity_viewer/src/workspace/canvas/workspace_canvas_view_model.dart';
 import 'package:serenity_viewer/src/environment/workspace_asset.dart';
 import 'package:serenity_viewer/src/environment/workspace_state.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
-import 'package:serenity_viewer/src/workspace/expose/expose_layouts.dart';
+import 'package:serenity_viewer/src/expose/expose_layouts.dart';
+import 'package:serenity_viewer/src/workspace/screen/workspace_canvas_view_model.dart';
+import 'package:serenity_viewer/src/workspace/viewport/workspace_projection.dart';
 
 typedef SharedVideoLookup = SharedVideoState? Function(WorkspaceWindowState window, {required bool isLoaded});
 

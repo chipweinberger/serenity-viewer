@@ -5,9 +5,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/workspace/workspace_mutations.dart';
+import 'package:serenity_viewer/src/workspace/layout/workspace_mutations.dart';
 import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
-import 'package:serenity_viewer/src/workspace/windows/recently_closed_window_entry.dart';
+import 'package:serenity_viewer/src/workspace/session/recently_closed_window_entry.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/asset_window/frame/asset_window_resize_helpers.dart';
 import 'package:serenity_viewer/src/asset_window/interaction/asset_window_interaction_state.dart';

@@ -8,8 +8,8 @@ import 'package:video_player/video_player.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
 import 'package:serenity_viewer/src/asset_window/content/zoom_box.dart';
 
-class _SerenityVideoPlaybackCoordinator {
-  _SerenityVideoPlaybackCoordinator({required this.onIntrinsicSizeResolved, required this.onPositionChanged});
+class _PlaybackCoordinator {
+  _PlaybackCoordinator({required this.onIntrinsicSizeResolved, required this.onPositionChanged});
 
   final ValueChanged<Size> onIntrinsicSizeResolved;
   final ValueChanged<int> onPositionChanged;
@@ -170,12 +170,12 @@ class VideoSurface extends StatefulWidget {
 }
 
 class _SerenityVideoSurfaceState extends State<VideoSurface> {
-  late final _SerenityVideoPlaybackCoordinator _playbackCoordinator;
+  late final _PlaybackCoordinator _playbackCoordinator;
 
   @override
   void initState() {
     super.initState();
-    _playbackCoordinator = _SerenityVideoPlaybackCoordinator(
+    _playbackCoordinator = _PlaybackCoordinator(
       onIntrinsicSizeResolved: widget.onIntrinsicSizeResolved,
       onPositionChanged: widget.onPositionChanged,
     );

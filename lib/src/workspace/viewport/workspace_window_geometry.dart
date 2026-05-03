@@ -1,4 +1,4 @@
-part of 'package:serenity_viewer/src/workspace/workspace_mutations.dart';
+part of 'package:serenity_viewer/src/workspace/layout/workspace_mutations.dart';
 
 typedef _WindowEdges = ({double left, double top, double right, double bottom});
 typedef _WindowBounds = ({Offset position, Size size});

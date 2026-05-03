@@ -12,7 +12,7 @@ import 'package:serenity_viewer/src/environment/workspace_state.dart';
 
 part 'workspace_environment_mutations.dart';
 part 'workspace_viewport_mutations.dart';
-part 'viewport/workspace_window_geometry.dart';
+part '../viewport/workspace_window_geometry.dart';
 part 'workspace_window_mutations.dart';
 
 class WorkspaceMutations {

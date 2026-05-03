@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/app_environment_controller.dart';
 import 'package:serenity_viewer/src/app/app_environment_state.dart';
-import 'package:serenity_viewer/src/workspace/thumbnails/workspace_thumbnail_renderer.dart';
-import 'package:serenity_viewer/src/workspace/thumbnails/workspace_thumbnail_store.dart';
+import 'package:serenity_viewer/src/thumbnails/workspace_thumbnail_renderer.dart';
+import 'package:serenity_viewer/src/thumbnails/workspace_thumbnail_store.dart';
 
 class WorkspaceThumbnailRefresher {
   WorkspaceThumbnailRefresher({

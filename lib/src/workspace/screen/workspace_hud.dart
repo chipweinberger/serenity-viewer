@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
-import 'package:serenity_viewer/src/workspace/canvas/workspace_chrome_view_model.dart';
+import 'package:serenity_viewer/src/workspace/screen/workspace_chrome_view_model.dart';
 
 @immutable
 class WorkspaceHudActions {

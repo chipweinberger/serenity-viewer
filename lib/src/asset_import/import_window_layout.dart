@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/workspace/workspace_mutations.dart';
+import 'package:serenity_viewer/src/workspace/layout/workspace_mutations.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 
 String importedAssetNote({
