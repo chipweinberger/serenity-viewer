@@ -163,6 +163,11 @@ extension _SerenityShellMenus on _SerenityShellState {
             shortcut: const SingleActivator(LogicalKeyboardKey.digit1, meta: true),
           ),
           PlatformMenuItem(
+            label: 'Collate',
+            onSelected: activeWorkspace == null ? null : () => unawaited(_confirmCollateWorkspaceWindows()),
+            shortcut: const SingleActivator(LogicalKeyboardKey.digit3, meta: true),
+          ),
+          PlatformMenuItem(
             label: 'Pause All',
             onSelected: _pauseAllVideos,
             shortcut: const SingleActivator(LogicalKeyboardKey.keyP, meta: true, shift: true),

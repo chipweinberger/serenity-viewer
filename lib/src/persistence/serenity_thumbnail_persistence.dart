@@ -3,6 +3,26 @@
 part of '../../main.dart';
 
 extension _SerenityShellThumbnailPersistence on _SerenityShellState {
+  ({Rect mediaRect, Rect visibleRect}) _thumbnailMediaLayoutForWindow({
+    required AssetWindowState window,
+    required Rect windowRect,
+  }) {
+    final scale = window.size.width <= 0 ? 1.0 : windowRect.width / window.size.width;
+    final fitSize = _fitSizeForViewportToAspect(windowRect.size, window.asset.aspectRatio);
+    final baseSize = window.zoom > 1.0 && window.zoomBaseSize != null
+        ? Size(window.zoomBaseSize!.width * scale, window.zoomBaseSize!.height * scale)
+        : fitSize;
+    final zoomedWidth = baseSize.width * window.zoom;
+    final zoomedHeight = baseSize.height * window.zoom;
+    final mediaRect = Rect.fromLTWH(
+      windowRect.left + ((windowRect.width - zoomedWidth) / 2) + (window.contentOffset.dx * scale),
+      windowRect.top + ((windowRect.height - zoomedHeight) / 2) + (window.contentOffset.dy * scale),
+      zoomedWidth,
+      zoomedHeight,
+    );
+    return (mediaRect: mediaRect, visibleRect: mediaRect.intersect(windowRect));
+  }
+
   Future<void> _refreshActiveWorkspaceThumbnailIfNeeded() async {
     if (_screen != SerenityScreen.workspace) {
       return;
@@ -211,10 +231,11 @@ extension _SerenityShellThumbnailPersistence on _SerenityShellState {
           continue;
         }
         final roundedRect = RRect.fromRectAndRadius(rect, const Radius.circular(assetCornerRadius));
+        final mediaLayout = _thumbnailMediaLayoutForWindow(window: window, windowRect: rect);
         canvas.save();
         try {
           canvas.clipRRect(roundedRect);
-          canvas.drawRect(rect, Paint()..color = Colors.black);
+          canvas.drawRect(rect, Paint()..color = window.asset.color);
 
           var paintedMedia = false;
           if (window.asset.type == AssetType.image &&
@@ -222,13 +243,28 @@ extension _SerenityShellThumbnailPersistence on _SerenityShellState {
               await File(window.asset.filePath!).exists()) {
             final decoded = await _decodeThumbnailSourceImage(window.asset.filePath!);
             if (decoded != null) {
-              paintImage(canvas: canvas, rect: rect, image: decoded, fit: BoxFit.fill);
+              canvas.save();
+              canvas.clipRect(rect);
+              canvas.drawImageRect(
+                decoded,
+                Rect.fromLTWH(0, 0, decoded.width.toDouble(), decoded.height.toDouble()),
+                mediaLayout.mediaRect,
+                Paint()..filterQuality = FilterQuality.medium,
+              );
+              canvas.restore();
               paintedMedia = true;
             }
           } else if (window.asset.filePath != null && window.asset.filePath!.isNotEmpty) {
             final decoded = await _decodeThumbnailVideoFrame(window, targetWidth: rect.width.ceil());
             if (decoded != null) {
-              paintImage(canvas: canvas, rect: rect, image: decoded, fit: BoxFit.fill);
+              if (!mediaLayout.visibleRect.isEmpty) {
+                canvas.drawImageRect(
+                  decoded,
+                  Rect.fromLTWH(0, 0, decoded.width.toDouble(), decoded.height.toDouble()),
+                  mediaLayout.visibleRect,
+                  Paint()..filterQuality = FilterQuality.medium,
+                );
+              }
               paintedMedia = true;
             }
           }

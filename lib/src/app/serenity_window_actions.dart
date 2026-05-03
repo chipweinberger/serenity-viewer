@@ -4,6 +4,10 @@ part of '../../main.dart';
 
 extension _SerenityShellWindowActions on _SerenityShellState {
   static const List<double> _videoPlaybackSpeeds = [0.25, 0.5, 0.75, 1.0];
+  static const double _minWindowWidth = 96.0;
+  static const double _minWindowHeight = 72.0;
+  static const double _maxContentZoom = 30.0;
+  static const Size _collateTargetBox = Size(700, 700);
 
   bool get _isCommandPressedForContentGesture {
     final pressedKeys = HardwareKeyboard.instance.logicalKeysPressed;
@@ -110,6 +114,149 @@ extension _SerenityShellWindowActions on _SerenityShellState {
     );
   }
 
+  AssetWindowState _scaleWindowAroundCenter(
+    AssetWindowState window,
+    double scaleDelta, {
+    required bool mirrorContentZoom,
+  }) {
+    final clampedScaleDelta = scaleDelta.clamp(0.5, 2.0);
+    final focalWorldPoint = Offset(
+      window.position.dx + (window.size.width / 2),
+      window.position.dy + (window.size.height / 2),
+    );
+    final nextWidth = (window.size.width * clampedScaleDelta).clamp(_minWindowWidth, _workspaceExtent * 2).toDouble();
+    final nextHeight = (window.size.height * clampedScaleDelta)
+        .clamp(_minWindowHeight, _workspaceExtent * 2)
+        .toDouble();
+    final nextSize = Size(nextWidth, nextHeight);
+    final nextPosition = _clampWindowPosition(
+      Offset(focalWorldPoint.dx - (nextWidth / 2), focalWorldPoint.dy - (nextHeight / 2)),
+      nextSize,
+    );
+    final shouldScaleContentZoom = mirrorContentZoom || window.zoom > 1.0 || window.zoomBaseSize != null;
+    final nextZoom = shouldScaleContentZoom
+        ? (window.zoom * clampedScaleDelta).clamp(1.0, _maxContentZoom).toDouble()
+        : window.zoom;
+    final snappedZoom = (nextZoom - 1).abs() < 0.02 ? 1.0 : nextZoom;
+    final nextContentOffset = snappedZoom > 1.0 ? window.contentOffset * clampedScaleDelta : Offset.zero;
+    final nextZoomBaseSize = snappedZoom > 1.0
+        ? Size(
+            (window.zoomBaseSize?.width ?? window.size.width) * clampedScaleDelta,
+            (window.zoomBaseSize?.height ?? window.size.height) * clampedScaleDelta,
+          )
+        : null;
+
+    return window.copyWith(
+      position: nextPosition,
+      size: nextSize,
+      zoom: snappedZoom,
+      zoomBaseWidth: nextZoomBaseSize?.width,
+      zoomBaseHeight: nextZoomBaseSize?.height,
+      contentOffsetDx: nextContentOffset.dx,
+      contentOffsetDy: nextContentOffset.dy,
+      clearZoomBase: snappedZoom <= 1.0,
+      clearContentOffset: snappedZoom <= 1.0,
+    );
+  }
+
+  ({Rect visibleRect, Size zoomedContentSize}) _visibleContentRectForWindow(AssetWindowState window) {
+    final fitSize = _fitSizeForViewportToAspect(window.size, window.asset.aspectRatio);
+    final baseSize = window.zoom > 1.0 && window.zoomBaseSize != null ? window.zoomBaseSize! : fitSize;
+    final zoomedContentSize = Size(baseSize.width * window.zoom, baseSize.height * window.zoom);
+    final left = ((window.size.width - zoomedContentSize.width) / 2) + window.contentOffset.dx;
+    final top = ((window.size.height - zoomedContentSize.height) / 2) + window.contentOffset.dy;
+    final visibleLeft = math.max(0.0, left);
+    final visibleTop = math.max(0.0, top);
+    final visibleRight = math.min(window.size.width, left + zoomedContentSize.width);
+    final visibleBottom = math.min(window.size.height, top + zoomedContentSize.height);
+
+    return (
+      visibleRect: Rect.fromLTRB(visibleLeft, visibleTop, visibleRight, visibleBottom),
+      zoomedContentSize: zoomedContentSize,
+    );
+  }
+
+  void _collateWorkspaceWindows() {
+    final workspace = _activeWorkspaceOrNull;
+    if (workspace == null || _workspaceLayoutMode == WorkspaceLayoutMode.expose) {
+      return;
+    }
+
+    final collatableWindows = workspace.windows
+        .where((window) => window.asset.type == AssetType.image || window.asset.type == AssetType.video)
+        .toList();
+    if (collatableWindows.isEmpty) {
+      return;
+    }
+
+    final targetCenter = workspace.viewportCenter;
+
+    _replaceWorkspace(
+      workspace.copyWith(
+        windows: workspace.windows.map((window) {
+          if (window.asset.type != AssetType.image && window.asset.type != AssetType.video) {
+            return window;
+          }
+
+          final targetSize = _fitSizeForViewportToAspect(_collateTargetBox, window.asset.aspectRatio);
+          if (targetSize.width <= 0 || targetSize.height <= 0) {
+            return window;
+          }
+
+          final centeredPosition = _clampWindowPosition(
+            Offset(targetCenter.dx - (targetSize.width / 2), targetCenter.dy - (targetSize.height / 2)),
+            targetSize,
+          );
+          return window.copyWith(
+            position: centeredPosition,
+            size: targetSize,
+            zoom: 1,
+            clearZoomBase: true,
+            clearContentOffset: true,
+          );
+        }).toList(),
+      ),
+      queueThumbnail: true,
+    );
+  }
+
+  Future<void> _confirmCollateWorkspaceWindows() async {
+    final workspace = _activeWorkspaceOrNull;
+    if (workspace == null || _workspaceLayoutMode != WorkspaceLayoutMode.freeform) {
+      return;
+    }
+
+    final collatableWindows = workspace.windows
+        .where((window) => window.asset.type == AssetType.image || window.asset.type == AssetType.video)
+        .toList();
+    if (collatableWindows.isEmpty) {
+      _showMessage('There are no image or video windows to collate.');
+      return;
+    }
+
+    final shouldCollate = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Collate Windows?'),
+          content: Text(
+            'Center and resize ${collatableWindows.length} image/video window'
+            '${collatableWindows.length == 1 ? '' : 's'} into a fixed ${_collateTargetBox.width.toInt()} × '
+            '${_collateTargetBox.height.toInt()} box?',
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
+            FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Collate')),
+          ],
+        );
+      },
+    );
+
+    if (shouldCollate == true && mounted) {
+      _collateWorkspaceWindows();
+    }
+  }
+
   void _resizeWindow(String windowId, WindowResizeHandle handle, Offset delta) {
     final workspace = _activeWorkspace;
     _replaceWorkspace(
@@ -118,9 +265,6 @@ extension _SerenityShellWindowActions on _SerenityShellState {
           if (window.asset.id != windowId) {
             return window;
           }
-
-          const minWidth = 96.0;
-          const minHeight = 72.0;
 
           var left = window.position.dx;
           var top = window.position.dy;
@@ -159,27 +303,27 @@ extension _SerenityShellWindowActions on _SerenityShellState {
           }
 
           var width = right - left;
-          if (width < minWidth) {
+          if (width < _minWindowWidth) {
             if ({WindowResizeHandle.left, WindowResizeHandle.topLeft, WindowResizeHandle.bottomLeft}.contains(handle)) {
-              left = right - minWidth;
+              left = right - _minWindowWidth;
             } else {
-              right = left + minWidth;
+              right = left + _minWindowWidth;
             }
-            width = minWidth;
+            width = _minWindowWidth;
           }
 
           var height = bottom - top;
-          if (height < minHeight) {
+          if (height < _minWindowHeight) {
             if ({WindowResizeHandle.top, WindowResizeHandle.topLeft, WindowResizeHandle.topRight}.contains(handle)) {
-              top = bottom - minHeight;
+              top = bottom - _minWindowHeight;
             } else {
-              bottom = top + minHeight;
+              bottom = top + _minWindowHeight;
             }
-            height = minHeight;
+            height = _minWindowHeight;
           }
 
-          width = width.clamp(minWidth, _workspaceExtent * 2);
-          height = height.clamp(minHeight, _workspaceExtent * 2);
+          width = width.clamp(_minWindowWidth, _workspaceExtent * 2);
+          height = height.clamp(_minWindowHeight, _workspaceExtent * 2);
           left = left.clamp(_workspaceMinCoordinate, _workspaceMaxCoordinate - width);
           top = top.clamp(_workspaceMinCoordinate, _workspaceMaxCoordinate - height);
 
@@ -197,38 +341,7 @@ extension _SerenityShellWindowActions on _SerenityShellState {
           if (window.asset.id != windowId) {
             return window;
           }
-
-          const minWidth = 96.0;
-          const minHeight = 72.0;
-          const maxContentZoom = 30.0;
-          final clampedScaleDelta = scaleDelta.clamp(0.5, 2.0);
-          final focalWorldPoint = Offset(
-            window.position.dx + (window.size.width / 2),
-            window.position.dy + (window.size.height / 2),
-          );
-          final nextWidth = (window.size.width * clampedScaleDelta).clamp(minWidth, _workspaceExtent * 2).toDouble();
-          final nextHeight = (window.size.height * clampedScaleDelta).clamp(minHeight, _workspaceExtent * 2).toDouble();
-          final nextSize = Size(nextWidth, nextHeight);
-          final nextPosition = _clampWindowPosition(
-            Offset(focalWorldPoint.dx - (nextWidth / 2), focalWorldPoint.dy - (nextHeight / 2)),
-            nextSize,
-          );
-          final shouldScaleContentZoom = window.zoom > 1.0 || window.zoomBaseSize != null;
-          final nextZoom = shouldScaleContentZoom
-              ? (window.zoom * clampedScaleDelta).clamp(1.0, maxContentZoom).toDouble()
-              : window.zoom;
-          final snappedZoom = (nextZoom - 1).abs() < 0.02 ? 1.0 : nextZoom;
-          final nextContentOffset = snappedZoom > 1.0 ? window.contentOffset * clampedScaleDelta : Offset.zero;
-
-          return window.copyWith(
-            position: nextPosition,
-            size: nextSize,
-            zoom: snappedZoom,
-            contentOffsetDx: nextContentOffset.dx,
-            contentOffsetDy: nextContentOffset.dy,
-            clearZoomBase: snappedZoom <= 1.0,
-            clearContentOffset: snappedZoom <= 1.0,
-          );
+          return _scaleWindowAroundCenter(window, scaleDelta, mirrorContentZoom: false);
         }).toList(),
       ),
     );
@@ -246,11 +359,27 @@ extension _SerenityShellWindowActions on _SerenityShellState {
     }
 
     final currentWindow = matchingWindow.first;
-    final intrinsicWidth = currentWindow.asset.intrinsicWidth;
-    final intrinsicHeight = currentWindow.asset.intrinsicHeight;
-    if (intrinsicWidth == null || intrinsicHeight == null || intrinsicWidth <= 0 || intrinsicHeight <= 0) {
-      return;
-    }
+    final visibleContent = _visibleContentRectForWindow(currentWindow);
+    final visibleRect = visibleContent.visibleRect;
+    final visibleWidth = math.max(1.0, visibleRect.width);
+    final visibleHeight = math.max(1.0, visibleRect.height);
+    final nextSize = Size(
+      visibleWidth.clamp(_minWindowWidth, _workspaceExtent * 2),
+      visibleHeight.clamp(_minWindowHeight, _workspaceExtent * 2),
+    );
+    final nextPosition = _clampWindowPosition(currentWindow.position + visibleRect.topLeft, nextSize);
+    final nextLeft =
+        ((currentWindow.size.width - visibleContent.zoomedContentSize.width) / 2) +
+        currentWindow.contentOffset.dx -
+        visibleRect.left;
+    final nextTop =
+        ((currentWindow.size.height - visibleContent.zoomedContentSize.height) / 2) +
+        currentWindow.contentOffset.dy -
+        visibleRect.top;
+    final nextContentOffset = Offset(
+      nextLeft - ((nextSize.width - visibleContent.zoomedContentSize.width) / 2),
+      nextTop - ((nextSize.height - visibleContent.zoomedContentSize.height) / 2),
+    );
 
     _replaceWorkspace(
       workspace.copyWith(
@@ -258,12 +387,13 @@ extension _SerenityShellWindowActions on _SerenityShellState {
           if (window.asset.id != windowId) {
             return window;
           }
-          final nextSize = _windowSizeByFittingAspect(
-            currentSize: window.size,
-            contentWidth: intrinsicWidth,
-            contentHeight: intrinsicHeight,
+          return window.copyWith(
+            position: nextPosition,
+            size: nextSize,
+            contentOffsetDx: currentWindow.zoom > 1.0 ? nextContentOffset.dx : 0,
+            contentOffsetDy: currentWindow.zoom > 1.0 ? nextContentOffset.dy : 0,
+            clearContentOffset: currentWindow.zoom <= 1.0,
           );
-          return window.copyWith(position: _clampWindowPosition(window.position, nextSize), size: nextSize);
         }).toList(),
       ),
     );

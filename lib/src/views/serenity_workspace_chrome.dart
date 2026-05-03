@@ -13,6 +13,22 @@ extension _SerenityShellWorkspaceChrome on _SerenityShellState {
     );
   }
 
+  Widget _buildWorkspaceHudAction({required String tooltip, required VoidCallback? onTap, required Widget child}) {
+    return Tooltip(
+      message: tooltip,
+      waitDuration: const Duration(milliseconds: 350),
+      child: ClipOval(
+        child: BackdropFilter(
+          filter: ui.ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+          child: Material(
+            color: Colors.white.withValues(alpha: 0.52),
+            child: InkWell(onTap: onTap, child: child),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildWindowTitleLabel(BuildContext context) {
     return IgnorePointer(
       child: ConstrainedBox(
@@ -179,41 +195,39 @@ extension _SerenityShellWorkspaceChrome on _SerenityShellState {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        ClipOval(
-          child: BackdropFilter(
-            filter: ui.ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-            child: Material(
-              color: Colors.white.withValues(alpha: 0.52),
-              child: InkWell(
-                onTap: _toggleExpose,
-                child: SizedBox(
-                  width: 38,
-                  height: 38,
-                  child: Icon(
-                    _workspaceLayoutMode == WorkspaceLayoutMode.expose ? Icons.grid_view_rounded : Icons.apps_rounded,
-                    size: 17,
-                    color: SerenityTheme.textPrimary,
-                  ),
-                ),
-              ),
+        _buildWorkspaceHudAction(
+          tooltip: _workspaceLayoutMode == WorkspaceLayoutMode.expose ? 'Freeform' : 'Expose',
+          onTap: _toggleExpose,
+          child: SizedBox(
+            width: 38,
+            height: 38,
+            child: Icon(
+              _workspaceLayoutMode == WorkspaceLayoutMode.expose ? Icons.grid_view_rounded : Icons.apps_rounded,
+              size: 17,
+              color: SerenityTheme.textPrimary,
             ),
           ),
         ),
         const SizedBox(width: 10),
-        ClipOval(
-          child: BackdropFilter(
-            filter: ui.ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-            child: Material(
-              color: Colors.white.withValues(alpha: 0.52),
-              child: InkWell(
-                onTap: _fitWorkspaceViewportToContent,
-                child: const SizedBox(
-                  width: 38,
-                  height: 38,
-                  child: Icon(Icons.fit_screen_rounded, size: 17, color: SerenityTheme.textPrimary),
-                ),
-              ),
-            ),
+        _buildWorkspaceHudAction(
+          tooltip: 'Zoom to fit',
+          onTap: _fitWorkspaceViewportToContent,
+          child: const SizedBox(
+            width: 38,
+            height: 38,
+            child: Icon(Icons.fit_screen_rounded, size: 17, color: SerenityTheme.textPrimary),
+          ),
+        ),
+        const SizedBox(width: 10),
+        _buildWorkspaceHudAction(
+          tooltip: 'Collate',
+          onTap: _workspaceLayoutMode == WorkspaceLayoutMode.freeform
+              ? () => unawaited(_confirmCollateWorkspaceWindows())
+              : null,
+          child: const SizedBox(
+            width: 38,
+            height: 38,
+            child: Icon(Icons.filter_center_focus_rounded, size: 18, color: SerenityTheme.textPrimary),
           ),
         ),
         const SizedBox(width: 10),
@@ -236,20 +250,13 @@ extension _SerenityShellWorkspaceChrome on _SerenityShellState {
           ),
         ),
         const SizedBox(width: 10),
-        ClipOval(
-          child: BackdropFilter(
-            filter: ui.ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-            child: Material(
-              color: Colors.white.withValues(alpha: 0.52),
-              child: InkWell(
-                onTap: () => unawaited(_openWorkspaceLinksDialog(_activeWorkspace)),
-                child: const SizedBox(
-                  width: 38,
-                  height: 38,
-                  child: Icon(Icons.menu_rounded, size: 18, color: SerenityTheme.textPrimary),
-                ),
-              ),
-            ),
+        _buildWorkspaceHudAction(
+          tooltip: 'Open workspace links',
+          onTap: () => unawaited(_openWorkspaceLinksDialog(_activeWorkspace)),
+          child: const SizedBox(
+            width: 38,
+            height: 38,
+            child: Icon(Icons.menu_rounded, size: 18, color: SerenityTheme.textPrimary),
           ),
         ),
         if (showExposeSelectionHud) ...[
