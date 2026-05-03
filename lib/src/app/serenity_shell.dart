@@ -54,6 +54,8 @@ part '../app/serenity_workspace_views.dart';
 part '../app/serenity_workspace_geometry.dart';
 part '../views/serenity_workspace_view.dart';
 part '../views/serenity_workspace_chrome.dart';
+part '../views/serenity_workspace_chrome_tabs.dart';
+part '../views/serenity_workspace_chrome_hud.dart';
 part '../views/serenity_workspace_links_dialog.dart';
 part '../views/serenity_library_view.dart';
 part '../persistence/serenity_startup_persistence.dart';
