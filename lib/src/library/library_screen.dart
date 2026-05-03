@@ -103,7 +103,13 @@ class LibraryScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildOpenWorkspaceCard(WorkspaceState workspace) {
+  Widget _buildWorkspaceCard(
+    WorkspaceState workspace, {
+    required List<Widget> hoverActions,
+    VoidCallback? onTap,
+    bool isDimmed = false,
+    String? statusLabel,
+  }) {
     return SizedBox(
       width: _thumbnailWidth,
       height: _thumbnailHeight,
@@ -112,63 +118,66 @@ class LibraryScreen extends StatelessWidget {
         mediaCounts: workspaceMediaCounts(workspace),
         unloadedCount: unloadedWorkspaceWindowCount(workspace, loadPlan),
         isRefreshing: refreshingWorkspaceIds.contains(workspace.id),
-        hoverActions: [
-          _buildWorkspaceCardAction(
-            tooltip: 'Close workspace',
-            onTap: () => actions.onToggleWorkspaceOpen(workspace.id),
-            icon: Icons.close_rounded,
-          ),
-          _buildWorkspaceCardAction(
-            tooltip: 'Rename workspace',
-            onTap: () => unawaited(actions.onRenameWorkspace(workspace.id)),
-            icon: Icons.edit_outlined,
-          ),
-          _buildWorkspaceCardAction(
-            tooltip: 'Delete workspace',
-            onTap: () => unawaited(actions.onDeleteWorkspace(workspace.id)),
-            icon: Icons.delete_outline_rounded,
-          ),
-        ],
-        onTap: () async {
-          if (!workspace.isOpen) {
-            actions.onToggleWorkspaceOpen(workspace.id);
-          }
-          await actions.onSetActiveWorkspace(workspace.id);
-        },
+        isDimmed: isDimmed,
+        statusLabel: statusLabel,
+        hoverActions: hoverActions,
+        onTap: onTap,
       ),
     );
   }
 
+  Widget _buildOpenWorkspaceCard(WorkspaceState workspace) {
+    return _buildWorkspaceCard(
+      workspace,
+      hoverActions: [
+        _buildWorkspaceCardAction(
+          tooltip: 'Close workspace',
+          onTap: () => actions.onToggleWorkspaceOpen(workspace.id),
+          icon: Icons.close_rounded,
+        ),
+        _buildWorkspaceCardAction(
+          tooltip: 'Rename workspace',
+          onTap: () => unawaited(actions.onRenameWorkspace(workspace.id)),
+          icon: Icons.edit_outlined,
+        ),
+        _buildWorkspaceCardAction(
+          tooltip: 'Delete workspace',
+          onTap: () => unawaited(actions.onDeleteWorkspace(workspace.id)),
+          icon: Icons.delete_outline_rounded,
+        ),
+      ],
+      onTap: () async {
+        if (!workspace.isOpen) {
+          actions.onToggleWorkspaceOpen(workspace.id);
+        }
+        await actions.onSetActiveWorkspace(workspace.id);
+      },
+    );
+  }
+
   Widget _buildKnownWorkspaceCard(WorkspaceState workspace) {
-    return SizedBox(
-      width: _thumbnailWidth,
-      height: _thumbnailHeight,
-      child: WorkspaceThumbnailCard(
-        workspace: workspace,
-        mediaCounts: workspaceMediaCounts(workspace),
-        unloadedCount: unloadedWorkspaceWindowCount(workspace, loadPlan),
-        isRefreshing: refreshingWorkspaceIds.contains(workspace.id),
-        isDimmed: workspace.isOpen,
-        statusLabel: workspace.isOpen ? 'Open' : null,
-        hoverActions: [
-          _buildWorkspaceCardAction(
-            tooltip: 'Rename workspace',
-            onTap: () => unawaited(actions.onRenameWorkspace(workspace.id)),
-            icon: Icons.edit_outlined,
-          ),
-          _buildWorkspaceCardAction(
-            tooltip: 'Delete workspace',
-            onTap: () => unawaited(actions.onDeleteWorkspace(workspace.id)),
-            icon: Icons.delete_outline_rounded,
-          ),
-        ],
-        onTap: workspace.isOpen
-            ? null
-            : () async {
-                actions.onToggleWorkspaceOpen(workspace.id);
-                await actions.onSetActiveWorkspace(workspace.id);
-              },
-      ),
+    return _buildWorkspaceCard(
+      workspace,
+      isDimmed: workspace.isOpen,
+      statusLabel: workspace.isOpen ? 'Open' : null,
+      hoverActions: [
+        _buildWorkspaceCardAction(
+          tooltip: 'Rename workspace',
+          onTap: () => unawaited(actions.onRenameWorkspace(workspace.id)),
+          icon: Icons.edit_outlined,
+        ),
+        _buildWorkspaceCardAction(
+          tooltip: 'Delete workspace',
+          onTap: () => unawaited(actions.onDeleteWorkspace(workspace.id)),
+          icon: Icons.delete_outline_rounded,
+        ),
+      ],
+      onTap: workspace.isOpen
+          ? null
+          : () async {
+              actions.onToggleWorkspaceOpen(workspace.id);
+              await actions.onSetActiveWorkspace(workspace.id);
+            },
     );
   }
 
@@ -201,6 +210,79 @@ class LibraryScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildWorkspaceSearchField() {
+    return SizedBox(
+      width: 280,
+      child: TextField(
+        controller: searchController,
+        onChanged: actions.onSearchChanged,
+        decoration: InputDecoration(
+          prefixIcon: const Icon(Icons.search_rounded),
+          hintText: 'Search by name',
+          isDense: true,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          filled: true,
+          fillColor: AppTheme.panel,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOpenNowSection(BuildContext context, List<WorkspaceState> visibleOpenWorkspaces) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Open Now • ${visibleOpenWorkspaces.length}',
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(color: AppTheme.textPrimary, fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 16,
+          runSpacing: 16,
+          children: [for (final workspace in visibleOpenWorkspaces) _buildOpenWorkspaceCard(workspace)],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAllWorkspacesSection(
+    BuildContext context, {
+    required List<WorkspaceState> knownWorkspaces,
+    required int knownWorkspaceCount,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            Text(
+              'All Workspaces • $knownWorkspaceCount',
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(color: AppTheme.textPrimary, fontWeight: FontWeight.w800),
+            ),
+            _buildWorkspaceSearchField(),
+          ],
+        ),
+        const SizedBox(height: 12),
+        _buildWorkspaceSortChips(context),
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 16,
+          runSpacing: 16,
+          children: [for (final workspace in knownWorkspaces) _buildKnownWorkspaceCard(workspace)],
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final visibleOpenWorkspaces = _visibleOpenWorkspaces();
@@ -225,58 +307,12 @@ class LibraryScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Open Now • ${visibleOpenWorkspaces.length}',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.headlineSmall?.copyWith(color: AppTheme.textPrimary, fontWeight: FontWeight.w800),
-                    ),
-                    const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 16,
-                      runSpacing: 16,
-                      children: [for (final workspace in visibleOpenWorkspaces) _buildOpenWorkspaceCard(workspace)],
-                    ),
+                    _buildOpenNowSection(context, visibleOpenWorkspaces),
                     const SizedBox(height: 48),
-                    Wrap(
-                      spacing: 12,
-                      runSpacing: 12,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Text(
-                          'All Workspaces • $knownWorkspaceCount',
-                          style: Theme.of(
-                            context,
-                          ).textTheme.headlineSmall?.copyWith(color: AppTheme.textPrimary, fontWeight: FontWeight.w800),
-                        ),
-                        SizedBox(
-                          width: 280,
-                          child: TextField(
-                            controller: searchController,
-                            onChanged: actions.onSearchChanged,
-                            decoration: InputDecoration(
-                              prefixIcon: const Icon(Icons.search_rounded),
-                              hintText: 'Search by name',
-                              isDense: true,
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                              filled: true,
-                              fillColor: AppTheme.panel,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(18),
-                                borderSide: BorderSide.none,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    _buildWorkspaceSortChips(context),
-                    const SizedBox(height: 16),
-                    Wrap(
-                      spacing: 16,
-                      runSpacing: 16,
-                      children: [for (final workspace in knownWorkspaces) _buildKnownWorkspaceCard(workspace)],
+                    _buildAllWorkspacesSection(
+                      context,
+                      knownWorkspaces: knownWorkspaces,
+                      knownWorkspaceCount: knownWorkspaceCount,
                     ),
                   ],
                 ),
