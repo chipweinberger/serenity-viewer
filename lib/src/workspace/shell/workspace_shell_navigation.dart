@@ -1,7 +1,15 @@
-part of 'workspace_shell_controller.dart';
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+
+import 'package:serenity_viewer/src/environment/window.dart';
+import 'package:serenity_viewer/src/expose/expose_layouts.dart';
+import 'package:serenity_viewer/src/foundation/app_constants.dart';
+import 'package:serenity_viewer/src/workspace/layout/workspace_layout.dart';
+import 'package:serenity_viewer/src/workspace/shell/workspace_shell_controller.dart';
 
 class WorkspaceShellNavigationApi {
-  WorkspaceShellNavigationApi._(this._controller);
+  WorkspaceShellNavigationApi(this._controller);
 
   static const double _appliedExposeViewportZoomFactor = 0.0625;
 

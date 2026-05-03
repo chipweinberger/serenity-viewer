@@ -7,18 +7,16 @@ import 'package:serenity_viewer/src/app/environment/app_environment_state.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
-import 'package:serenity_viewer/src/expose/expose_layouts.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/links/workspace_links_controller.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_controller.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
 import 'package:serenity_viewer/src/workspace/controller/workspace_controller.dart';
-import 'package:serenity_viewer/src/workspace/layout/workspace_layout.dart';
 import 'package:serenity_viewer/src/workspace/shell/workspace_shell_management.dart';
+import 'package:serenity_viewer/src/workspace/shell/workspace_shell_navigation.dart';
 import 'package:serenity_viewer/src/workspace/session/workspace_view_tracking_state.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 
-part 'workspace_shell_navigation.dart';
 part 'workspace_shell_shortcuts.dart';
 part 'workspace_shell_tracking.dart';
 
@@ -65,7 +63,7 @@ class WorkspaceShellController {
     required this.queueWorkspaceRefresh,
     required this.toggleVideoPlayback,
   }) {
-    navigation = WorkspaceShellNavigationApi._(this);
+    navigation = WorkspaceShellNavigationApi(this);
     management = WorkspaceShellManagementApi(this);
     shortcuts = WorkspaceShellShortcutsApi._(this);
     tracking = WorkspaceShellTrackingApi._(this);
