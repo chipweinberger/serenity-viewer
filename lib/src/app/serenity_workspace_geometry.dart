@@ -3,17 +3,6 @@
 part of 'serenity_shell.dart';
 
 extension _SerenityShellWorkspaceGeometry on _SerenityShellState {
-  AssetType? _assetTypeForPath(String path) {
-    final extension = path.split('.').last.toLowerCase();
-    if (_SerenityShellState._imageExtensions.contains(extension)) {
-      return AssetType.image;
-    }
-    if (_SerenityShellState._videoExtensions.contains(extension)) {
-      return AssetType.video;
-    }
-    return null;
-  }
-
   String _newId(String prefix) {
     return '$prefix-${DateTime.now().microsecondsSinceEpoch}-${math.Random().nextInt(9999)}';
   }

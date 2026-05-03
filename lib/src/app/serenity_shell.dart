@@ -15,6 +15,8 @@ import 'package:image/image.dart' as img;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
 
+import 'package:serenity_viewer/src/app/serenity_import_coordinator.dart';
+import 'package:serenity_viewer/src/app/serenity_import_result.dart';
 import 'package:serenity_viewer/src/app/serenity_shell_dependencies.dart';
 import 'package:serenity_viewer/src/app/serenity_workspace_mutations.dart';
 import 'package:serenity_viewer/src/core/serenity_core.dart';
@@ -32,7 +34,6 @@ import 'package:serenity_viewer/src/models/workspace_link.dart';
 import 'package:serenity_viewer/src/models/workspace_state.dart';
 import 'package:serenity_viewer/src/persistence/serenity_environment_archive.dart';
 import 'package:serenity_viewer/src/media/serenity_workspace_load_plan.dart';
-import 'package:serenity_viewer/src/media/serenity_import_window_planning.dart';
 import 'package:serenity_viewer/src/media/serenity_missing_asset_resolution.dart';
 import 'package:serenity_viewer/src/state/serenity_chrome_state.dart';
 import 'package:serenity_viewer/src/state/serenity_shell_persistence_state.dart';
