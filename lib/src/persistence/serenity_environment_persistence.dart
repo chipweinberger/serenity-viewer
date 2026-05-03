@@ -3,17 +3,6 @@
 part of '../app/serenity_shell.dart';
 
 extension _SerenityShellEnvironmentPersistence on _SerenityShellState {
-  Map<String, dynamic> _environmentManifest() {
-    final session = _session;
-    return {
-      'app': 'Serenity',
-      'format': 'sry',
-      'version': 2,
-      'savedAt': DateTime.now().toIso8601String(),
-      if (session != null) ...session.toManifestJson(),
-    };
-  }
-
   Future<void> _saveEnvironmentToPath(
     String path, {
     SerenitySessionState? sessionOverride,
@@ -28,20 +17,7 @@ extension _SerenityShellEnvironmentPersistence on _SerenityShellState {
     try {
       await _refreshActiveWorkspaceThumbnailIfNeeded();
 
-      final archive = Archive()
-        ..addFile(
-          ArchiveFile.string('manifest.json', const JsonEncoder.withIndent('  ').convert(_environmentManifest())),
-        );
-
-      for (final workspace in session.workspaces) {
-        archive.addFile(
-          ArchiveFile.string(
-            'workspaces/${workspace.id}.json',
-            const JsonEncoder.withIndent('  ').convert(workspace.toJson()),
-          ),
-        );
-      }
-
+      final thumbnailBytesByWorkspaceId = <String, List<int>>{};
       for (final workspace in session.workspaces) {
         final thumbnailPath = workspace.thumbnailPath;
         if (thumbnailPath == null || thumbnailPath.isEmpty) {
@@ -52,17 +28,13 @@ extension _SerenityShellEnvironmentPersistence on _SerenityShellState {
         if (!await thumbnailFile.exists()) {
           continue;
         }
-
-        archive.addFile(
-          ArchiveFile(
-            'thumbnails/${workspace.id}.jpg',
-            await thumbnailFile.length(),
-            await thumbnailFile.readAsBytes(),
-          ),
-        );
+        thumbnailBytesByWorkspaceId[workspace.id] = await thumbnailFile.readAsBytes();
       }
 
-      final encoded = ZipEncoder().encode(archive);
+      final encoded = buildEnvironmentArchiveBytes(
+        session: session,
+        thumbnailBytesByWorkspaceId: thumbnailBytesByWorkspaceId,
+      );
 
       final file = File(path);
       await file.parent.create(recursive: true);
@@ -136,9 +108,8 @@ extension _SerenityShellEnvironmentPersistence on _SerenityShellState {
   }) async {
     try {
       final bytes = await XFile(path).readAsBytes();
-      final archive = ZipDecoder().decodeBytes(bytes);
-      final decoded = _sessionFromEnvironmentArchive(archive);
-      final resolved = await _resolveMissingAssets(decoded);
+      final decoded = decodeEnvironmentArchiveBytes(bytes);
+      final resolved = await _resolveMissingAssets(decoded.session);
       if (!mounted) {
         return false;
       }
@@ -156,7 +127,7 @@ extension _SerenityShellEnvironmentPersistence on _SerenityShellState {
         await _storeLastEnvironmentPath(path);
       }
       await _syncWindowTitle();
-      await _restoreEnvironmentThumbnails(archive, resolved);
+      await _restoreEnvironmentThumbnails(decoded.thumbnailBytesByWorkspaceId, resolved);
       await _saveSession();
       if (mounted && showSuccessMessage) {
         _showMessage('Opened ${path.split(Platform.pathSeparator).last}.');
@@ -259,46 +230,23 @@ extension _SerenityShellEnvironmentPersistence on _SerenityShellState {
     }
   }
 
-  SerenitySessionState _sessionFromEnvironmentArchive(Archive archive) {
-    final manifestEntry = archive.findFile('manifest.json');
-    if (manifestEntry == null) {
-      throw const FormatException('Missing manifest.json');
-    }
-
-    final manifestJson = jsonDecode(utf8.decode(manifestEntry.content as List<int>)) as Map<String, dynamic>;
-    if (manifestJson['format'] != 'sry' || manifestJson['version'] != 2) {
-      throw const FormatException('Unsupported .sry format');
-    }
-
-    final workspaceIds = (manifestJson['workspaceIds'] as List<dynamic>? ?? const []).cast<String>();
-    final workspaces = <WorkspaceState>[];
-    for (final workspaceId in workspaceIds) {
-      final workspaceEntry = archive.findFile('workspaces/$workspaceId.json');
-      if (workspaceEntry == null) {
-        throw FormatException('Missing workspace file for $workspaceId');
-      }
-
-      final workspaceJson = jsonDecode(utf8.decode(workspaceEntry.content as List<int>)) as Map<String, dynamic>;
-      workspaces.add(WorkspaceState.fromJson(workspaceJson));
-    }
-
-    return SerenitySessionState.fromManifestJson(manifestJson, workspaces);
-  }
-
-  Future<void> _restoreEnvironmentThumbnails(Archive archive, SerenitySessionState session) async {
+  Future<void> _restoreEnvironmentThumbnails(
+    Map<String, List<int>> thumbnailBytesByWorkspaceId,
+    SerenitySessionState session,
+  ) async {
     final thumbnailDirectory = await _thumbnailDirectory();
     final nextWorkspaces = <WorkspaceState>[];
     var updated = false;
 
     for (final workspace in session.workspaces) {
-      final entry = archive.findFile('thumbnails/${workspace.id}.jpg');
-      if (entry == null) {
+      final thumbnailBytes = thumbnailBytesByWorkspaceId[workspace.id];
+      if (thumbnailBytes == null) {
         nextWorkspaces.add(workspace);
         continue;
       }
 
       final file = File('${thumbnailDirectory.path}/${workspace.id}.jpg');
-      await file.writeAsBytes(entry.content as List<int>, flush: true);
+      await file.writeAsBytes(thumbnailBytes, flush: true);
       await FileImage(file).evict();
       nextWorkspaces.add(workspace.copyWith(thumbnailPath: file.path));
       updated = true;

@@ -4,7 +4,6 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
-import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_selector/file_selector.dart';
@@ -27,6 +26,7 @@ import 'package:serenity_viewer/src/models/window_zoom_update.dart';
 import 'package:serenity_viewer/src/models/workspace_asset.dart';
 import 'package:serenity_viewer/src/models/workspace_link.dart';
 import 'package:serenity_viewer/src/models/workspace_state.dart';
+import 'package:serenity_viewer/src/persistence/serenity_environment_archive.dart';
 import 'package:serenity_viewer/src/widgets/expose_window_card.dart';
 import 'package:serenity_viewer/src/widgets/serenity_media_zoom_utils.dart';
 import 'package:serenity_viewer/src/widgets/serenity_settings_dialog.dart';
