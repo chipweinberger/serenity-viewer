@@ -9,6 +9,7 @@ import 'package:serenity_viewer/src/app/environment/app_environment_controller.d
 import 'package:serenity_viewer/src/app/environment/app_environment_state.dart';
 import 'package:serenity_viewer/src/app/platform/app_shell_platform_bridge.dart';
 import 'package:serenity_viewer/src/app/sry_document/sry_document_coordinator.dart';
+import 'package:serenity_viewer/src/asset_window/interaction/asset_window_interaction_state.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
@@ -27,6 +28,7 @@ import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.
 class AppShellRuntime {
   AppShellRuntime.assembled({
     required this.dependencies,
+    required this.state,
     required this.foundation,
     required this.documents,
     required this.workspace,
@@ -35,18 +37,12 @@ class AppShellRuntime {
   });
 
   final ShellDependencies dependencies;
+  final AppShellRuntimeStateServices state;
   final AppShellRuntimeFoundationServices foundation;
   final AppShellRuntimeDocumentServices documents;
   final AppShellRuntimeWorkspaceServices workspace;
   final Timer autosaveTimer;
   final AppLifecycleListener appLifecycleListener;
-
-  ShellHandles get handles => dependencies.handles;
-  AppEnvironmentState get persistenceState => dependencies.persistenceState;
-  ChromeState get chromeState => dependencies.chromeState;
-  WorkspaceViewTrackingState get workspaceViewTrackingState => dependencies.workspaceViewTrackingState;
-  WorkspaceViewportState get workspaceViewportState => dependencies.workspaceViewportState;
-  ThumbnailRefreshState get thumbnailRefreshState => dependencies.thumbnailRefreshState;
 
   static AppShellRuntime create({
     required bool isRunningInWidgetTest,
@@ -115,8 +111,28 @@ class AppShellRuntime {
     dependencies.windowInteractionState.dispose();
     workspace.thumbnailController.dispose();
     foundation.mediaBridge.dispose();
-    handles.dispose();
+    state.handles.dispose();
   }
+}
+
+class AppShellRuntimeStateServices {
+  const AppShellRuntimeStateServices({
+    required this.handles,
+    required this.persistenceState,
+    required this.chromeState,
+    required this.windowInteractionState,
+    required this.workspaceViewTrackingState,
+    required this.workspaceViewportState,
+    required this.thumbnailRefreshState,
+  });
+
+  final ShellHandles handles;
+  final AppEnvironmentState persistenceState;
+  final ChromeState chromeState;
+  final AssetWindowInteractionState windowInteractionState;
+  final WorkspaceViewTrackingState workspaceViewTrackingState;
+  final WorkspaceViewportState workspaceViewportState;
+  final ThumbnailRefreshState thumbnailRefreshState;
 }
 
 class AppShellRuntimeFoundationServices {

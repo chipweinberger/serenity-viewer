@@ -46,6 +46,15 @@ class AppShellRuntimeFactory {
 
     return AppShellRuntime.assembled(
       dependencies: dependencies,
+      state: AppShellRuntimeStateServices(
+        handles: dependencies.handles,
+        persistenceState: dependencies.persistenceState,
+        chromeState: dependencies.chromeState,
+        windowInteractionState: dependencies.windowInteractionState,
+        workspaceViewTrackingState: dependencies.workspaceViewTrackingState,
+        workspaceViewportState: dependencies.workspaceViewportState,
+        thumbnailRefreshState: dependencies.thumbnailRefreshState,
+      ),
       foundation: AppShellRuntimeFoundationServices(
         chromeController: foundation.chromeController,
         mediaBridge: foundation.mediaBridge,

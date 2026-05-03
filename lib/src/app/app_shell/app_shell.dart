@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/dependencies/shell_dependencies.dart';
-import 'package:serenity_viewer/src/app/environment/app_environment_state.dart';
 import 'package:serenity_viewer/src/app/app_shell/builders/app_shell_content_builder.dart';
 import 'package:serenity_viewer/src/app/app_shell/builders/app_shell_content_scope.dart';
 import 'package:serenity_viewer/src/app/app_shell/builders/app_shell_menu_builder.dart';
@@ -16,11 +15,8 @@ import 'package:serenity_viewer/src/app/app_shell/controllers/app_shell_window_c
 import 'package:serenity_viewer/src/app/app_shell/controllers/app_shell_window_history_controller.dart';
 import 'package:serenity_viewer/src/app/app_shell/controllers/app_shell_workspace_geometry_controller.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_runtime.dart';
-import 'package:serenity_viewer/src/asset_window/interaction/asset_window_interaction_state.dart';
 import 'package:serenity_viewer/src/workspace/session/recently_closed_window_entry.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
-import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
-import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -38,26 +34,22 @@ class _AppShellState extends State<AppShell> {
   final List<RecentlyClosedWindowEntry> _recentlyClosedWindows = [];
   late final AppShellRuntime _runtime;
 
-  ShellHandles get _handles => _runtime.handles;
+  AppShellRuntimeStateServices get _state => _runtime.state;
   AppShellRuntimeFoundationServices get _foundation => _runtime.foundation;
   AppShellRuntimeDocumentServices get _documents => _runtime.documents;
   AppShellRuntimeWorkspaceServices get _workspaceRuntime => _runtime.workspace;
-  AppEnvironmentState get _persistenceState => _runtime.persistenceState;
-  ChromeState get _uiState => _runtime.chromeState;
-  AssetWindowInteractionState get _windowInteractionState => _runtime.dependencies.windowInteractionState;
-  WorkspaceViewportState get _workspaceViewportState => _runtime.workspaceViewportState;
 
   bool get _isRunningInWidgetTest {
     return Platform.environment.containsKey('FLUTTER_TEST') ||
         WidgetsBinding.instance.runtimeType.toString().contains('Test');
   }
 
-  List<Workspace> get _workspaces => _persistenceState.environment?.workspaces ?? const [];
+  List<Workspace> get _workspaces => _state.persistenceState.environment?.workspaces ?? const [];
 
   List<Workspace> get _openWorkspaces => _workspaces.where((workspace) => workspace.isOpen).toList();
 
   Workspace? get _activeWorkspaceOrNull {
-    final environment = _persistenceState.environment;
+    final environment = _state.persistenceState.environment;
     if (environment == null || environment.workspaces.isEmpty) {
       return null;
     }
@@ -71,8 +63,8 @@ class _AppShellState extends State<AppShell> {
   }
 
   String get _windowTitle {
-    final path = _persistenceState.currentEnvironmentPath;
-    final suffix = _persistenceState.hasUnsavedChanges ? ' *' : '';
+    final path = _state.persistenceState.currentEnvironmentPath;
+    final suffix = _state.persistenceState.hasUnsavedChanges ? ' *' : '';
     if (path == null || path.isEmpty) {
       return 'Serenity$suffix';
     }
@@ -107,12 +99,12 @@ class _AppShellState extends State<AppShell> {
   }
 
   Future<void> _saveEnvironment({bool force = false}) async {
-    final environment = _persistenceState.environment;
-    final environmentPath = _persistenceState.currentEnvironmentPath;
+    final environment = _state.persistenceState.environment;
+    final environmentPath = _state.persistenceState.currentEnvironmentPath;
     if (environment == null || environmentPath == null || environmentPath.isEmpty) {
       return;
     }
-    if (!force && !_persistenceState.hasUnsavedChanges) {
+    if (!force && !_state.persistenceState.hasUnsavedChanges) {
       return;
     }
 
@@ -136,7 +128,7 @@ class _AppShellState extends State<AppShell> {
 
   AppShellWindowHistoryController get _windowHistoryController {
     return AppShellWindowHistoryController(
-      environment: () => _persistenceState.environment,
+      environment: () => _state.persistenceState.environment,
       workspaces: () => _workspaces,
       activeWorkspace: () => _activeWorkspaceOrNull,
       recentlyClosedWindows: _recentlyClosedWindows,
@@ -146,7 +138,7 @@ class _AppShellState extends State<AppShell> {
       commitStateChange: setState,
       showMessage: _uiController.showMessage,
       showWorkspaceScreen: _navigationController.showWorkspaceScreen,
-      screen: () => _uiState.screen,
+      screen: () => _state.chromeState.screen,
       maxRecentlyClosedWindows: _AppShellState._maxRecentlyClosedWindows,
     );
   }
@@ -155,8 +147,8 @@ class _AppShellState extends State<AppShell> {
     return AppShellWindowController(
       context: () => context,
       mounted: () => mounted,
-      chromeState: _uiState,
-      environment: () => _persistenceState.environment,
+      chromeState: _state.chromeState,
+      environment: () => _state.persistenceState.environment,
       activeWorkspace: () => _activeWorkspace,
       activeWorkspaceOrNull: () => _activeWorkspaceOrNull,
       workspaceController: _workspaceRuntime.workspaceController,
@@ -166,8 +158,8 @@ class _AppShellState extends State<AppShell> {
 
   AppShellWorkspaceGeometryController get _workspaceGeometryController {
     return AppShellWorkspaceGeometryController(
-      persistenceState: _persistenceState,
-      workspaceViewportState: _workspaceViewportState,
+      persistenceState: _state.persistenceState,
+      workspaceViewportState: _state.workspaceViewportState,
       thumbnailController: _workspaceRuntime.thumbnailController,
       replaceWorkspace: _environmentActions.replaceWorkspace,
     );
@@ -177,7 +169,7 @@ class _AppShellState extends State<AppShell> {
     return AppShellMediaImportController(
       imageExtensions: _AppShellState._imageExtensions,
       videoExtensions: _AppShellState._videoExtensions,
-      persistenceState: _persistenceState,
+      persistenceState: _state.persistenceState,
       activeWorkspace: () => _activeWorkspace,
       videoConversionCoordinator: _workspaceRuntime.videoConversionCoordinator,
       createFileBookmark: _foundation.appShellPlatformBridge.createFileBookmark,
@@ -197,7 +189,7 @@ class _AppShellState extends State<AppShell> {
   AppShellUiController get _uiController {
     return AppShellUiController(
       context: () => context,
-      persistenceState: _persistenceState,
+      persistenceState: _state.persistenceState,
       updateEnvironment: _environmentActions.updateEnvironment,
     );
   }
@@ -243,7 +235,7 @@ class _AppShellState extends State<AppShell> {
       confirmDeleteWorkspace: _workspaceRuntime.workspaceShellController.management.confirmDeleteWorkspace,
       restoreRecentlyClosedWindow: _windowHistoryController.restoreRecentlyClosedWindow,
     ).build(
-      activeWorkspaceId: _persistenceState.environment?.activeWorkspaceId,
+      activeWorkspaceId: _state.persistenceState.environment?.activeWorkspaceId,
       focusedWindow: focusedWindow,
       focusedWindowIsSelected: focusedWindowIsSelected,
       recentlyClosedWindows: _recentlyClosedWindows,
@@ -251,31 +243,31 @@ class _AppShellState extends State<AppShell> {
   }
 
   Widget _buildShellContent(BuildContext context) {
-    if (_persistenceState.isLoading || _persistenceState.environment == null) {
+    if (_state.persistenceState.isLoading || _state.persistenceState.environment == null) {
       return const Center(child: CircularProgressIndicator());
     }
 
     return AppShellContentBuilder(
       state: AppShellContentState(
         context: context,
-        uiState: _uiState,
-        environment: _persistenceState.environment!,
+        uiState: _state.chromeState,
+        environment: _state.persistenceState.environment!,
         windowTitle: _windowTitle,
         workspaces: _workspaces,
         openWorkspaces: _openWorkspaces,
         activeWorkspace: _activeWorkspace,
         activeWorkspaceOrNull: _activeWorkspaceOrNull,
         selectedExposeWindowCount: _workspaceRuntime.workspaceController.expose.selectionCount(),
-        windowInteractionState: _windowInteractionState,
-        workspaceViewportState: _workspaceViewportState,
+        windowInteractionState: _state.windowInteractionState,
+        workspaceViewportState: _state.workspaceViewportState,
         chromeController: _foundation.chromeController,
         mediaBridge: _foundation.mediaBridge,
         workspaceShellController: _workspaceRuntime.workspaceShellController,
         workspaceLinksController: _workspaceRuntime.workspaceLinksController,
         thumbnailController: _workspaceRuntime.thumbnailController,
         windowHistoryController: _windowHistoryController,
-        searchController: _handles.searchController,
-        tabScrollController: _handles.tabScrollController,
+        searchController: _state.handles.searchController,
+        tabScrollController: _state.handles.tabScrollController,
       ),
       actions: AppShellContentActions(
         commitStateChange: setState,
@@ -349,7 +341,7 @@ class _AppShellState extends State<AppShell> {
     return PlatformMenuBar(
       menus: _buildMenus(),
       child: Focus(
-        focusNode: _handles.focusNode,
+        focusNode: _state.handles.focusNode,
         autofocus: true,
         onKeyEvent: (_, event) => _workspaceRuntime.workspaceShellController.shortcuts.onKeyEvent(event),
         child: Scaffold(body: SafeArea(top: false, child: _buildShellContent(context))),
