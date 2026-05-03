@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -8,13 +6,13 @@ import 'package:serenity_viewer/src/asset_window/interaction/asset_window_intera
 import 'package:serenity_viewer/src/asset_window/interaction/asset_window_zoom_update.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
-import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
-import 'package:serenity_viewer/src/workspace/layout/workspace_layout.dart';
-import 'package:serenity_viewer/src/workspace/operations/workspace_stacking_operations.dart';
 import 'package:serenity_viewer/src/workspace/session/recently_closed_window_entry.dart';
 
 import 'workspace_controller.dart';
+import 'workspace_controller_window_arrangement.dart';
+import 'workspace_controller_window_editing.dart';
+import 'workspace_controller_window_runtime.dart';
 
 const Size workspaceCollateTargetBox = Size(700, 700);
 
@@ -24,32 +22,36 @@ class WorkspaceWindowControllerState {
     required this.commitInteractionState,
     required this.windowInteractionState,
     required this.replaceWorkspace,
-  });
+  }) : arrangement = WorkspaceWindowArrangementState(chromeState: chromeState, replaceWorkspace: replaceWorkspace),
+       editing = WorkspaceWindowEditingState(
+         chromeState: chromeState,
+         windowInteractionState: windowInteractionState,
+         replaceWorkspace: replaceWorkspace,
+       ),
+       runtime = WorkspaceWindowRuntimeState(
+         commitInteractionState: commitInteractionState,
+         windowInteractionState: windowInteractionState,
+       );
 
   final ChromeState chromeState;
   final SerenityWorkspaceCommit commitInteractionState;
   final AssetWindowInteractionState windowInteractionState;
   final SerenityWorkspaceReplace replaceWorkspace;
+  final WorkspaceWindowArrangementState arrangement;
+  final WorkspaceWindowEditingState editing;
+  final WorkspaceWindowRuntimeState runtime;
 
   Window? focusedWindowOrNull(Workspace? workspace) {
-    if (workspace == null || workspace.windows.isEmpty) {
-      return null;
-    }
-
-    final sortedWindows = [...workspace.windows]..sort((a, b) => a.zIndex.compareTo(b.zIndex));
-    return sortedWindows.last;
+    return arrangement.focusedWindowOrNull(workspace);
   }
 
   void focusWindow(Workspace workspace, String windowId) {
-    final result = WorkspaceStackingOperations.focusWindow(workspace, windowId);
-    if (identical(result.workspace, workspace)) {
+    final result = arrangement.focusWindow(workspace, windowId);
+    if (result?.previousZOrder == null) {
       return;
     }
 
-    if (result.previousZOrder != null) {
-      windowInteractionState.previousWindowZOrders[windowId] = result.previousZOrder!;
-    }
-    replaceWorkspace(result.workspace, queueThumbnail: true);
+    windowInteractionState.previousWindowZOrders[windowId] = result!.previousZOrder!;
   }
 
   void restorePreviousWindowZOrder(Workspace workspace, String windowId) {
@@ -58,33 +60,23 @@ class WorkspaceWindowControllerState {
       return;
     }
 
-    replaceWorkspace(
-      WorkspaceStackingOperations.restorePreviousWindowZOrder(workspace, windowId, previousZ),
-      queueThumbnail: true,
-    );
+    arrangement.restorePreviousWindowZOrder(workspace, windowId, previousZ);
   }
 
   void moveWindow(Workspace workspace, String windowId, Offset delta) {
-    replaceWorkspace(WorkspaceLayout.moveWindow(workspace, windowId, delta), queueThumbnail: true);
+    editing.moveWindow(workspace, windowId, delta);
   }
 
   void resizeWindow(Workspace workspace, String windowId, AssetWindowResizeHandle handle, Offset delta) {
-    replaceWorkspace(WorkspaceLayout.resizeWindow(workspace, windowId, handle, delta), queueThumbnail: true);
+    editing.resizeWindow(workspace, windowId, handle, delta);
   }
 
   void transformWindowFromTrackpad(Workspace workspace, String windowId, double scaleDelta) {
-    replaceWorkspace(
-      WorkspaceLayout.transformWindowFromTrackpad(workspace, windowId, scaleDelta),
-      queueThumbnail: true,
-    );
+    editing.transformWindowFromTrackpad(workspace, windowId, scaleDelta);
   }
 
   void fitWindowToContent(Workspace? workspace, String windowId) {
-    if (workspace == null || workspace.windows.every((window) => window.asset.id != windowId)) {
-      return;
-    }
-
-    replaceWorkspace(WorkspaceLayout.fitWindowToContent(workspace, windowId), queueThumbnail: true);
+    editing.fitWindowToContent(workspace, windowId);
   }
 
   void handleOptionGestureHover(
@@ -93,53 +85,28 @@ class WorkspaceWindowControllerState {
     required bool isCommandPressedForContentGesture,
     required bool isOptionPressedForWindowGesture,
   }) {
-    final targetWindowId = windowInteractionState.activeGestureWindowId;
-    if (chromeState.screen != SerenityScreen.workspace ||
-        chromeState.workspaceLayoutMode == WorkspaceLayoutMode.expose ||
-        isCommandPressedForContentGesture ||
-        !isOptionPressedForWindowGesture ||
-        targetWindowId == null ||
-        event.delta == Offset.zero) {
-      return;
-    }
-
-    moveWindow(workspace, targetWindowId, event.delta / workspace.viewportZoom);
+    editing.handleOptionGestureHover(
+      event,
+      workspace,
+      isCommandPressedForContentGesture: isCommandPressedForContentGesture,
+      isOptionPressedForWindowGesture: isOptionPressedForWindowGesture,
+    );
   }
 
   void flashWindow(String windowId, {required bool mounted}) {
-    windowInteractionState.windowFlashTimer?.cancel();
-    commitInteractionState(() {
-      windowInteractionState.flashedWindowId = windowId;
-      windowInteractionState.windowFlashNonce += 1;
-    });
-    windowInteractionState.windowFlashTimer = Timer(const Duration(milliseconds: 300), () {
-      if (!mounted || windowInteractionState.flashedWindowId != windowId) {
-        return;
-      }
-      commitInteractionState(() {
-        windowInteractionState.flashedWindowId = null;
-      });
-    });
+    runtime.flashWindow(windowId, mounted: mounted);
   }
 
   void setWindowZoom(Workspace workspace, String windowId, AssetWindowZoomUpdate update) {
-    replaceWorkspace(WorkspaceLayout.setWindowZoom(workspace, windowId, update), queueThumbnail: true);
+    editing.setWindowZoom(workspace, windowId, update);
   }
 
   void setWindowIntrinsicSize(Workspace? workspace, String windowId, Size intrinsicSize) {
-    if (workspace == null || intrinsicSize.width <= 0 || intrinsicSize.height <= 0) {
-      return;
-    }
-
-    if (workspace.windows.where((window) => window.asset.id == windowId).isEmpty) {
-      return;
-    }
-
-    replaceWorkspace(WorkspaceLayout.setWindowIntrinsicSize(workspace, windowId, intrinsicSize), queueThumbnail: true);
+    editing.setWindowIntrinsicSize(workspace, windowId, intrinsicSize);
   }
 
   void clearWindowRuntimeState(String windowId) {
-    windowInteractionState.previousWindowZOrders.remove(windowId);
+    runtime.clearWindowRuntimeState(windowId);
   }
 
   void rememberClosedWindow(
@@ -148,37 +115,23 @@ class WorkspaceWindowControllerState {
     required Workspace workspace,
     required Window window,
   }) {
-    recentlyClosedWindows.insert(
-      0,
-      RecentlyClosedWindowEntry(
-        workspaceId: workspace.id,
-        workspaceName: workspace.name,
-        window: window,
-        closedAt: DateTime.now(),
-      ),
+    runtime.rememberClosedWindow(
+      recentlyClosedWindows,
+      maxRecentlyClosedWindows: maxRecentlyClosedWindows,
+      workspace: workspace,
+      window: window,
     );
-
-    if (recentlyClosedWindows.length > maxRecentlyClosedWindows) {
-      recentlyClosedWindows.removeRange(maxRecentlyClosedWindows, recentlyClosedWindows.length);
-    }
   }
 
   bool canCollateWorkspaceWindows(Workspace? workspace) {
-    return workspace != null &&
-        chromeState.workspaceLayoutMode != WorkspaceLayoutMode.expose &&
-        workspace.windows.any((window) => window.asset.type == AssetType.image || window.asset.type == AssetType.video);
+    return arrangement.canCollateWorkspaceWindows(workspace);
   }
 
   int collatableWindowCount(Workspace workspace) {
-    return workspace.windows
-        .where((window) => window.asset.type == AssetType.image || window.asset.type == AssetType.video)
-        .length;
+    return arrangement.collatableWindowCount(workspace);
   }
 
   void collateWorkspaceWindows(Workspace workspace) {
-    replaceWorkspace(
-      WorkspaceLayout.collateWorkspaceWindows(workspace, targetBox: workspaceCollateTargetBox),
-      queueThumbnail: true,
-    );
+    arrangement.collateWorkspaceWindows(workspace);
   }
 }
