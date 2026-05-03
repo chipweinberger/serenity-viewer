@@ -19,6 +19,7 @@ import 'package:serenity_viewer/src/app/serenity_workspace_mutations.dart';
 import 'package:serenity_viewer/src/core/serenity_core.dart';
 import 'package:serenity_viewer/src/core/serenity_keyboard_modifiers.dart';
 import 'package:serenity_viewer/src/core/serenity_theme.dart';
+import 'package:serenity_viewer/src/core/serenity_workspace_projection.dart';
 import 'package:serenity_viewer/src/models/asset_window_state.dart';
 import 'package:serenity_viewer/src/models/serenity_session_state.dart';
 import 'package:serenity_viewer/src/models/session_support.dart';

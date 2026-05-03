@@ -74,7 +74,7 @@ extension _SerenityShellWorkspaceView on _SerenityShellState {
                 for (final window in windows)
                   Builder(
                     builder: (context) {
-                      final screenOffset = _workspaceScreenOffsetForWindow(workspace, window, viewportSize);
+                      final screenOffset = workspaceScreenOffsetForWindow(workspace, window, viewportSize);
                       final isLoaded = loadPlan.loadedAssetIds.contains(window.asset.id);
                       final sharedVideoControllerEntry = _sharedVideoControllerForWindow(window, isLoaded: isLoaded);
                       return Positioned(

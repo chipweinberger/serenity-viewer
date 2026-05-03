@@ -212,20 +212,13 @@ extension _SerenityShellThumbnailPersistence on _SerenityShellState {
         (canvasWidth - (sourceViewportSize.width * sourceScale)) / 2,
         (canvasHeight - (sourceViewportSize.height * sourceScale)) / 2,
       );
-      final sourceViewportCenter = sourceViewportSize.center(Offset.zero);
-
       for (final window in sortedWindows) {
-        final rect = Rect.fromLTWH(
-          sourceOffset.dx +
-              ((sourceViewportCenter.dx +
-                      ((window.position.dx - workspace.viewportCenter.dx) * workspace.viewportZoom)) *
-                  sourceScale),
-          sourceOffset.dy +
-              ((sourceViewportCenter.dy +
-                      ((window.position.dy - workspace.viewportCenter.dy) * workspace.viewportZoom)) *
-                  sourceScale),
-          math.max(1, window.size.width * workspace.viewportZoom * sourceScale),
-          math.max(1, window.size.height * workspace.viewportZoom * sourceScale),
+        final rect = workspaceScreenRectForWindow(
+          workspace,
+          window,
+          sourceViewportSize,
+          viewportOffset: sourceOffset,
+          viewportScale: sourceScale,
         );
         if (!rect.overlaps(const Rect.fromLTWH(0, 0, canvasWidth, canvasHeight))) {
           continue;
