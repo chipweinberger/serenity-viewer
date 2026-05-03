@@ -109,7 +109,11 @@ extension _SerenityShellEnvironmentPersistence on _SerenityShellState {
     try {
       final bytes = await XFile(path).readAsBytes();
       final decoded = decodeEnvironmentArchiveBytes(bytes);
-      final resolved = await _resolveMissingAssets(decoded.session);
+      final resolved = await resolveMissingAssetsInSession(
+        session: decoded.session,
+        resolveBookmark: _resolveFileBookmark,
+        createBookmark: _createFileBookmark,
+      );
       if (!mounted) {
         return false;
       }

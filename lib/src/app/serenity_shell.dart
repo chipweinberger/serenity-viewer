@@ -32,6 +32,7 @@ import 'package:serenity_viewer/src/models/workspace_state.dart';
 import 'package:serenity_viewer/src/persistence/serenity_environment_archive.dart';
 import 'package:serenity_viewer/src/media/serenity_workspace_load_plan.dart';
 import 'package:serenity_viewer/src/media/serenity_import_window_planning.dart';
+import 'package:serenity_viewer/src/media/serenity_missing_asset_resolution.dart';
 import 'package:serenity_viewer/src/widgets/expose_window_card.dart';
 import 'package:serenity_viewer/src/widgets/serenity_media_zoom_utils.dart';
 import 'package:serenity_viewer/src/widgets/serenity_settings_dialog.dart';
@@ -60,7 +61,6 @@ part '../persistence/serenity_thumbnail_persistence.dart';
 part '../persistence/serenity_environment_persistence.dart';
 part '../media/serenity_media_tools.dart';
 part '../media/serenity_import_and_load_plan.dart';
-part '../media/serenity_missing_assets.dart';
 part '../media/serenity_video_conversion_tools.dart';
 
 class SerenityApp extends StatelessWidget {
