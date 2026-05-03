@@ -99,18 +99,23 @@ class _SerenityShellState extends State<SerenityShell> {
   static const List<String> _imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tif', 'tiff'];
   static const List<String> _videoExtensions = ['mp4', 'mov', 'm4v', 'avi', 'mkv', 'webm'];
 
-  final _SerenityShellHandles _handles = _SerenityShellHandles();
-  final _SerenityShellPersistenceState _persistenceState = _SerenityShellPersistenceState();
-  final _SerenityShellUiFields _uiState = _SerenityShellUiFields();
+  // Long-lived UI handles owned by the shell.
+  final _handles = _SerenityShellHandles();
 
-  final _SerenityWindowInteractionState _windowInteractionState = _SerenityWindowInteractionState();
+  // Coarse app state buckets.
+  final _persistenceState = _SerenityShellPersistenceState();
+  final _uiState = _SerenityShellUiFields();
+
+  // Workspace and window interaction state.
+  final _windowInteractionState = _SerenityWindowInteractionState();
+  final _workspaceViewTrackingState = _SerenityWorkspaceViewTrackingState();
+  final _workspaceViewportState = _SerenityWorkspaceViewportState();
   final List<RecentlyClosedWindowEntry> _recentlyClosedWindows = [];
 
-  Timer? _autosaveTimer;
-  final _SerenityThumbnailRefreshState _thumbnailRefreshState = _SerenityThumbnailRefreshState();
+  // Runtime resources and timers.
+  final _thumbnailRefreshState = _SerenityThumbnailRefreshState();
   AppLifecycleListener? _appLifecycleListener;
-  final _SerenityWorkspaceViewTrackingState _workspaceViewTrackingState = _SerenityWorkspaceViewTrackingState();
-  final _SerenityWorkspaceViewportState _workspaceViewportState = _SerenityWorkspaceViewportState();
+  Timer? _autosaveTimer;
 
   bool get _isRunningInWidgetTest {
     return Platform.environment.containsKey('FLUTTER_TEST') ||
