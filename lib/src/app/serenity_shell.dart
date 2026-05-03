@@ -15,6 +15,7 @@ import 'package:image/image.dart' as img;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
 
+import 'package:serenity_viewer/src/app/serenity_shell_dependencies.dart';
 import 'package:serenity_viewer/src/app/serenity_workspace_mutations.dart';
 import 'package:serenity_viewer/src/core/serenity_core.dart';
 import 'package:serenity_viewer/src/core/serenity_keyboard_modifiers.dart';
@@ -33,6 +34,12 @@ import 'package:serenity_viewer/src/persistence/serenity_environment_archive.dar
 import 'package:serenity_viewer/src/media/serenity_workspace_load_plan.dart';
 import 'package:serenity_viewer/src/media/serenity_import_window_planning.dart';
 import 'package:serenity_viewer/src/media/serenity_missing_asset_resolution.dart';
+import 'package:serenity_viewer/src/state/serenity_chrome_state.dart';
+import 'package:serenity_viewer/src/state/serenity_shell_persistence_state.dart';
+import 'package:serenity_viewer/src/state/serenity_thumbnail_refresh_state.dart';
+import 'package:serenity_viewer/src/state/serenity_window_interaction_state.dart';
+import 'package:serenity_viewer/src/state/serenity_workspace_view_tracking_state.dart';
+import 'package:serenity_viewer/src/state/serenity_workspace_viewport_state.dart';
 import 'package:serenity_viewer/src/widgets/expose_window_card.dart';
 import 'package:serenity_viewer/src/widgets/serenity_media_zoom_utils.dart';
 import 'package:serenity_viewer/src/widgets/serenity_settings_dialog.dart';
@@ -101,23 +108,19 @@ class _SerenityShellState extends State<SerenityShell> {
   static const List<String> _imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tif', 'tiff'];
   static const List<String> _videoExtensions = ['mp4', 'mov', 'm4v', 'avi', 'mkv', 'webm'];
 
-  // Long-lived UI handles owned by the shell.
-  final _handles = _SerenityShellHandles();
-
-  // Coarse app state buckets.
-  final _persistenceState = _SerenityShellPersistenceState();
-  final _uiState = _SerenityShellUiFields();
-
-  // Workspace and window interaction state.
-  final _windowInteractionState = _SerenityWindowInteractionState();
-  final _workspaceViewTrackingState = _SerenityWorkspaceViewTrackingState();
-  final _workspaceViewportState = _SerenityWorkspaceViewportState();
+  final _dependencies = SerenityShellDependencies();
+  final _mediaControllerCache = _SerenityMediaControllerCache();
   final List<RecentlyClosedWindowEntry> _recentlyClosedWindows = [];
-
-  // Runtime resources and timers.
-  final _thumbnailRefreshState = _SerenityThumbnailRefreshState();
   AppLifecycleListener? _appLifecycleListener;
   Timer? _autosaveTimer;
+
+  SerenityShellHandles get _handles => _dependencies.handles;
+  SerenityShellPersistenceState get _persistenceState => _dependencies.persistenceState;
+  SerenityChromeState get _uiState => _dependencies.chromeState;
+  SerenityWindowInteractionState get _windowInteractionState => _dependencies.windowInteractionState;
+  SerenityWorkspaceViewTrackingState get _workspaceViewTrackingState => _dependencies.workspaceViewTrackingState;
+  SerenityWorkspaceViewportState get _workspaceViewportState => _dependencies.workspaceViewportState;
+  SerenityThumbnailRefreshState get _thumbnailRefreshState => _dependencies.thumbnailRefreshState;
 
   bool get _isRunningInWidgetTest {
     return Platform.environment.containsKey('FLUTTER_TEST') ||
@@ -176,7 +179,7 @@ class _SerenityShellState extends State<SerenityShell> {
     _workspaceViewTrackingState.dispose();
     _windowInteractionState.dispose();
     _thumbnailRefreshState.dispose();
-    for (final entry in _windowInteractionState.sharedVideoControllers.values) {
+    for (final entry in _mediaControllerCache.sharedVideoControllers.values) {
       unawaited(entry.controller.dispose());
     }
     _handles.dispose();
