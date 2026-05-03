@@ -12,6 +12,7 @@ import 'package:serenity_viewer/src/widgets/window_resize_helpers.dart';
 
 part 'serenity_workspace_mutations_session.dart';
 part 'serenity_workspace_mutations_viewport.dart';
+part 'serenity_workspace_window_geometry.dart';
 part 'serenity_workspace_mutations_window.dart';
 
 class SerenityWorkspaceMutations {
