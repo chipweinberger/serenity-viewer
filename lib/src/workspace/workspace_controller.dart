@@ -9,12 +9,12 @@ import 'package:serenity_viewer/src/workspace/workspace_mutations.dart';
 import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
 import 'package:serenity_viewer/src/workspace/windows/recently_closed_window_entry.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
-import 'package:serenity_viewer/src/workspace/windows/window_zoom_update.dart';
+import 'package:serenity_viewer/src/asset_window/frame/asset_window_resize_helpers.dart';
+import 'package:serenity_viewer/src/asset_window/interaction/asset_window_interaction_state.dart';
+import 'package:serenity_viewer/src/asset_window/interaction/asset_window_zoom_update.dart';
 import 'package:serenity_viewer/src/environment/workspace_state.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
-import 'package:serenity_viewer/src/workspace/windows/window_interaction_state.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
-import 'package:serenity_viewer/src/workspace/windows/window_resize_helpers.dart';
 
 typedef SerenityWorkspaceStateCommit = void Function(VoidCallback update);
 typedef SerenityWorkspaceReplace = void Function(WorkspaceState workspace, {bool queueThumbnail});
@@ -35,7 +35,7 @@ class WorkspaceController {
   static const Size collateTargetBox = Size(700, 700);
 
   final ChromeState chromeState;
-  final WindowInteractionState windowInteractionState;
+  final AssetWindowInteractionState windowInteractionState;
   final WorkspaceViewportState workspaceViewportState;
   final SerenityWorkspaceStateCommit commitInteractionState;
   final SerenityWorkspaceReplace replaceWorkspace;
@@ -158,7 +158,7 @@ class WorkspaceController {
     );
   }
 
-  void resizeWindow(WorkspaceState workspace, String windowId, WindowResizeHandle handle, Offset delta) {
+  void resizeWindow(WorkspaceState workspace, String windowId, AssetWindowResizeHandle handle, Offset delta) {
     replaceWorkspace(WorkspaceMutations.resizeWindow(workspace, windowId, handle, delta), queueThumbnail: true);
   }
 
@@ -266,7 +266,7 @@ class WorkspaceController {
     await refreshActiveWorkspaceThumbnail();
   }
 
-  void setWindowZoom(WorkspaceState workspace, String windowId, WindowZoomUpdate update) {
+  void setWindowZoom(WorkspaceState workspace, String windowId, AssetWindowZoomUpdate update) {
     replaceWorkspace(WorkspaceMutations.setWindowZoom(workspace, windowId, update), queueThumbnail: true);
   }
 

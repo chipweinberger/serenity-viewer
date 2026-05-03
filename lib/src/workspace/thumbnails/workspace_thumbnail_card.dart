@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
-import 'package:serenity_viewer/src/media/models/workspace_media_counts.dart';
+import 'package:serenity_viewer/src/workspace_loading/workspace_media_counts.dart';
 import 'package:serenity_viewer/src/environment/workspace_state.dart';
 
 class WorkspaceThumbnailCard extends StatefulWidget {

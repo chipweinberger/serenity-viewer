@@ -1,8 +1,8 @@
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
-import 'package:serenity_viewer/src/media/models/media_load_plan.dart';
+import 'package:serenity_viewer/src/workspace_loading/media_load_plan.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
-import 'package:serenity_viewer/src/media/models/workspace_media_counts.dart';
+import 'package:serenity_viewer/src/workspace_loading/workspace_media_counts.dart';
 import 'package:serenity_viewer/src/environment/workspace_state.dart';
 
 MediaLoadPlan buildWorkspaceLoadPlan({required Environment environment, required WorkspaceState? activeWorkspace}) {

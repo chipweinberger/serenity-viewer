@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
-import 'package:serenity_viewer/src/workspace/windows/window_frame_view_model.dart';
-import 'package:serenity_viewer/src/workspace/windows/window_zoom_update.dart';
-import 'package:serenity_viewer/src/media/utils/media_preview_transforms.dart';
-import 'package:serenity_viewer/src/media/widgets/media_canvas.dart';
+import 'package:serenity_viewer/src/asset_window/content/asset_content.dart';
+import 'package:serenity_viewer/src/asset_window/content/asset_preview_transforms.dart';
+import 'package:serenity_viewer/src/asset_window/interaction/asset_window_zoom_update.dart';
+import 'package:serenity_viewer/src/asset_window/presentation/asset_window_view_model.dart';
 
-class WindowFrameContent extends StatelessWidget {
-  const WindowFrameContent({
+class AssetWindowContent extends StatelessWidget {
+  const AssetWindowContent({
     super.key,
     required this.viewModel,
     required this.showExpandedVideoControls,
@@ -22,12 +22,12 @@ class WindowFrameContent extends StatelessWidget {
     required this.onCycleVideoPlaybackSpeed,
   });
 
-  final WindowFrameViewModel viewModel;
+  final AssetWindowViewModel viewModel;
   final bool showExpandedVideoControls;
   final bool shrinkContent;
   final double inset;
   final VoidCallback onTap;
-  final ValueChanged<WindowZoomUpdate> onZoomChanged;
+  final ValueChanged<AssetWindowZoomUpdate> onZoomChanged;
   final ValueChanged<Size> onIntrinsicSizeResolved;
   final VoidCallback onTogglePlayback;
   final ValueChanged<bool> onVideoControlInteractionChanged;
@@ -38,16 +38,16 @@ class WindowFrameContent extends StatelessWidget {
     if (!shrinkContent) {
       return 1.0;
     }
-    return previewWindowScaleForInset(viewModel.window, inset);
+    return assetPreviewScaleForInset(viewModel.window, inset);
   }
 
   WorkspaceWindowState _windowForHoverPreview() {
     final scale = _hoverPreviewScale();
-    return scalePreviewWindow(viewModel.window, scale);
+    return scaleAssetPreviewWindow(viewModel.window, scale);
   }
 
-  WindowZoomUpdate _zoomUpdateForWindowState(WindowZoomUpdate update) {
-    return remapWindowZoomUpdateForPreviewScale(update, _hoverPreviewScale());
+  AssetWindowZoomUpdate _zoomUpdateForWindowState(AssetWindowZoomUpdate update) {
+    return remapAssetWindowZoomUpdateForPreviewScale(update, _hoverPreviewScale());
   }
 
   @override
@@ -55,7 +55,7 @@ class WindowFrameContent extends StatelessWidget {
     return Positioned.fill(
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
-        child: MediaCanvas(
+        child: AssetContent(
           key: ValueKey(viewModel.window.asset.id),
           window: _windowForHoverPreview(),
           isLoaded: viewModel.isLoaded,

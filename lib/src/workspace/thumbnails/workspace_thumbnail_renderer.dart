@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/media/utils/media_zoom_utils.dart';
+import 'package:serenity_viewer/src/asset_window/content/asset_zoom_utils.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_projection.dart';
 import 'package:serenity_viewer/src/environment/workspace_window_state.dart';

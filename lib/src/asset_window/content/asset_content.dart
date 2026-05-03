@@ -8,16 +8,16 @@ import 'package:video_player/video_player.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/foundation/keyboard_modifiers.dart';
 import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
-import 'package:serenity_viewer/src/workspace/windows/window_zoom_update.dart';
-import 'package:serenity_viewer/src/media/utils/media_zoom_utils.dart';
-import 'package:serenity_viewer/src/media/widgets/demo_art_widget.dart';
-import 'package:serenity_viewer/src/media/widgets/image_surface.dart';
-import 'package:serenity_viewer/src/media/widgets/media_placeholder_widgets.dart';
-import 'package:serenity_viewer/src/media/widgets/video_surface.dart';
-import 'package:serenity_viewer/src/media/widgets/zoom_box.dart';
+import 'package:serenity_viewer/src/asset_window/content/asset_placeholder_widgets.dart';
+import 'package:serenity_viewer/src/asset_window/content/asset_zoom_utils.dart';
+import 'package:serenity_viewer/src/asset_window/content/demo_art_widget.dart';
+import 'package:serenity_viewer/src/asset_window/content/image_surface.dart';
+import 'package:serenity_viewer/src/asset_window/content/video_surface.dart';
+import 'package:serenity_viewer/src/asset_window/content/zoom_box.dart';
+import 'package:serenity_viewer/src/asset_window/interaction/asset_window_zoom_update.dart';
 
-class MediaCanvas extends StatefulWidget {
-  const MediaCanvas({
+class AssetContent extends StatefulWidget {
+  const AssetContent({
     super.key,
     required this.window,
     required this.isLoaded,
@@ -44,7 +44,7 @@ class MediaCanvas extends StatefulWidget {
   final VideoPlayerController? sharedVideoController;
   final Future<void>? sharedVideoInitialization;
   final VoidCallback onTap;
-  final ValueChanged<WindowZoomUpdate> onZoomChanged;
+  final ValueChanged<AssetWindowZoomUpdate> onZoomChanged;
   final ValueChanged<Size> onIntrinsicSizeResolved;
   final bool isVideoPaused;
   final VoidCallback onTogglePlayback;
@@ -59,10 +59,10 @@ class MediaCanvas extends StatefulWidget {
   final bool videoPreviewMode;
 
   @override
-  State<MediaCanvas> createState() => _SerenityMediaCanvasState();
+  State<AssetContent> createState() => _AssetContentState();
 }
 
-class _SerenityMediaCanvasState extends State<MediaCanvas> {
+class _AssetContentState extends State<AssetContent> {
   static const double _maxZoom = 30.0;
   double _gestureStartZoom = 1;
   Offset _gestureStartContentOffset = Offset.zero;
@@ -83,7 +83,7 @@ class _SerenityMediaCanvasState extends State<MediaCanvas> {
   }
 
   @override
-  void didUpdateWidget(covariant MediaCanvas oldWidget) {
+  void didUpdateWidget(covariant AssetContent oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.window.asset.id != widget.window.asset.id) {
       _gestureStartZoom = 1;
@@ -143,7 +143,7 @@ class _SerenityMediaCanvasState extends State<MediaCanvas> {
     final clampedZoom = nextZoom.clamp(1.0, _maxZoom);
     final snappedZoom = (clampedZoom - 1).abs() < 0.02 ? 1.0 : clampedZoom;
     widget.onZoomChanged(
-      WindowZoomUpdate(
+      AssetWindowZoomUpdate(
         zoom: snappedZoom,
         zoomBaseSize: snappedZoom > 1.0 ? (widget.window.zoomBaseSize ?? fitSize) : null,
         contentOffset: snappedZoom > 1.0
@@ -209,7 +209,7 @@ class _SerenityMediaCanvasState extends State<MediaCanvas> {
         : Offset.zero;
 
     widget.onZoomChanged(
-      WindowZoomUpdate(
+      AssetWindowZoomUpdate(
         zoom: snappedZoom,
         zoomBaseSize: snappedZoom > 1.0 ? (widget.window.zoomBaseSize ?? _gestureStartFitSize) : null,
         contentOffset: nextOffset,

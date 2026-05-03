@@ -1,8 +1,8 @@
 // ignore_for_file: invalid_use_of_protected_member
 
-part of 'window_frame.dart';
+part of 'asset_window.dart';
 
-extension on _WindowFrameState {
+extension on _AssetWindowState {
   bool _handleHardwareKey(KeyEvent event) {
     final pressedKeys = HardwareKeyboard.instance.logicalKeysPressed;
     final nextIsCommandPressed = isCommandPressed(pressedKeys);
@@ -32,19 +32,19 @@ extension on _WindowFrameState {
     return false;
   }
 
-  WindowResizeHandle? _resizeHandleForPosition(Offset localPosition) {
-    return windowResizeHandleForPosition(windowSize: widget.viewModel.window.size, localPosition: localPosition);
+  AssetWindowResizeHandle? _resizeHandleForPosition(Offset localPosition) {
+    return assetWindowResizeHandleForPosition(windowSize: widget.viewModel.window.size, localPosition: localPosition);
   }
 
-  MouseCursor _cursorForHandle(WindowResizeHandle? handle) {
-    return mouseCursorForResizeHandle(handle);
+  MouseCursor _cursorForHandle(AssetWindowResizeHandle? handle) {
+    return mouseCursorForAssetWindowResizeHandle(handle);
   }
 
-  String _nativeCursorKindForHandle(WindowResizeHandle? handle) {
-    return nativeCursorKindForResizeHandle(handle);
+  String _nativeCursorKindForHandle(AssetWindowResizeHandle? handle) {
+    return nativeCursorKindForAssetWindowResizeHandle(handle);
   }
 
-  void _syncNativeCursor(WindowResizeHandle? handle) {
+  void _syncNativeCursor(AssetWindowResizeHandle? handle) {
     if (!Platform.isMacOS) {
       return;
     }
@@ -76,7 +76,7 @@ extension on _WindowFrameState {
       return;
     }
     if (!mounted) {
-      _WindowFrameState._anyWindowResizing = false;
+      _AssetWindowState._anyWindowResizing = false;
       return;
     }
     setState(() {
@@ -86,7 +86,7 @@ extension on _WindowFrameState {
         _hoverPosition = null;
       }
     });
-    _WindowFrameState._anyWindowResizing = false;
+    _AssetWindowState._anyWindowResizing = false;
     _isDraggingWindow = false;
     _syncNativeCursor(preserveHover && _hoverPosition != null ? _resizeHandleForPosition(_hoverPosition!) : null);
   }
@@ -103,7 +103,7 @@ extension on _WindowFrameState {
   }
 
   void _handleMouseEnter(PointerEnterEvent event) {
-    if (_WindowFrameState._anyWindowResizing && !_isResizing) {
+    if (_AssetWindowState._anyWindowResizing && !_isResizing) {
       return;
     }
     _syncNativeCursor(_resizeHandleForPosition(event.localPosition));
@@ -117,7 +117,7 @@ extension on _WindowFrameState {
   }
 
   void _handleMouseHover(PointerHoverEvent event) {
-    if (_WindowFrameState._anyWindowResizing && !_isResizing) {
+    if (_AssetWindowState._anyWindowResizing && !_isResizing) {
       if (_isHovered || _hoverPosition != null) {
         _clearHoverState();
       }
@@ -133,9 +133,9 @@ extension on _WindowFrameState {
     _clearHoverState();
   }
 
-  void _beginResize(PointerDownEvent event, WindowResizeHandle handle) {
+  void _beginResize(PointerDownEvent event, AssetWindowResizeHandle handle) {
     _syncNativeCursor(handle);
-    _WindowFrameState._anyWindowResizing = true;
+    _AssetWindowState._anyWindowResizing = true;
     if (!mounted) {
       return;
     }

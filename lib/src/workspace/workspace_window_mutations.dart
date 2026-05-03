@@ -34,7 +34,7 @@ WorkspaceState _collateWorkspaceWindows(WorkspaceState workspace, {required Size
   });
 }
 
-WorkspaceState _resizeWindow(WorkspaceState workspace, String windowId, WindowResizeHandle handle, Offset delta) {
+WorkspaceState _resizeWindow(WorkspaceState workspace, String windowId, AssetWindowResizeHandle handle, Offset delta) {
   return _updateWindowById(workspace, windowId, (window) => _resizeWindowState(window, handle, delta));
 }
 
@@ -55,7 +55,7 @@ WorkspaceState _fitWindowToContent(WorkspaceState workspace, String windowId) {
   return _updateWindowById(workspace, windowId, (_) => _fitWindowToVisibleContent(currentWindow));
 }
 
-WorkspaceState _setWindowZoom(WorkspaceState workspace, String windowId, WindowZoomUpdate update) {
+WorkspaceState _setWindowZoom(WorkspaceState workspace, String windowId, AssetWindowZoomUpdate update) {
   return _updateWindowById(
     workspace,
     windowId,

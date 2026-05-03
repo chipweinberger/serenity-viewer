@@ -6,23 +6,23 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/media/controllers/media_bridge.dart';
+import 'package:serenity_viewer/src/asset_window/asset_window.dart';
+import 'package:serenity_viewer/src/asset_window/frame/asset_window_resize_helpers.dart';
+import 'package:serenity_viewer/src/asset_window/interaction/asset_window_interaction_state.dart';
+import 'package:serenity_viewer/src/asset_window/interaction/asset_window_zoom_update.dart';
+import 'package:serenity_viewer/src/asset_window/presentation/asset_window_view_model.dart';
+import 'package:serenity_viewer/src/asset_window/presentation/expose_asset_window_card.dart';
+import 'package:serenity_viewer/src/video_tools/media_bridge.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_projection.dart';
 import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
-import 'package:serenity_viewer/src/media/models/media_load_plan.dart';
+import 'package:serenity_viewer/src/workspace_loading/media_load_plan.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
-import 'package:serenity_viewer/src/workspace/windows/window_frame_view_model.dart';
 import 'package:serenity_viewer/src/workspace/canvas/workspace_canvas_view_model.dart';
-import 'package:serenity_viewer/src/workspace/windows/window_zoom_update.dart';
 import 'package:serenity_viewer/src/environment/workspace_asset.dart';
 import 'package:serenity_viewer/src/environment/workspace_state.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
-import 'package:serenity_viewer/src/workspace/windows/window_interaction_state.dart';
-import 'package:serenity_viewer/src/workspace/expose/expose_window_card.dart';
-import 'package:serenity_viewer/src/workspace/windows/window_frame.dart';
-import 'package:serenity_viewer/src/workspace/windows/window_resize_helpers.dart';
 import 'package:serenity_viewer/src/workspace/expose/expose_layouts.dart';
 
 typedef SharedVideoLookup = SharedVideoState? Function(WorkspaceWindowState window, {required bool isLoaded});
@@ -70,10 +70,10 @@ class WorkspaceScreenActions {
   final ValueChanged<String> focusWindow;
   final ValueChanged<String> restorePreviousWindowZOrder;
   final void Function(String windowId, Offset delta) moveWindow;
-  final void Function(String windowId, WindowResizeHandle handle, Offset delta) resizeWindow;
+  final void Function(String windowId, AssetWindowResizeHandle handle, Offset delta) resizeWindow;
   final void Function(String windowId, double scaleDelta, Offset localFocalPoint) transformWindowFromTrackpad;
   final ValueChanged<String> fitWindowToContent;
-  final void Function(String windowId, WindowZoomUpdate update) setWindowZoom;
+  final void Function(String windowId, AssetWindowZoomUpdate update) setWindowZoom;
   final void Function(String windowId, int positionMs) setVideoPosition;
   final ValueChanged<String> cycleVideoPlaybackSpeed;
   final void Function(String windowId, Size intrinsicSize) setWindowIntrinsicSize;
@@ -105,7 +105,7 @@ class WorkspaceScreen extends StatelessWidget {
   final Environment environment;
   final List<WorkspaceState> openWorkspaces;
   final ChromeState chromeState;
-  final WindowInteractionState windowInteractionState;
+  final AssetWindowInteractionState windowInteractionState;
   final MediaLoadPlan loadPlan;
   final SharedVideoLookup sharedVideoLookup;
   final WorkspaceScreenActions actions;
@@ -229,7 +229,7 @@ class WorkspaceScreen extends StatelessWidget {
     final screenOffset = workspaceScreenOffsetForWindow(workspace, window, viewportSize);
     final isLoaded = _isWindowLoaded(canvasViewModel.loadPlan, window);
     final sharedVideoState = sharedVideoLookup(window, isLoaded: isLoaded);
-    final windowViewModel = WindowFrameViewModel(
+    final windowViewModel = AssetWindowViewModel(
       window: window,
       isLoaded: isLoaded,
       sharedVideoController: sharedVideoState?.controller,
@@ -255,7 +255,7 @@ class WorkspaceScreen extends StatelessWidget {
         child: SizedBox(
           width: window.size.width,
           height: window.size.height,
-          child: WindowFrame(
+          child: AssetWindow(
             viewModel: windowViewModel,
             onTap: () => _handleFreeformWindowTap(window),
             onPinnedHoverRequested: () => actions.setPinnedHoverWindow(window.asset.id),
@@ -319,14 +319,14 @@ class WorkspaceScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildExposeWindowCard(SerenityWindowLayout layout, MediaLoadPlan loadPlan) {
+  Widget _buildExposeAssetWindowCard(SerenityWindowLayout layout, MediaLoadPlan loadPlan) {
     final window = layout.window;
     final isLoaded = _isWindowLoaded(loadPlan, window);
     final sharedVideoState = sharedVideoLookup(window, isLoaded: isLoaded);
 
     return Positioned.fromRect(
       rect: layout.rect,
-      child: ExposeWindowCard(
+      child: ExposeAssetWindowCard(
         window: window,
         isLoaded: isLoaded,
         sharedVideoController: sharedVideoState?.controller,
@@ -358,7 +358,7 @@ class WorkspaceScreen extends StatelessWidget {
           }
 
           final exposeLayouts = computeExposeLayoutRects(windows: windows, viewportSize: viewportSize);
-          return Stack(children: [for (final layout in exposeLayouts) _buildExposeWindowCard(layout, loadPlan)]);
+          return Stack(children: [for (final layout in exposeLayouts) _buildExposeAssetWindowCard(layout, loadPlan)]);
         },
       ),
     );

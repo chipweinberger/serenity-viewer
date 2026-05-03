@@ -1,8 +1,8 @@
 // ignore_for_file: invalid_use_of_protected_member
 
-part of 'window_frame.dart';
+part of 'asset_window.dart';
 
-extension on _WindowFrameState {
+extension on _AssetWindowState {
   bool get _isOptionGestureTargetActive {
     return _isOptionPressed &&
         !_isCommandPressed &&
@@ -18,11 +18,11 @@ extension on _WindowFrameState {
 
   bool get _showHoverFrame => _shouldShowCommandOverlay;
 
-  WindowResizeHandle? get _hoveredResizeHandle {
+  AssetWindowResizeHandle? get _hoveredResizeHandle {
     return _hoverPosition == null ? null : _resizeHandleForPosition(_hoverPosition!);
   }
 
-  WindowResizeHandle? get _displayedResizeHandle {
+  AssetWindowResizeHandle? get _displayedResizeHandle {
     return _activeResizeHandle ?? _hoveredResizeHandle;
   }
 
@@ -33,30 +33,30 @@ extension on _WindowFrameState {
   void _handleContentTap() {
     if (widget.viewModel.isPinnedHover) {
       widget.onPinnedHoverDismissed();
-      _WindowFrameState._lastTappedWindowId = null;
-      _WindowFrameState._lastContentTapAt = null;
+      _AssetWindowState._lastTappedWindowId = null;
+      _AssetWindowState._lastContentTapAt = null;
       return;
     }
 
     final now = DateTime.now();
     final isDoubleClick =
-        _WindowFrameState._lastTappedWindowId == widget.viewModel.window.asset.id &&
-        _WindowFrameState._lastContentTapAt != null &&
-        now.difference(_WindowFrameState._lastContentTapAt!) <= _WindowFrameState._doubleClickThreshold;
+        _AssetWindowState._lastTappedWindowId == widget.viewModel.window.asset.id &&
+        _AssetWindowState._lastContentTapAt != null &&
+        now.difference(_AssetWindowState._lastContentTapAt!) <= _AssetWindowState._doubleClickThreshold;
     widget.onTap();
     if (isDoubleClick) {
-      _WindowFrameState._lastTappedWindowId = null;
-      _WindowFrameState._lastContentTapAt = null;
+      _AssetWindowState._lastTappedWindowId = null;
+      _AssetWindowState._lastContentTapAt = null;
       widget.onPinnedHoverRequested();
       return;
     }
 
-    _WindowFrameState._lastTappedWindowId = widget.viewModel.window.asset.id;
-    _WindowFrameState._lastContentTapAt = now;
+    _AssetWindowState._lastTappedWindowId = widget.viewModel.window.asset.id;
+    _AssetWindowState._lastContentTapAt = now;
   }
 
   Widget _buildContent({required bool shrinkContent, required double inset}) {
-    return WindowFrameContent(
+    return AssetWindowContent(
       viewModel: widget.viewModel,
       showExpandedVideoControls: _showExpandedVideoControls,
       shrinkContent: shrinkContent,
@@ -86,7 +86,7 @@ extension on _WindowFrameState {
       return const SizedBox.shrink();
     }
 
-    return WindowOverlay(
+    return AssetWindowOverlay(
       workspaceZoom: widget.viewModel.workspaceZoom,
       filename: widget.viewModel.window.asset.filename,
       isSelected: widget.viewModel.isSelected,
@@ -101,7 +101,7 @@ extension on _WindowFrameState {
   Widget _buildFramedWindow() {
     const hoverInset = 3.0;
 
-    return WindowFrameChrome(
+    return AssetWindowChrome(
       flashValue: _flashAnimation.value,
       isFocused: widget.viewModel.isFocused,
       showHoverFrame: _showHoverFrame,

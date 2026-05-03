@@ -4,7 +4,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/media/widgets/zoom_box.dart';
+import 'package:serenity_viewer/src/asset_window/content/zoom_box.dart';
 
 class ImageSurface extends StatefulWidget {
   const ImageSurface({

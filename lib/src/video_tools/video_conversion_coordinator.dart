@@ -3,11 +3,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/media/controllers/media_bridge.dart';
+import 'package:serenity_viewer/src/video_tools/media_bridge.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/media/models/settings_and_video_models.dart';
+import 'package:serenity_viewer/src/video_tools/settings_and_video_models.dart';
 import 'package:serenity_viewer/src/environment/workspace_state.dart';
-import 'package:serenity_viewer/src/media/utils/media_zoom_utils.dart';
+import 'package:serenity_viewer/src/asset_window/content/asset_zoom_utils.dart';
 
 class VideoConversionCoordinator {
   VideoConversionCoordinator({

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 @immutable
-class WindowZoomUpdate {
-  const WindowZoomUpdate({
+class AssetWindowZoomUpdate {
+  const AssetWindowZoomUpdate({
     required this.zoom,
     this.zoomBaseSize,
     this.contentOffset,

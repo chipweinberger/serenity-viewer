@@ -45,38 +45,38 @@ _WindowEdges _windowEdges(WorkspaceWindowState window) {
   );
 }
 
-_WindowEdges _applyResizeDelta(_WindowEdges edges, WindowResizeHandle handle, Offset delta) {
+_WindowEdges _applyResizeDelta(_WindowEdges edges, AssetWindowResizeHandle handle, Offset delta) {
   var left = edges.left;
   var top = edges.top;
   var right = edges.right;
   var bottom = edges.bottom;
 
   switch (handle) {
-    case WindowResizeHandle.left:
+    case AssetWindowResizeHandle.left:
       left += delta.dx;
       break;
-    case WindowResizeHandle.right:
+    case AssetWindowResizeHandle.right:
       right += delta.dx;
       break;
-    case WindowResizeHandle.top:
+    case AssetWindowResizeHandle.top:
       top += delta.dy;
       break;
-    case WindowResizeHandle.bottom:
+    case AssetWindowResizeHandle.bottom:
       bottom += delta.dy;
       break;
-    case WindowResizeHandle.topLeft:
+    case AssetWindowResizeHandle.topLeft:
       left += delta.dx;
       top += delta.dy;
       break;
-    case WindowResizeHandle.topRight:
+    case AssetWindowResizeHandle.topRight:
       right += delta.dx;
       top += delta.dy;
       break;
-    case WindowResizeHandle.bottomLeft:
+    case AssetWindowResizeHandle.bottomLeft:
       left += delta.dx;
       bottom += delta.dy;
       break;
-    case WindowResizeHandle.bottomRight:
+    case AssetWindowResizeHandle.bottomRight:
       right += delta.dx;
       bottom += delta.dy;
       break;
@@ -85,15 +85,23 @@ _WindowEdges _applyResizeDelta(_WindowEdges edges, WindowResizeHandle handle, Of
   return (left: left, top: top, right: right, bottom: bottom);
 }
 
-bool _resizesFromLeft(WindowResizeHandle handle) {
-  return {WindowResizeHandle.left, WindowResizeHandle.topLeft, WindowResizeHandle.bottomLeft}.contains(handle);
+bool _resizesFromLeft(AssetWindowResizeHandle handle) {
+  return {
+    AssetWindowResizeHandle.left,
+    AssetWindowResizeHandle.topLeft,
+    AssetWindowResizeHandle.bottomLeft,
+  }.contains(handle);
 }
 
-bool _resizesFromTop(WindowResizeHandle handle) {
-  return {WindowResizeHandle.top, WindowResizeHandle.topLeft, WindowResizeHandle.topRight}.contains(handle);
+bool _resizesFromTop(AssetWindowResizeHandle handle) {
+  return {
+    AssetWindowResizeHandle.top,
+    AssetWindowResizeHandle.topLeft,
+    AssetWindowResizeHandle.topRight,
+  }.contains(handle);
 }
 
-_WindowBounds _clampResizedBounds(_WindowEdges edges, WindowResizeHandle handle) {
+_WindowBounds _clampResizedBounds(_WindowEdges edges, AssetWindowResizeHandle handle) {
   var left = edges.left;
   var top = edges.top;
   var right = edges.right;
@@ -127,12 +135,12 @@ _WindowBounds _clampResizedBounds(_WindowEdges edges, WindowResizeHandle handle)
   return (position: Offset(left, top), size: Size(width, height));
 }
 
-_WindowBounds _resizedBoundsForWindow(WorkspaceWindowState window, WindowResizeHandle handle, Offset delta) {
+_WindowBounds _resizedBoundsForWindow(WorkspaceWindowState window, AssetWindowResizeHandle handle, Offset delta) {
   final resizedEdges = _applyResizeDelta(_windowEdges(window), handle, delta);
   return _clampResizedBounds(resizedEdges, handle);
 }
 
-WorkspaceWindowState _resizeWindowState(WorkspaceWindowState window, WindowResizeHandle handle, Offset delta) {
+WorkspaceWindowState _resizeWindowState(WorkspaceWindowState window, AssetWindowResizeHandle handle, Offset delta) {
   final nextBounds = _resizedBoundsForWindow(window, handle, delta);
   return window.copyWith(position: nextBounds.position, size: nextBounds.size);
 }

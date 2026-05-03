@@ -8,9 +8,9 @@ import 'package:video_player/video_player.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
-import 'package:serenity_viewer/src/media/models/media_load_plan.dart';
+import 'package:serenity_viewer/src/workspace_loading/media_load_plan.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
-import 'package:serenity_viewer/src/media/models/settings_and_video_models.dart';
+import 'package:serenity_viewer/src/video_tools/settings_and_video_models.dart';
 import 'package:serenity_viewer/src/environment/workspace_asset.dart';
 
 @immutable

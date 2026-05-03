@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class WindowFrameChrome extends StatelessWidget {
-  const WindowFrameChrome({
+class AssetWindowChrome extends StatelessWidget {
+  const AssetWindowChrome({
     super.key,
     required this.flashValue,
     required this.isFocused,

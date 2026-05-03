@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
-import 'package:serenity_viewer/src/media/widgets/zoom_box.dart';
+import 'package:serenity_viewer/src/asset_window/content/zoom_box.dart';
 
 class _SerenityVideoPlaybackCoordinator {
   _SerenityVideoPlaybackCoordinator({required this.onIntrinsicSizeResolved, required this.onPositionChanged});

@@ -9,11 +9,11 @@ import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/foundation/keyboard_modifiers.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
 import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
-import 'package:serenity_viewer/src/media/utils/media_preview_transforms.dart';
-import 'package:serenity_viewer/src/media/widgets/media_canvas.dart';
+import 'package:serenity_viewer/src/asset_window/content/asset_content.dart';
+import 'package:serenity_viewer/src/asset_window/content/asset_preview_transforms.dart';
 
-class ExposeWindowCard extends StatefulWidget {
-  const ExposeWindowCard({
+class ExposeAssetWindowCard extends StatefulWidget {
+  const ExposeAssetWindowCard({
     super.key,
     required this.window,
     required this.isLoaded,
@@ -41,10 +41,10 @@ class ExposeWindowCard extends StatefulWidget {
   final VoidCallback onRemove;
 
   @override
-  State<ExposeWindowCard> createState() => _ExposeWindowCardState();
+  State<ExposeAssetWindowCard> createState() => _ExposeAssetWindowCardState();
 }
 
-class _ExposeWindowCardState extends State<ExposeWindowCard> {
+class _ExposeAssetWindowCardState extends State<ExposeAssetWindowCard> {
   static const double _maxCardCornerRadius = 20.0;
 
   bool _isHovered = false;
@@ -71,8 +71,8 @@ class _ExposeWindowCardState extends State<ExposeWindowCard> {
   }
 
   WorkspaceWindowState _windowForPreview(Size previewSize) {
-    final scale = previewWindowScaleForSize(widget.window, previewSize);
-    return scalePreviewWindow(widget.window, scale, size: previewSize);
+    final scale = assetPreviewScaleForSize(widget.window, previewSize);
+    return scaleAssetPreviewWindow(widget.window, scale, size: previewSize);
   }
 
   Widget _buildMediaPreview() {
@@ -80,7 +80,7 @@ class _ExposeWindowCardState extends State<ExposeWindowCard> {
       builder: (context, constraints) {
         final previewWindow = _windowForPreview(constraints.biggest);
         return IgnorePointer(
-          child: MediaCanvas(
+          child: AssetContent(
             window: previewWindow,
             isLoaded: widget.isLoaded,
             sharedVideoController: widget.sharedVideoController,

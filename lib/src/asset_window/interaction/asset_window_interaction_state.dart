@@ -1,6 +1,6 @@
 import 'dart:async';
 
-class WindowInteractionState {
+class AssetWindowInteractionState {
   final Map<String, bool> pausedVideoWindows = {};
   final Map<String, int> previousWindowZOrders = {};
   final Set<String> selectedExposeWindowIds = {};

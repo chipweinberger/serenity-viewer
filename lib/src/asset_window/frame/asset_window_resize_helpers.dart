@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-enum WindowResizeHandle { left, right, top, bottom, topLeft, topRight, bottomLeft, bottomRight }
+enum AssetWindowResizeHandle { left, right, top, bottom, topLeft, topRight, bottomLeft, bottomRight }
 
-WindowResizeHandle? windowResizeHandleForPosition({
+AssetWindowResizeHandle? assetWindowResizeHandleForPosition({
   required Size windowSize,
   required Offset localPosition,
   double edgeInset = 8,
@@ -20,64 +20,64 @@ WindowResizeHandle? windowResizeHandleForPosition({
   final isBottom = localPosition.dy >= windowSize.height - edgeInset;
 
   if (isInTopLeftCorner) {
-    return WindowResizeHandle.topLeft;
+    return AssetWindowResizeHandle.topLeft;
   }
   if (isInTopRightCorner) {
-    return WindowResizeHandle.topRight;
+    return AssetWindowResizeHandle.topRight;
   }
   if (isInBottomLeftCorner) {
-    return WindowResizeHandle.bottomLeft;
+    return AssetWindowResizeHandle.bottomLeft;
   }
   if (isInBottomRightCorner) {
-    return WindowResizeHandle.bottomRight;
+    return AssetWindowResizeHandle.bottomRight;
   }
   if (isLeft) {
-    return WindowResizeHandle.left;
+    return AssetWindowResizeHandle.left;
   }
   if (isRight) {
-    return WindowResizeHandle.right;
+    return AssetWindowResizeHandle.right;
   }
   if (isTop) {
-    return WindowResizeHandle.top;
+    return AssetWindowResizeHandle.top;
   }
   if (isBottom) {
-    return WindowResizeHandle.bottom;
+    return AssetWindowResizeHandle.bottom;
   }
   return null;
 }
 
-MouseCursor mouseCursorForResizeHandle(WindowResizeHandle? handle) {
+MouseCursor mouseCursorForAssetWindowResizeHandle(AssetWindowResizeHandle? handle) {
   switch (handle) {
-    case WindowResizeHandle.left:
-    case WindowResizeHandle.right:
+    case AssetWindowResizeHandle.left:
+    case AssetWindowResizeHandle.right:
       return SystemMouseCursors.resizeLeftRight;
-    case WindowResizeHandle.top:
-    case WindowResizeHandle.bottom:
+    case AssetWindowResizeHandle.top:
+    case AssetWindowResizeHandle.bottom:
       return SystemMouseCursors.resizeUpDown;
-    case WindowResizeHandle.topLeft:
-    case WindowResizeHandle.bottomRight:
+    case AssetWindowResizeHandle.topLeft:
+    case AssetWindowResizeHandle.bottomRight:
       return SystemMouseCursors.resizeUpLeftDownRight;
-    case WindowResizeHandle.topRight:
-    case WindowResizeHandle.bottomLeft:
+    case AssetWindowResizeHandle.topRight:
+    case AssetWindowResizeHandle.bottomLeft:
       return SystemMouseCursors.resizeUpRightDownLeft;
     case null:
       return SystemMouseCursors.basic;
   }
 }
 
-String nativeCursorKindForResizeHandle(WindowResizeHandle? handle) {
+String nativeCursorKindForAssetWindowResizeHandle(AssetWindowResizeHandle? handle) {
   switch (handle) {
-    case WindowResizeHandle.left:
-    case WindowResizeHandle.right:
+    case AssetWindowResizeHandle.left:
+    case AssetWindowResizeHandle.right:
       return 'leftRight';
-    case WindowResizeHandle.top:
-    case WindowResizeHandle.bottom:
+    case AssetWindowResizeHandle.top:
+    case AssetWindowResizeHandle.bottom:
       return 'upDown';
-    case WindowResizeHandle.topLeft:
-    case WindowResizeHandle.bottomRight:
+    case AssetWindowResizeHandle.topLeft:
+    case AssetWindowResizeHandle.bottomRight:
       return 'diagonalPrimary';
-    case WindowResizeHandle.topRight:
-    case WindowResizeHandle.bottomLeft:
+    case AssetWindowResizeHandle.topRight:
+    case AssetWindowResizeHandle.bottomLeft:
       return 'diagonalSecondary';
     case null:
       return 'basic';

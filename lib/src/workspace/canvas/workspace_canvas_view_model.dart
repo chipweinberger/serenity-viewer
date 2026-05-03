@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
-import 'package:serenity_viewer/src/media/models/media_load_plan.dart';
+import 'package:serenity_viewer/src/workspace_loading/media_load_plan.dart';
 import 'package:serenity_viewer/src/environment/workspace_state.dart';
 
 @immutable

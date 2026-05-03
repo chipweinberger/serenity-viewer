@@ -80,7 +80,7 @@ extension _AppShellWindowActions on _AppShellState {
     }
   }
 
-  void _resizeWindow(String windowId, WindowResizeHandle handle, Offset delta) {
+  void _resizeWindow(String windowId, AssetWindowResizeHandle handle, Offset delta) {
     _workspaceController.resizeWindow(_activeWorkspace, windowId, handle, delta);
   }
 
@@ -113,7 +113,7 @@ extension _AppShellWindowActions on _AppShellState {
     unawaited(_workspaceController.handleWorkspacePanZoomEnd());
   }
 
-  void _setWindowZoom(String windowId, WindowZoomUpdate update) {
+  void _setWindowZoom(String windowId, AssetWindowZoomUpdate update) {
     _workspaceController.setWindowZoom(_activeWorkspace, windowId, update);
   }
 

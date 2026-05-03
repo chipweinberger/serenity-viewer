@@ -8,18 +8,18 @@ import 'package:flutter/services.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/foundation/keyboard_modifiers.dart';
-import 'package:serenity_viewer/src/workspace/windows/window_frame_view_model.dart';
-import 'package:serenity_viewer/src/workspace/windows/window_zoom_update.dart';
-import 'package:serenity_viewer/src/workspace/windows/window_frame_chrome.dart';
-import 'package:serenity_viewer/src/workspace/windows/window_frame_content.dart';
-import 'package:serenity_viewer/src/workspace/windows/window_overlay.dart';
-import 'package:serenity_viewer/src/workspace/windows/window_resize_helpers.dart';
+import 'package:serenity_viewer/src/asset_window/content/asset_window_content.dart';
+import 'package:serenity_viewer/src/asset_window/frame/asset_window_chrome.dart';
+import 'package:serenity_viewer/src/asset_window/frame/asset_window_overlay.dart';
+import 'package:serenity_viewer/src/asset_window/frame/asset_window_resize_helpers.dart';
+import 'package:serenity_viewer/src/asset_window/interaction/asset_window_zoom_update.dart';
+import 'package:serenity_viewer/src/asset_window/presentation/asset_window_view_model.dart';
 
-part 'window_frame_interactions.dart';
-part 'window_frame_presentation.dart';
+part 'asset_window_interactions.dart';
+part 'asset_window_presentation.dart';
 
-class WindowFrame extends StatefulWidget {
-  const WindowFrame({
+class AssetWindow extends StatefulWidget {
+  const AssetWindow({
     super.key,
     required this.viewModel,
     required this.onTap,
@@ -42,15 +42,15 @@ class WindowFrame extends StatefulWidget {
     required this.onOptionGestureReleased,
   });
 
-  final WindowFrameViewModel viewModel;
+  final AssetWindowViewModel viewModel;
   final VoidCallback onTap;
   final VoidCallback onPinnedHoverRequested;
   final VoidCallback onPinnedHoverDismissed;
   final VoidCallback onToggleSelected;
   final ValueChanged<Offset> onPanUpdate;
   final void Function(double scaleDelta, Offset localFocalPoint) onTrackpadWindowScale;
-  final void Function(WindowResizeHandle handle, Offset delta) onResizeUpdate;
-  final ValueChanged<WindowZoomUpdate> onZoomChanged;
+  final void Function(AssetWindowResizeHandle handle, Offset delta) onResizeUpdate;
+  final ValueChanged<AssetWindowZoomUpdate> onZoomChanged;
   final ValueChanged<Size> onIntrinsicSizeResolved;
   final ValueChanged<int> onVideoPositionChanged;
   final VoidCallback onCycleVideoPlaybackSpeed;
@@ -63,10 +63,10 @@ class WindowFrame extends StatefulWidget {
   final VoidCallback onOptionGestureReleased;
 
   @override
-  State<WindowFrame> createState() => _WindowFrameState();
+  State<AssetWindow> createState() => _AssetWindowState();
 }
 
-class _WindowFrameState extends State<WindowFrame> with SingleTickerProviderStateMixin {
+class _AssetWindowState extends State<AssetWindow> with SingleTickerProviderStateMixin {
   static bool _anyWindowResizing = false;
   static const Duration _doubleClickThreshold = Duration(milliseconds: 275);
   static String? _lastTappedWindowId;
@@ -82,7 +82,7 @@ class _WindowFrameState extends State<WindowFrame> with SingleTickerProviderStat
   bool _claimedOptionGestureTarget = false;
   double _lastTrackpadScale = 1.0;
   Offset? _hoverPosition;
-  WindowResizeHandle? _activeResizeHandle;
+  AssetWindowResizeHandle? _activeResizeHandle;
   String? _lastNativeCursorKind;
   late final AnimationController _flashController;
   late final Animation<double> _flashAnimation;
@@ -113,7 +113,7 @@ class _WindowFrameState extends State<WindowFrame> with SingleTickerProviderStat
   }
 
   @override
-  void didUpdateWidget(covariant WindowFrame oldWidget) {
+  void didUpdateWidget(covariant AssetWindow oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.viewModel.flashNonce != 0 && widget.viewModel.flashNonce != oldWidget.viewModel.flashNonce) {
       unawaited(_flashController.forward(from: 0));

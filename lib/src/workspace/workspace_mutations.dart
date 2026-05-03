@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/environment/workspace_window_state.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
-import 'package:serenity_viewer/src/workspace/windows/window_zoom_update.dart';
+import 'package:serenity_viewer/src/asset_window/frame/asset_window_resize_helpers.dart';
+import 'package:serenity_viewer/src/asset_window/content/asset_zoom_utils.dart';
+import 'package:serenity_viewer/src/asset_window/interaction/asset_window_zoom_update.dart';
 import 'package:serenity_viewer/src/environment/workspace_state.dart';
-import 'package:serenity_viewer/src/media/utils/media_zoom_utils.dart';
-import 'package:serenity_viewer/src/workspace/windows/window_resize_helpers.dart';
 
 part 'workspace_environment_mutations.dart';
 part 'workspace_viewport_mutations.dart';
@@ -127,7 +127,7 @@ class WorkspaceMutations {
   static WorkspaceState resizeWindow(
     WorkspaceState workspace,
     String windowId,
-    WindowResizeHandle handle,
+    AssetWindowResizeHandle handle,
     Offset delta,
   ) {
     return _resizeWindow(workspace, windowId, handle, delta);
@@ -141,7 +141,7 @@ class WorkspaceMutations {
     return _fitWindowToContent(workspace, windowId);
   }
 
-  static WorkspaceState setWindowZoom(WorkspaceState workspace, String windowId, WindowZoomUpdate update) {
+  static WorkspaceState setWindowZoom(WorkspaceState workspace, String windowId, AssetWindowZoomUpdate update) {
     return _setWindowZoom(workspace, windowId, update);
   }
 
