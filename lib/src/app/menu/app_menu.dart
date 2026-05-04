@@ -123,6 +123,48 @@ class AppMenu extends StatelessWidget {
 
   final Widget child;
 
+  ({
+    EnvironmentStoreState environmentStoreState,
+    WindowInteractionState windowInteractionState,
+    WorkspaceWindowHistoryState workspaceWindowHistoryState,
+  })
+  _watchState(BuildContext context) {
+    return (
+      environmentStoreState: context.watch<EnvironmentStoreState>(),
+      windowInteractionState: context.watch<WindowInteractionState>(),
+      workspaceWindowHistoryState: context.watch<WorkspaceWindowHistoryState>(),
+    );
+  }
+
+  ({
+    AppUiController appUiController,
+    PlatformBridge platformBridge,
+    DocumentCoordinator documentCoordinator,
+    WorkspaceWindowController workspaceWindowController,
+    EnvironmentController environmentController,
+    WorkspaceVideoConversionController workspaceVideoConversionController,
+    WorkspaceWindowHistoryController workspaceWindowHistoryController,
+    WorkspaceCollateController workspaceCollateController,
+    WorkspaceAssetPickerController workspaceAssetPickerController,
+    AppFeedbackController feedback,
+    AppSettingsController settings,
+  })
+  _readDependencies(BuildContext context) {
+    return (
+      appUiController: context.read<AppUiController>(),
+      platformBridge: context.read<PlatformBridge>(),
+      documentCoordinator: context.read<DocumentCoordinator>(),
+      workspaceWindowController: context.read<WorkspaceWindowController>(),
+      environmentController: context.read<EnvironmentController>(),
+      workspaceVideoConversionController: context.read<WorkspaceVideoConversionController>(),
+      workspaceWindowHistoryController: context.read<WorkspaceWindowHistoryController>(),
+      workspaceCollateController: context.read<WorkspaceCollateController>(),
+      workspaceAssetPickerController: context.read<WorkspaceAssetPickerController>(),
+      feedback: context.read<AppFeedbackController>(),
+      settings: context.read<AppSettingsController>(),
+    );
+  }
+
   _MenuState _buildState({
     required EnvironmentStoreState environmentStoreState,
     required WindowInteractionState windowInteractionState,
@@ -455,53 +497,43 @@ class AppMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final environmentStoreState = context.watch<EnvironmentStoreState>();
-    final windowInteractionState = context.watch<WindowInteractionState>();
-    final workspaceWindowHistoryState = context.watch<WorkspaceWindowHistoryState>();
-    final appUiController = context.read<AppUiController>();
-    final platformBridge = context.read<PlatformBridge>();
-    final documentCoordinator = context.read<DocumentCoordinator>();
-    final workspaceWindowController = context.read<WorkspaceWindowController>();
-    final environmentController = context.read<EnvironmentController>();
-    final workspaceVideoConversionController = context.read<WorkspaceVideoConversionController>();
-    final workspaceWindowHistoryController = context.read<WorkspaceWindowHistoryController>();
-    final workspaceCollateController = context.read<WorkspaceCollateController>();
-    final workspaceAssetPickerController = context.read<WorkspaceAssetPickerController>();
-    final feedback = context.read<AppFeedbackController>();
-    final settings = context.read<AppSettingsController>();
+    final state = _watchState(context);
+    final dependencies = _readDependencies(context);
 
-    final state = _buildState(
-      environmentStoreState: environmentStoreState,
-      windowInteractionState: windowInteractionState,
-      workspaceWindowHistoryState: workspaceWindowHistoryState,
-      workspaceWindowController: workspaceWindowController,
+    final menuState = _buildState(
+      environmentStoreState: state.environmentStoreState,
+      windowInteractionState: state.windowInteractionState,
+      workspaceWindowHistoryState: state.workspaceWindowHistoryState,
+      workspaceWindowController: dependencies.workspaceWindowController,
     );
-    final app = _buildAppActions(feedback: feedback, settings: settings);
+    final app = _buildAppActions(feedback: dependencies.feedback, settings: dependencies.settings);
     final file = _buildFileActions(
-      documentCoordinator: documentCoordinator,
-      workspaceAssetPickerController: workspaceAssetPickerController,
+      documentCoordinator: dependencies.documentCoordinator,
+      workspaceAssetPickerController: dependencies.workspaceAssetPickerController,
     );
     final asset = _buildAssetActions(
-      platformBridge: platformBridge,
-      workspaceVideoConversionController: workspaceVideoConversionController,
+      platformBridge: dependencies.platformBridge,
+      workspaceVideoConversionController: dependencies.workspaceVideoConversionController,
     );
     final window = _buildWindowActions(
-      environmentController: environmentController,
-      workspaceWindowController: workspaceWindowController,
-      workspaceWindowHistoryController: workspaceWindowHistoryController,
+      environmentController: dependencies.environmentController,
+      workspaceWindowController: dependencies.workspaceWindowController,
+      workspaceWindowHistoryController: dependencies.workspaceWindowHistoryController,
     );
     final workspace = _buildWorkspaceActions(
-      appUiController: appUiController,
-      environmentController: environmentController,
-      workspaceWindowController: workspaceWindowController,
-      workspaceCollateController: workspaceCollateController,
-      feedback: feedback,
+      appUiController: dependencies.appUiController,
+      environmentController: dependencies.environmentController,
+      workspaceWindowController: dependencies.workspaceWindowController,
+      workspaceCollateController: dependencies.workspaceCollateController,
+      feedback: dependencies.feedback,
     );
-    final history = _buildHistoryActions(workspaceWindowHistoryController: workspaceWindowHistoryController);
+    final history = _buildHistoryActions(
+      workspaceWindowHistoryController: dependencies.workspaceWindowHistoryController,
+    );
 
     return PlatformMenuBar(
       menus: _buildMenus(
-        state: state,
+        state: menuState,
         app: app,
         file: file,
         window: window,

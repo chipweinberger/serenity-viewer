@@ -35,6 +35,58 @@ export 'package:serenity_viewer/src/app/views/app_main_view_contract.dart';
 class AppMainView extends StatelessWidget {
   const AppMainView({super.key});
 
+  ({
+    AppUiState appUiState,
+    EnvironmentStoreState environmentStoreState,
+    WindowInteractionState windowInteractionState,
+    WorkspaceViewportState workspaceViewportState,
+  })
+  _watchState(BuildContext context) {
+    return (
+      appUiState: context.watch<AppUiState>(),
+      environmentStoreState: context.watch<EnvironmentStoreState>(),
+      windowInteractionState: context.watch<WindowInteractionState>(),
+      workspaceViewportState: context.watch<WorkspaceViewportState>(),
+    );
+  }
+
+  ({
+    AppUiHandles uiHandles,
+    AppUiController appUiController,
+    SharedVideoControllerPool sharedVideoControllerPool,
+    PlatformBridge platformBridge,
+    EnvironmentController environmentController,
+    WorkspaceExposeLayoutController workspaceExposeLayoutController,
+    WorkspaceLinksController workspaceLinksController,
+    WorkspaceLinksLauncher workspaceLinksLauncher,
+    WorkspaceLinksPrompts workspaceLinksPrompts,
+    ThumbnailController thumbnailController,
+    WorkspaceWindowHistoryController windowHistoryController,
+    WorkspaceMediaImportController workspaceMediaImportController,
+    WorkspaceWindowController workspaceWindowController,
+    WorkspaceViewportSessionController workspaceViewportSessionController,
+    WorkspaceCollateController workspaceCollateController,
+  })
+  _readDependencies(BuildContext context) {
+    return (
+      uiHandles: context.read<AppUiHandles>(),
+      appUiController: context.read<AppUiController>(),
+      sharedVideoControllerPool: context.read<SharedVideoControllerPool>(),
+      platformBridge: context.read<PlatformBridge>(),
+      environmentController: context.read<EnvironmentController>(),
+      workspaceExposeLayoutController: context.read<WorkspaceExposeLayoutController>(),
+      workspaceLinksController: context.read<WorkspaceLinksController>(),
+      workspaceLinksLauncher: context.read<WorkspaceLinksLauncher>(),
+      workspaceLinksPrompts: context.read<WorkspaceLinksPrompts>(),
+      thumbnailController: context.read<ThumbnailController>(),
+      windowHistoryController: context.read<WorkspaceWindowHistoryController>(),
+      workspaceMediaImportController: context.read<WorkspaceMediaImportController>(),
+      workspaceWindowController: context.read<WorkspaceWindowController>(),
+      workspaceViewportSessionController: context.read<WorkspaceViewportSessionController>(),
+      workspaceCollateController: context.read<WorkspaceCollateController>(),
+    );
+  }
+
   AppMainViewModel _buildModel({
     required AppUiState appUiState,
     required EnvironmentStoreState environmentStoreState,
@@ -186,51 +238,34 @@ class AppMainView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appUiState = context.watch<AppUiState>();
-    final environmentStoreState = context.watch<EnvironmentStoreState>();
-    final windowInteractionState = context.watch<WindowInteractionState>();
-    final workspaceViewportState = context.watch<WorkspaceViewportState>();
-    final uiHandles = context.read<AppUiHandles>();
-    final appUiController = context.read<AppUiController>();
-    final sharedVideoControllerPool = context.read<SharedVideoControllerPool>();
-    final platformBridge = context.read<PlatformBridge>();
-    final environmentController = context.read<EnvironmentController>();
-    final workspaceExposeLayoutController = context.read<WorkspaceExposeLayoutController>();
-    final workspaceLinksController = context.read<WorkspaceLinksController>();
-    final workspaceLinksLauncher = context.read<WorkspaceLinksLauncher>();
-    final workspaceLinksPrompts = context.read<WorkspaceLinksPrompts>();
-    final thumbnailController = context.read<ThumbnailController>();
-    final windowHistoryController = context.read<WorkspaceWindowHistoryController>();
-    final workspaceMediaImportController = context.read<WorkspaceMediaImportController>();
-    final workspaceWindowController = context.read<WorkspaceWindowController>();
-    final workspaceViewportSessionController = context.read<WorkspaceViewportSessionController>();
-    final workspaceCollateController = context.read<WorkspaceCollateController>();
+    final state = _watchState(context);
+    final dependencies = _readDependencies(context);
 
     final model = _buildModel(
-      appUiState: appUiState,
-      environmentStoreState: environmentStoreState,
-      windowInteractionState: windowInteractionState,
-      workspaceViewportState: workspaceViewportState,
+      appUiState: state.appUiState,
+      environmentStoreState: state.environmentStoreState,
+      windowInteractionState: state.windowInteractionState,
+      workspaceViewportState: state.workspaceViewportState,
     );
     final services = _buildServices(
-      appUiController: appUiController,
-      sharedVideoControllerPool: sharedVideoControllerPool,
-      environmentController: environmentController,
-      workspaceExposeLayoutController: workspaceExposeLayoutController,
-      workspaceLinksController: workspaceLinksController,
-      workspaceLinksLauncher: workspaceLinksLauncher,
-      workspaceLinksPrompts: workspaceLinksPrompts,
-      thumbnailController: thumbnailController,
-      windowHistoryController: windowHistoryController,
-      uiHandles: uiHandles,
+      appUiController: dependencies.appUiController,
+      sharedVideoControllerPool: dependencies.sharedVideoControllerPool,
+      environmentController: dependencies.environmentController,
+      workspaceExposeLayoutController: dependencies.workspaceExposeLayoutController,
+      workspaceLinksController: dependencies.workspaceLinksController,
+      workspaceLinksLauncher: dependencies.workspaceLinksLauncher,
+      workspaceLinksPrompts: dependencies.workspaceLinksPrompts,
+      thumbnailController: dependencies.thumbnailController,
+      windowHistoryController: dependencies.windowHistoryController,
+      uiHandles: dependencies.uiHandles,
     );
     final actions = _buildActions(
-      appUiController: appUiController,
-      platformBridge: platformBridge,
-      workspaceMediaImportController: workspaceMediaImportController,
-      workspaceWindowController: workspaceWindowController,
-      workspaceViewportSessionController: workspaceViewportSessionController,
-      workspaceCollateController: workspaceCollateController,
+      appUiController: dependencies.appUiController,
+      platformBridge: dependencies.platformBridge,
+      workspaceMediaImportController: dependencies.workspaceMediaImportController,
+      workspaceWindowController: dependencies.workspaceWindowController,
+      workspaceViewportSessionController: dependencies.workspaceViewportSessionController,
+      workspaceCollateController: dependencies.workspaceCollateController,
       context: context,
     );
     final workspaceLoadPlan = buildWorkspaceLoadPlan(
