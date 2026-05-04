@@ -288,7 +288,20 @@ class AppDelegate: FlutterAppDelegate {
 
     let image = NSImage(size: imageSize)
     image.lockFocus()
-    configured.draw(in: NSRect(origin: .zero, size: imageSize))
+    let drawRect = NSRect(origin: .zero, size: imageSize)
+    let glow = NSShadow()
+    glow.shadowColor = NSColor.white.withAlphaComponent(0.95)
+    glow.shadowBlurRadius = 2.6
+    glow.shadowOffset = .zero
+
+    NSGraphicsContext.saveGraphicsState()
+    glow.set()
+    NSColor.black.set()
+    configured.draw(in: drawRect)
+    NSGraphicsContext.restoreGraphicsState()
+
+    NSColor.black.set()
+    configured.draw(in: drawRect)
     image.unlockFocus()
     image.isTemplate = true
     return NSCursor(image: image, hotSpot: NSPoint(x: imageSize.width / 2, y: imageSize.height / 2))
