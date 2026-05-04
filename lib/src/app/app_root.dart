@@ -77,12 +77,10 @@ class _AppRootState extends State<AppRoot> {
     return MultiProvider(
       providers: [
         Provider<AppStateStore>.value(value: _stateStore),
-        Provider<AppRuntime>.value(value: _runtime),
         Provider<AppUiHandles>.value(value: _uiHandles),
         Provider<ValueGetter<bool>>.value(value: () => mounted),
         Provider<AppFeedbackController>.value(value: _feedback),
         Provider<AppSettingsController>.value(value: _settings),
-        Provider<DocumentPersistenceController>.value(value: _documentPersistence),
         ChangeNotifierProvider.value(value: _stateStore.appUiState),
         ChangeNotifierProvider.value(value: _stateStore.environmentStoreState),
         ChangeNotifierProvider.value(value: _stateStore.windowInteractionState),
@@ -94,7 +92,6 @@ class _AppRootState extends State<AppRoot> {
         Provider.value(value: _runtime.sharedVideoControllerPool),
         Provider.value(value: _runtime.platformBridge),
         Provider.value(value: _runtime.environmentStore),
-        Provider.value(value: _runtime.environmentBookmarkSynchronizer),
         Provider.value(value: _runtime.documentCoordinator),
         Provider.value(value: _runtime.workspaceController),
         Provider.value(value: _runtime.environmentController),
