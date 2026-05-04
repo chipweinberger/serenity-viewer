@@ -72,7 +72,7 @@ class WorkspaceContentBuilder {
           onToggleExpose: actions.toggleExpose,
           onFitWorkspaceViewportToContent: actions.fitWorkspaceViewportToContent,
           onConfirmCollateWorkspaceWindows: actions.confirmCollateWorkspaceWindows,
-          onConfirmApplyExposeGridToWorkspace: state.environmentSession.navigation.confirmApplyExposeGridToWorkspace,
+          onConfirmApplyExposeGridToWorkspace: state.environmentSession.expose.confirmApplyExposeGridToWorkspace,
           onOpenLinks: () => showWorkspaceLinksDialog(
             context: state.context,
             initialWorkspace: state.activeWorkspace,

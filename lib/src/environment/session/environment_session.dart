@@ -12,6 +12,7 @@ import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.d
 import 'package:serenity_viewer/src/app/app_ui_state.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 import 'package:serenity_viewer/src/environment/session/environment_management_controller.dart';
+import 'package:serenity_viewer/src/environment/session/environment_expose_controller.dart';
 import 'package:serenity_viewer/src/environment/session/environment_view_controller.dart';
 import 'package:serenity_viewer/src/environment/session/environment_shortcut_controller.dart';
 import 'package:serenity_viewer/src/environment/session/workspace_view_tracking_controller.dart';
@@ -42,18 +43,24 @@ class EnvironmentSession {
         EnvironmentViewDependencies(
           environmentStoreState: dependencies.environmentStoreState,
           appUiState: dependencies.appUiState,
-          workspaceViewportState: dependencies.workspaceViewportState,
           workspaceController: dependencies.workspaceController,
-          context: dependencies.context,
-          mounted: dependencies.mounted,
           openWorkspaces: dependencies.openWorkspaces,
-          activeWorkspace: dependencies.activeWorkspace,
           updateEnvironment: dependencies.updateEnvironment,
-          replaceWorkspace: dependencies.replaceWorkspace,
           showWorkspaceScreen: dependencies.showWorkspaceScreen,
           showLibraryScreen: dependencies.showLibraryScreen,
           workspaceSwitchTarget: dependencies.workspaceSwitchTarget,
           refreshActiveWorkspaceThumbnail: dependencies.refreshActiveWorkspaceThumbnail,
+        ),
+      ),
+      expose = EnvironmentExposeController(
+        EnvironmentExposeDependencies(
+          appUiState: dependencies.appUiState,
+          workspaceViewportState: dependencies.workspaceViewportState,
+          context: dependencies.context,
+          mounted: dependencies.mounted,
+          activeWorkspace: dependencies.activeWorkspace,
+          replaceWorkspace: dependencies.replaceWorkspace,
+          showWorkspaceScreen: dependencies.showWorkspaceScreen,
         ),
       ) {
     final managementMutations = EnvironmentManagementActions(
@@ -106,6 +113,7 @@ class EnvironmentSession {
   }
 
   final EnvironmentViewController navigation;
+  final EnvironmentExposeController expose;
   late final EnvironmentManagementController management;
   late final EnvironmentShortcutController shortcuts;
   late final WorkspaceViewTrackingController tracking;
