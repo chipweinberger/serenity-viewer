@@ -1,5 +1,5 @@
 import 'package:serenity_viewer/src/environment/workspace.dart';
-import 'package:serenity_viewer/src/workspace/window/workspace_window_model_helpers.dart';
+import 'package:serenity_viewer/src/window/workspace_window_model_helpers.dart';
 
 class WorkspacePlaybackMutations {
   static const List<double> videoPlaybackSpeeds = [0.25, 0.5, 0.75, 1.0];

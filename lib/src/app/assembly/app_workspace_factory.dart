@@ -9,8 +9,8 @@ import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.d
 import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_viewport_session_controller.dart';
 import 'package:serenity_viewer/src/environment/session/environment_session.dart';
-import 'package:serenity_viewer/src/workspace/window/actions/workspace_video_conversion_controller.dart';
-import 'package:serenity_viewer/src/workspace/window/history/workspace_window_history_controller.dart';
+import 'package:serenity_viewer/src/window/actions/workspace_video_conversion_controller.dart';
+import 'package:serenity_viewer/src/window/history/workspace_window_history_controller.dart';
 
 class AppWorkspaceFactory {
   const AppWorkspaceFactory(this.config);

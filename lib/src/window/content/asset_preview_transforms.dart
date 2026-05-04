@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/environment/window.dart';
-import 'package:serenity_viewer/src/workspace/window/interaction/window_zoom_update.dart';
+import 'package:serenity_viewer/src/window/interaction/window_zoom_update.dart';
 
 double assetPreviewScaleForInset(Window window, double inset) {
   if (inset <= 0 || window.size.width <= 0 || window.size.height <= 0) {

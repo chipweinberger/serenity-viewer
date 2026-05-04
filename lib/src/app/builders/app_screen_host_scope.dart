@@ -3,9 +3,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/environment/asset.dart';
-import 'package:serenity_viewer/src/workspace/window/frame/window_resize_helpers.dart';
-import 'package:serenity_viewer/src/workspace/window/interaction/window_interaction_state.dart';
-import 'package:serenity_viewer/src/workspace/window/interaction/window_zoom_update.dart';
+import 'package:serenity_viewer/src/window/frame/window_resize_helpers.dart';
+import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
+import 'package:serenity_viewer/src/window/interaction/window_zoom_update.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.dart';
@@ -15,7 +15,7 @@ import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.da
 import 'package:serenity_viewer/src/environment/session/environment_session.dart';
 import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
-import 'package:serenity_viewer/src/workspace/window/history/workspace_window_history_controller.dart';
+import 'package:serenity_viewer/src/window/history/workspace_window_history_controller.dart';
 
 class AppScreenHostState {
   const AppScreenHostState({

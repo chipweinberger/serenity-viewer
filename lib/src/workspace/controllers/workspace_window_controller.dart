@@ -12,8 +12,8 @@ import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/foundation/keyboard_modifiers.dart';
 import 'package:serenity_viewer/src/app/app_ui_state.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
-import 'package:serenity_viewer/src/workspace/window/frame/window_resize_helpers.dart';
-import 'package:serenity_viewer/src/workspace/window/interaction/window_zoom_update.dart';
+import 'package:serenity_viewer/src/window/frame/window_resize_helpers.dart';
+import 'package:serenity_viewer/src/window/interaction/window_zoom_update.dart';
 
 class WorkspaceWindowController {
   const WorkspaceWindowController({

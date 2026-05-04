@@ -1,6 +1,6 @@
 // ignore_for_file: invalid_use_of_protected_member
 
-part of 'window.dart';
+part of 'workspace_window.dart';
 
 extension on _WindowState {
   bool _handleHardwareKey(KeyEvent event) {

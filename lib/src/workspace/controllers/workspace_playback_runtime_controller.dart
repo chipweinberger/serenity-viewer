@@ -1,4 +1,4 @@
-import 'package:serenity_viewer/src/workspace/window/interaction/window_interaction_state.dart';
+import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 

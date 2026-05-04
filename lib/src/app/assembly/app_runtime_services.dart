@@ -18,10 +18,10 @@ import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.d
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresh_state.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
-import 'package:serenity_viewer/src/workspace/window/interaction/window_interaction_state.dart';
-import 'package:serenity_viewer/src/workspace/window/actions/workspace_video_conversion_controller.dart';
-import 'package:serenity_viewer/src/workspace/window/history/workspace_window_history_controller.dart';
-import 'package:serenity_viewer/src/workspace/window/history/workspace_window_history_state.dart';
+import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
+import 'package:serenity_viewer/src/window/actions/workspace_video_conversion_controller.dart';
+import 'package:serenity_viewer/src/window/history/workspace_window_history_controller.dart';
+import 'package:serenity_viewer/src/window/history/workspace_window_history_state.dart';
 
 class AppStateServices {
   const AppStateServices({

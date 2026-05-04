@@ -1,9 +1,9 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/workspace/window/frame/window_resize_helpers.dart';
-import 'package:serenity_viewer/src/workspace/window/interaction/window_interaction_state.dart';
-import 'package:serenity_viewer/src/workspace/window/interaction/window_zoom_update.dart';
+import 'package:serenity_viewer/src/window/frame/window_resize_helpers.dart';
+import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
+import 'package:serenity_viewer/src/window/interaction/window_zoom_update.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/app/app_ui_state.dart';

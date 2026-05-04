@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
-import 'package:serenity_viewer/src/workspace/window/workspace_window_model_helpers.dart';
+import 'package:serenity_viewer/src/window/workspace_window_model_helpers.dart';
 
 class WorkspaceEnvironmentMutations {
   static Environment replaceWorkspace(Environment environment, Workspace nextWorkspace) {

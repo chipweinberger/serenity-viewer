@@ -9,8 +9,8 @@ import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/foundation/keyboard_modifiers.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
-import 'package:serenity_viewer/src/workspace/window/content/asset_content.dart';
-import 'package:serenity_viewer/src/workspace/window/content/asset_preview_transforms.dart';
+import 'package:serenity_viewer/src/window/content/asset_content.dart';
+import 'package:serenity_viewer/src/window/content/asset_preview_transforms.dart';
 
 class ExposeWindowCard extends StatefulWidget {
   const ExposeWindowCard({

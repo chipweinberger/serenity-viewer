@@ -7,7 +7,7 @@ import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/media/video/media_inspector.dart';
 import 'package:serenity_viewer/src/media/video/video_models.dart';
-import 'package:serenity_viewer/src/workspace/window/content/asset_zoom_utils.dart';
+import 'package:serenity_viewer/src/window/content/asset_zoom_utils.dart';
 
 class WorkspaceVideoConversionController {
   WorkspaceVideoConversionController({

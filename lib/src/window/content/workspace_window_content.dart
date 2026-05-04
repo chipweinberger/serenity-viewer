@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/environment/window.dart';
-import 'package:serenity_viewer/src/workspace/window/content/asset_content.dart';
-import 'package:serenity_viewer/src/workspace/window/content/asset_preview_transforms.dart';
-import 'package:serenity_viewer/src/workspace/window/interaction/window_zoom_update.dart';
-import 'package:serenity_viewer/src/workspace/window/presentation/workspace_window_view_model.dart';
+import 'package:serenity_viewer/src/window/content/asset_content.dart';
+import 'package:serenity_viewer/src/window/content/asset_preview_transforms.dart';
+import 'package:serenity_viewer/src/window/interaction/window_zoom_update.dart';
+import 'package:serenity_viewer/src/window/presentation/workspace_window_view_model.dart';
 
 class WorkspaceWindowContent extends StatelessWidget {
   const WorkspaceWindowContent({

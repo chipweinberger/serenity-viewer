@@ -258,76 +258,65 @@ class _WorkspaceLinksDialogState extends State<_WorkspaceLinksDialog> {
           ? Center(
               key: const ValueKey('empty-links'),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 36),
+                padding: const EdgeInsets.symmetric(horizontal: 28),
                 child: Text(
-                  'No links yet.',
-                  style: Theme.of(context).textTheme.titleMedium!.copyWith(color: AppTheme.textMuted),
+                  'Paste a URL above to keep it with this workspace.',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: AppTheme.textMuted, height: 1.4),
                 ),
               ),
             )
           : ListView.separated(
               key: const ValueKey('links-list'),
-              itemBuilder: (context, index) => _buildLinkRow(_workspace.links[index]),
-              separatorBuilder: (context, index) => const SizedBox(height: 10),
+              padding: EdgeInsets.zero,
               itemCount: _workspace.links.length,
+              itemBuilder: (context, index) => _buildLinkRow(_workspace.links[index]),
+              separatorBuilder: (_, __) => const SizedBox(height: 10),
             ),
-    );
-  }
-
-  Widget _buildDialogSurface(double dialogWidth, double dialogHeight) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(30),
-      child: BackdropFilter(
-        filter: ui.ImageFilter.blur(sigmaX: 28, sigmaY: 28),
-        child: Material(
-          color: Colors.white.withValues(alpha: 0.2),
-          child: SizedBox(
-            width: dialogWidth,
-            height: dialogHeight,
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(22, 20, 22, 22),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Colors.white.withValues(alpha: 0.58), const Color(0xFFF3E3CD).withValues(alpha: 0.44)],
-                ),
-                borderRadius: BorderRadius.circular(30),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.42)),
-                boxShadow: const [BoxShadow(color: AppTheme.shadow, blurRadius: 40, offset: Offset(0, 16))],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildHeader(),
-                  const SizedBox(height: 10),
-                  _buildComposer(),
-                  const SizedBox(height: 18),
-                  Expanded(child: _buildLinksList()),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final availableWidth = math.max(280.0, constraints.maxWidth - 48);
-        final availableHeight = math.max(220.0, constraints.maxHeight - 48);
-        final dialogWidth = math.min(620.0, availableWidth);
-        final dialogHeight = math.min(760.0, availableHeight);
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final dialogWidth = math.min(560.0, screenWidth - 36);
 
-        return SafeArea(
-          child: Center(
-            child: Padding(padding: const EdgeInsets.all(24), child: _buildDialogSurface(dialogWidth, dialogHeight)),
+    return SafeArea(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(28),
+            child: BackdropFilter(
+              filter: ui.ImageFilter.blur(sigmaX: 26, sigmaY: 26),
+              child: Container(
+                width: dialogWidth,
+                constraints: const BoxConstraints(maxHeight: 560),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.56),
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.34)),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black.withValues(alpha: 0.09), blurRadius: 36, offset: const Offset(0, 18)),
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+                  child: Column(
+                    children: [
+                      _buildHeader(),
+                      const SizedBox(height: 14),
+                      _buildComposer(),
+                      const SizedBox(height: 14),
+                      Expanded(child: _buildLinksList()),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }

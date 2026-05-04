@@ -8,13 +8,13 @@ import 'package:video_player/video_player.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/foundation/keyboard_modifiers.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
-import 'package:serenity_viewer/src/workspace/window/content/asset_placeholder_widgets.dart';
-import 'package:serenity_viewer/src/workspace/window/content/asset_zoom_utils.dart';
-import 'package:serenity_viewer/src/workspace/window/content/demo_art_widget.dart';
-import 'package:serenity_viewer/src/workspace/window/content/image_surface.dart';
-import 'package:serenity_viewer/src/workspace/window/content/video_surface.dart';
-import 'package:serenity_viewer/src/workspace/window/content/zoom_box.dart';
-import 'package:serenity_viewer/src/workspace/window/interaction/window_zoom_update.dart';
+import 'package:serenity_viewer/src/window/content/asset_placeholder_widgets.dart';
+import 'package:serenity_viewer/src/window/content/asset_zoom_utils.dart';
+import 'package:serenity_viewer/src/window/content/demo_art_widget.dart';
+import 'package:serenity_viewer/src/window/content/image_surface.dart';
+import 'package:serenity_viewer/src/window/content/video_surface.dart';
+import 'package:serenity_viewer/src/window/content/zoom_box.dart';
+import 'package:serenity_viewer/src/window/interaction/window_zoom_update.dart';
 
 class AssetContent extends StatefulWidget {
   const AssetContent({
