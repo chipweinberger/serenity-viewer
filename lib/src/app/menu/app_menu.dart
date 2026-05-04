@@ -186,6 +186,7 @@ class AppMenu extends StatelessWidget {
     final focusedWindowLabel = focusedWindow == null
         ? 'No Asset Selected'
         : _middleTruncatedLabel(focusedWindow.asset.filename);
+    final hasConvertibleWindowsInActiveWorkspace = workspaceController.media.hasConvertibleWindowsInActiveWorkspace;
 
     return [
       PlatformMenuItem(label: focusedWindowLabel, onSelected: null),
@@ -204,6 +205,12 @@ class AppMenu extends StatelessWidget {
                 ? null
                 : () => unawaited(workspaceController.media.convertWindowToJpeg(focusedConvertibleWindow.asset.id)),
             shortcut: const SingleActivator(LogicalKeyboardKey.keyJ, meta: true, shift: true),
+          ),
+          PlatformMenuItem(
+            label: 'Convert Workspace to JPEG',
+            onSelected: hasConvertibleWindowsInActiveWorkspace
+                ? () => unawaited(workspaceController.media.convertActiveWorkspaceToJpeg())
+                : null,
           ),
         ],
       ),

@@ -34,44 +34,84 @@ class WorkspaceVideoConversionController {
   final int Function(String value) colorFromDigest;
   final ValueChanged<String> removePausedVideoWindow;
 
+  bool get hasConvertibleWindowsInActiveWorkspace {
+    final workspace = activeWorkspace();
+    if (workspace == null) {
+      return false;
+    }
+
+    return workspace.windows.any(_isConvertibleWindow);
+  }
+
   Future<void> convertWindowToJpeg(String windowId) async {
+    await _convertWindowToJpeg(windowId, showSuccessMessage: true);
+  }
+
+  Future<void> convertActiveWorkspaceToJpeg() async {
     final workspace = activeWorkspace();
     if (workspace == null) {
       return;
     }
 
+    final convertibleWindowIds = workspace.windows
+        .where(_isConvertibleWindow)
+        .map((window) => window.asset.id)
+        .toList();
+    if (convertibleWindowIds.isEmpty) {
+      showMessage('There are no video or PNG windows to convert in this workspace.');
+      return;
+    }
+
+    var convertedCount = 0;
+    for (final windowId in convertibleWindowIds) {
+      final didConvert = await _convertWindowToJpeg(windowId, showSuccessMessage: false);
+      if (didConvert) {
+        convertedCount += 1;
+      }
+    }
+
+    if (convertedCount > 0) {
+      showMessage('Converted $convertedCount window${convertedCount == 1 ? '' : 's'} to JPEG in this workspace.');
+    }
+  }
+
+  Future<bool> _convertWindowToJpeg(String windowId, {required bool showSuccessMessage}) async {
+    final workspace = activeWorkspace();
+    if (workspace == null) {
+      return false;
+    }
+
     final matches = workspace.windows.where((window) => window.asset.id == windowId);
     if (matches.isEmpty) {
       showMessage('Focus a video or PNG window first.');
-      return;
+      return false;
     }
 
     final window = matches.first;
     if (window.asset.type == AssetType.video) {
-      await _convertVideoWindowToJpeg(workspace, window);
-      return;
+      return _convertVideoWindowToJpeg(workspace, window, showSuccessMessage: showSuccessMessage);
     }
 
     if (_isPngWindow(window)) {
-      await _convertPngWindowToJpeg(workspace, window);
-      return;
+      return _convertPngWindowToJpeg(workspace, window, showSuccessMessage: showSuccessMessage);
     }
 
     showMessage('Focus a video or PNG window first.');
+    return false;
   }
 
-  Future<void> _convertVideoWindowToJpeg(Workspace workspace, Window window) async {
+  Future<bool> _convertVideoWindowToJpeg(Workspace workspace, Window window, {required bool showSuccessMessage}) async {
     final sourcePath = window.asset.filePath;
     if (sourcePath == null || sourcePath.isEmpty) {
       showMessage('That video is missing its source file.');
-      return;
+      return false;
     }
     final sourceFile = File(sourcePath);
 
     final probe = await mediaInspector.probeVideoFile(sourceFile);
     if (probe == null || probe.width == null || probe.height == null) {
       showMessage('Serenity could not inspect that video for conversion.');
-      return;
+      return false;
     }
 
     final conversion = await videoFrameExporter.exportVideoFrameToJpeg(
@@ -82,7 +122,7 @@ class WorkspaceVideoConversionController {
       confirmOverwriteJpeg: videoConversionPrompts,
     );
     if (conversion == null) {
-      return;
+      return false;
     }
 
     final bookmark = await createFileBookmark(conversion.path);
@@ -117,20 +157,23 @@ class WorkspaceVideoConversionController {
     );
 
     removePausedVideoWindow(window.asset.id);
-    showMessage('Converted ${window.asset.filename} to ${conversion.filename}.');
+    if (showSuccessMessage) {
+      showMessage('Converted ${window.asset.filename} to ${conversion.filename}.');
+    }
+    return true;
   }
 
-  Future<void> _convertPngWindowToJpeg(Workspace workspace, Window window) async {
+  Future<bool> _convertPngWindowToJpeg(Workspace workspace, Window window, {required bool showSuccessMessage}) async {
     final sourcePath = window.asset.filePath;
     if (sourcePath == null || sourcePath.isEmpty) {
       showMessage('That PNG is missing its source file.');
-      return;
+      return false;
     }
 
     final sourceFile = File(sourcePath);
     if (!await sourceFile.exists()) {
       showMessage('That PNG is missing its source file.');
-      return;
+      return false;
     }
 
     final destinationPath = _jpegPathFor(sourceFile);
@@ -138,7 +181,7 @@ class WorkspaceVideoConversionController {
     if (await destinationFile.exists()) {
       final shouldOverwrite = await videoConversionPrompts(destinationFile.uri.pathSegments.last);
       if (!shouldOverwrite) {
-        return;
+        return false;
       }
     }
 
@@ -146,7 +189,7 @@ class WorkspaceVideoConversionController {
     final decoded = img.decodePng(bytes);
     if (decoded == null) {
       showMessage('Serenity could not decode that PNG for conversion.');
-      return;
+      return false;
     }
 
     await destinationFile.writeAsBytes(img.encodeJpg(decoded, quality: 92), flush: true);
@@ -181,7 +224,14 @@ class WorkspaceVideoConversionController {
       ),
     );
 
-    showMessage('Converted ${window.asset.filename} to $filename.');
+    if (showSuccessMessage) {
+      showMessage('Converted ${window.asset.filename} to $filename.');
+    }
+    return true;
+  }
+
+  bool _isConvertibleWindow(Window window) {
+    return window.asset.type == AssetType.video || _isPngWindow(window);
   }
 
   bool _isPngWindow(Window window) {

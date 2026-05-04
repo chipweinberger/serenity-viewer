@@ -31,4 +31,10 @@ class WorkspaceMediaController {
   Future<void> convertWindowToJpeg(String windowId) {
     return videoConversionController.convertWindowToJpeg(windowId);
   }
+
+  bool get hasConvertibleWindowsInActiveWorkspace => videoConversionController.hasConvertibleWindowsInActiveWorkspace;
+
+  Future<void> convertActiveWorkspaceToJpeg() {
+    return videoConversionController.convertActiveWorkspaceToJpeg();
+  }
 }
