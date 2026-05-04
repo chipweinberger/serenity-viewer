@@ -5,11 +5,11 @@ import 'package:serenity_viewer/src/workspace/operations/workspace_environment_o
 class WorkspaceEnvironmentTabsState {
   const WorkspaceEnvironmentTabsState();
 
-  void toggleWorkspaceOpen(Environment environment, String workspaceId, void Function(Environment) updateEnvironment) {
+  void toggleOpen(Environment environment, String workspaceId, void Function(Environment) updateEnvironment) {
     updateEnvironment(WorkspaceEnvironmentOperations.toggleWorkspaceOpen(environment, workspaceId));
   }
 
-  void reorderOpenWorkspace(
+  void reorderOpen(
     Environment? environment,
     List<Workspace> workspaces, {
     required String sourceWorkspaceId,

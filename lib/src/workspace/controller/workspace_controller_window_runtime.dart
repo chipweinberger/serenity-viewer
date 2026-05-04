@@ -13,7 +13,7 @@ class WorkspaceWindowRuntimeState {
   final SerenityWorkspaceCommit commitInteractionState;
   final AssetWindowInteractionState windowInteractionState;
 
-  void flashWindow(String windowId, {required bool mounted}) {
+  void flash(String windowId, {required bool mounted}) {
     windowInteractionState.windowFlashTimer?.cancel();
     commitInteractionState(() {
       windowInteractionState.flashedWindowId = windowId;
@@ -29,11 +29,11 @@ class WorkspaceWindowRuntimeState {
     });
   }
 
-  void clearWindowRuntimeState(String windowId) {
+  void clear(String windowId) {
     windowInteractionState.previousWindowZOrders.remove(windowId);
   }
 
-  void rememberClosedWindow(
+  void rememberClosed(
     List<RecentlyClosedWindowEntry> recentlyClosedWindows, {
     required int maxRecentlyClosedWindows,
     required Workspace workspace,

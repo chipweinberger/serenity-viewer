@@ -1,8 +1,4 @@
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-
 import 'package:serenity_viewer/src/asset_window/interaction/asset_window_interaction_state.dart';
-import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
 import 'package:serenity_viewer/src/workspace/controller/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/controller/workspace_controller_viewport_fit.dart';
@@ -38,30 +34,4 @@ class WorkspaceViewportControllerState {
   final Future<void> Function() refreshActiveWorkspaceThumbnail;
   final WorkspaceViewportGestureState gesture;
   final WorkspaceViewportFitState fit;
-
-  void handleWorkspacePanZoomStart(
-    PointerPanZoomStartEvent event,
-    Workspace workspace, {
-    required bool isCommandPressedForContentGesture,
-    required bool isOptionPressedForWindowGesture,
-  }) {
-    gesture.handleWorkspacePanZoomStart(
-      event,
-      workspace,
-      isCommandPressedForContentGesture: isCommandPressedForContentGesture,
-      isOptionPressedForWindowGesture: isOptionPressedForWindowGesture,
-    );
-  }
-
-  void handleWorkspacePanZoomUpdate(PointerPanZoomUpdateEvent event, Workspace workspace, Size viewportSize) {
-    gesture.handleWorkspacePanZoomUpdate(event, workspace, viewportSize);
-  }
-
-  Future<void> handleWorkspacePanZoomEnd() async {
-    await gesture.handleWorkspacePanZoomEnd();
-  }
-
-  void fitWorkspaceViewportToContent(Workspace? workspace) {
-    fit.fitWorkspaceViewportToContent(workspace);
-  }
 }

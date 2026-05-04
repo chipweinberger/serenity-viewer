@@ -15,7 +15,7 @@ class WorkspaceViewportFitState {
   final SerenityWorkspaceReplace replaceWorkspace;
   final SerenityWorkspaceViewportSetter setWorkspaceViewport;
 
-  void fitWorkspaceViewportToContent(Workspace? workspace) {
+  void toContent(Workspace? workspace) {
     if (workspace == null) {
       return;
     }

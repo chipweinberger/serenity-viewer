@@ -45,7 +45,7 @@ class AppShellWindowHistoryController {
   final int maxRecentlyClosedWindows;
 
   Window? focusedWindowOrNull() {
-    return workspaceController.windows.focusedOrNull(activeWorkspace());
+    return workspaceController.windows.arrangement.focusedOrNull(activeWorkspace());
   }
 
   void closeWindow(String workspaceId, String windowId) {
@@ -62,14 +62,14 @@ class AppShellWindowHistoryController {
     }
 
     commitStateChange(() {
-      workspaceController.windows.rememberClosedWindow(
+      workspaceController.windows.runtime.rememberClosed(
         recentlyClosedWindows,
         maxRecentlyClosedWindows: maxRecentlyClosedWindows,
         workspace: workspace,
         window: window,
       );
-      workspaceController.playback.clearRuntimeState(windowId);
-      workspaceController.windows.clearRuntimeState(windowId);
+      workspaceController.playback.runtime.clear(windowId);
+      workspaceController.windows.runtime.clear(windowId);
     });
 
     replaceWorkspace(
@@ -78,7 +78,7 @@ class AppShellWindowHistoryController {
   }
 
   void removeWindow(String workspaceId, String windowId) {
-    workspaceController.expose.removeWindowSelection(windowId);
+    workspaceController.expose.remove(windowId);
     closeWindow(workspaceId, windowId);
   }
 

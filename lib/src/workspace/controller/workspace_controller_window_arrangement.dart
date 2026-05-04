@@ -14,7 +14,7 @@ class WorkspaceWindowArrangementState {
   final ChromeState chromeState;
   final SerenityWorkspaceReplace replaceWorkspace;
 
-  Window? focusedWindowOrNull(Workspace? workspace) {
+  Window? focusedOrNull(Workspace? workspace) {
     if (workspace == null || workspace.windows.isEmpty) {
       return null;
     }
@@ -23,7 +23,7 @@ class WorkspaceWindowArrangementState {
     return sortedWindows.last;
   }
 
-  WindowFocusResult? focusWindow(Workspace workspace, String windowId) {
+  WindowFocusResult? focus(Workspace workspace, String windowId) {
     final result = WorkspaceStackingOperations.focusWindow(workspace, windowId);
     if (identical(result.workspace, workspace)) {
       return null;
@@ -33,26 +33,26 @@ class WorkspaceWindowArrangementState {
     return WindowFocusResult(previousZOrder: result.previousZOrder);
   }
 
-  void restorePreviousWindowZOrder(Workspace workspace, String windowId, int previousZOrder) {
+  void restorePreviousZOrder(Workspace workspace, String windowId, int previousZOrder) {
     replaceWorkspace(
       WorkspaceStackingOperations.restorePreviousWindowZOrder(workspace, windowId, previousZOrder),
       queueThumbnail: true,
     );
   }
 
-  bool canCollateWorkspaceWindows(Workspace? workspace) {
+  bool canCollate(Workspace? workspace) {
     return workspace != null &&
         chromeState.workspaceLayoutMode != WorkspaceLayoutMode.expose &&
         workspace.windows.any((window) => window.asset.type == AssetType.image || window.asset.type == AssetType.video);
   }
 
-  int collatableWindowCount(Workspace workspace) {
+  int collatableCount(Workspace workspace) {
     return workspace.windows
         .where((window) => window.asset.type == AssetType.image || window.asset.type == AssetType.video)
         .length;
   }
 
-  void collateWorkspaceWindows(Workspace workspace) {
+  void collate(Workspace workspace) {
     replaceWorkspace(
       WorkspaceLayout.collateWorkspaceWindows(workspace, targetBox: workspaceCollateTargetBox),
       queueThumbnail: true,

@@ -10,18 +10,18 @@ class WorkspacePlaybackRuntimeState {
   final AssetWindowInteractionState windowInteractionState;
   final SerenityWorkspaceCommit commitInteractionState;
 
-  bool isVideoWindowPaused(String windowId) {
+  bool isPaused(String windowId) {
     return windowInteractionState.pausedVideoWindows[windowId] ?? true;
   }
 
-  void toggleVideoPlayback(String windowId) {
+  void toggle(String windowId) {
     commitInteractionState(() {
       windowInteractionState.pausedVideoWindows[windowId] =
           !(windowInteractionState.pausedVideoWindows[windowId] ?? true);
     });
   }
 
-  void pauseAllVideos(Environment? environment) {
+  void stopAll(Environment? environment) {
     if (environment == null) {
       return;
     }
@@ -37,7 +37,7 @@ class WorkspacePlaybackRuntimeState {
     });
   }
 
-  void clearRuntimeState(String windowId) {
+  void clear(String windowId) {
     windowInteractionState.pausedVideoWindows.remove(windowId);
   }
 }

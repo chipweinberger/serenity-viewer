@@ -8,7 +8,7 @@ class WorkspaceExposeControllerState {
   final AssetWindowInteractionState windowInteractionState;
   final SerenityWorkspaceCommit commitInteractionState;
 
-  void toggleWindowSelected(String windowId) {
+  void toggle(String windowId) {
     commitInteractionState(() {
       if (windowInteractionState.selectedExposeWindowIds.contains(windowId)) {
         windowInteractionState.selectedExposeWindowIds.remove(windowId);
@@ -18,7 +18,7 @@ class WorkspaceExposeControllerState {
     });
   }
 
-  void clearWindowSelection() {
+  void clear() {
     if (windowInteractionState.selectedExposeWindowIds.isEmpty) {
       return;
     }
@@ -28,29 +28,29 @@ class WorkspaceExposeControllerState {
     });
   }
 
-  int selectedWindowCount(Workspace workspace) {
+  int countIn(Workspace workspace) {
     return workspace.windows
         .where((window) => windowInteractionState.selectedExposeWindowIds.contains(window.asset.id))
         .length;
   }
 
-  bool isWindowSelected(String windowId) {
+  bool contains(String windowId) {
     return windowInteractionState.selectedExposeWindowIds.contains(windowId);
   }
 
-  int selectionCount() {
+  int count() {
     return windowInteractionState.selectedExposeWindowIds.length;
   }
 
-  bool hasWindowSelection() {
+  bool hasSelection() {
     return windowInteractionState.selectedExposeWindowIds.isNotEmpty;
   }
 
-  Set<String> selectedWindowIds() {
+  Set<String> ids() {
     return {...windowInteractionState.selectedExposeWindowIds};
   }
 
-  void removeWindowSelection(String windowId) {
+  void remove(String windowId) {
     windowInteractionState.selectedExposeWindowIds.remove(windowId);
   }
 }

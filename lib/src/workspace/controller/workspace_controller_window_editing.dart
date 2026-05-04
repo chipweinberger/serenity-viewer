@@ -22,22 +22,22 @@ class WorkspaceWindowEditingState {
   final AssetWindowInteractionState windowInteractionState;
   final SerenityWorkspaceReplace replaceWorkspace;
 
-  void moveWindow(Workspace workspace, String windowId, Offset delta) {
+  void move(Workspace workspace, String windowId, Offset delta) {
     replaceWorkspace(WorkspaceLayout.moveWindow(workspace, windowId, delta), queueThumbnail: true);
   }
 
-  void resizeWindow(Workspace workspace, String windowId, AssetWindowResizeHandle handle, Offset delta) {
+  void resize(Workspace workspace, String windowId, AssetWindowResizeHandle handle, Offset delta) {
     replaceWorkspace(WorkspaceLayout.resizeWindow(workspace, windowId, handle, delta), queueThumbnail: true);
   }
 
-  void transformWindowFromTrackpad(Workspace workspace, String windowId, double scaleDelta) {
+  void transformFromTrackpad(Workspace workspace, String windowId, double scaleDelta) {
     replaceWorkspace(
       WorkspaceLayout.transformWindowFromTrackpad(workspace, windowId, scaleDelta),
       queueThumbnail: true,
     );
   }
 
-  void fitWindowToContent(Workspace? workspace, String windowId) {
+  void fitToContent(Workspace? workspace, String windowId) {
     if (workspace == null || workspace.windows.every((window) => window.asset.id != windowId)) {
       return;
     }
@@ -45,7 +45,7 @@ class WorkspaceWindowEditingState {
     replaceWorkspace(WorkspaceLayout.fitWindowToContent(workspace, windowId), queueThumbnail: true);
   }
 
-  void handleOptionGestureHover(
+  void handleOptionHover(
     PointerHoverEvent event,
     Workspace workspace, {
     required bool isCommandPressedForContentGesture,
@@ -61,14 +61,14 @@ class WorkspaceWindowEditingState {
       return;
     }
 
-    moveWindow(workspace, targetWindowId, event.delta / workspace.viewportZoom);
+    move(workspace, targetWindowId, event.delta / workspace.viewportZoom);
   }
 
-  void setWindowZoom(Workspace workspace, String windowId, AssetWindowZoomUpdate update) {
+  void setZoom(Workspace workspace, String windowId, AssetWindowZoomUpdate update) {
     replaceWorkspace(WorkspaceLayout.setWindowZoom(workspace, windowId, update), queueThumbnail: true);
   }
 
-  void setWindowIntrinsicSize(Workspace? workspace, String windowId, Size intrinsicSize) {
+  void setIntrinsicSize(Workspace? workspace, String windowId, Size intrinsicSize) {
     if (workspace == null || intrinsicSize.width <= 0 || intrinsicSize.height <= 0) {
       return;
     }

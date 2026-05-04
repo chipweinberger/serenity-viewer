@@ -36,11 +36,7 @@ class WorkspaceShellManagementMutations {
       return;
     }
 
-    controller.workspaceController.environment.toggleWorkspaceOpen(
-      environment,
-      workspaceId,
-      controller.updateEnvironment,
-    );
+    controller.workspaceController.environment.tabs.toggleOpen(environment, workspaceId, controller.updateEnvironment);
   }
 
   void renameWorkspace(Workspace workspace, String nextName) {
@@ -104,17 +100,19 @@ class WorkspaceShellManagementMutations {
     required Workspace sourceWorkspace,
     required Workspace destinationWorkspace,
   }) {
-    controller.workspaceController.environment.moveSelectedExposeWindowsToWorkspace(
+    controller.workspaceController.environment.windowTransfer.moveSelectedToWorkspace(
       environment: environment,
       sourceWorkspace: sourceWorkspace,
       destinationWorkspace: destinationWorkspace,
+      selectedWindowIds: controller.workspaceController.expose.ids(),
       updateEnvironment: controller.updateEnvironment,
       queueThumbnailRefresh: controller.queueWorkspaceRefresh,
+      clearExposeSelection: controller.workspaceController.expose.clear,
     );
   }
 
   void reorderOpenWorkspace(String sourceWorkspaceId, String targetWorkspaceId) {
-    controller.workspaceController.environment.reorderOpenWorkspace(
+    controller.workspaceController.environment.tabs.reorderOpen(
       controller.persistenceState.environment,
       controller.workspaces(),
       sourceWorkspaceId: sourceWorkspaceId,

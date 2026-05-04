@@ -16,11 +16,11 @@ class WorkspaceShellNavigationApi {
   final WorkspaceShellController _controller;
 
   void toggleSelectedWindow(String windowId) {
-    _controller.workspaceController.expose.toggleWindowSelected(windowId);
+    _controller.workspaceController.expose.toggle(windowId);
   }
 
   void clearExposeSelection() {
-    _controller.workspaceController.expose.clearWindowSelection();
+    _controller.workspaceController.expose.clear();
   }
 
   void toggleOverview() {

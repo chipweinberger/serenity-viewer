@@ -26,7 +26,7 @@ class WorkspaceViewportGestureState {
   final SerenityWorkspaceViewportSetter setWorkspaceViewport;
   final Future<void> Function() refreshActiveWorkspaceThumbnail;
 
-  void handleWorkspacePanZoomStart(
+  void handlePanZoomStart(
     PointerPanZoomStartEvent event,
     Workspace workspace, {
     required bool isCommandPressedForContentGesture,
@@ -48,7 +48,7 @@ class WorkspaceViewportGestureState {
     workspaceViewportState.gestureAccumulatedPan = Offset.zero;
   }
 
-  void handleWorkspacePanZoomUpdate(PointerPanZoomUpdateEvent event, Workspace workspace, Size viewportSize) {
+  void handlePanZoomUpdate(PointerPanZoomUpdateEvent event, Workspace workspace, Size viewportSize) {
     if (!workspaceViewportState.isGestureActive) {
       return;
     }
@@ -72,7 +72,7 @@ class WorkspaceViewportGestureState {
     setWorkspaceViewport(workspaceId: workspace.id, center: nextCenter, zoom: nextZoom, queueThumbnail: false);
   }
 
-  Future<void> handleWorkspacePanZoomEnd() async {
+  Future<void> handlePanZoomEnd() async {
     workspaceViewportState.isGestureActive = false;
     workspaceViewportState.gestureAccumulatedPan = Offset.zero;
     await refreshActiveWorkspaceThumbnail();

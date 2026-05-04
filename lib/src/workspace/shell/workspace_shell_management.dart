@@ -55,10 +55,11 @@ class WorkspaceShellManagementApi {
   Future<void> moveSelectedExposeWindowsToWorkspace(String destinationWorkspaceId) async {
     final environment = _controller.persistenceState.environment;
     final sourceWorkspace = _controller.activeWorkspace();
-    if (!_controller.workspaceController.environment.canMoveSelectedWindowsToWorkspace(
+    if (!_controller.workspaceController.environment.windowTransfer.canMoveSelectedToWorkspace(
       environment: environment,
       sourceWorkspace: sourceWorkspace,
       destinationWorkspaceId: destinationWorkspaceId,
+      hasSelectedWindowIds: _controller.workspaceController.expose.hasSelection(),
     )) {
       if (sourceWorkspace != null && destinationWorkspaceId == sourceWorkspace.id) {
         _controller.showMessage('Choose a different tab to move those windows.');
@@ -81,7 +82,7 @@ class WorkspaceShellManagementApi {
     }
 
     final destinationWorkspace = destinationMatches.first;
-    final selectedWindowCount = _controller.workspaceController.expose.selectedWindowCount(sourceWorkspace);
+    final selectedWindowCount = _controller.workspaceController.expose.countIn(sourceWorkspace);
     if (selectedWindowCount == 0) {
       _controller.navigation.clearExposeSelection();
       return;

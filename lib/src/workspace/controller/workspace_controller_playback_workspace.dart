@@ -9,7 +9,7 @@ class WorkspacePlaybackWorkspaceState {
 
   final SerenityWorkspaceReplace replaceWorkspace;
 
-  void setVideoPosition(Workspace? workspace, String windowId, int positionMs) {
+  void setPosition(Workspace? workspace, String windowId, int positionMs) {
     if (workspace == null) {
       return;
     }
@@ -25,7 +25,7 @@ class WorkspacePlaybackWorkspaceState {
     );
   }
 
-  void cycleVideoPlaybackSpeed(Workspace? workspace, String windowId) {
+  void cycleSpeed(Workspace? workspace, String windowId) {
     if (workspace == null ||
         workspace.windows
             .where((window) => window.asset.id == windowId && window.asset.type == AssetType.video)
@@ -36,7 +36,7 @@ class WorkspacePlaybackWorkspaceState {
     replaceWorkspace(WorkspacePlaybackOperations.cycleVideoPlaybackSpeed(workspace, windowId), queueThumbnail: false);
   }
 
-  bool canToggleVideoPlayback(Workspace? workspace, String windowId) {
+  bool canToggle(Workspace? workspace, String windowId) {
     return workspace != null &&
         workspace.windows
             .where((window) => window.asset.id == windowId && window.asset.type == AssetType.video)

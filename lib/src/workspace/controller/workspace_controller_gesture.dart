@@ -7,7 +7,7 @@ class WorkspaceGestureControllerState {
   final AssetWindowInteractionState windowInteractionState;
   final SerenityWorkspaceCommit commitInteractionState;
 
-  void setActiveWindow(String? windowId) {
+  void setActive(String? windowId) {
     if (windowInteractionState.activeGestureWindowId == windowId) {
       return;
     }
@@ -17,7 +17,7 @@ class WorkspaceGestureControllerState {
     });
   }
 
-  void setPinnedHoverWindow(String? windowId) {
+  void setPinnedHover(String? windowId) {
     if (windowInteractionState.pinnedHoverWindowId == windowId) {
       return;
     }
@@ -27,7 +27,7 @@ class WorkspaceGestureControllerState {
     });
   }
 
-  void clearPinnedHoverWindow() {
-    setPinnedHoverWindow(null);
+  void clearPinnedHover() {
+    setPinnedHover(null);
   }
 }

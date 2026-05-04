@@ -7,7 +7,7 @@ import 'package:serenity_viewer/src/workspace/operations/workspace_environment_o
 class WorkspaceEnvironmentWindowTransferState {
   const WorkspaceEnvironmentWindowTransferState();
 
-  bool canMoveSelectedWindowsToWorkspace({
+  bool canMoveSelectedToWorkspace({
     required Environment? environment,
     required Workspace? sourceWorkspace,
     required String destinationWorkspaceId,
@@ -19,7 +19,7 @@ class WorkspaceEnvironmentWindowTransferState {
         destinationWorkspaceId != sourceWorkspace.id;
   }
 
-  void moveSelectedExposeWindowsToWorkspace({
+  void moveSelectedToWorkspace({
     required Environment environment,
     required Workspace sourceWorkspace,
     required Workspace destinationWorkspace,
