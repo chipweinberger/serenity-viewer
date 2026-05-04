@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/library/thumbnail_card.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
 import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
+import 'package:serenity_viewer/src/library/workspace_card.dart';
 import 'package:serenity_viewer/src/media/loading/workspace_load_plan.dart';
 import 'package:serenity_viewer/src/settings/appearance/glass_chip.dart';
 
@@ -113,7 +113,7 @@ class LibraryScreen extends StatelessWidget {
     return SizedBox(
       width: _thumbnailWidth,
       height: _thumbnailHeight,
-      child: ThumbnailCard(
+      child: WorkspaceCard(
         workspace: workspace,
         mediaCounts: workspaceMediaCounts(workspace),
         unloadedCount: unloadedWorkspaceWindowCount(workspace, loadPlan),

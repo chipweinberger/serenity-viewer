@@ -6,8 +6,8 @@ import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
 import 'package:serenity_viewer/src/media/loading/workspace_media_counts.dart';
 
-class ThumbnailCard extends StatefulWidget {
-  const ThumbnailCard({
+class WorkspaceCard extends StatefulWidget {
+  const WorkspaceCard({
     super.key,
     required this.workspace,
     required this.mediaCounts,
@@ -29,10 +29,10 @@ class ThumbnailCard extends StatefulWidget {
   final String? statusLabel;
 
   @override
-  State<ThumbnailCard> createState() => _ThumbnailCardState();
+  State<WorkspaceCard> createState() => _WorkspaceCardState();
 }
 
-class _ThumbnailCardState extends State<ThumbnailCard> {
+class _WorkspaceCardState extends State<WorkspaceCard> {
   bool _isHovered = false;
 
   Widget _buildEmptyWorkspace(BuildContext context) {
