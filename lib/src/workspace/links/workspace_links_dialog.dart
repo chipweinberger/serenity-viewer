@@ -20,7 +20,10 @@ Future<void> showWorkspaceLinksDialog({
     barrierLabel: 'Workspace links',
     barrierColor: Colors.black.withValues(alpha: 0.26),
     pageBuilder: (dialogContext, animation, secondaryAnimation) {
-      return _WorkspaceLinksDialog(initialWorkspace: initialWorkspace, controller: controller);
+      return Material(
+        type: MaterialType.transparency,
+        child: _WorkspaceLinksDialog(initialWorkspace: initialWorkspace, controller: controller),
+      );
     },
     transitionBuilder: (context, animation, secondaryAnimation, child) {
       final curve = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
@@ -45,6 +48,8 @@ class _WorkspaceLinksDialog extends StatefulWidget {
 class _WorkspaceLinksDialogState extends State<_WorkspaceLinksDialog> {
   late Workspace _workspace;
   final TextEditingController _pasteController = TextEditingController();
+
+  List<Link> get _displayLinks => _workspace.links.reversed.toList();
 
   @override
   void initState() {
@@ -250,6 +255,7 @@ class _WorkspaceLinksDialogState extends State<_WorkspaceLinksDialog> {
   }
 
   Widget _buildLinksList() {
+    final displayLinks = _displayLinks;
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 180),
       switchInCurve: Curves.easeOutCubic,
@@ -269,8 +275,8 @@ class _WorkspaceLinksDialogState extends State<_WorkspaceLinksDialog> {
           : ListView.separated(
               key: const ValueKey('links-list'),
               padding: EdgeInsets.zero,
-              itemCount: _workspace.links.length,
-              itemBuilder: (context, index) => _buildLinkRow(_workspace.links[index]),
+              itemCount: displayLinks.length,
+              itemBuilder: (context, index) => _buildLinkRow(displayLinks[index]),
               separatorBuilder: (_, __) => const SizedBox(height: 10),
             ),
     );
