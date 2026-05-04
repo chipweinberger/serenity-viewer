@@ -6,10 +6,10 @@ import 'package:serenity_viewer/src/environment/session/environment_store_state.
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
-import 'package:serenity_viewer/src/expose/expose_layouts.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/settings/behavior/app_ui_state.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
+import 'package:serenity_viewer/src/workspace/layout/workspace_expose_layout.dart';
 import 'package:serenity_viewer/src/workspace/layout/workspace_layout.dart';
 import 'package:serenity_viewer/src/environment/session/environment_api.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
@@ -144,7 +144,7 @@ class EnvironmentViewController {
     }
 
     final sortedWindows = [...workspace.windows]..sort((a, b) => a.asset.filename.compareTo(b.asset.filename));
-    final exposeLayouts = computeExposeLayoutRects(
+    final exposeLayouts = computeWorkspaceExposeLayout(
       windows: sortedWindows,
       viewportSize: _dependencies.workspaceViewportState.viewportSize,
     );

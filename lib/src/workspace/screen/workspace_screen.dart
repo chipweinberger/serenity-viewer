@@ -21,7 +21,7 @@ import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/asset.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/settings/behavior/app_ui_state.dart';
-import 'package:serenity_viewer/src/expose/expose_layouts.dart';
+import 'package:serenity_viewer/src/workspace/layout/workspace_expose_layout.dart';
 import 'package:serenity_viewer/src/workspace/screen/workspace_canvas_view_model.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_projection.dart';
 
@@ -315,7 +315,7 @@ class WorkspaceScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildExposeWindowCard(SerenityWindowLayout layout, MediaLoadPlan loadPlan) {
+  Widget _buildExposeWindowCard(WorkspaceExposeWindowLayout layout, MediaLoadPlan loadPlan) {
     final window = layout.window;
     final isLoaded = _isWindowLoaded(loadPlan, window);
     final sharedVideoState = sharedVideoLookup(window, isLoaded: isLoaded);
@@ -353,7 +353,7 @@ class WorkspaceScreen extends StatelessWidget {
             return const SizedBox.shrink();
           }
 
-          final exposeLayouts = computeExposeLayoutRects(windows: windows, viewportSize: viewportSize);
+          final exposeLayouts = computeWorkspaceExposeLayout(windows: windows, viewportSize: viewportSize);
           return Stack(children: [for (final layout in exposeLayouts) _buildExposeWindowCard(layout, loadPlan)]);
         },
       ),
