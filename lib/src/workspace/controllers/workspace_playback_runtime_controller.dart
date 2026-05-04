@@ -28,6 +28,19 @@ class WorkspacePlaybackRuntimeController {
     );
   }
 
+  void playAll(Environment? environment) {
+    if (environment == null) {
+      return;
+    }
+
+    windowInteractionState.playAllVideoWindows(
+      environment.workspaces.expand(
+        (workspace) =>
+            workspace.windows.where((window) => window.asset.type == AssetType.video).map((window) => window.asset.id),
+      ),
+    );
+  }
+
   void clear(String windowId) {
     windowInteractionState.removePausedVideoWindow(windowId);
   }

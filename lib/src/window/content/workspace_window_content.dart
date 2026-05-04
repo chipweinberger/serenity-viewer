@@ -10,7 +10,8 @@ class WorkspaceWindowContent extends StatelessWidget {
   const WorkspaceWindowContent({
     super.key,
     required this.viewModel,
-    required this.showExpandedVideoControls,
+    required this.showControls,
+    required this.showPlayButton,
     required this.shrinkContent,
     required this.inset,
     required this.onTap,
@@ -23,7 +24,8 @@ class WorkspaceWindowContent extends StatelessWidget {
   });
 
   final WorkspaceWindowViewModel viewModel;
-  final bool showExpandedVideoControls;
+  final bool showControls;
+  final bool showPlayButton;
   final bool shrinkContent;
   final double inset;
   final VoidCallback onTap;
@@ -66,13 +68,13 @@ class WorkspaceWindowContent extends StatelessWidget {
           onIntrinsicSizeResolved: onIntrinsicSizeResolved,
           isVideoPaused: viewModel.isVideoPaused,
           onTogglePlayback: onTogglePlayback,
-          showVideoControls: true,
-          showExpandedVideoControls: showExpandedVideoControls,
+          showControls: showControls,
+          showPlayButton: showPlayButton,
           workspaceZoom: viewModel.workspaceZoom,
           onVideoControlInteractionChanged: onVideoControlInteractionChanged,
           onVideoPositionChanged: onVideoPositionChanged,
           onCycleVideoPlaybackSpeed: onCycleVideoPlaybackSpeed,
-          allowDirectContentGestures: viewModel.isPinnedHover,
+          allowDirectContentGestures: viewModel.areControlsPinned,
         ),
       ),
     );

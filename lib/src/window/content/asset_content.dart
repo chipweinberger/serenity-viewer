@@ -28,8 +28,8 @@ class AssetContent extends StatefulWidget {
     required this.onIntrinsicSizeResolved,
     required this.isVideoPaused,
     required this.onTogglePlayback,
-    required this.showVideoControls,
-    this.showExpandedVideoControls = false,
+    required this.showControls,
+    this.showPlayButton = false,
     this.workspaceZoom = 1,
     required this.onVideoControlInteractionChanged,
     required this.onVideoPositionChanged,
@@ -48,8 +48,8 @@ class AssetContent extends StatefulWidget {
   final ValueChanged<Size> onIntrinsicSizeResolved;
   final bool isVideoPaused;
   final VoidCallback onTogglePlayback;
-  final bool showVideoControls;
-  final bool showExpandedVideoControls;
+  final bool showControls;
+  final bool showPlayButton;
   final double workspaceZoom;
   final ValueChanged<bool> onVideoControlInteractionChanged;
   final ValueChanged<int> onVideoPositionChanged;
@@ -263,8 +263,8 @@ class _AssetContentState extends State<AssetContent> {
         playbackSpeed: widget.window.videoPlaybackSpeed,
         onPositionChanged: widget.onVideoPositionChanged,
         onCyclePlaybackSpeed: widget.onCycleVideoPlaybackSpeed,
-        showControls: widget.showVideoControls,
-        showExpandedControls: widget.showExpandedVideoControls,
+        showControls: widget.showControls,
+        showPlayButton: widget.showPlayButton,
         workspaceZoom: widget.workspaceZoom,
         onControlInteractionChanged: widget.onVideoControlInteractionChanged,
         previewMode: widget.videoPreviewMode,

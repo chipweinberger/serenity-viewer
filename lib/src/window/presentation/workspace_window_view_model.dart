@@ -12,7 +12,7 @@ class WorkspaceWindowViewModel {
     required this.sharedVideoInitialization,
     required this.isFocused,
     required this.isSelected,
-    required this.isPinnedHover,
+    required this.areControlsPinned,
     required this.workspaceZoom,
     required this.flashNonce,
     required this.isVideoPaused,
@@ -27,7 +27,7 @@ class WorkspaceWindowViewModel {
   final Future<void>? sharedVideoInitialization;
   final bool isFocused;
   final bool isSelected;
-  final bool isPinnedHover;
+  final bool areControlsPinned;
   final double workspaceZoom;
   final int flashNonce;
   final bool isVideoPaused;

@@ -95,6 +95,18 @@ class WindowInteractionState extends ChangeNotifier {
     return changed;
   }
 
+  bool playAllVideoWindows(Iterable<String> windowIds) {
+    var changed = false;
+    for (final windowId in windowIds) {
+      if (_pausedVideoWindows[windowId] != false) {
+        _pausedVideoWindows[windowId] = false;
+        changed = true;
+      }
+    }
+    _notifyIfNeeded(changed);
+    return changed;
+  }
+
   bool rememberPreviousWindowZOrder(String windowId, int previousZOrder) {
     if (_previousWindowZOrders[windowId] == previousZOrder) {
       return false;

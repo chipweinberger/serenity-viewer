@@ -351,6 +351,11 @@ class AppMenu extends StatelessWidget {
         shortcut: const SingleActivator(LogicalKeyboardKey.digit3, meta: true),
       ),
       PlatformMenuItem(
+        label: 'Play All',
+        onSelected: workspaceController.playback.playAllVideos,
+        shortcut: const SingleActivator(LogicalKeyboardKey.keyP, meta: true, alt: true),
+      ),
+      PlatformMenuItem(
         label: 'Pause All',
         onSelected: workspaceController.playback.pauseAllVideos,
         shortcut: const SingleActivator(LogicalKeyboardKey.keyP, meta: true, shift: true),

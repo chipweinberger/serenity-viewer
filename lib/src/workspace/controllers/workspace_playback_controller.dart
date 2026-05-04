@@ -44,4 +44,8 @@ class WorkspacePlaybackController {
   void pauseAllVideos() {
     runtime.stopAll(environment());
   }
+
+  void playAllVideos() {
+    runtime.playAll(environment());
+  }
 }

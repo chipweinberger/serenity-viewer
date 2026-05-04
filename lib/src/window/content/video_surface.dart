@@ -140,7 +140,7 @@ class VideoSurface extends StatefulWidget {
     required this.onPositionChanged,
     required this.onCyclePlaybackSpeed,
     required this.showControls,
-    this.showExpandedControls = false,
+    this.showPlayButton = false,
     this.workspaceZoom = 1,
     required this.onControlInteractionChanged,
     this.previewMode = false,
@@ -160,7 +160,7 @@ class VideoSurface extends StatefulWidget {
   final ValueChanged<int> onPositionChanged;
   final VoidCallback onCyclePlaybackSpeed;
   final bool showControls;
-  final bool showExpandedControls;
+  final bool showPlayButton;
   final double workspaceZoom;
   final ValueChanged<bool> onControlInteractionChanged;
   final bool previewMode;
@@ -281,79 +281,22 @@ class _SerenityVideoSurfaceState extends State<VideoSurface> {
               Positioned(
                 left: 10 * uiScale,
                 right: 10 * uiScale,
-                bottom: widget.showExpandedControls ? 42 * uiScale : 10 * uiScale,
-                child: widget.showExpandedControls
-                    ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(999),
-                                child: BackdropFilter(
-                                  filter: ui.ImageFilter.blur(sigmaX: 12 * uiScale, sigmaY: 12 * uiScale),
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 10 * uiScale, vertical: 4 * uiScale),
-                                    decoration: BoxDecoration(
-                                      color: Colors.black.withValues(alpha: 0.42),
-                                      borderRadius: BorderRadius.circular(999),
-                                    ),
-                                    child: Text(
-                                      '$elapsedLabel / $totalLabel',
-                                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w700,
-                                        letterSpacing: 0.1,
-                                        fontSize: 11 * uiScale,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 6 * uiScale),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(999),
-                                child: BackdropFilter(
-                                  filter: ui.ImageFilter.blur(sigmaX: 12 * uiScale, sigmaY: 12 * uiScale),
-                                  child: Material(
-                                    color: Colors.black.withValues(alpha: 0.42),
-                                    child: InkWell(
-                                      onTap: widget.onCyclePlaybackSpeed,
-                                      child: Padding(
-                                        padding: EdgeInsets.symmetric(horizontal: 10 * uiScale, vertical: 4 * uiScale),
-                                        child: Text(
-                                          speedLabel,
-                                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w700,
-                                            letterSpacing: 0.1,
-                                            fontSize: 11 * uiScale,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 6 * uiScale),
-                          _buildBottomControlsRow(
-                            context,
-                            positionMs: positionMs,
-                            durationMs: durationMs,
-                            uiScale: uiScale,
-                          ),
-                        ],
-                      )
-                    : _buildBottomControlsRow(
-                        context,
-                        positionMs: positionMs,
-                        durationMs: durationMs,
-                        uiScale: uiScale,
-                      ),
+                bottom: 10 * uiScale,
+                child: _buildControlsRow(
+                  context,
+                  positionMs: positionMs,
+                  durationMs: durationMs,
+                  elapsedLabel: elapsedLabel,
+                  totalLabel: totalLabel,
+                  speedLabel: speedLabel,
+                  uiScale: uiScale,
+                ),
+              ),
+            if (widget.showPlayButton && widget.isPaused && durationMs > 0)
+              Positioned(
+                left: 4 * uiScale,
+                bottom: 4 * uiScale,
+                child: _buildPausedPlayButton(uiScale: uiScale),
               ),
           ],
         );
@@ -361,77 +304,158 @@ class _SerenityVideoSurfaceState extends State<VideoSurface> {
     );
   }
 
-  Widget _buildBottomControlsRow(
+  Widget _buildControlsRow(
     BuildContext context, {
     required int positionMs,
     required int durationMs,
+    required String elapsedLabel,
+    required String totalLabel,
+    required String speedLabel,
     required double uiScale,
   }) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(999),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          ClipOval(
-            child: BackdropFilter(
-              filter: ui.ImageFilter.blur(sigmaX: 12 * uiScale, sigmaY: 12 * uiScale),
-              child: Material(
-                color: Colors.black.withValues(alpha: 0.42),
-                child: InkWell(
-                  onTap: widget.onTogglePlayback,
-                  child: Padding(
-                    padding: EdgeInsets.all(6 * uiScale),
-                    child: Icon(
-                      widget.isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
-                      size: 14 * uiScale,
-                      color: Colors.white,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(999),
+                child: BackdropFilter(
+                  filter: ui.ImageFilter.blur(sigmaX: 12 * uiScale, sigmaY: 12 * uiScale),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10 * uiScale, vertical: 4 * uiScale),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.42),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      '$elapsedLabel / $totalLabel',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.1,
+                        fontSize: 11 * uiScale,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ),
-          SizedBox(width: 8 * uiScale),
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(999),
-              child: BackdropFilter(
-                filter: ui.ImageFilter.blur(sigmaX: 12 * uiScale, sigmaY: 12 * uiScale),
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8 * uiScale, vertical: 2 * uiScale),
-                  decoration: BoxDecoration(
+              SizedBox(width: 6 * uiScale),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(999),
+                child: BackdropFilter(
+                  filter: ui.ImageFilter.blur(sigmaX: 12 * uiScale, sigmaY: 12 * uiScale),
+                  child: Material(
                     color: Colors.black.withValues(alpha: 0.42),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Listener(
-                    onPointerDown: (_) => widget.onControlInteractionChanged(true),
-                    onPointerUp: (_) => widget.onControlInteractionChanged(false),
-                    onPointerCancel: (_) => widget.onControlInteractionChanged(false),
-                    child: SliderTheme(
-                      data: SliderTheme.of(context).copyWith(
-                        trackHeight: 3 * uiScale,
-                        thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6 * uiScale),
-                        overlayShape: RoundSliderOverlayShape(overlayRadius: 12 * uiScale),
-                        activeTrackColor: Colors.white,
-                        inactiveTrackColor: Colors.white.withValues(alpha: 0.28),
-                        thumbColor: Colors.white,
-                        overlayColor: Colors.white.withValues(alpha: 0.14),
-                      ),
-                      child: Slider(
-                        value: positionMs.toDouble().clamp(0, durationMs.toDouble()),
-                        min: 0,
-                        max: durationMs.toDouble(),
-                        onChanged: (nextValue) async {
-                          await widget.controller.seekTo(Duration(milliseconds: nextValue.round()));
-                        },
-                        onChangeEnd: (_) => widget.onControlInteractionChanged(false),
+                    child: InkWell(
+                      onTap: widget.onCyclePlaybackSpeed,
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10 * uiScale, vertical: 4 * uiScale),
+                        child: Text(
+                          speedLabel,
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.1,
+                            fontSize: 11 * uiScale,
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
+            ],
+          ),
+          SizedBox(height: 6 * uiScale),
+          Row(
+            children: [
+              _buildPlaybackButton(
+                uiScale: uiScale,
+                icon: widget.isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
+                padding: 6 * uiScale,
+                iconSize: 14 * uiScale,
+              ),
+              SizedBox(width: 8 * uiScale),
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(999),
+                  child: BackdropFilter(
+                    filter: ui.ImageFilter.blur(sigmaX: 12 * uiScale, sigmaY: 12 * uiScale),
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8 * uiScale, vertical: 2 * uiScale),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.42),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Listener(
+                        onPointerDown: (_) => widget.onControlInteractionChanged(true),
+                        onPointerUp: (_) => widget.onControlInteractionChanged(false),
+                        onPointerCancel: (_) => widget.onControlInteractionChanged(false),
+                        child: SliderTheme(
+                          data: SliderTheme.of(context).copyWith(
+                            trackHeight: 3 * uiScale,
+                            thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6 * uiScale),
+                            overlayShape: RoundSliderOverlayShape(overlayRadius: 12 * uiScale),
+                            activeTrackColor: Colors.white,
+                            inactiveTrackColor: Colors.white.withValues(alpha: 0.28),
+                            thumbColor: Colors.white,
+                            overlayColor: Colors.white.withValues(alpha: 0.14),
+                          ),
+                          child: Slider(
+                            value: positionMs.toDouble().clamp(0, durationMs.toDouble()),
+                            min: 0,
+                            max: durationMs.toDouble(),
+                            onChanged: (nextValue) async {
+                              await widget.controller.seekTo(Duration(milliseconds: nextValue.round()));
+                            },
+                            onChangeEnd: (_) => widget.onControlInteractionChanged(false),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPausedPlayButton({required double uiScale}) {
+    return _buildPlaybackButton(
+      uiScale: uiScale,
+      icon: Icons.play_arrow_rounded,
+      padding: 4 * uiScale,
+      iconSize: 12 * uiScale,
+    );
+  }
+
+  Widget _buildPlaybackButton({
+    required double uiScale,
+    required IconData icon,
+    required double padding,
+    required double iconSize,
+  }) {
+    return ClipOval(
+      child: BackdropFilter(
+        filter: ui.ImageFilter.blur(sigmaX: 12 * uiScale, sigmaY: 12 * uiScale),
+        child: Material(
+          color: Colors.black.withValues(alpha: 0.42),
+          child: InkWell(
+            onTap: widget.onTogglePlayback,
+            child: Padding(
+              padding: EdgeInsets.all(padding),
+              child: Icon(icon, size: iconSize, color: Colors.white),
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -3,6 +3,10 @@
 part of 'workspace_window.dart';
 
 extension on _WindowState {
+  bool get _areControlsPinned => widget.viewModel.areControlsPinned;
+
+  bool get _showControlsFromCommand => widget.viewModel.isCommandPressed && (_isHovered || _isResizing);
+
   bool get _isOptionGestureTargetActive {
     return widget.viewModel.isOptionPressed &&
         !widget.viewModel.isCommandPressed &&
@@ -10,12 +14,12 @@ extension on _WindowState {
   }
 
   bool get _shouldShowCommandOverlay {
-    return widget.viewModel.isSelected ||
-        widget.viewModel.isPinnedHover ||
-        (widget.viewModel.isCommandPressed && (_isHovered || _isResizing));
+    return widget.viewModel.isSelected || _areControlsPinned || _showControlsFromCommand;
   }
 
-  bool get _showExpandedVideoControls => _shouldShowCommandOverlay;
+  bool get _showControls => _areControlsPinned || _showControlsFromCommand;
+
+  bool get _showPlayButton => !_showControls;
 
   bool get _showHoverFrame => _shouldShowCommandOverlay;
 
@@ -32,7 +36,7 @@ extension on _WindowState {
   }
 
   void _handleContentTap() {
-    if (widget.viewModel.isPinnedHover) {
+    if (_areControlsPinned) {
       widget.onPinnedHoverDismissed();
       _WindowState._lastTappedWindowId = null;
       _WindowState._lastContentTapAt = null;
@@ -59,7 +63,8 @@ extension on _WindowState {
   Widget _buildContent({required bool shrinkContent, required double inset}) {
     return WorkspaceWindowContent(
       viewModel: widget.viewModel,
-      showExpandedVideoControls: _showExpandedVideoControls,
+      showControls: _showControls,
+      showPlayButton: _showPlayButton,
       shrinkContent: shrinkContent,
       inset: inset,
       onTap: _handleContentTap,

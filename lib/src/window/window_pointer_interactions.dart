@@ -8,7 +8,7 @@ extension on _WindowState {
     final isOptionPressed = widget.viewModel.isOptionPressed;
     final isCommandPressed = widget.viewModel.isCommandPressed;
 
-    if (isCommandPressed && !oldWidget.viewModel.isCommandPressed && widget.viewModel.isPinnedHover) {
+    if (isCommandPressed && !oldWidget.viewModel.isCommandPressed && widget.viewModel.areControlsPinned) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           widget.onPinnedHoverDismissed();

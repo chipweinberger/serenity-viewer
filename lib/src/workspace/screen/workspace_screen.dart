@@ -215,7 +215,7 @@ class WorkspaceScreen extends StatelessWidget {
       sharedVideoInitialization: sharedVideoState?.initialization,
       isFocused: window.asset.id == canvasViewModel.focusedWindowId,
       isSelected: windowInteractionState.selectedExposeWindowIds.contains(window.asset.id),
-      isPinnedHover: windowInteractionState.pinnedHoverWindowId == window.asset.id,
+      areControlsPinned: windowInteractionState.pinnedHoverWindowId == window.asset.id,
       workspaceZoom: workspace.viewportZoom,
       flashNonce: window.asset.id == windowInteractionState.flashedWindowId
           ? windowInteractionState.windowFlashNonce
