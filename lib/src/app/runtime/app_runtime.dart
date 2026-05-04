@@ -30,48 +30,48 @@ import 'package:serenity_viewer/src/workspace/links/workspace_links_launcher.dar
 import 'package:serenity_viewer/src/workspace/links/workspace_links_prompts.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
 
-export 'package:serenity_viewer/src/app/runtime/app_runtime_groups.dart';
 export 'package:serenity_viewer/src/app/runtime/app_runtime_inputs.dart';
 
 class AppRuntime {
   AppRuntime.assembled({
-    required this.foundation,
+    required AppFoundation foundation,
     required this.documentCoordinator,
-    required this.workspace,
+    required AppWorkspaceServices workspace,
     required this.autosaveTimer,
     required this.appLifecycleListener,
-  });
+  }) : _foundation = foundation,
+       _workspace = workspace;
 
-  final AppFoundation foundation;
+  final AppFoundation _foundation;
   final DocumentCoordinator documentCoordinator;
-  final AppWorkspaceServices workspace;
+  final AppWorkspaceServices _workspace;
   final Timer autosaveTimer;
   final AppLifecycleListener appLifecycleListener;
 
-  AppUiController get appUiController => foundation.appUiController;
-  PlatformBridge get platformBridge => foundation.platformBridge;
-  SharedVideoControllerPool get sharedVideoControllerPool => foundation.sharedVideoControllerPool;
-  EnvironmentStore get environmentStore => foundation.environmentStore;
+  AppUiController get appUiController => _foundation.appUiController;
+  PlatformBridge get platformBridge => _foundation.platformBridge;
+  SharedVideoControllerPool get sharedVideoControllerPool => _foundation.sharedVideoControllerPool;
+  EnvironmentStore get environmentStore => _foundation.environmentStore;
   EnvironmentBookmarkSynchronizer get environmentBookmarkSynchronizer =>
-      foundation.environmentBookmarkSynchronizer;
-  ThumbnailController get thumbnailController => workspace.thumbnailController;
-  WorkspaceAssetPickerController get workspaceAssetPickerController => workspace.workspaceAssetPickerController;
-  WorkspaceCollateController get workspaceCollateController => workspace.workspaceCollateController;
+      _foundation.environmentBookmarkSynchronizer;
+  ThumbnailController get thumbnailController => _workspace.thumbnailController;
+  WorkspaceAssetPickerController get workspaceAssetPickerController => _workspace.workspaceAssetPickerController;
+  WorkspaceCollateController get workspaceCollateController => _workspace.workspaceCollateController;
   WorkspaceVideoConversionController get workspaceVideoConversionController =>
-      workspace.workspaceVideoConversionController;
-  WorkspaceMediaImportController get workspaceMediaImportController => workspace.workspaceMediaImportController;
-  WorkspaceLinksController get workspaceLinksController => workspace.workspaceLinksController;
-  WorkspaceLinksLauncher get workspaceLinksLauncher => workspace.workspaceLinksLauncher;
-  WorkspaceLinksPrompts get workspaceLinksPrompts => workspace.workspaceLinksPrompts;
-  WorkspaceController get workspaceController => workspace.workspaceController;
-  WorkspaceWindowController get workspaceWindowController => workspace.workspaceWindowController;
+      _workspace.workspaceVideoConversionController;
+  WorkspaceMediaImportController get workspaceMediaImportController => _workspace.workspaceMediaImportController;
+  WorkspaceLinksController get workspaceLinksController => _workspace.workspaceLinksController;
+  WorkspaceLinksLauncher get workspaceLinksLauncher => _workspace.workspaceLinksLauncher;
+  WorkspaceLinksPrompts get workspaceLinksPrompts => _workspace.workspaceLinksPrompts;
+  WorkspaceController get workspaceController => _workspace.workspaceController;
+  WorkspaceWindowController get workspaceWindowController => _workspace.workspaceWindowController;
   WorkspaceWindowHistoryController get workspaceWindowHistoryController =>
-      workspace.workspaceWindowHistoryController;
+      _workspace.workspaceWindowHistoryController;
   WorkspaceViewportSessionController get workspaceViewportSessionController =>
-      workspace.workspaceViewportSessionController;
-  EnvironmentController get environmentController => workspace.environmentController;
-  WorkspaceExposeLayoutController get workspaceExposeLayoutController => workspace.workspaceExposeLayoutController;
-  WorkspaceShortcutController get workspaceShortcutController => workspace.workspaceShortcutController;
+      _workspace.workspaceViewportSessionController;
+  EnvironmentController get environmentController => _workspace.environmentController;
+  WorkspaceExposeLayoutController get workspaceExposeLayoutController => _workspace.workspaceExposeLayoutController;
+  WorkspaceShortcutController get workspaceShortcutController => _workspace.workspaceShortcutController;
 
   static AppRuntime create(AppRuntimeInputs inputs) {
     final stateStore = inputs.stateStore;
@@ -127,8 +127,8 @@ class AppRuntime {
   void dispose() {
     autosaveTimer.cancel();
     appLifecycleListener.dispose();
-    workspace.workspaceViewTrackingController.cancel();
-    workspace.thumbnailController.dispose();
-    foundation.sharedVideoControllerPool.dispose();
+    _workspace.workspaceViewTrackingController.cancel();
+    _workspace.thumbnailController.dispose();
+    _foundation.sharedVideoControllerPool.dispose();
   }
 }
