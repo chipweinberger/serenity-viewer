@@ -1,7 +1,17 @@
-part of 'app_workspace_factory.dart';
+import 'package:serenity_viewer/src/environment/controller/environment_management_controller.dart';
+import 'package:serenity_viewer/src/environment/controller/environment_management_mutations.dart';
+import 'package:serenity_viewer/src/environment/controller/environment_navigation_controller.dart';
+import 'package:serenity_viewer/src/workspace/actions/workspace_expose_layout_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
+import 'package:serenity_viewer/src/workspace/input/workspace_shortcut_controller.dart';
+import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.dart';
+import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
+import 'package:serenity_viewer/src/workspace/tracking/workspace_view_tracking_controller.dart';
 
-EnvironmentNavigationController _createEnvironmentNavigationController({
-  required _WorkspaceFactoryScope scope,
+import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_scope.dart';
+
+EnvironmentNavigationController createEnvironmentNavigationController({
+  required WorkspaceFactoryScope scope,
   required ThumbnailController thumbnailController,
   required WorkspaceController workspaceController,
 }) {
@@ -20,7 +30,7 @@ EnvironmentNavigationController _createEnvironmentNavigationController({
   );
 }
 
-WorkspaceExposeLayoutController _createWorkspaceExposeLayoutController({required _WorkspaceFactoryScope scope}) {
+WorkspaceExposeLayoutController createWorkspaceExposeLayoutController({required WorkspaceFactoryScope scope}) {
   return WorkspaceExposeLayoutController(
     WorkspaceExposeLayoutDependencies(
       appUiState: scope.uiState,
@@ -34,8 +44,8 @@ WorkspaceExposeLayoutController _createWorkspaceExposeLayoutController({required
   );
 }
 
-EnvironmentManagementMutations _createEnvironmentManagementMutations({
-  required _WorkspaceFactoryScope scope,
+EnvironmentManagementMutations createEnvironmentManagementMutations({
+  required WorkspaceFactoryScope scope,
   required ThumbnailController thumbnailController,
   required WorkspaceController workspaceController,
 }) {
@@ -54,13 +64,13 @@ EnvironmentManagementMutations _createEnvironmentManagementMutations({
   );
 }
 
-EnvironmentManagementController _createEnvironmentManagementController({
-  required _WorkspaceFactoryScope scope,
+EnvironmentManagementController createEnvironmentManagementController({
+  required WorkspaceFactoryScope scope,
   required EnvironmentNavigationController navigationController,
   required ThumbnailController thumbnailController,
   required WorkspaceController workspaceController,
 }) {
-  final mutations = _createEnvironmentManagementMutations(
+  final mutations = createEnvironmentManagementMutations(
     scope: scope,
     thumbnailController: thumbnailController,
     workspaceController: workspaceController,
@@ -81,8 +91,8 @@ EnvironmentManagementController _createEnvironmentManagementController({
   );
 }
 
-WorkspaceShortcutController _createWorkspaceShortcutController({
-  required _WorkspaceFactoryScope scope,
+WorkspaceShortcutController createWorkspaceShortcutController({
+  required WorkspaceFactoryScope scope,
   required EnvironmentNavigationController navigationController,
   required WorkspaceLinksController workspaceLinksController,
 }) {
@@ -99,7 +109,7 @@ WorkspaceShortcutController _createWorkspaceShortcutController({
   );
 }
 
-WorkspaceViewTrackingController _createWorkspaceViewTrackingController({required _WorkspaceFactoryScope scope}) {
+WorkspaceViewTrackingController createWorkspaceViewTrackingController({required WorkspaceFactoryScope scope}) {
   return WorkspaceViewTrackingController(
     WorkspaceViewTrackingDependencies(
       environmentStoreState: scope.envState,

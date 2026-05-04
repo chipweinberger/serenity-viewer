@@ -1,7 +1,19 @@
-part of 'app_workspace_factory.dart';
+import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
+import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
+import 'package:serenity_viewer/src/app/runtime/app_runtime_groups.dart';
+import 'package:serenity_viewer/src/app/runtime/app_runtime_inputs.dart';
+import 'package:serenity_viewer/src/app/state/app_state_store.dart';
+import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
+import 'package:serenity_viewer/src/environment/store/environment_store.dart';
+import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
+import 'package:serenity_viewer/src/media/video/media_inspector.dart';
+import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
+import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresh_state.dart';
+import 'package:serenity_viewer/src/workspace/tracking/workspace_view_tracking_state.dart';
+import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 
-class _WorkspaceFactoryScope {
-  const _WorkspaceFactoryScope({required this.inputs, required this.foundation});
+class WorkspaceFactoryScope {
+  const WorkspaceFactoryScope({required this.inputs, required this.foundation});
 
   final AppRuntimeInputs inputs;
   final AppFoundation foundation;

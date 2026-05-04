@@ -1,80 +1,47 @@
-import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
-import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
 import 'package:serenity_viewer/src/app/runtime/app_runtime_groups.dart';
 import 'package:serenity_viewer/src/app/runtime/app_runtime_inputs.dart';
-import 'package:serenity_viewer/src/app/state/app_state_store.dart';
-import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
-import 'package:serenity_viewer/src/environment/controller/environment_management_controller.dart';
-import 'package:serenity_viewer/src/environment/controller/environment_management_mutations.dart';
-import 'package:serenity_viewer/src/environment/controller/environment_navigation_controller.dart';
-import 'package:serenity_viewer/src/environment/store/environment_store.dart';
-import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
-import 'package:serenity_viewer/src/media/import/workspace_media_import_controller.dart';
-import 'package:serenity_viewer/src/media/video/media_inspector.dart';
 import 'package:serenity_viewer/src/media/video/video_frame_exporter.dart';
-import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
-import 'package:serenity_viewer/src/workspace/actions/workspace_asset_picker_controller.dart';
-import 'package:serenity_viewer/src/workspace/actions/workspace_collate_controller.dart';
-import 'package:serenity_viewer/src/workspace/actions/workspace_expose_layout_controller.dart';
-import 'package:serenity_viewer/src/workspace/actions/workspace_video_conversion_controller.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_video_conversion_prompts.dart';
-import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
-import 'package:serenity_viewer/src/workspace/controllers/workspace_viewport_session_controller.dart';
-import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
-import 'package:serenity_viewer/src/workspace/history/workspace_window_history_controller.dart';
-import 'package:serenity_viewer/src/workspace/input/workspace_shortcut_controller.dart';
-import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.dart';
-import 'package:serenity_viewer/src/workspace/links/workspace_links_launcher.dart';
-import 'package:serenity_viewer/src/workspace/links/workspace_links_prompts.dart';
-import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
-import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresh_state.dart';
-import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresher.dart';
-import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_renderer.dart';
-import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_store.dart';
-import 'package:serenity_viewer/src/workspace/tracking/workspace_view_tracking_controller.dart';
-import 'package:serenity_viewer/src/workspace/tracking/workspace_view_tracking_state.dart';
-import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
-
-part 'app_workspace_factory_scope.dart';
-part 'app_workspace_factory_core.dart';
-part 'app_workspace_factory_environment.dart';
-part 'app_workspace_factory_media.dart';
+import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_core.dart';
+import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_environment.dart';
+import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_media.dart';
+import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_scope.dart';
 
 AppWorkspaceServices createAppWorkspaceServices({required AppRuntimeInputs inputs, required AppFoundation foundation}) {
-  final scope = _WorkspaceFactoryScope(
+  final scope = WorkspaceFactoryScope(
     inputs: inputs,
     foundation: foundation,
   );
 
-  final thumbnailController = _createThumbnailController(scope: scope);
-  final workspaceLinksController = _createWorkspaceLinksController(scope: scope);
-  final workspaceLinksLauncher = _createWorkspaceLinksLauncher(scope: scope);
-  final workspaceLinksPrompts = _createWorkspaceLinksPrompts(scope: scope);
-  final workspaceController = _createWorkspaceController(scope: scope, thumbnailController: thumbnailController);
-  final workspaceWindowController = _createWorkspaceWindowController(
+  final thumbnailController = createThumbnailController(scope: scope);
+  final workspaceLinksController = createWorkspaceLinksController(scope: scope);
+  final workspaceLinksLauncher = createWorkspaceLinksLauncher(scope: scope);
+  final workspaceLinksPrompts = createWorkspaceLinksPrompts(scope: scope);
+  final workspaceController = createWorkspaceController(scope: scope, thumbnailController: thumbnailController);
+  final workspaceWindowController = createWorkspaceWindowController(
     scope: scope,
     workspaceController: workspaceController,
   );
-  final workspaceWindowHistoryController = _createWorkspaceWindowHistoryController(
+  final workspaceWindowHistoryController = createWorkspaceWindowHistoryController(
     scope: scope,
     workspaceController: workspaceController,
   );
-  final workspaceViewportSessionController = _createWorkspaceViewportSessionController(
+  final workspaceViewportSessionController = createWorkspaceViewportSessionController(
     scope: scope,
     thumbnailController: thumbnailController,
   );
-  final workspaceCollateController = _createWorkspaceCollateController(
+  final workspaceCollateController = createWorkspaceCollateController(
     scope: scope,
     workspaceWindowController: workspaceWindowController,
   );
-  final environmentNavigationController = _createEnvironmentNavigationController(
+  final environmentNavigationController = createEnvironmentNavigationController(
     scope: scope,
     thumbnailController: thumbnailController,
     workspaceController: workspaceController,
   );
-  final workspaceExposeLayoutController = _createWorkspaceExposeLayoutController(scope: scope);
-  final environmentManagementController = _createEnvironmentManagementController(
+  final workspaceExposeLayoutController = createWorkspaceExposeLayoutController(scope: scope);
+  final environmentManagementController = createEnvironmentManagementController(
     scope: scope,
     navigationController: environmentNavigationController,
     thumbnailController: thumbnailController,
@@ -84,26 +51,26 @@ AppWorkspaceServices createAppWorkspaceServices({required AppRuntimeInputs input
     navigation: environmentNavigationController,
     management: environmentManagementController,
   );
-  final workspaceShortcutController = _createWorkspaceShortcutController(
-    scope: scope,
-    navigationController: environmentNavigationController,
-    workspaceLinksController: workspaceLinksController,
-  );
-  final workspaceViewTrackingController = _createWorkspaceViewTrackingController(scope: scope);
+  final workspaceViewTrackingController = createWorkspaceViewTrackingController(scope: scope);
   final videoFrameExporter = VideoFrameExporter(mediaInspector: scope.media);
   final workspaceVideoConversionPrompts = WorkspaceVideoConversionPrompts(context: scope.app.context);
-  final workspaceVideoConversionController = _createWorkspaceVideoConversionController(
+  final workspaceVideoConversionController = createWorkspaceVideoConversionController(
     scope: scope,
     videoFrameExporter: videoFrameExporter,
     workspaceVideoConversionPrompts: workspaceVideoConversionPrompts,
   );
-  final workspaceMediaImportController = _createWorkspaceMediaImportController(
+  final workspaceMediaImportController = createWorkspaceMediaImportController(
     scope: scope,
     thumbnailController: thumbnailController,
     videoFrameExporter: videoFrameExporter,
     workspaceVideoConversionPrompts: workspaceVideoConversionPrompts,
   );
-  final workspaceAssetPickerController = _createWorkspaceAssetPickerController(
+  final workspaceShortcutController = createWorkspaceShortcutController(
+    scope: scope,
+    navigationController: environmentNavigationController,
+    workspaceLinksController: workspaceLinksController,
+  );
+  final workspaceAssetPickerController = createWorkspaceAssetPickerController(
     workspaceMediaImportController: workspaceMediaImportController,
   );
 

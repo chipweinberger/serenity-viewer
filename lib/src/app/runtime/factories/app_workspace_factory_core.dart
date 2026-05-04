@@ -1,6 +1,21 @@
-part of 'app_workspace_factory.dart';
+import 'package:serenity_viewer/src/workspace/actions/workspace_asset_picker_controller.dart';
+import 'package:serenity_viewer/src/workspace/actions/workspace_collate_controller.dart';
+import 'package:serenity_viewer/src/media/import/workspace_media_import_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_viewport_session_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
+import 'package:serenity_viewer/src/workspace/history/workspace_window_history_controller.dart';
+import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.dart';
+import 'package:serenity_viewer/src/workspace/links/workspace_links_launcher.dart';
+import 'package:serenity_viewer/src/workspace/links/workspace_links_prompts.dart';
+import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
+import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresher.dart';
+import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_renderer.dart';
+import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_store.dart';
 
-WorkspaceAssetPickerController _createWorkspaceAssetPickerController({
+import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_scope.dart';
+
+WorkspaceAssetPickerController createWorkspaceAssetPickerController({
   required WorkspaceMediaImportController workspaceMediaImportController,
 }) {
   return WorkspaceAssetPickerController(
@@ -9,8 +24,8 @@ WorkspaceAssetPickerController _createWorkspaceAssetPickerController({
   );
 }
 
-WorkspaceCollateController _createWorkspaceCollateController({
-  required _WorkspaceFactoryScope scope,
+WorkspaceCollateController createWorkspaceCollateController({
+  required WorkspaceFactoryScope scope,
   required WorkspaceWindowController workspaceWindowController,
 }) {
   return WorkspaceCollateController(
@@ -20,7 +35,7 @@ WorkspaceCollateController _createWorkspaceCollateController({
   );
 }
 
-ThumbnailController _createThumbnailController({required _WorkspaceFactoryScope scope}) {
+ThumbnailController createThumbnailController({required WorkspaceFactoryScope scope}) {
   return ThumbnailController(
     state: scope.thumbState,
     refresher: ThumbnailRefresher(
@@ -35,7 +50,7 @@ ThumbnailController _createThumbnailController({required _WorkspaceFactoryScope 
   );
 }
 
-WorkspaceLinksController _createWorkspaceLinksController({required _WorkspaceFactoryScope scope}) {
+WorkspaceLinksController createWorkspaceLinksController({required WorkspaceFactoryScope scope}) {
   return WorkspaceLinksController(
     screen: () => scope.uiState.screen,
     hasSession: () => scope.envState.environment != null,
@@ -47,16 +62,16 @@ WorkspaceLinksController _createWorkspaceLinksController({required _WorkspaceFac
   );
 }
 
-WorkspaceLinksLauncher _createWorkspaceLinksLauncher({required _WorkspaceFactoryScope scope}) {
+WorkspaceLinksLauncher createWorkspaceLinksLauncher({required WorkspaceFactoryScope scope}) {
   return WorkspaceLinksLauncher(showMessage: scope.app.showMessage, mounted: scope.app.mounted);
 }
 
-WorkspaceLinksPrompts _createWorkspaceLinksPrompts({required _WorkspaceFactoryScope scope}) {
+WorkspaceLinksPrompts createWorkspaceLinksPrompts({required WorkspaceFactoryScope scope}) {
   return WorkspaceLinksPrompts(context: scope.app.context);
 }
 
-WorkspaceController _createWorkspaceController({
-  required _WorkspaceFactoryScope scope,
+WorkspaceController createWorkspaceController({
+  required WorkspaceFactoryScope scope,
   required ThumbnailController thumbnailController,
 }) {
   return WorkspaceController(
@@ -69,8 +84,8 @@ WorkspaceController _createWorkspaceController({
   );
 }
 
-WorkspaceWindowController _createWorkspaceWindowController({
-  required _WorkspaceFactoryScope scope,
+WorkspaceWindowController createWorkspaceWindowController({
+  required WorkspaceFactoryScope scope,
   required WorkspaceController workspaceController,
 }) {
   return WorkspaceWindowController(
@@ -82,8 +97,8 @@ WorkspaceWindowController _createWorkspaceWindowController({
   );
 }
 
-WorkspaceWindowHistoryController _createWorkspaceWindowHistoryController({
-  required _WorkspaceFactoryScope scope,
+WorkspaceWindowHistoryController createWorkspaceWindowHistoryController({
+  required WorkspaceFactoryScope scope,
   required WorkspaceController workspaceController,
 }) {
   return WorkspaceWindowHistoryController(
@@ -101,8 +116,8 @@ WorkspaceWindowHistoryController _createWorkspaceWindowHistoryController({
   );
 }
 
-WorkspaceViewportSessionController _createWorkspaceViewportSessionController({
-  required _WorkspaceFactoryScope scope,
+WorkspaceViewportSessionController createWorkspaceViewportSessionController({
+  required WorkspaceFactoryScope scope,
   required ThumbnailController thumbnailController,
 }) {
   return WorkspaceViewportSessionController(
