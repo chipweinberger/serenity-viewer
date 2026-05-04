@@ -83,10 +83,9 @@ class AppRuntime {
     autosaveTimer.cancel();
     appLifecycleListener.dispose();
     workspace.workspaceViewTrackingController.cancel();
-    stateStore.workspaceViewTrackingState.dispose();
-    stateStore.windowInteractionState.dispose();
     workspace.thumbnailController.dispose();
     foundation.sharedVideoControllerPool.dispose();
+    stateStore.dispose();
     state.uiHandles.dispose();
   }
 }
