@@ -37,7 +37,82 @@ typedef SerenityWorkspaceSwitchTargetResolver =
     });
 
 class EnvironmentApi {
-  EnvironmentApi({
+  EnvironmentApi(EnvironmentApiDependencies dependencies)
+    : navigation = EnvironmentViewController(
+        EnvironmentViewDependencies(
+          environmentStoreState: dependencies.environmentStoreState,
+          appUiState: dependencies.appUiState,
+          workspaceViewportState: dependencies.workspaceViewportState,
+          workspaceController: dependencies.workspaceController,
+          context: dependencies.context,
+          mounted: dependencies.mounted,
+          openWorkspaces: dependencies.openWorkspaces,
+          activeWorkspace: dependencies.activeWorkspace,
+          updateEnvironment: dependencies.updateEnvironment,
+          replaceWorkspace: dependencies.replaceWorkspace,
+          showWorkspaceScreen: dependencies.showWorkspaceScreen,
+          showLibraryScreen: dependencies.showLibraryScreen,
+          workspaceSwitchTarget: dependencies.workspaceSwitchTarget,
+          refreshActiveWorkspaceThumbnail: dependencies.refreshActiveWorkspaceThumbnail,
+        ),
+      ) {
+    final managementMutations = EnvironmentManagementActions(
+      EnvironmentManagementActionDependencies(
+        environmentStoreState: dependencies.environmentStoreState,
+        appUiState: dependencies.appUiState,
+        workspaceController: dependencies.workspaceController,
+        workspaces: dependencies.workspaces,
+        updateEnvironment: dependencies.updateEnvironment,
+        replaceWorkspace: dependencies.replaceWorkspace,
+        showWorkspaceScreen: dependencies.showWorkspaceScreen,
+        newId: dependencies.newId,
+        queueWorkspaceRefresh: dependencies.queueWorkspaceRefresh,
+      ),
+    );
+    management = EnvironmentManagementController(
+      EnvironmentManagementDependencies(
+        environmentStoreState: dependencies.environmentStoreState,
+        workspaceController: dependencies.workspaceController,
+        context: dependencies.context,
+        mounted: dependencies.mounted,
+        workspaces: dependencies.workspaces,
+        activeWorkspace: dependencies.activeWorkspace,
+        showMessage: dependencies.showMessage,
+        navigation: navigation,
+        mutations: managementMutations,
+      ),
+    );
+    shortcuts = EnvironmentShortcutController(
+      EnvironmentShortcutDependencies(
+        appUiState: dependencies.appUiState,
+        workspaceLinksController: dependencies.workspaceLinksController,
+        focusedWindowOrNull: dependencies.focusedWindowOrNull,
+        showWorkspaceScreen: dependencies.showWorkspaceScreen,
+        toggleExpose: dependencies.toggleExpose,
+        toggleVideoPlayback: dependencies.toggleVideoPlayback,
+        navigation: navigation,
+      ),
+    );
+    tracking = WorkspaceViewTrackingController(
+      WorkspaceViewTrackingDependencies(
+        environmentStoreState: dependencies.environmentStoreState,
+        appUiState: dependencies.appUiState,
+        workspaceViewTrackingState: dependencies.workspaceViewTrackingState,
+        mounted: dependencies.mounted,
+        activeWorkspace: dependencies.activeWorkspace,
+        updateEnvironment: dependencies.updateEnvironment,
+      ),
+    );
+  }
+
+  final EnvironmentViewController navigation;
+  late final EnvironmentManagementController management;
+  late final EnvironmentShortcutController shortcuts;
+  late final WorkspaceViewTrackingController tracking;
+}
+
+class EnvironmentApiDependencies {
+  const EnvironmentApiDependencies({
     required this.environmentStoreState,
     required this.appUiState,
     required this.workspaceViewTrackingState,
@@ -61,73 +136,7 @@ class EnvironmentApi {
     required this.refreshActiveWorkspaceThumbnail,
     required this.queueWorkspaceRefresh,
     required this.toggleVideoPlayback,
-  }) {
-    navigation = EnvironmentViewController(
-      EnvironmentViewDependencies(
-        environmentStoreState: environmentStoreState,
-        appUiState: appUiState,
-        workspaceViewportState: workspaceViewportState,
-        workspaceController: workspaceController,
-        context: context,
-        mounted: mounted,
-        openWorkspaces: openWorkspaces,
-        activeWorkspace: activeWorkspace,
-        updateEnvironment: updateEnvironment,
-        replaceWorkspace: replaceWorkspace,
-        showWorkspaceScreen: showWorkspaceScreen,
-        showLibraryScreen: showLibraryScreen,
-        workspaceSwitchTarget: workspaceSwitchTarget,
-        refreshActiveWorkspaceThumbnail: refreshActiveWorkspaceThumbnail,
-      ),
-    );
-    final managementMutations = EnvironmentManagementActions(
-      EnvironmentManagementActionDependencies(
-        environmentStoreState: environmentStoreState,
-        appUiState: appUiState,
-        workspaceController: workspaceController,
-        workspaces: workspaces,
-        updateEnvironment: updateEnvironment,
-        replaceWorkspace: replaceWorkspace,
-        showWorkspaceScreen: showWorkspaceScreen,
-        newId: newId,
-        queueWorkspaceRefresh: queueWorkspaceRefresh,
-      ),
-    );
-    management = EnvironmentManagementController(
-      EnvironmentManagementDependencies(
-        environmentStoreState: environmentStoreState,
-        workspaceController: workspaceController,
-        context: context,
-        mounted: mounted,
-        workspaces: workspaces,
-        activeWorkspace: activeWorkspace,
-        showMessage: showMessage,
-        navigation: navigation,
-        mutations: managementMutations,
-      ),
-    );
-    shortcuts = EnvironmentShortcutController(
-      EnvironmentShortcutDependencies(
-        appUiState: appUiState,
-        workspaceLinksController: workspaceLinksController,
-        focusedWindowOrNull: focusedWindowOrNull,
-        showWorkspaceScreen: showWorkspaceScreen,
-        toggleExpose: toggleExpose,
-        toggleVideoPlayback: toggleVideoPlayback,
-        navigation: navigation,
-      ),
-    );
-    tracking = WorkspaceViewTrackingController(
-      WorkspaceViewTrackingDependencies(
-        environmentStoreState: environmentStoreState,
-        appUiState: appUiState,
-        workspaceViewTrackingState: workspaceViewTrackingState,
-        mounted: mounted,
-        activeWorkspace: activeWorkspace,
-        updateEnvironment: updateEnvironment,
-      ),
-    );
-  }
+  });
 
   final EnvironmentStoreState environmentStoreState;
   final AppUiState appUiState;
@@ -152,9 +161,4 @@ class EnvironmentApi {
   final Future<void> Function() refreshActiveWorkspaceThumbnail;
   final SerenityQueueWorkspaceRefresh queueWorkspaceRefresh;
   final ValueChanged<String> toggleVideoPlayback;
-
-  late final EnvironmentViewController navigation;
-  late final EnvironmentManagementController management;
-  late final EnvironmentShortcutController shortcuts;
-  late final WorkspaceViewTrackingController tracking;
 }
