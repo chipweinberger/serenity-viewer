@@ -3,7 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/app/app_dependencies.dart';
+import 'package:serenity_viewer/src/app/app_owned_state.dart';
 import 'package:serenity_viewer/src/app/assembly/app_document_factory.dart';
 import 'package:serenity_viewer/src/app/assembly/app_foundation_factory.dart';
 import 'package:serenity_viewer/src/app/assembly/app_runtime_config.dart';
@@ -16,7 +16,7 @@ export 'package:serenity_viewer/src/app/assembly/app_runtime_services.dart';
 
 class AppRuntime {
   AppRuntime.assembled({
-    required this.dependencies,
+    required this.ownedState,
     required this.state,
     required this.foundation,
     required this.documents,
@@ -25,7 +25,7 @@ class AppRuntime {
     required this.appLifecycleListener,
   });
 
-  final AppDependencies dependencies;
+  final AppOwnedState ownedState;
   final AppStateServices state;
   final AppFoundation foundation;
   final AppDocument documents;
@@ -34,8 +34,8 @@ class AppRuntime {
   final AppLifecycleListener appLifecycleListener;
 
   static AppRuntime create(AppRuntimeConfig config) {
-    final dependencies = config.dependencies;
-    final environmentStoreState = dependencies.environmentStoreState;
+    final ownedState = config.ownedState;
+    final environmentStoreState = ownedState.environmentStoreState;
     final bridge = AppRuntimeBridge();
 
     final foundation = AppFoundationFactory(config).create(
@@ -61,16 +61,16 @@ class AppRuntime {
     );
 
     return AppRuntime.assembled(
-      dependencies: dependencies,
+      ownedState: ownedState,
       state: AppStateServices(
-        handles: dependencies.handles,
-        environmentStoreState: dependencies.environmentStoreState,
-        appUiState: dependencies.appUiState,
-        windowInteractionState: dependencies.windowInteractionState,
-        workspaceViewTrackingState: dependencies.workspaceViewTrackingState,
-        workspaceViewportState: dependencies.workspaceViewportState,
-        thumbnailRefreshState: dependencies.thumbnailRefreshState,
-        recentlyClosedWindowsState: dependencies.recentlyClosedWindowsState,
+        uiHandles: ownedState.uiHandles,
+        environmentStoreState: ownedState.environmentStoreState,
+        appUiState: ownedState.appUiState,
+        windowInteractionState: ownedState.windowInteractionState,
+        workspaceViewTrackingState: ownedState.workspaceViewTrackingState,
+        workspaceViewportState: ownedState.workspaceViewportState,
+        thumbnailRefreshState: ownedState.thumbnailRefreshState,
+        recentlyClosedWindowsState: ownedState.recentlyClosedWindowsState,
       ),
       foundation: foundation,
       documents: AppDocument(documentCoordinator: documentCoordinator),
@@ -84,10 +84,10 @@ class AppRuntime {
     autosaveTimer.cancel();
     appLifecycleListener.dispose();
     workspace.environmentSession.tracking.cancel();
-    dependencies.workspaceViewTrackingState.dispose();
-    dependencies.windowInteractionState.dispose();
+    ownedState.workspaceViewTrackingState.dispose();
+    ownedState.windowInteractionState.dispose();
     workspace.thumbnailController.dispose();
     foundation.sharedVideoControllerPool.dispose();
-    state.handles.dispose();
+    state.uiHandles.dispose();
   }
 }

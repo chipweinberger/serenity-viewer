@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/assembly/app_runtime.dart';
 import 'package:serenity_viewer/src/app/assembly/app_runtime_config_builder.dart';
-import 'package:serenity_viewer/src/app/app_dependencies.dart';
+import 'package:serenity_viewer/src/app/app_owned_state.dart';
 import 'package:serenity_viewer/src/app/app_view_state.dart';
 import 'package:serenity_viewer/src/app/builders/app_menu_builder.dart';
 import 'package:serenity_viewer/src/app/builders/app_screen_host_builder.dart';
@@ -23,7 +23,7 @@ class AppRoot extends StatefulWidget {
 }
 
 class _AppRootState extends State<AppRoot> {
-  final _dependencies = AppDependencies();
+  final _ownedState = AppOwnedState();
   late final AppRuntime _runtime;
   late final AppFeedbackController _feedback;
   late final DocumentPersistenceController _documentPersistence;
@@ -140,8 +140,8 @@ class _AppRootState extends State<AppRoot> {
         workspaceLinksController: _workspaceRuntime.workspaceLinksController,
         thumbnailController: _workspaceRuntime.thumbnailController,
         windowHistoryController: _workspaceRuntime.workspaceWindowHistoryController,
-        searchController: _state.handles.searchController,
-        tabScrollController: _state.handles.tabScrollController,
+        searchController: _state.uiHandles.searchController,
+        tabScrollController: _state.uiHandles.tabScrollController,
       ),
       actions: AppScreenHostActions(
         commitStateChange: setState,
@@ -203,7 +203,7 @@ class _AppRootState extends State<AppRoot> {
 
   AppRuntimeConfig _buildRuntimeConfig() {
     return AppRuntimeConfigBuilder(
-      dependencies: _dependencies,
+      ownedState: _ownedState,
       context: () => context,
       mounted: () => mounted,
       commitStateChange: setState,
@@ -226,7 +226,7 @@ class _AppRootState extends State<AppRoot> {
     return PlatformMenuBar(
       menus: _buildMenus(),
       child: Focus(
-        focusNode: _state.handles.focusNode,
+        focusNode: _state.uiHandles.focusNode,
         autofocus: true,
         onKeyEvent: (_, event) => _workspaceRuntime.environmentSession.shortcuts.onKeyEvent(event),
         child: Scaffold(body: SafeArea(top: false, child: _buildContent(context))),

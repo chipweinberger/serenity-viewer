@@ -1,4 +1,4 @@
-import 'package:serenity_viewer/src/app/app_dependencies.dart';
+import 'package:serenity_viewer/src/app/app_owned_state.dart';
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
 import 'package:serenity_viewer/src/environment/document/document_coordinator.dart';
@@ -25,7 +25,7 @@ import 'package:serenity_viewer/src/workspace/window/session/workspace_window_hi
 
 class AppStateServices {
   const AppStateServices({
-    required this.handles,
+    required this.uiHandles,
     required this.environmentStoreState,
     required this.appUiState,
     required this.windowInteractionState,
@@ -35,7 +35,7 @@ class AppStateServices {
     required this.recentlyClosedWindowsState,
   });
 
-  final AppHandles handles;
+  final AppUiHandles uiHandles;
   final EnvironmentStoreState environmentStoreState;
   final AppUiState appUiState;
   final WindowInteractionState windowInteractionState;

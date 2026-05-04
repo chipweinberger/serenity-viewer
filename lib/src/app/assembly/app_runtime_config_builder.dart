@@ -6,12 +6,12 @@ import 'package:serenity_viewer/src/app/app_view_state.dart';
 import 'package:serenity_viewer/src/app/seed_environment.dart';
 import 'package:serenity_viewer/src/environment/document/document_persistence_controller.dart';
 import 'package:serenity_viewer/src/foundation/serenity_identity.dart';
-import 'package:serenity_viewer/src/app/app_dependencies.dart';
+import 'package:serenity_viewer/src/app/app_owned_state.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 
 class AppRuntimeConfigBuilder {
   const AppRuntimeConfigBuilder({
-    required this.dependencies,
+    required this.ownedState,
     required this.context,
     required this.mounted,
     required this.commitStateChange,
@@ -23,7 +23,7 @@ class AppRuntimeConfigBuilder {
     required this.documentPersistence,
   });
 
-  final AppDependencies dependencies;
+  final AppOwnedState ownedState;
   final BuildContext Function() context;
   final bool Function() mounted;
   final StateSetter commitStateChange;
@@ -37,7 +37,7 @@ class AppRuntimeConfigBuilder {
   AppRuntimeConfig build() {
     return AppRuntimeConfig(
       isRunningInWidgetTest: isRunningInWidgetTest,
-      dependencies: dependencies,
+      ownedState: ownedState,
       shell: AppConfig(
         windowTitle: () => viewState().windowTitle,
         context: context,

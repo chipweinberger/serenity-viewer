@@ -18,13 +18,13 @@ class AppWorkspaceFactory {
   final AppRuntimeConfig config;
 
   AppWorkspaceServices create({required AppFoundation foundation}) {
-    final dependencies = config.dependencies;
-    final environmentStoreState = dependencies.environmentStoreState;
-    final appUiState = dependencies.appUiState;
-    final windowInteractionState = dependencies.windowInteractionState;
-    final workspaceViewTrackingState = dependencies.workspaceViewTrackingState;
-    final workspaceViewportState = dependencies.workspaceViewportState;
-    final thumbnailRefreshState = dependencies.thumbnailRefreshState;
+    final ownedState = config.ownedState;
+    final environmentStoreState = ownedState.environmentStoreState;
+    final appUiState = ownedState.appUiState;
+    final windowInteractionState = ownedState.windowInteractionState;
+    final workspaceViewTrackingState = ownedState.workspaceViewTrackingState;
+    final workspaceViewportState = ownedState.workspaceViewportState;
+    final thumbnailRefreshState = ownedState.thumbnailRefreshState;
 
     late final EnvironmentSession environmentSession;
 
@@ -73,7 +73,7 @@ class AppWorkspaceFactory {
       environment: () => environmentStoreState.environment,
       workspaces: config.workspace.workspaces,
       activeWorkspace: config.workspace.activeWorkspace,
-      recentlyClosedWindowsState: dependencies.recentlyClosedWindowsState,
+      recentlyClosedWindowsState: ownedState.recentlyClosedWindowsState,
       workspaceController: workspaceController,
       updateEnvironment: foundation.environmentStore.updateEnvironment,
       replaceWorkspace: foundation.environmentStore.replaceWorkspace,

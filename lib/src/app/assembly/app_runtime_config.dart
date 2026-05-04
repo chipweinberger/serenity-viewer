@@ -4,19 +4,19 @@ import 'package:serenity_viewer/src/environment/session/environment_session.dart
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
-import 'package:serenity_viewer/src/app/app_dependencies.dart';
+import 'package:serenity_viewer/src/app/app_owned_state.dart';
 
 class AppRuntimeConfig {
   const AppRuntimeConfig({
     required this.isRunningInWidgetTest,
-    required this.dependencies,
+    required this.ownedState,
     required this.shell,
     required this.environment,
     required this.workspace,
   });
 
   final bool isRunningInWidgetTest;
-  final AppDependencies dependencies;
+  final AppOwnedState ownedState;
   final AppConfig shell;
   final EnvironmentConfig environment;
   final WorkspaceConfig workspace;

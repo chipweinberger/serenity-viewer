@@ -8,7 +8,7 @@ class AppDocumentFactory {
 
   DocumentCoordinator create({required AppFoundation foundation, required AppWorkspaceServices workspace}) {
     return DocumentCoordinator(
-      environmentStoreState: config.dependencies.environmentStoreState,
+      environmentStoreState: config.ownedState.environmentStoreState,
       environmentStore: foundation.environmentStore,
       context: config.shell.context,
       mounted: config.shell.mounted,

@@ -8,8 +8,8 @@ import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresh_state
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 import 'package:serenity_viewer/src/workspace/window/session/recently_closed_windows_state.dart';
 
-class AppDependencies {
-  final AppHandles handles = AppHandles();
+class AppOwnedState {
+  final AppUiHandles uiHandles = AppUiHandles();
   final EnvironmentStoreState environmentStoreState = EnvironmentStoreState();
   final AppUiState appUiState = AppUiState();
   final WindowInteractionState windowInteractionState = WindowInteractionState();
@@ -19,7 +19,7 @@ class AppDependencies {
   final RecentlyClosedWindowsState recentlyClosedWindowsState = RecentlyClosedWindowsState();
 }
 
-class AppHandles {
+class AppUiHandles {
   final FocusNode focusNode = FocusNode();
   final TextEditingController searchController = TextEditingController();
   final ScrollController tabScrollController = ScrollController();
