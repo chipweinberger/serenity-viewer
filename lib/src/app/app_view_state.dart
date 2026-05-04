@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:serenity_viewer/src/app/assembly/app_runtime.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 
-class AppDerivedState {
-  const AppDerivedState(this.state);
+class AppViewState {
+  const AppViewState(this.state);
 
   final AppStateServices state;
 

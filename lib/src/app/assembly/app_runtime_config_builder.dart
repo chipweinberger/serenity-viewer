@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/app_actions.dart';
-import 'package:serenity_viewer/src/app/app_derived_state.dart';
 import 'package:serenity_viewer/src/app/app_persistence_controller.dart';
 import 'package:serenity_viewer/src/app/assembly/app_runtime_config.dart';
 import 'package:serenity_viewer/src/app/assembly/app_runtime_services.dart';
+import 'package:serenity_viewer/src/app/app_view_state.dart';
 import 'package:serenity_viewer/src/app/seed_environment.dart';
 import 'package:serenity_viewer/src/foundation/serenity_identity.dart';
 import 'package:serenity_viewer/src/app/app_dependencies.dart';
@@ -18,7 +18,7 @@ class AppRuntimeConfigBuilder {
     required this.commitStateChange,
     required this.showMessage,
     required this.isRunningInWidgetTest,
-    required this.derivedState,
+    required this.viewState,
     required this.foundation,
     required this.controller,
     required this.persistence,
@@ -30,7 +30,7 @@ class AppRuntimeConfigBuilder {
   final StateSetter commitStateChange;
   final ValueChanged<String> showMessage;
   final bool isRunningInWidgetTest;
-  final AppDerivedState Function() derivedState;
+  final AppViewState Function() viewState;
   final AppFoundation Function() foundation;
   final AppActions Function() controller;
   final AppPersistenceController Function() persistence;
@@ -40,7 +40,7 @@ class AppRuntimeConfigBuilder {
       isRunningInWidgetTest: isRunningInWidgetTest,
       dependencies: dependencies,
       shell: AppConfig(
-        windowTitle: () => derivedState().windowTitle,
+        windowTitle: () => viewState().windowTitle,
         context: context,
         mounted: mounted,
         commitStateChange: commitStateChange,
@@ -56,9 +56,9 @@ class AppRuntimeConfigBuilder {
       workspace: WorkspaceConfig(
         newId: newSerenityId,
         colorFromDigest: assetColorValueFromDigest,
-        activeWorkspace: () => derivedState().activeWorkspaceOrNull,
-        workspaces: () => derivedState().workspaces,
-        openWorkspaces: () => derivedState().openWorkspaces,
+        activeWorkspace: () => viewState().activeWorkspaceOrNull,
+        workspaces: () => viewState().workspaces,
+        openWorkspaces: () => viewState().openWorkspaces,
         focusedWindowOrNull: () => controller().workspace.workspaceWindowController.focusedWindowOrNull(),
         setWorkspaceViewport:
             ({required String workspaceId, Offset? center, double? zoom, bool queueThumbnail = false}) =>

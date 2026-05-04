@@ -7,8 +7,8 @@ import 'package:serenity_viewer/src/app/assembly/app_runtime.dart';
 import 'package:serenity_viewer/src/app/assembly/app_runtime_config_builder.dart';
 import 'package:serenity_viewer/src/app/app_dependencies.dart';
 import 'package:serenity_viewer/src/app/app_actions.dart';
-import 'package:serenity_viewer/src/app/app_derived_state.dart';
 import 'package:serenity_viewer/src/app/app_persistence_controller.dart';
+import 'package:serenity_viewer/src/app/app_view_state.dart';
 import 'package:serenity_viewer/src/app/builders/app_screen_host_builder.dart';
 import 'package:serenity_viewer/src/app/builders/app_screen_host_scope.dart';
 import 'package:serenity_viewer/src/app/builders/menu_builder.dart';
@@ -29,7 +29,7 @@ class _AppRootState extends State<AppRoot> {
   late final AppPersistenceController _persistence;
 
   AppStateServices get _state => _runtime.state;
-  AppDerivedState get _derived => AppDerivedState(_state);
+  AppViewState get _viewState => AppViewState(_state);
   AppFoundation get _foundation => _runtime.foundation;
   AppDocument get _documents => _runtime.documents;
   AppWorkspaceServices get _workspaceRuntime => _runtime.workspace;
@@ -126,11 +126,11 @@ class _AppRootState extends State<AppRoot> {
         context: context,
         uiState: _state.appUiState,
         environment: _state.environmentStoreState.environment!,
-        windowTitle: _derived.windowTitle,
-        workspaces: _derived.workspaces,
-        openWorkspaces: _derived.openWorkspaces,
-        activeWorkspace: _derived.activeWorkspace,
-        activeWorkspaceOrNull: _derived.activeWorkspaceOrNull,
+        windowTitle: _viewState.windowTitle,
+        workspaces: _viewState.workspaces,
+        openWorkspaces: _viewState.openWorkspaces,
+        activeWorkspace: _viewState.activeWorkspace,
+        activeWorkspaceOrNull: _viewState.activeWorkspaceOrNull,
         selectedExposeWindowCount: _workspaceRuntime.workspaceController.expose.count(),
         windowInteractionState: _state.windowInteractionState,
         workspaceViewportState: _state.workspaceViewportState,
@@ -210,7 +210,7 @@ class _AppRootState extends State<AppRoot> {
       commitStateChange: setState,
       showMessage: _showMessage,
       isRunningInWidgetTest: _isRunningInWidgetTest,
-      derivedState: () => _derived,
+      viewState: () => _viewState,
       foundation: () => _foundation,
       controller: () => _controller,
       persistence: () => _persistence,
