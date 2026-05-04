@@ -321,6 +321,7 @@ EnvironmentManagementController createEnvironmentManagementController({
 
 WorkspaceShortcutController createWorkspaceShortcutController({
   required WorkspaceDependencies dependencies,
+  required EnvironmentManagementController managementController,
   required EnvironmentNavigationController navigationController,
   required WorkspacePlaybackController playbackController,
   required WorkspaceLinksController workspaceLinksController,
@@ -334,6 +335,8 @@ WorkspaceShortcutController createWorkspaceShortcutController({
       playbackController: playbackController,
       workspaceLinksController: workspaceLinksController,
       focusedWindowOrNull: dependencies.queries.focusedWindowOrNull,
+      activeWorkspaceId: () =>
+          dependencies.services.environmentStore.environmentStoreState.environment?.activeWorkspaceId,
       showWorkspaceScreen:
           ({
             WorkspaceLayoutMode workspaceLayoutMode = WorkspaceLayoutMode.freeform,
@@ -346,6 +349,7 @@ WorkspaceShortcutController createWorkspaceShortcutController({
             clearExposeSelection: clearExposeSelection,
             refreshWorkspaceTrackingEnabled: refreshWorkspaceTracking,
           ),
+      management: managementController,
       navigation: navigationController,
     ),
   );
@@ -508,6 +512,7 @@ WorkspaceParts assembleWorkspace({required WorkspaceDependencies dependencies}) 
   );
   final shortcuts = createWorkspaceShortcutController(
     dependencies: dependencies,
+    managementController: management,
     navigationController: navigation,
     playbackController: playback,
     workspaceLinksController: links,

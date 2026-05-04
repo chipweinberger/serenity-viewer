@@ -307,12 +307,14 @@ class AppMenu extends StatelessWidget {
         onSelected: state.activeWorkspaceId == null
             ? () => feedback.showMessage('There is no workspace to rename.')
             : () => unawaited(environmentController.management.renameWorkspace(state.activeWorkspaceId!)),
+        shortcut: const SingleActivator(LogicalKeyboardKey.keyW, meta: true, shift: true),
       ),
       PlatformMenuItem(
         label: 'Delete…',
         onSelected: state.activeWorkspaceId == null
             ? () => feedback.showMessage('There is no workspace to delete.')
             : () => unawaited(environmentController.management.confirmDeleteWorkspace(state.activeWorkspaceId!)),
+        shortcut: const SingleActivator(LogicalKeyboardKey.keyD, meta: true, shift: true),
       ),
     ];
   }

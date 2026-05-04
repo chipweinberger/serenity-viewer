@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
+import 'package:serenity_viewer/src/environment/controller/environment_management_controller.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller_types.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
@@ -19,7 +20,9 @@ class WorkspaceShortcutDependencies {
     required this.playbackController,
     required this.workspaceLinksController,
     required this.focusedWindowOrNull,
+    required this.activeWorkspaceId,
     required this.showWorkspaceScreen,
+    required this.management,
     required this.navigation,
   });
 
@@ -28,7 +31,9 @@ class WorkspaceShortcutDependencies {
   final WorkspacePlaybackController playbackController;
   final WorkspaceLinksController workspaceLinksController;
   final Window? Function() focusedWindowOrNull;
+  final String? Function() activeWorkspaceId;
   final SerenityShowWorkspaceScreen showWorkspaceScreen;
+  final EnvironmentManagementController management;
   final EnvironmentNavigationController navigation;
 }
 
@@ -36,6 +41,22 @@ class WorkspaceShortcutController {
   WorkspaceShortcutController(this._dependencies);
 
   final WorkspaceShortcutDependencies _dependencies;
+
+  void _renameActiveWorkspace() {
+    final activeWorkspaceId = _dependencies.activeWorkspaceId();
+    if (activeWorkspaceId == null) {
+      return;
+    }
+    unawaited(_dependencies.management.renameWorkspace(activeWorkspaceId));
+  }
+
+  void _deleteActiveWorkspace() {
+    final activeWorkspaceId = _dependencies.activeWorkspaceId();
+    if (activeWorkspaceId == null) {
+      return;
+    }
+    unawaited(_dependencies.management.confirmDeleteWorkspace(activeWorkspaceId));
+  }
 
   void handleShortcut(LogicalKeyboardKey key) {
     if (key == LogicalKeyboardKey.arrowUp) {
@@ -87,6 +108,17 @@ class WorkspaceShortcutController {
     }
 
     final key = event.logicalKey;
+    if (HardwareKeyboard.instance.isMetaPressed && HardwareKeyboard.instance.isShiftPressed) {
+      if (key == LogicalKeyboardKey.keyW) {
+        _renameActiveWorkspace();
+        return KeyEventResult.handled;
+      }
+      if (key == LogicalKeyboardKey.keyD) {
+        _deleteActiveWorkspace();
+        return KeyEventResult.handled;
+      }
+    }
+
     if ({
       LogicalKeyboardKey.arrowUp,
       LogicalKeyboardKey.arrowDown,
