@@ -6,15 +6,15 @@ import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
-import 'package:serenity_viewer/src/workspace/window/session/recently_closed_window_entry.dart';
-import 'package:serenity_viewer/src/workspace/window/session/recently_closed_windows_state.dart';
+import 'package:serenity_viewer/src/workspace/window/session/workspace_window_history_entry.dart';
+import 'package:serenity_viewer/src/workspace/window/session/workspace_window_history_state.dart';
 
 class WorkspaceWindowHistoryController {
   WorkspaceWindowHistoryController({
     required this.environment,
     required this.workspaces,
     required this.activeWorkspace,
-    required this.recentlyClosedWindowsState,
+    required this.workspaceWindowHistoryState,
     required this.workspaceController,
     required this.updateEnvironment,
     required this.replaceWorkspace,
@@ -28,7 +28,7 @@ class WorkspaceWindowHistoryController {
   final Environment? Function() environment;
   final List<Workspace> Function() workspaces;
   final Workspace? Function() activeWorkspace;
-  final RecentlyClosedWindowsState recentlyClosedWindowsState;
+  final WorkspaceWindowHistoryState workspaceWindowHistoryState;
   final WorkspaceController workspaceController;
   final ValueChanged<Environment> updateEnvironment;
   final void Function(Workspace workspace, {bool queueThumbnail}) replaceWorkspace;
@@ -44,8 +44,8 @@ class WorkspaceWindowHistoryController {
   final SerenityScreen Function() screen;
   final int maxRecentlyClosedWindows;
 
-  List<RecentlyClosedWindowEntry> get entries {
-    return recentlyClosedWindowsState.entries;
+  List<WorkspaceWindowHistoryEntry> get entries {
+    return workspaceWindowHistoryState.entries;
   }
 
   void closeWindow(String workspaceId, String windowId) {
@@ -82,7 +82,7 @@ class WorkspaceWindowHistoryController {
     closeWindow(workspaceId, windowId);
   }
 
-  void restoreRecentlyClosedWindow([RecentlyClosedWindowEntry? entry]) {
+  void restoreRecentlyClosedWindow([WorkspaceWindowHistoryEntry? entry]) {
     final targetEntry = entry ?? (entries.isEmpty ? null : entries.first);
     final currentEnvironment = environment();
     if (targetEntry == null || currentEnvironment == null) {

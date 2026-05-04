@@ -19,7 +19,7 @@ import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.da
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresh_state.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 import 'package:serenity_viewer/src/workspace/window/interaction/window_interaction_state.dart';
-import 'package:serenity_viewer/src/workspace/window/session/recently_closed_windows_state.dart';
+import 'package:serenity_viewer/src/workspace/window/session/workspace_window_history_state.dart';
 import 'package:serenity_viewer/src/workspace/window/session/workspace_video_conversion_controller.dart';
 import 'package:serenity_viewer/src/workspace/window/session/workspace_window_history_controller.dart';
 
@@ -32,7 +32,7 @@ class AppStateServices {
     required this.workspaceViewTrackingState,
     required this.workspaceViewportState,
     required this.thumbnailRefreshState,
-    required this.recentlyClosedWindowsState,
+    required this.workspaceWindowHistoryState,
   });
 
   final AppUiHandles uiHandles;
@@ -42,7 +42,7 @@ class AppStateServices {
   final WorkspaceViewTrackingState workspaceViewTrackingState;
   final WorkspaceViewportState workspaceViewportState;
   final ThumbnailRefreshState thumbnailRefreshState;
-  final RecentlyClosedWindowsState recentlyClosedWindowsState;
+  final WorkspaceWindowHistoryState workspaceWindowHistoryState;
 }
 
 class AppFoundation {

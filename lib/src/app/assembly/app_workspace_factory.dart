@@ -73,7 +73,7 @@ class AppWorkspaceFactory {
       environment: () => environmentStoreState.environment,
       workspaces: config.workspace.workspaces,
       activeWorkspace: config.workspace.activeWorkspace,
-      recentlyClosedWindowsState: ownedState.recentlyClosedWindowsState,
+      workspaceWindowHistoryState: ownedState.workspaceWindowHistoryState,
       workspaceController: workspaceController,
       updateEnvironment: foundation.environmentStore.updateEnvironment,
       replaceWorkspace: foundation.environmentStore.replaceWorkspace,

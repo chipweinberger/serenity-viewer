@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:serenity_viewer/src/environment/asset.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/workspace/window/session/recently_closed_window_entry.dart';
+import 'package:serenity_viewer/src/workspace/window/session/workspace_window_history_entry.dart';
 
 class AppMenuBuilder {
   AppMenuBuilder({
@@ -64,13 +64,13 @@ class AppMenuBuilder {
   final Future<void> Function(String workspaceId) renameWorkspace;
   final VoidCallback showNoWorkspaceToDeleteMessage;
   final Future<void> Function(String workspaceId) confirmDeleteWorkspace;
-  final void Function([RecentlyClosedWindowEntry? entry]) restoreRecentlyClosedWindow;
+  final void Function([WorkspaceWindowHistoryEntry? entry]) restoreRecentlyClosedWindow;
 
   List<PlatformMenuItem> build({
     required String? activeWorkspaceId,
     required Window? focusedWindow,
     required bool focusedWindowIsSelected,
-    required List<RecentlyClosedWindowEntry> recentlyClosedWindows,
+    required List<WorkspaceWindowHistoryEntry> recentlyClosedWindows,
   }) {
     final focusedVideoWindow = focusedWindow?.asset.type == AssetType.video ? focusedWindow : null;
     final focusedWindowLabel = focusedWindow == null

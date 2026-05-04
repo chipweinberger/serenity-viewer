@@ -112,7 +112,7 @@ class _AppRootState extends State<AppRoot> {
       activeWorkspaceId: _state.environmentStoreState.environment?.activeWorkspaceId,
       focusedWindow: focusedWindow,
       focusedWindowIsSelected: focusedWindowIsSelected,
-      recentlyClosedWindows: _state.recentlyClosedWindowsState.entries,
+      recentlyClosedWindows: _state.workspaceWindowHistoryState.entries,
     );
   }
 

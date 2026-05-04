@@ -70,7 +70,7 @@ class AppRuntime {
         workspaceViewTrackingState: ownedState.workspaceViewTrackingState,
         workspaceViewportState: ownedState.workspaceViewportState,
         thumbnailRefreshState: ownedState.thumbnailRefreshState,
-        recentlyClosedWindowsState: ownedState.recentlyClosedWindowsState,
+        workspaceWindowHistoryState: ownedState.workspaceWindowHistoryState,
       ),
       foundation: foundation,
       documents: AppDocument(documentCoordinator: documentCoordinator),

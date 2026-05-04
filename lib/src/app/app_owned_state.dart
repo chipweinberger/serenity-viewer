@@ -6,7 +6,7 @@ import 'package:serenity_viewer/src/workspace/window/interaction/window_interact
 import 'package:serenity_viewer/src/environment/session/workspace_view_tracking_state.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresh_state.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
-import 'package:serenity_viewer/src/workspace/window/session/recently_closed_windows_state.dart';
+import 'package:serenity_viewer/src/workspace/window/session/workspace_window_history_state.dart';
 
 class AppOwnedState {
   final AppUiHandles uiHandles = AppUiHandles();
@@ -16,7 +16,7 @@ class AppOwnedState {
   final WorkspaceViewTrackingState workspaceViewTrackingState = WorkspaceViewTrackingState();
   final WorkspaceViewportState workspaceViewportState = WorkspaceViewportState();
   final ThumbnailRefreshState thumbnailRefreshState = ThumbnailRefreshState();
-  final RecentlyClosedWindowsState recentlyClosedWindowsState = RecentlyClosedWindowsState();
+  final WorkspaceWindowHistoryState workspaceWindowHistoryState = WorkspaceWindowHistoryState();
 }
 
 class AppUiHandles {
