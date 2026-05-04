@@ -28,8 +28,8 @@ import 'package:serenity_viewer/src/workspace/viewport/workspace_projection.dart
 typedef SharedVideoLookup = SharedVideoState? Function(Window window, {required bool isLoaded});
 
 @immutable
-class WorkspaceScreenActions {
-  const WorkspaceScreenActions({
+class WorkspaceScreenHostActions {
+  const WorkspaceScreenHostActions({
     required this.setDropTargetActive,
     required this.importFiles,
     required this.trackViewportSize,
@@ -89,8 +89,8 @@ class WorkspaceScreenActions {
   final Future<void> Function(Asset asset) revealAssetInFinder;
 }
 
-class WorkspaceScreen extends StatelessWidget {
-  const WorkspaceScreen({
+class WorkspaceScreenHost extends StatelessWidget {
+  const WorkspaceScreenHost({
     super.key,
     required this.environment,
     required this.openWorkspaces,
@@ -108,7 +108,7 @@ class WorkspaceScreen extends StatelessWidget {
   final WindowInteractionState windowInteractionState;
   final MediaLoadPlan loadPlan;
   final SharedVideoLookup sharedVideoLookup;
-  final WorkspaceScreenActions actions;
+  final WorkspaceScreenHostActions actions;
   final Widget workspaceHud;
 
   Widget _buildEmptyWorkspaceCanvasState(BuildContext context) {

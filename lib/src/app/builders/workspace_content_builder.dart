@@ -4,7 +4,7 @@ import 'package:serenity_viewer/src/app/builders/app_screen_host_scope.dart';
 import 'package:serenity_viewer/src/workspace/links/presentation/workspace_links_dialog.dart';
 import 'package:serenity_viewer/src/workspace/screen/workspace_hud_view_model.dart';
 import 'package:serenity_viewer/src/workspace/screen/workspace_hud.dart';
-import 'package:serenity_viewer/src/workspace/screen/workspace_screen.dart';
+import 'package:serenity_viewer/src/workspace/screen/workspace_screen_host.dart';
 import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
 import 'package:serenity_viewer/src/media/loading/workspace_load_plan.dart';
 
@@ -31,14 +31,14 @@ class WorkspaceContentBuilder {
   Widget build(MediaLoadPlan workspaceLoadPlan) {
     final workspaceHudViewModel = _buildWorkspaceHudViewModel();
 
-    return WorkspaceScreen(
+    return WorkspaceScreenHost(
       environment: state.environment,
       openWorkspaces: state.openWorkspaces,
       appUiState: state.uiState,
       windowInteractionState: state.windowInteractionState,
       loadPlan: workspaceLoadPlan,
       sharedVideoLookup: state.sharedVideoControllerPool.sharedVideoForWindow,
-      actions: WorkspaceScreenActions(
+      actions: WorkspaceScreenHostActions(
         setDropTargetActive: (isActive) => actions.commitStateChange(() => state.uiState.isDropTargetActive = isActive),
         importFiles: actions.importFiles,
         trackViewportSize: (viewportSize) => state.workspaceViewportState.viewportSize = viewportSize,
