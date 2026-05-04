@@ -55,59 +55,65 @@ class _AppRootState extends State<AppRoot> {
 
   AppRuntime _createRuntime() {
     return createAppRuntime(
-      isRunningInWidgetTest: _isRunningInWidgetTest,
-      environmentStoreState: _environmentStoreState,
-      appUiState: _appUiState,
-      windowInteractionState: _windowInteractionState,
-      workspaceViewTrackingState: _workspaceViewTrackingState,
-      workspaceViewportState: _workspaceViewportState,
-      thumbnailRefreshState: _thumbnailRefreshState,
-      environmentWindowHistoryState: _environmentWindowHistoryState,
-      windowTitle: () => deriveWindowTitle(_environmentStoreState),
-      context: () => context,
-      mounted: () => mounted,
-      showMessage: _showMessage,
-      seedEnvironment: buildSeedEnvironment,
-      updateEnvironment: (environment) => _runtime.environmentStore.updateEnvironment(environment),
-      replaceWorkspace: (workspace, {queueThumbnail = true}) {
-        _runtime.environmentStore.replaceWorkspace(workspace, queueThumbnail: queueThumbnail);
-      },
-      saveEnvironment: () => _documentPersistence.saveEnvironment(),
-      newId: newSerenityId,
-      colorFromDigest: assetColorValueFromDigest,
-      activeWorkspace: () => deriveActiveWorkspaceOrNull(_environmentStoreState),
-      workspaces: () => deriveWorkspaces(_environmentStoreState),
-      openWorkspaces: () => deriveOpenWorkspaces(_environmentStoreState),
-      focusedWindowOrNull: () => _runtime.workspaceController.window.focusedWindowOrNull(),
-      setWorkspaceViewport: ({required workspaceId, center, zoom, queueThumbnail = true}) {
-        _runtime.workspaceController.viewport.setWorkspaceViewport(
-          workspaceId: workspaceId,
-          center: center,
-          zoom: zoom,
-          queueThumbnail: queueThumbnail,
-        );
-      },
-      showWorkspaceScreen:
-          ({
-            WorkspaceLayoutMode workspaceLayoutMode = WorkspaceLayoutMode.freeform,
-            bool resetEditMode = true,
-            bool clearExposeSelection = true,
-            bool refreshWorkspaceTracking = true,
-          }) => _runtime.appUiController.showWorkspaceScreen(
-            workspaceLayoutMode: workspaceLayoutMode,
-            resetEditMode: resetEditMode,
-            clearExposeSelection: clearExposeSelection,
-            refreshWorkspaceTrackingEnabled: refreshWorkspaceTracking,
-          ),
-      showLibraryScreen:
-          ({bool resetEditMode = true, bool clearExposeSelection = true, bool refreshWorkspaceTracking = true}) =>
-              _runtime.appUiController.showLibraryScreen(
+      dependencies: AppRuntimeDependencies(
+        state: AppRuntimeState(
+          environmentStoreState: _environmentStoreState,
+          appUiState: _appUiState,
+          windowInteractionState: _windowInteractionState,
+          workspaceViewTrackingState: _workspaceViewTrackingState,
+          workspaceViewportState: _workspaceViewportState,
+          thumbnailRefreshState: _thumbnailRefreshState,
+          environmentWindowHistoryState: _environmentWindowHistoryState,
+        ),
+        runtime: AppRuntimeRuntime(
+          isRunningInWidgetTest: _isRunningInWidgetTest,
+          windowTitle: () => deriveWindowTitle(_environmentStoreState),
+          context: () => context,
+          mounted: () => mounted,
+          showMessage: _showMessage,
+        ),
+        queries: AppRuntimeQueries(
+          activeWorkspace: () => deriveActiveWorkspaceOrNull(_environmentStoreState),
+          workspaces: () => deriveWorkspaces(_environmentStoreState),
+          openWorkspaces: () => deriveOpenWorkspaces(_environmentStoreState),
+          focusedWindowOrNull: () => _runtime.workspaceController.window.focusedWindowOrNull(),
+        ),
+        actions: AppRuntimeActions(
+          seedEnvironment: buildSeedEnvironment,
+          saveEnvironment: () => _documentPersistence.saveEnvironment(),
+          newId: newSerenityId,
+          colorFromDigest: assetColorValueFromDigest,
+          setWorkspaceViewport: ({required workspaceId, center, zoom, queueThumbnail = true}) {
+            _runtime.workspaceController.viewport.setWorkspaceViewport(
+              workspaceId: workspaceId,
+              center: center,
+              zoom: zoom,
+              queueThumbnail: queueThumbnail,
+            );
+          },
+          showWorkspaceScreen:
+              ({
+                WorkspaceLayoutMode workspaceLayoutMode = WorkspaceLayoutMode.freeform,
+                bool resetEditMode = true,
+                bool clearExposeSelection = true,
+                bool refreshWorkspaceTracking = true,
+              }) => _runtime.appUiController.showWorkspaceScreen(
+                workspaceLayoutMode: workspaceLayoutMode,
                 resetEditMode: resetEditMode,
                 clearExposeSelection: clearExposeSelection,
                 refreshWorkspaceTrackingEnabled: refreshWorkspaceTracking,
               ),
-      toggleExpose: () => _runtime.appUiController.toggleExpose(),
-      toggleVideoPlayback: (windowId) => _runtime.workspaceController.playback.toggleVideoPlayback(windowId),
+          showLibraryScreen:
+              ({bool resetEditMode = true, bool clearExposeSelection = true, bool refreshWorkspaceTracking = true}) =>
+                  _runtime.appUiController.showLibraryScreen(
+                    resetEditMode: resetEditMode,
+                    clearExposeSelection: clearExposeSelection,
+                    refreshWorkspaceTrackingEnabled: refreshWorkspaceTracking,
+                  ),
+          toggleExpose: () => _runtime.appUiController.toggleExpose(),
+          toggleVideoPlayback: (windowId) => _runtime.workspaceController.playback.toggleVideoPlayback(windowId),
+        ),
+      ),
     );
   }
 

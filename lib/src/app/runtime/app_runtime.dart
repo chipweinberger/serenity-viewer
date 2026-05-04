@@ -63,56 +63,165 @@ class AppRuntime {
   }
 }
 
-AppRuntime createAppRuntime({
-  required bool isRunningInWidgetTest,
-  required EnvironmentStoreState environmentStoreState,
-  required AppUiState appUiState,
-  required WindowInteractionState windowInteractionState,
-  required WorkspaceViewTrackingState workspaceViewTrackingState,
-  required WorkspaceViewportState workspaceViewportState,
-  required ThumbnailRefreshState thumbnailRefreshState,
-  required EnvironmentWindowHistoryState environmentWindowHistoryState,
-  required String Function() windowTitle,
-  required BuildContext Function() context,
-  required bool Function() mounted,
-  required ValueChanged<String> showMessage,
-  required Environment Function() seedEnvironment,
-  required ValueChanged<Environment> updateEnvironment,
-  required void Function(Workspace workspace, {bool queueThumbnail}) replaceWorkspace,
-  required Future<void> Function() saveEnvironment,
-  required String Function(String prefix) newId,
-  required int Function(String value) colorFromDigest,
-  required Workspace? Function() activeWorkspace,
-  required List<Workspace> Function() workspaces,
-  required List<Workspace> Function() openWorkspaces,
-  required Window? Function() focusedWindowOrNull,
-  required void Function({required String workspaceId, Offset? center, double? zoom, bool queueThumbnail})
-  setWorkspaceViewport,
-  required SerenityShowWorkspaceScreen showWorkspaceScreen,
-  required SerenityShowLibraryScreen showLibraryScreen,
-  required VoidCallback toggleExpose,
-  required ValueChanged<String> toggleVideoPlayback,
-}) {
+class AppRuntimeState {
+  const AppRuntimeState({
+    required this.environmentStoreState,
+    required this.appUiState,
+    required this.windowInteractionState,
+    required this.workspaceViewTrackingState,
+    required this.workspaceViewportState,
+    required this.thumbnailRefreshState,
+    required this.environmentWindowHistoryState,
+  });
+
+  final EnvironmentStoreState environmentStoreState;
+  final AppUiState appUiState;
+  final WindowInteractionState windowInteractionState;
+  final WorkspaceViewTrackingState workspaceViewTrackingState;
+  final WorkspaceViewportState workspaceViewportState;
+  final ThumbnailRefreshState thumbnailRefreshState;
+  final EnvironmentWindowHistoryState environmentWindowHistoryState;
+
+  WorkspaceState get workspace {
+    return WorkspaceState(
+      appUiState: appUiState,
+      windowInteractionState: windowInteractionState,
+      workspaceViewTrackingState: workspaceViewTrackingState,
+      workspaceViewportState: workspaceViewportState,
+      thumbnailRefreshState: thumbnailRefreshState,
+      environmentWindowHistoryState: environmentWindowHistoryState,
+    );
+  }
+}
+
+class AppRuntimeRuntime {
+  const AppRuntimeRuntime({
+    required this.isRunningInWidgetTest,
+    required this.windowTitle,
+    required this.context,
+    required this.mounted,
+    required this.showMessage,
+  });
+
+  final bool isRunningInWidgetTest;
+  final String Function() windowTitle;
+  final BuildContext Function() context;
+  final bool Function() mounted;
+  final ValueChanged<String> showMessage;
+
+  WorkspaceRuntime get workspace {
+    return WorkspaceRuntime(
+      isRunningInWidgetTest: isRunningInWidgetTest,
+      context: context,
+      mounted: mounted,
+      showMessage: showMessage,
+    );
+  }
+
+  DocumentUiActions get documentUi {
+    return DocumentUiActions(context: context, mounted: mounted, showMessage: showMessage);
+  }
+}
+
+class AppRuntimeQueries {
+  const AppRuntimeQueries({
+    required this.activeWorkspace,
+    required this.workspaces,
+    required this.openWorkspaces,
+    required this.focusedWindowOrNull,
+  });
+
+  final Workspace? Function() activeWorkspace;
+  final List<Workspace> Function() workspaces;
+  final List<Workspace> Function() openWorkspaces;
+  final Window? Function() focusedWindowOrNull;
+
+  WorkspaceQueries get workspace {
+    return WorkspaceQueries(
+      activeWorkspace: activeWorkspace,
+      workspaces: workspaces,
+      openWorkspaces: openWorkspaces,
+      focusedWindowOrNull: focusedWindowOrNull,
+    );
+  }
+}
+
+class AppRuntimeActions {
+  const AppRuntimeActions({
+    required this.seedEnvironment,
+    required this.saveEnvironment,
+    required this.newId,
+    required this.colorFromDigest,
+    required this.setWorkspaceViewport,
+    required this.showWorkspaceScreen,
+    required this.showLibraryScreen,
+    required this.toggleExpose,
+    required this.toggleVideoPlayback,
+  });
+
+  final Environment Function() seedEnvironment;
+  final Future<void> Function() saveEnvironment;
+  final String Function(String prefix) newId;
+  final int Function(String value) colorFromDigest;
+  final void Function({required String workspaceId, Offset? center, double? zoom, bool queueThumbnail})
+  setWorkspaceViewport;
+  final SerenityShowWorkspaceScreen showWorkspaceScreen;
+  final SerenityShowLibraryScreen showLibraryScreen;
+  final VoidCallback toggleExpose;
+  final ValueChanged<String> toggleVideoPlayback;
+
+  WorkspaceActions get workspace {
+    return WorkspaceActions(
+      newId: newId,
+      colorFromDigest: colorFromDigest,
+      setWorkspaceViewport: setWorkspaceViewport,
+      showWorkspaceScreen: showWorkspaceScreen,
+      showLibraryScreen: showLibraryScreen,
+      toggleExpose: toggleExpose,
+      toggleVideoPlayback: toggleVideoPlayback,
+    );
+  }
+
+  DocumentCreationActions get documentCreation {
+    return DocumentCreationActions(seedEnvironment: seedEnvironment);
+  }
+}
+
+class AppRuntimeDependencies {
+  const AppRuntimeDependencies({
+    required this.state,
+    required this.runtime,
+    required this.queries,
+    required this.actions,
+  });
+
+  final AppRuntimeState state;
+  final AppRuntimeRuntime runtime;
+  final AppRuntimeQueries queries;
+  final AppRuntimeActions actions;
+}
+
+AppRuntime createAppRuntime({required AppRuntimeDependencies dependencies}) {
   late final AppFoundation foundation;
   late final AppUiController appUiController;
   late final EnvironmentStore environmentStore;
   late final WorkspaceParts workspace;
 
   foundation = createAppFoundation(
-    isRunningInWidgetTest: isRunningInWidgetTest,
-    environmentStoreState: environmentStoreState,
-    windowTitle: windowTitle,
-    showMessage: showMessage,
-    mounted: mounted,
+    isRunningInWidgetTest: dependencies.runtime.isRunningInWidgetTest,
+    environmentStoreState: dependencies.state.environmentStoreState,
+    windowTitle: dependencies.runtime.windowTitle,
+    showMessage: dependencies.runtime.showMessage,
+    mounted: dependencies.runtime.mounted,
   );
   appUiController = AppUiController(
-    appUiState: appUiState,
-    windowInteractionState: windowInteractionState,
+    appUiState: dependencies.state.appUiState,
+    windowInteractionState: dependencies.state.windowInteractionState,
     refreshWorkspaceTracking: () => workspace.workspaceController.tracking.refresh(),
   );
   environmentStore = EnvironmentStore(
-    environmentStoreState: environmentStoreState,
-    appUiState: appUiState,
+    environmentStoreState: dependencies.state.environmentStoreState,
+    appUiState: dependencies.state.appUiState,
     markWorkspaceThumbnailDirty: (workspaceId) =>
         workspace.workspaceController.thumbnails.markWorkspaceDirty(workspaceId),
     refreshWorkspaceTracking: () => workspace.workspaceController.tracking.refresh(),
@@ -126,45 +235,20 @@ AppRuntime createAppRuntime({
         mediaInspector: foundation.mediaInspector,
         appUiController: appUiController,
       ),
-      runtime: WorkspaceRuntime(
-        isRunningInWidgetTest: isRunningInWidgetTest,
-        context: context,
-        mounted: mounted,
-        showMessage: showMessage,
-      ),
-      state: WorkspaceState(
-        appUiState: appUiState,
-        windowInteractionState: windowInteractionState,
-        workspaceViewTrackingState: workspaceViewTrackingState,
-        workspaceViewportState: workspaceViewportState,
-        thumbnailRefreshState: thumbnailRefreshState,
-        environmentWindowHistoryState: environmentWindowHistoryState,
-      ),
-      queries: WorkspaceQueries(
-        activeWorkspace: activeWorkspace,
-        workspaces: workspaces,
-        openWorkspaces: openWorkspaces,
-        focusedWindowOrNull: focusedWindowOrNull,
-      ),
-      actions: WorkspaceActions(
-        newId: newId,
-        colorFromDigest: colorFromDigest,
-        setWorkspaceViewport: setWorkspaceViewport,
-        showWorkspaceScreen: showWorkspaceScreen,
-        showLibraryScreen: showLibraryScreen,
-        toggleExpose: toggleExpose,
-        toggleVideoPlayback: toggleVideoPlayback,
-      ),
+      runtime: dependencies.runtime.workspace,
+      state: dependencies.state.workspace,
+      queries: dependencies.queries.workspace,
+      actions: dependencies.actions.workspace,
     ),
   );
   final documentCoordinator = createAppDocumentCoordinator(
     environmentStore: environmentStore,
-    ui: DocumentUiActions(context: context, mounted: mounted, showMessage: showMessage),
+    ui: dependencies.runtime.documentUi,
     load: DocumentLoadActions(
       resolveFileBookmark: foundation.platformBridge.resolveFileBookmark,
       createFileBookmark: foundation.platformBridge.createFileBookmark,
       storeLastEnvironmentPath: foundation.platformBridge.storeLastEnvironmentPath,
-      saveEnvironment: saveEnvironment,
+      saveEnvironment: dependencies.actions.saveEnvironment,
     ),
     save: DocumentSaveActions(
       refreshActiveWorkspaceThumbnailIfNeeded: () async =>
@@ -172,18 +256,18 @@ AppRuntime createAppRuntime({
       storeLastEnvironmentPath: foundation.platformBridge.storeLastEnvironmentPath,
       syncWindowTitle: foundation.platformBridge.syncWindowTitle,
     ),
-    creation: DocumentCreationActions(seedEnvironment: seedEnvironment),
+    creation: dependencies.actions.documentCreation,
     thumbnails: DocumentThumbnailActions(thumbnailDirectory: foundation.platformBridge.thumbnailDirectory),
   );
   final autosaveTimer = Timer.periodic(const Duration(minutes: 1), (_) {
-    if (environmentStoreState.hasUnsavedChanges) {
-      unawaited(saveEnvironment());
+    if (dependencies.state.environmentStoreState.hasUnsavedChanges) {
+      unawaited(dependencies.actions.saveEnvironment());
     }
   });
   final appLifecycleListener = AppLifecycleListener(
     onStateChange: workspace.workspaceController.tracking.handleAppLifecycleStateChanged,
     onExitRequested: () async {
-      await saveEnvironment();
+      await dependencies.actions.saveEnvironment();
       return ui.AppExitResponse.exit;
     },
   );
