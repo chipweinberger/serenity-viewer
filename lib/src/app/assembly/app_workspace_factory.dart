@@ -12,6 +12,7 @@ import 'package:serenity_viewer/src/workspace/controllers/workspace_viewport_ses
 import 'package:serenity_viewer/src/environment/session/environment_session.dart';
 import 'package:serenity_viewer/src/media/video/video_frame_exporter.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_video_conversion_controller.dart';
+import 'package:serenity_viewer/src/workspace/actions/workspace_video_conversion_prompts.dart';
 import 'package:serenity_viewer/src/workspace/history/workspace_window_history_controller.dart';
 
 class AppWorkspaceFactory {
@@ -56,6 +57,7 @@ class AppWorkspaceFactory {
     );
     final workspaceLinksPrompts = WorkspaceLinksPrompts(context: config.shell.context);
     final videoFrameExporter = VideoFrameExporter(mediaInspector: foundation.mediaInspector);
+    final workspaceVideoConversionPrompts = WorkspaceVideoConversionPrompts(context: config.shell.context);
     final workspaceController = WorkspaceController(
       appUiState: appUiState,
       windowInteractionState: windowInteractionState,
@@ -120,11 +122,10 @@ class AppWorkspaceFactory {
       ),
     );
     final workspaceVideoConversionController = WorkspaceVideoConversionController(
-      context: config.shell.context,
-      mounted: config.shell.mounted,
       showMessage: config.shell.showMessage,
       mediaInspector: foundation.mediaInspector,
       videoFrameExporter: videoFrameExporter,
+      videoConversionPrompts: workspaceVideoConversionPrompts.confirmOverwriteJpeg,
       createFileBookmark: foundation.platformBridge.createFileBookmark,
       activeWorkspace: config.workspace.activeWorkspace,
       replaceWorkspace: config.environment.replaceWorkspace,
@@ -140,7 +141,7 @@ class AppWorkspaceFactory {
       videoExtensions: const ['mp4', 'mov', 'm4v', 'avi', 'mkv', 'webm'],
       environmentStoreState: environmentStoreState,
       activeWorkspace: () => config.workspace.activeWorkspace()!,
-      confirmSingleFrameConversion: workspaceVideoConversionController.confirmSingleFrameConversion,
+      confirmSingleFrameConversion: workspaceVideoConversionPrompts.confirmSingleFrameConversion,
       videoFrameExporter: videoFrameExporter,
       createFileBookmark: foundation.platformBridge.createFileBookmark,
       mediaInspector: foundation.mediaInspector,

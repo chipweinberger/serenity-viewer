@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
@@ -11,11 +11,10 @@ import 'package:serenity_viewer/src/window/content/asset_zoom_utils.dart';
 
 class WorkspaceVideoConversionController {
   WorkspaceVideoConversionController({
-    required this.context,
-    required this.mounted,
     required this.showMessage,
     required this.mediaInspector,
     required this.videoFrameExporter,
+    required this.videoConversionPrompts,
     required this.createFileBookmark,
     required this.activeWorkspace,
     required this.replaceWorkspace,
@@ -23,52 +22,15 @@ class WorkspaceVideoConversionController {
     required this.removePausedVideoWindow,
   });
 
-  final BuildContext Function() context;
-  final bool Function() mounted;
   final ValueChanged<String> showMessage;
   final MediaInspector mediaInspector;
   final VideoFrameExporter videoFrameExporter;
+  final Future<bool> Function(String filename) videoConversionPrompts;
   final Future<String?> Function(String path) createFileBookmark;
   final Workspace? Function() activeWorkspace;
   final void Function(Workspace workspace) replaceWorkspace;
   final int Function(String value) colorFromDigest;
   final ValueChanged<String> removePausedVideoWindow;
-
-  Future<bool> confirmOverwriteJpeg(String filename) async {
-    final shouldOverwrite = await showDialog<bool>(
-      context: context(),
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Replace Existing JPEG?'),
-          content: Text('$filename already exists. Replace it?'),
-          actions: [
-            TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
-            FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Replace')),
-          ],
-        );
-      },
-    );
-
-    return shouldOverwrite == true;
-  }
-
-  Future<bool> confirmSingleFrameConversion(String filename) async {
-    final shouldConvert = await showDialog<bool>(
-      context: context(),
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Single-Frame Video Detected'),
-          content: Text('$filename appears to contain a single frame. Convert it to JPEG instead?'),
-          actions: [
-            TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Keep Video')),
-            FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Convert to JPEG')),
-          ],
-        );
-      },
-    );
-
-    return shouldConvert == true;
-  }
 
   Future<void> convertVideoWindowToJpeg(String windowId) async {
     final workspace = activeWorkspace();
@@ -103,7 +65,7 @@ class WorkspaceVideoConversionController {
       probe: probe,
       positionMs: window.videoPositionMs,
       normalizedCrop: normalizedVisibleRectForWindow(window, Size(probe.width!.toDouble(), probe.height!.toDouble())),
-      confirmOverwriteJpeg: confirmOverwriteJpeg,
+      confirmOverwriteJpeg: videoConversionPrompts,
     );
     if (conversion == null) {
       return;
