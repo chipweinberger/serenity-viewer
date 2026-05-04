@@ -21,7 +21,7 @@ EnvironmentNavigationController createEnvironmentNavigationController({
       appUiState: scope.uiState,
       workspaceController: workspaceController,
       openWorkspaces: scope.ws.openWorkspaces,
-      updateEnvironment: scope.env.updateEnvironment,
+      updateEnvironment: scope.inputs.updateEnvironment,
       showWorkspaceScreen: scope.ws.showWorkspaceScreen,
       showLibraryScreen: scope.ws.showLibraryScreen,
       workspaceSwitchTarget: scope.ui.workspaceSwitchTarget,
@@ -38,7 +38,7 @@ WorkspaceExposeLayoutController createWorkspaceExposeLayoutController({required 
       context: scope.inputs.context,
       mounted: scope.inputs.mounted,
       activeWorkspace: scope.ws.activeWorkspace,
-      replaceWorkspace: scope.env.replaceWorkspace,
+      replaceWorkspace: scope.inputs.replaceWorkspace,
       showWorkspaceScreen: scope.ws.showWorkspaceScreen,
     ),
   );
@@ -55,8 +55,8 @@ EnvironmentManagementMutations createEnvironmentManagementMutations({
       appUiState: scope.uiState,
       workspaceController: workspaceController,
       workspaces: scope.ws.workspaces,
-      updateEnvironment: scope.env.updateEnvironment,
-      replaceWorkspace: scope.env.replaceWorkspace,
+      updateEnvironment: scope.inputs.updateEnvironment,
+      replaceWorkspace: scope.inputs.replaceWorkspace,
       showWorkspaceScreen: scope.ws.showWorkspaceScreen,
       newId: scope.ws.newId,
       queueWorkspaceRefresh: thumbnailController.queueWorkspaceRefresh,
@@ -117,7 +117,7 @@ WorkspaceViewTrackingController createWorkspaceViewTrackingController({required 
       workspaceViewTrackingState: scope.trackingState,
       mounted: scope.inputs.mounted,
       activeWorkspace: scope.ws.activeWorkspace,
-      updateEnvironment: scope.env.updateEnvironment,
+      updateEnvironment: scope.inputs.updateEnvironment,
     ),
   );
 }

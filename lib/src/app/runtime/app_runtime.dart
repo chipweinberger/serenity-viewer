@@ -51,13 +51,13 @@ class AppRuntime {
     );
     final autosaveTimer = Timer.periodic(const Duration(minutes: 1), (_) {
       if (environmentStoreState.hasUnsavedChanges) {
-        unawaited(inputs.environment.saveEnvironment());
+        unawaited(inputs.saveEnvironment());
       }
     });
     final appLifecycleListener = AppLifecycleListener(
       onStateChange: workspace.workspaceViewTrackingController.handleAppLifecycleStateChanged,
       onExitRequested: () async {
-        await inputs.environment.saveEnvironment();
+        await inputs.saveEnvironment();
         return ui.AppExitResponse.exit;
       },
     );

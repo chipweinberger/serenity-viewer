@@ -18,7 +18,6 @@ class WorkspaceFactoryScope {
   final AppRuntimeInputs inputs;
   final AppFoundation foundation;
 
-  AppRuntimeEnvironmentInputs get env => inputs.environment;
   AppRuntimeWorkspaceInputs get ws => inputs.workspace;
   AppStateStore get stateStore => inputs.stateStore;
   PlatformBridge get platform => foundation.platformBridge;

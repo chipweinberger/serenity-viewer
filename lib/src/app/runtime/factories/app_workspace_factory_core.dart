@@ -56,7 +56,7 @@ WorkspaceLinksController createWorkspaceLinksController({required WorkspaceFacto
     hasSession: () => scope.envState.environment != null,
     activeWorkspace: scope.ws.activeWorkspace,
     workspaces: scope.ws.workspaces,
-    replaceWorkspace: scope.env.replaceWorkspace,
+    replaceWorkspace: scope.inputs.replaceWorkspace,
     newId: scope.ws.newId,
     showMessage: scope.inputs.showMessage,
   );
@@ -78,7 +78,7 @@ WorkspaceController createWorkspaceController({
     appUiState: scope.uiState,
     windowInteractionState: scope.interactionState,
     workspaceViewportState: scope.viewportState,
-    replaceWorkspace: scope.env.replaceWorkspace,
+    replaceWorkspace: scope.inputs.replaceWorkspace,
     setWorkspaceViewport: scope.ws.setWorkspaceViewport,
     refreshActiveWorkspaceThumbnail: thumbnailController.refreshActiveWorkspaceIfNeeded,
   );

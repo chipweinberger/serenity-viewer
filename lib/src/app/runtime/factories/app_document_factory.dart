@@ -12,7 +12,7 @@ DocumentCoordinator createAppDocumentCoordinator({
     environmentStore: foundation.environmentStore,
     context: inputs.context,
     mounted: inputs.mounted,
-    seedEnvironment: inputs.environment.seedEnvironment,
+    seedEnvironment: inputs.seedEnvironment,
     showMessage: inputs.showMessage,
     refreshActiveWorkspaceThumbnailIfNeeded: workspace.thumbnailController.refreshActiveWorkspaceIfNeeded,
     storeLastEnvironmentPath: foundation.platformBridge.storeLastEnvironmentPath,
@@ -20,7 +20,7 @@ DocumentCoordinator createAppDocumentCoordinator({
     resolveFileBookmark: foundation.platformBridge.resolveFileBookmark,
     createFileBookmark: foundation.platformBridge.createFileBookmark,
     thumbnailDirectory: foundation.platformBridge.thumbnailDirectory,
-    updateEnvironment: inputs.environment.updateEnvironment,
-    saveEnvironment: inputs.environment.saveEnvironment,
+    updateEnvironment: inputs.updateEnvironment,
+    saveEnvironment: inputs.saveEnvironment,
   );
 }

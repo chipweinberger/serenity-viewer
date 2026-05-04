@@ -18,7 +18,7 @@ WorkspaceVideoConversionController createWorkspaceVideoConversionController({
     videoConversionPrompts: workspaceVideoConversionPrompts.confirmOverwriteJpeg,
     createFileBookmark: scope.platform.createFileBookmark,
     activeWorkspace: scope.ws.activeWorkspace,
-    replaceWorkspace: scope.env.replaceWorkspace,
+    replaceWorkspace: scope.inputs.replaceWorkspace,
     colorFromDigest: scope.ws.colorFromDigest,
     removePausedVideoWindow: scope.interactionState.removePausedVideoWindow,
   );

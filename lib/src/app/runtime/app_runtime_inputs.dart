@@ -22,7 +22,10 @@ class AppRuntimeInputs {
     required this.context,
     required this.mounted,
     required this.showMessage,
-    required this.environment,
+    required this.seedEnvironment,
+    required this.updateEnvironment,
+    required this.replaceWorkspace,
+    required this.saveEnvironment,
     required this.workspace,
   });
 
@@ -33,22 +36,11 @@ class AppRuntimeInputs {
   final BuildContext Function() context;
   final bool Function() mounted;
   final ValueChanged<String> showMessage;
-  final AppRuntimeEnvironmentInputs environment;
-  final AppRuntimeWorkspaceInputs workspace;
-}
-
-class AppRuntimeEnvironmentInputs {
-  const AppRuntimeEnvironmentInputs({
-    required this.seedEnvironment,
-    required this.updateEnvironment,
-    required this.replaceWorkspace,
-    required this.saveEnvironment,
-  });
-
   final Environment Function() seedEnvironment;
   final ValueChanged<Environment> updateEnvironment;
   final void Function(Workspace workspace, {bool queueThumbnail}) replaceWorkspace;
   final Future<void> Function() saveEnvironment;
+  final AppRuntimeWorkspaceInputs workspace;
 }
 
 class AppRuntimeWorkspaceInputs {
@@ -86,17 +78,27 @@ String Function() _buildRuntimeWindowTitle({
   return () => deriveWindowTitle(stateStore);
 }
 
-AppRuntimeEnvironmentInputs _buildAppRuntimeEnvironmentInputs({
+Environment Function() _buildRuntimeSeedEnvironment() {
+  return buildSeedEnvironment;
+}
+
+ValueChanged<Environment> _buildRuntimeUpdateEnvironment({
   required AppFoundation Function() foundation,
+}) {
+  return (environment) => foundation().environmentStore.updateEnvironment(environment);
+}
+
+void Function(Workspace workspace, {bool queueThumbnail}) _buildRuntimeReplaceWorkspace({
+  required AppFoundation Function() foundation,
+}) {
+  return (workspace, {queueThumbnail = true}) =>
+      foundation().environmentStore.replaceWorkspace(workspace, queueThumbnail: queueThumbnail);
+}
+
+Future<void> Function() _buildRuntimeSaveEnvironment({
   required DocumentPersistenceController Function() documentPersistence,
 }) {
-  return AppRuntimeEnvironmentInputs(
-    seedEnvironment: buildSeedEnvironment,
-    updateEnvironment: (environment) => foundation().environmentStore.updateEnvironment(environment),
-    replaceWorkspace: (workspace, {queueThumbnail = true}) =>
-        foundation().environmentStore.replaceWorkspace(workspace, queueThumbnail: queueThumbnail),
-    saveEnvironment: () => documentPersistence().saveEnvironment(),
-  );
+  return () => documentPersistence().saveEnvironment();
 }
 
 AppRuntimeWorkspaceInputs _buildAppRuntimeWorkspaceInputs({
@@ -162,10 +164,10 @@ AppRuntimeInputs buildAppRuntimeInputs({
     context: context,
     mounted: mounted,
     showMessage: showMessage,
-    environment: _buildAppRuntimeEnvironmentInputs(
-      foundation: foundation,
-      documentPersistence: documentPersistence,
-    ),
+    seedEnvironment: _buildRuntimeSeedEnvironment(),
+    updateEnvironment: _buildRuntimeUpdateEnvironment(foundation: foundation),
+    replaceWorkspace: _buildRuntimeReplaceWorkspace(foundation: foundation),
+    saveEnvironment: _buildRuntimeSaveEnvironment(documentPersistence: documentPersistence),
     workspace: _buildAppRuntimeWorkspaceInputs(
       stateStore: stateStore,
       foundation: foundation,
