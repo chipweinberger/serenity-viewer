@@ -8,7 +8,7 @@ import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/library/workspace_card.dart';
 import 'package:serenity_viewer/src/media/loading/workspace_load_plan.dart';
-import 'package:serenity_viewer/src/components/glass_chip.dart';
+import 'package:serenity_viewer/src/shared_widgets/glass_chip.dart';
 
 @immutable
 class LibraryScreenActions {

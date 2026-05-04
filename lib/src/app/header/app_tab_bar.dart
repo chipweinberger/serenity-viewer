@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:serenity_viewer/src/app/header/app_tab_bar_actions.dart';
 import 'package:serenity_viewer/src/app/header/app_tab.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
-import 'package:serenity_viewer/src/components/glass_chip.dart';
+import 'package:serenity_viewer/src/shared_widgets/glass_chip.dart';
 
 class AppTabBar extends StatelessWidget {
   const AppTabBar({
