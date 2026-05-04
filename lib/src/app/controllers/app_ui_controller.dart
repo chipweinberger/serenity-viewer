@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
-import 'package:serenity_viewer/src/settings/behavior/app_ui_state.dart';
+import 'package:serenity_viewer/src/app/app_ui_state.dart';
 import 'package:serenity_viewer/src/workspace/window/interaction/window_interaction_state.dart';
 
 class AppUiController {

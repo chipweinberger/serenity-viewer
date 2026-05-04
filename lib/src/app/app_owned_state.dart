@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/settings/behavior/app_ui_state.dart';
+import 'package:serenity_viewer/src/app/app_ui_state.dart';
 import 'package:serenity_viewer/src/environment/session/environment_store_state.dart';
 import 'package:serenity_viewer/src/workspace/window/interaction/window_interaction_state.dart';
 import 'package:serenity_viewer/src/environment/session/workspace_view_tracking_state.dart';

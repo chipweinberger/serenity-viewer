@@ -6,7 +6,7 @@ import 'package:serenity_viewer/src/workspace/window/interaction/window_interact
 import 'package:serenity_viewer/src/workspace/window/interaction/window_zoom_update.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/settings/behavior/app_ui_state.dart';
+import 'package:serenity_viewer/src/app/app_ui_state.dart';
 import 'package:serenity_viewer/src/workspace/layout/workspace_layout.dart';
 
 import 'workspace_controller.dart';
