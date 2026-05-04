@@ -20,10 +20,10 @@ EnvironmentNavigationController createEnvironmentNavigationController({
       environmentStoreState: scope.envState,
       appUiState: scope.uiState,
       workspaceController: workspaceController,
-      openWorkspaces: scope.inputs.openWorkspaces,
-      updateEnvironment: scope.inputs.updateEnvironment,
-      showWorkspaceScreen: scope.inputs.showWorkspaceScreen,
-      showLibraryScreen: scope.inputs.showLibraryScreen,
+      openWorkspaces: scope.openWorkspaces,
+      updateEnvironment: scope.updateEnvironment,
+      showWorkspaceScreen: scope.showWorkspaceScreen,
+      showLibraryScreen: scope.showLibraryScreen,
       workspaceSwitchTarget: scope.ui.workspaceSwitchTarget,
       refreshActiveWorkspaceThumbnail: thumbnailController.refreshActiveWorkspaceIfNeeded,
     ),
@@ -32,14 +32,14 @@ EnvironmentNavigationController createEnvironmentNavigationController({
 
 WorkspaceExposeLayoutController createWorkspaceExposeLayoutController({required WorkspaceFactoryScope scope}) {
   return WorkspaceExposeLayoutController(
-    WorkspaceExposeLayoutDependencies(
+      WorkspaceExposeLayoutDependencies(
       appUiState: scope.uiState,
       workspaceViewportState: scope.viewportState,
-      context: scope.inputs.context,
-      mounted: scope.inputs.mounted,
-      activeWorkspace: scope.inputs.activeWorkspace,
-      replaceWorkspace: scope.inputs.replaceWorkspace,
-      showWorkspaceScreen: scope.inputs.showWorkspaceScreen,
+      context: scope.context,
+      mounted: scope.mounted,
+      activeWorkspace: scope.activeWorkspace,
+      replaceWorkspace: scope.replaceWorkspace,
+      showWorkspaceScreen: scope.showWorkspaceScreen,
     ),
   );
 }
@@ -54,11 +54,11 @@ EnvironmentManagementMutations createEnvironmentManagementMutations({
       environmentStoreState: scope.envState,
       appUiState: scope.uiState,
       workspaceController: workspaceController,
-      workspaces: scope.inputs.workspaces,
-      updateEnvironment: scope.inputs.updateEnvironment,
-      replaceWorkspace: scope.inputs.replaceWorkspace,
-      showWorkspaceScreen: scope.inputs.showWorkspaceScreen,
-      newId: scope.inputs.newId,
+      workspaces: scope.workspaces,
+      updateEnvironment: scope.updateEnvironment,
+      replaceWorkspace: scope.replaceWorkspace,
+      showWorkspaceScreen: scope.showWorkspaceScreen,
+      newId: scope.newId,
       queueWorkspaceRefresh: thumbnailController.queueWorkspaceRefresh,
     ),
   );
@@ -80,11 +80,11 @@ EnvironmentManagementController createEnvironmentManagementController({
     EnvironmentManagementDependencies(
       environmentStoreState: scope.envState,
       workspaceController: workspaceController,
-      context: scope.inputs.context,
-      mounted: scope.inputs.mounted,
-      workspaces: scope.inputs.workspaces,
-      activeWorkspace: scope.inputs.activeWorkspace,
-      showMessage: scope.inputs.showMessage,
+      context: scope.context,
+      mounted: scope.mounted,
+      workspaces: scope.workspaces,
+      activeWorkspace: scope.activeWorkspace,
+      showMessage: scope.showMessage,
       navigation: navigationController,
       mutations: mutations,
     ),
@@ -100,10 +100,10 @@ WorkspaceShortcutController createWorkspaceShortcutController({
     WorkspaceShortcutDependencies(
       appUiState: scope.uiState,
       workspaceLinksController: workspaceLinksController,
-      focusedWindowOrNull: scope.inputs.focusedWindowOrNull,
-      showWorkspaceScreen: scope.inputs.showWorkspaceScreen,
-      toggleExpose: scope.inputs.toggleExpose,
-      toggleVideoPlayback: scope.inputs.toggleVideoPlayback,
+      focusedWindowOrNull: scope.focusedWindowOrNull,
+      showWorkspaceScreen: scope.showWorkspaceScreen,
+      toggleExpose: scope.toggleExpose,
+      toggleVideoPlayback: scope.toggleVideoPlayback,
       navigation: navigationController,
     ),
   );
@@ -115,9 +115,9 @@ WorkspaceViewTrackingController createWorkspaceViewTrackingController({required 
       environmentStoreState: scope.envState,
       appUiState: scope.uiState,
       workspaceViewTrackingState: scope.trackingState,
-      mounted: scope.inputs.mounted,
-      activeWorkspace: scope.inputs.activeWorkspace,
-      updateEnvironment: scope.inputs.updateEnvironment,
+      mounted: scope.mounted,
+      activeWorkspace: scope.activeWorkspace,
+      updateEnvironment: scope.updateEnvironment,
     ),
   );
 }

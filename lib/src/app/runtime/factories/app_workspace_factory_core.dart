@@ -29,8 +29,8 @@ WorkspaceCollateController createWorkspaceCollateController({
   required WorkspaceWindowController workspaceWindowController,
 }) {
   return WorkspaceCollateController(
-    context: scope.inputs.context,
-    showMessage: scope.inputs.showMessage,
+    context: scope.context,
+    showMessage: scope.showMessage,
     windowController: workspaceWindowController,
   );
 }
@@ -41,11 +41,11 @@ ThumbnailController createThumbnailController({required WorkspaceFactoryScope sc
     refresher: ThumbnailRefresher(
       environmentStoreState: scope.envState,
       updateEnvironment: scope.store.updateEnvironment,
-      renderer: ThumbnailRenderer(isRunningInWidgetTest: scope.inputs.isRunningInWidgetTest),
+      renderer: ThumbnailRenderer(isRunningInWidgetTest: scope.isRunningInWidgetTest),
       store: ThumbnailStore(thumbnailDirectory: scope.platform.thumbnailDirectory),
     ),
     activeScreen: () => scope.uiState.screen,
-    activeWorkspaceId: () => scope.inputs.activeWorkspace()?.id,
+    activeWorkspaceId: () => scope.activeWorkspace()?.id,
     viewportSize: () => scope.viewportState.viewportSize,
   );
 }
@@ -54,20 +54,20 @@ WorkspaceLinksController createWorkspaceLinksController({required WorkspaceFacto
   return WorkspaceLinksController(
     screen: () => scope.uiState.screen,
     hasSession: () => scope.envState.environment != null,
-    activeWorkspace: scope.inputs.activeWorkspace,
-    workspaces: scope.inputs.workspaces,
-    replaceWorkspace: scope.inputs.replaceWorkspace,
-    newId: scope.inputs.newId,
-    showMessage: scope.inputs.showMessage,
+    activeWorkspace: scope.activeWorkspace,
+    workspaces: scope.workspaces,
+    replaceWorkspace: scope.replaceWorkspace,
+    newId: scope.newId,
+    showMessage: scope.showMessage,
   );
 }
 
 WorkspaceLinksLauncher createWorkspaceLinksLauncher({required WorkspaceFactoryScope scope}) {
-  return WorkspaceLinksLauncher(showMessage: scope.inputs.showMessage, mounted: scope.inputs.mounted);
+  return WorkspaceLinksLauncher(showMessage: scope.showMessage, mounted: scope.mounted);
 }
 
 WorkspaceLinksPrompts createWorkspaceLinksPrompts({required WorkspaceFactoryScope scope}) {
-  return WorkspaceLinksPrompts(context: scope.inputs.context);
+  return WorkspaceLinksPrompts(context: scope.context);
 }
 
 WorkspaceController createWorkspaceController({
@@ -78,8 +78,8 @@ WorkspaceController createWorkspaceController({
     appUiState: scope.uiState,
     windowInteractionState: scope.interactionState,
     workspaceViewportState: scope.viewportState,
-    replaceWorkspace: scope.inputs.replaceWorkspace,
-    setWorkspaceViewport: scope.inputs.setWorkspaceViewport,
+    replaceWorkspace: scope.replaceWorkspace,
+    setWorkspaceViewport: scope.setWorkspaceViewport,
     refreshActiveWorkspaceThumbnail: thumbnailController.refreshActiveWorkspaceIfNeeded,
   );
 }
@@ -91,8 +91,8 @@ WorkspaceWindowController createWorkspaceWindowController({
   return WorkspaceWindowController(
     appUiState: scope.uiState,
     environment: () => scope.envState.environment,
-    activeWorkspace: () => scope.inputs.activeWorkspace()!,
-    activeWorkspaceOrNull: scope.inputs.activeWorkspace,
+    activeWorkspace: () => scope.activeWorkspace()!,
+    activeWorkspaceOrNull: scope.activeWorkspace,
     workspaceController: workspaceController,
   );
 }
@@ -103,14 +103,14 @@ WorkspaceWindowHistoryController createWorkspaceWindowHistoryController({
 }) {
   return WorkspaceWindowHistoryController(
     environment: () => scope.envState.environment,
-    workspaces: scope.inputs.workspaces,
-    activeWorkspace: scope.inputs.activeWorkspace,
+    workspaces: scope.workspaces,
+    activeWorkspace: scope.activeWorkspace,
     workspaceWindowHistoryState: scope.workspaceWindowHistoryState,
     workspaceController: workspaceController,
     updateEnvironment: scope.store.updateEnvironment,
     replaceWorkspace: scope.store.replaceWorkspace,
-    showMessage: scope.inputs.showMessage,
-    showWorkspaceScreen: scope.inputs.showWorkspaceScreen,
+    showMessage: scope.showMessage,
+    showWorkspaceScreen: scope.showWorkspaceScreen,
     screen: () => scope.uiState.screen,
     maxRecentlyClosedWindows: 12,
   );

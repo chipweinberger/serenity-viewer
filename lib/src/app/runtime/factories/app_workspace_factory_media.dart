@@ -12,14 +12,14 @@ WorkspaceVideoConversionController createWorkspaceVideoConversionController({
   required WorkspaceVideoConversionPrompts workspaceVideoConversionPrompts,
 }) {
   return WorkspaceVideoConversionController(
-    showMessage: scope.inputs.showMessage,
+    showMessage: scope.showMessage,
     mediaInspector: scope.media,
     videoFrameExporter: videoFrameExporter,
     videoConversionPrompts: workspaceVideoConversionPrompts.confirmOverwriteJpeg,
     createFileBookmark: scope.platform.createFileBookmark,
-    activeWorkspace: scope.inputs.activeWorkspace,
-    replaceWorkspace: scope.inputs.replaceWorkspace,
-    colorFromDigest: scope.inputs.colorFromDigest,
+    activeWorkspace: scope.activeWorkspace,
+    replaceWorkspace: scope.replaceWorkspace,
+    colorFromDigest: scope.colorFromDigest,
     removePausedVideoWindow: scope.interactionState.removePausedVideoWindow,
   );
 }
@@ -34,13 +34,13 @@ WorkspaceMediaImportController createWorkspaceMediaImportController({
     imageExtensions: const ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tif', 'tiff'],
     videoExtensions: const ['mp4', 'mov', 'm4v', 'avi', 'mkv', 'webm'],
     environmentStoreState: scope.envState,
-    activeWorkspace: () => scope.inputs.activeWorkspace()!,
+    activeWorkspace: () => scope.activeWorkspace()!,
     confirmSingleFrameConversion: workspaceVideoConversionPrompts.confirmSingleFrameConversion,
     videoFrameExporter: videoFrameExporter,
     createFileBookmark: scope.platform.createFileBookmark,
     mediaInspector: scope.media,
     updateEnvironment: scope.store.updateEnvironment,
     thumbnailController: thumbnailController,
-    showMessage: scope.inputs.showMessage,
+    showMessage: scope.showMessage,
   );
 }
