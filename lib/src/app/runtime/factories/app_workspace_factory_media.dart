@@ -1,10 +1,42 @@
 import 'package:serenity_viewer/src/media/import/workspace_media_import_controller.dart';
 import 'package:serenity_viewer/src/media/video/video_frame_exporter.dart';
+import 'package:serenity_viewer/src/workspace/actions/workspace_media_controller.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_video_conversion_controller.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_video_conversion_prompts.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
 
 import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_scope.dart';
+
+typedef WorkspaceMediaServices = ({
+  WorkspaceMediaController media,
+  WorkspaceMediaImportController import,
+  WorkspaceVideoConversionController videoConversion,
+});
+
+WorkspaceMediaServices createWorkspaceMediaServices({
+  required WorkspaceFactoryScope scope,
+  required ThumbnailController thumbnailController,
+}) {
+  final videoFrameExporter = VideoFrameExporter(mediaInspector: scope.media);
+  final workspaceVideoConversionPrompts = WorkspaceVideoConversionPrompts(context: scope.context);
+  final videoConversion = createWorkspaceVideoConversionController(
+    scope: scope,
+    videoFrameExporter: videoFrameExporter,
+    workspaceVideoConversionPrompts: workspaceVideoConversionPrompts,
+  );
+  final import = createWorkspaceMediaImportController(
+    scope: scope,
+    thumbnailController: thumbnailController,
+    videoFrameExporter: videoFrameExporter,
+    workspaceVideoConversionPrompts: workspaceVideoConversionPrompts,
+  );
+
+  return (
+    media: WorkspaceMediaController(importController: import, videoConversionController: videoConversion),
+    import: import,
+    videoConversion: videoConversion,
+  );
+}
 
 WorkspaceVideoConversionController createWorkspaceVideoConversionController({
   required WorkspaceFactoryScope scope,

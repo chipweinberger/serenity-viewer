@@ -10,9 +10,6 @@ import 'package:serenity_viewer/src/environment/store/environment_store.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/media/video/media_inspector.dart';
 import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
-import 'package:serenity_viewer/src/media/video/video_frame_exporter.dart';
-import 'package:serenity_viewer/src/workspace/actions/workspace_media_controller.dart';
-import 'package:serenity_viewer/src/workspace/actions/workspace_video_conversion_prompts.dart';
 import 'package:serenity_viewer/src/environment/history/environment_window_history_state.dart';
 import 'package:serenity_viewer/src/environment/history/environment_window_history_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
@@ -98,48 +95,14 @@ createAppWorkspaceServices({
     thumbnailController: thumbnailController,
   );
   final workspaceWindowController = createWorkspaceWindowController(scope: scope, core: workspaceCoreControllers);
-  final environmentNavigationController = createEnvironmentNavigationController(
+  final workspaceMediaServices = createWorkspaceMediaServices(scope: scope, thumbnailController: thumbnailController);
+  final workspaceEnvironmentServices = createWorkspaceEnvironmentServices(
     scope: scope,
     thumbnailController: thumbnailController,
     exposeController: workspaceCoreControllers.expose,
-  );
-  final workspaceExposeLayoutController = createWorkspaceExposeLayoutController(
-    scope: scope,
-    workspaceWindowController: workspaceWindowController,
-  );
-  final environmentManagementController = createEnvironmentManagementController(
-    scope: scope,
-    navigationController: environmentNavigationController,
-    thumbnailController: thumbnailController,
     environmentController: workspaceCoreControllers.environment,
-    exposeController: workspaceCoreControllers.expose,
-  );
-  final environmentController = EnvironmentController(
-    navigation: environmentNavigationController,
-    management: environmentManagementController,
-  );
-  final workspaceViewTrackingController = createWorkspaceViewTrackingController(scope: scope);
-  final videoFrameExporter = VideoFrameExporter(mediaInspector: scope.media);
-  final workspaceVideoConversionPrompts = WorkspaceVideoConversionPrompts(context: scope.context);
-  final workspaceVideoConversionController = createWorkspaceVideoConversionController(
-    scope: scope,
-    videoFrameExporter: videoFrameExporter,
-    workspaceVideoConversionPrompts: workspaceVideoConversionPrompts,
-  );
-  final workspaceMediaImportController = createWorkspaceMediaImportController(
-    scope: scope,
-    thumbnailController: thumbnailController,
-    videoFrameExporter: videoFrameExporter,
-    workspaceVideoConversionPrompts: workspaceVideoConversionPrompts,
-  );
-  final workspaceShortcutController = createWorkspaceShortcutController(
-    scope: scope,
-    navigationController: environmentNavigationController,
     workspaceLinksController: workspaceLinksController,
-  );
-  final workspaceMediaController = WorkspaceMediaController(
-    importController: workspaceMediaImportController,
-    videoConversionController: workspaceVideoConversionController,
+    workspaceWindowController: workspaceWindowController,
   );
   final environmentWindowHistoryController = createEnvironmentWindowHistoryController(
     scope: scope,
@@ -149,17 +112,17 @@ createAppWorkspaceServices({
   final workspaceController = createWorkspaceController(
     core: workspaceCoreControllers,
     window: workspaceWindowController,
-    media: workspaceMediaController,
-    layout: workspaceExposeLayoutController,
-    shortcuts: workspaceShortcutController,
+    media: workspaceMediaServices.media,
+    layout: workspaceEnvironmentServices.layout,
+    shortcuts: workspaceEnvironmentServices.shortcuts,
     links: workspaceLinksController,
     thumbnails: thumbnailController,
-    tracking: workspaceViewTrackingController,
+    tracking: workspaceEnvironmentServices.tracking,
   );
 
   return (
     workspaceController: workspaceController,
-    environmentController: environmentController,
+    environmentController: workspaceEnvironmentServices.environment,
     environmentWindowHistoryController: environmentWindowHistoryController,
   );
 }

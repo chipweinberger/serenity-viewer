@@ -1,3 +1,4 @@
+import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_management_controller.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_management_mutations.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_navigation_controller.dart';
@@ -11,6 +12,54 @@ import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.da
 import 'package:serenity_viewer/src/workspace/tracking/workspace_view_tracking_controller.dart';
 
 import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_scope.dart';
+
+typedef WorkspaceEnvironmentServices = ({
+  EnvironmentController environment,
+  EnvironmentNavigationController navigation,
+  WorkspaceExposeLayoutController layout,
+  WorkspaceShortcutController shortcuts,
+  WorkspaceViewTrackingController tracking,
+});
+
+WorkspaceEnvironmentServices createWorkspaceEnvironmentServices({
+  required WorkspaceFactoryScope scope,
+  required ThumbnailController thumbnailController,
+  required WorkspaceExposeController exposeController,
+  required WorkspaceEnvironmentController environmentController,
+  required WorkspaceLinksController workspaceLinksController,
+  required WorkspaceWindowController workspaceWindowController,
+}) {
+  final navigation = createEnvironmentNavigationController(
+    scope: scope,
+    thumbnailController: thumbnailController,
+    exposeController: exposeController,
+  );
+  final layout = createWorkspaceExposeLayoutController(
+    scope: scope,
+    workspaceWindowController: workspaceWindowController,
+  );
+  final management = createEnvironmentManagementController(
+    scope: scope,
+    navigationController: navigation,
+    thumbnailController: thumbnailController,
+    environmentController: environmentController,
+    exposeController: exposeController,
+  );
+  final shortcuts = createWorkspaceShortcutController(
+    scope: scope,
+    navigationController: navigation,
+    workspaceLinksController: workspaceLinksController,
+  );
+  final tracking = createWorkspaceViewTrackingController(scope: scope);
+
+  return (
+    environment: EnvironmentController(navigation: navigation, management: management),
+    navigation: navigation,
+    layout: layout,
+    shortcuts: shortcuts,
+    tracking: tracking,
+  );
+}
 
 EnvironmentNavigationController createEnvironmentNavigationController({
   required WorkspaceFactoryScope scope,
