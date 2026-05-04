@@ -83,17 +83,10 @@ class AppMainViewActions {
 }
 
 class AppActions {
-  const AppActions({required this.state, required this.files, required this.platform});
+  const AppActions({required this.files, required this.platform});
 
-  final AppStateActions state;
   final AppFileActions files;
   final AppPlatformActions platform;
-}
-
-class AppStateActions {
-  const AppStateActions({required this.commitStateChange});
-
-  final void Function(VoidCallback fn) commitStateChange;
 }
 
 class AppFileActions {

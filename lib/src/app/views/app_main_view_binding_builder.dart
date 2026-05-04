@@ -1,5 +1,3 @@
-import 'package:flutter/widgets.dart';
-
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/app/runtime/app_runtime_groups.dart';
 import 'package:serenity_viewer/src/app/state/app_derived_state.dart';
@@ -34,7 +32,6 @@ class AppMainViewBindingBuilder {
     required this.foundation,
     required this.workspace,
     required this.uiHandles,
-    required this.commitStateChange,
     required this.mounted,
   });
 
@@ -43,7 +40,6 @@ class AppMainViewBindingBuilder {
   final AppFoundation foundation;
   final AppWorkspaceServices workspace;
   final AppUiHandles uiHandles;
-  final void Function(VoidCallback fn) commitStateChange;
   final bool Function() mounted;
 
   AppUiController get _ui => foundation.appUiController;
@@ -95,7 +91,6 @@ class AppMainViewBindingBuilder {
   AppMainViewActions _buildActions() {
     return AppMainViewActions(
       app: AppActions(
-        state: AppStateActions(commitStateChange: commitStateChange),
         files: AppFileActions(importFiles: _imports.importFiles),
         platform: AppPlatformActions(revealAssetInFinder: _reveal),
       ),

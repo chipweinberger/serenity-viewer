@@ -36,14 +36,12 @@ class AppRuntimeAppInputs {
     required this.windowTitle,
     required this.context,
     required this.mounted,
-    required this.commitStateChange,
     required this.showMessage,
   });
 
   final String Function() windowTitle;
   final BuildContext Function() context;
   final bool Function() mounted;
-  final StateSetter commitStateChange;
   final ValueChanged<String> showMessage;
 }
 
@@ -96,7 +94,6 @@ class AppRuntimeInputBuilder {
     required this.uiHandles,
     required this.context,
     required this.mounted,
-    required this.commitStateChange,
     required this.showMessage,
     required this.isRunningInWidgetTest,
     required this.derivedState,
@@ -109,7 +106,6 @@ class AppRuntimeInputBuilder {
   final AppUiHandles uiHandles;
   final BuildContext Function() context;
   final bool Function() mounted;
-  final StateSetter commitStateChange;
   final ValueChanged<String> showMessage;
   final bool isRunningInWidgetTest;
   final AppDerivedState Function() derivedState;
@@ -122,7 +118,6 @@ class AppRuntimeInputBuilder {
       windowTitle: () => derivedState().windowTitle,
       context: context,
       mounted: mounted,
-      commitStateChange: commitStateChange,
       showMessage: showMessage,
     );
   }

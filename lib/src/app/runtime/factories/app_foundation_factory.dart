@@ -21,7 +21,6 @@ AppFoundation createAppFoundation({
   final appUiController = AppUiController(
     appUiState: appUiState,
     windowInteractionState: windowInteractionState,
-    commitStateChange: inputs.app.commitStateChange,
     refreshWorkspaceTracking: refreshWorkspaceTracking,
   );
   final mediaInspector = MediaInspector(isRunningInWidgetTest: inputs.isRunningInWidgetTest);

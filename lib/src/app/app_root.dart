@@ -46,7 +46,6 @@ class _AppRootState extends State<AppRoot> {
       foundation: _foundation,
       workspace: _workspaceRuntime,
       uiHandles: _uiHandles,
-      commitStateChange: setState,
       mounted: () => mounted,
     ).build();
   }
@@ -100,7 +99,6 @@ class _AppRootState extends State<AppRoot> {
       uiHandles: _uiHandles,
       context: () => context,
       mounted: () => mounted,
-      commitStateChange: setState,
       showMessage: _showMessage,
       isRunningInWidgetTest: _isRunningInWidgetTest,
       derivedState: () => _derivedState,

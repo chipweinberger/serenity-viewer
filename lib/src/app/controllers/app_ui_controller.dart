@@ -9,13 +9,11 @@ class AppUiController {
   AppUiController({
     required this.appUiState,
     required this.windowInteractionState,
-    required this.commitStateChange,
     required this.refreshWorkspaceTracking,
   });
 
   final AppUiState appUiState;
   final WindowInteractionState windowInteractionState;
-  final StateSetter commitStateChange;
   final VoidCallback refreshWorkspaceTracking;
 
   bool get isWorkspaceScreen => appUiState.screen == SerenityScreen.workspace;
