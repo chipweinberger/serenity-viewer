@@ -43,8 +43,13 @@ class AppRuntime {
     workspace = createAppWorkspaceServices(inputs: inputs, foundation: foundation);
     final documentCoordinator = createAppDocumentCoordinator(
       inputs: inputs,
-      foundation: foundation,
-      workspace: workspace,
+      environmentStore: foundation.environmentStore,
+      refreshActiveWorkspaceThumbnailIfNeeded: () async => workspace.thumbnailController.refreshActiveWorkspaceIfNeeded(),
+      storeLastEnvironmentPath: foundation.platformBridge.storeLastEnvironmentPath,
+      syncWindowTitle: foundation.platformBridge.syncWindowTitle,
+      resolveFileBookmark: foundation.platformBridge.resolveFileBookmark,
+      createFileBookmark: foundation.platformBridge.createFileBookmark,
+      thumbnailDirectory: foundation.platformBridge.thumbnailDirectory,
     );
     final autosaveTimer = Timer.periodic(const Duration(minutes: 1), (_) {
       if (environmentStoreState.hasUnsavedChanges) {
