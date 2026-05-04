@@ -53,7 +53,7 @@ class ContentState {
   final AppUiController appUiController;
   final MediaBridge mediaBridge;
   final EnvironmentApi environmentController;
-  final LinksController workspaceLinksController;
+  final WorkspaceLinksController workspaceLinksController;
   final ThumbnailController thumbnailController;
   final WorkspaceWindowHistoryController windowHistoryController;
   final TextEditingController searchController;

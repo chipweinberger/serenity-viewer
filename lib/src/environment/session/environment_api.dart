@@ -143,7 +143,7 @@ class EnvironmentApiDependencies {
   final WorkspaceViewTrackingState workspaceViewTrackingState;
   final WorkspaceViewportState workspaceViewportState;
   final WorkspaceController workspaceController;
-  final LinksController workspaceLinksController;
+  final WorkspaceLinksController workspaceLinksController;
   final BuildContext Function() context;
   final bool Function() mounted;
   final List<Workspace> Function() workspaces;

@@ -42,7 +42,7 @@ class AppWorkspaceFactory {
       commitStateChange: config.shell.commitStateChange,
       isMounted: config.shell.mounted,
     );
-    final workspaceLinksController = LinksController(
+    final workspaceLinksController = WorkspaceLinksController(
       screen: () => appUiState.screen,
       hasSession: () => environmentStoreState.environment != null,
       activeWorkspace: config.workspace.activeWorkspace,

@@ -82,7 +82,7 @@ class AppWorkspaceServices {
   final ThumbnailController thumbnailController;
   final VideoConversionCoordinator videoConversionCoordinator;
   final WorkspaceMediaImportController workspaceMediaImportController;
-  final LinksController workspaceLinksController;
+  final WorkspaceLinksController workspaceLinksController;
   final WorkspaceController workspaceController;
   final WorkspaceWindowController workspaceWindowController;
   final WorkspaceWindowHistoryController workspaceWindowHistoryController;

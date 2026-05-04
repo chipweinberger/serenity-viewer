@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/builders/content_scope.dart';
-import 'package:serenity_viewer/src/workspace/links/workspace_links_dialog.dart';
+import 'package:serenity_viewer/src/workspace/links/presentation/workspace_links_dialog.dart';
 import 'package:serenity_viewer/src/workspace/screen/workspace_hud_view_model.dart';
 import 'package:serenity_viewer/src/workspace/screen/workspace_hud.dart';
 import 'package:serenity_viewer/src/workspace/screen/workspace_screen.dart';
@@ -74,7 +74,7 @@ class WorkspaceContentBuilder {
           onFitWorkspaceViewportToContent: actions.fitWorkspaceViewportToContent,
           onConfirmCollateWorkspaceWindows: actions.confirmCollateWorkspaceWindows,
           onConfirmApplyExposeGridToWorkspace: state.environmentController.navigation.confirmApplyExposeGridToWorkspace,
-          onOpenLinks: () => showSerenityLinksDialog(
+          onOpenLinks: () => showWorkspaceLinksDialog(
             context: state.context,
             initialWorkspace: state.activeWorkspace,
             controller: state.workspaceLinksController,

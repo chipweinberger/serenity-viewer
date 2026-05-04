@@ -22,7 +22,7 @@ class EnvironmentShortcutDependencies {
   });
 
   final AppUiState appUiState;
-  final LinksController workspaceLinksController;
+  final WorkspaceLinksController workspaceLinksController;
   final Window? Function() focusedWindowOrNull;
   final SerenityShowWorkspaceScreen showWorkspaceScreen;
   final VoidCallback toggleExpose;
