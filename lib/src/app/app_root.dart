@@ -114,38 +114,15 @@ class _AppRootState extends State<AppRoot> {
   @override
   void initState() {
     super.initState();
-    _runtime = AppRuntime.create(_buildRuntimeInputs());
-    _feedback = AppFeedbackController(context: () => context);
-    _settings = AppSettingsController(
-      context: () => context,
-      environmentStoreState: _state.environmentStoreState,
-      updateEnvironment: _environmentStore.updateEnvironment,
-    );
-    _documentPersistence = DocumentPersistenceController(
-      state: _state,
-      environmentStore: _environmentStore,
-      platformBridge: _platformBridge,
-      environmentBookmarkSynchronizer: _environmentBookmarkSynchronizer,
-      documentCoordinator: _documentCoordinator,
-      mounted: () => mounted,
-      seedEnvironment: buildSeedEnvironment,
+    _runtime = AppRuntime.create(
       isRunningInWidgetTest: _isRunningInWidgetTest,
-    );
-    _documentPersistence.restoreEnvironment();
-  }
-
-  @override
-  void dispose() {
-    _runtime.dispose();
-    _stateStore.dispose();
-    _uiHandles.dispose();
-    super.dispose();
-  }
-
-  AppRuntimeInputs _buildRuntimeInputs() {
-    return AppRuntimeInputs(
-      isRunningInWidgetTest: _isRunningInWidgetTest,
-      stateStore: _stateStore,
+      environmentStoreState: _stateStore.environmentStoreState,
+      appUiState: _stateStore.appUiState,
+      windowInteractionState: _stateStore.windowInteractionState,
+      workspaceViewTrackingState: _stateStore.workspaceViewTrackingState,
+      workspaceViewportState: _stateStore.workspaceViewportState,
+      thumbnailRefreshState: _stateStore.thumbnailRefreshState,
+      workspaceWindowHistoryState: _stateStore.workspaceWindowHistoryState,
       windowTitle: () => deriveWindowTitle(_stateStore),
       context: () => context,
       mounted: () => mounted,
@@ -186,6 +163,31 @@ class _AppRootState extends State<AppRoot> {
       toggleExpose: _appUiController.toggleExpose,
       toggleVideoPlayback: _workspaceWindowController.toggleVideoPlayback,
     );
+    _feedback = AppFeedbackController(context: () => context);
+    _settings = AppSettingsController(
+      context: () => context,
+      environmentStoreState: _state.environmentStoreState,
+      updateEnvironment: _environmentStore.updateEnvironment,
+    );
+    _documentPersistence = DocumentPersistenceController(
+      state: _state,
+      environmentStore: _environmentStore,
+      platformBridge: _platformBridge,
+      environmentBookmarkSynchronizer: _environmentBookmarkSynchronizer,
+      documentCoordinator: _documentCoordinator,
+      mounted: () => mounted,
+      seedEnvironment: buildSeedEnvironment,
+      isRunningInWidgetTest: _isRunningInWidgetTest,
+    );
+    _documentPersistence.restoreEnvironment();
+  }
+
+  @override
+  void dispose() {
+    _runtime.dispose();
+    _stateStore.dispose();
+    _uiHandles.dispose();
+    super.dispose();
   }
 
   bool get _isRunningInWidgetTest {
