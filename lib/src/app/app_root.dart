@@ -21,8 +21,6 @@ import 'package:serenity_viewer/src/environment/document/document_coordinator.da
 import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
-import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/foundation/serenity_identity.dart';
 import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
 import 'package:serenity_viewer/src/settings/behavior/app_settings_controller.dart';
 import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
@@ -76,39 +74,6 @@ class _AppRootState extends State<AppRoot> {
         workspaces: () => deriveWorkspaces(_environmentStoreState),
         openWorkspaces: () => deriveOpenWorkspaces(_environmentStoreState),
         focusedWindowOrNull: () => _runtime.workspaceController.window.focusedWindowOrNull(),
-      ),
-      workspaceActions: WorkspaceActions(
-        newId: newSerenityId,
-        colorFromDigest: assetColorValueFromDigest,
-        setWorkspaceViewport: ({required workspaceId, center, zoom, queueThumbnail = true}) {
-          _runtime.workspaceController.viewport.setWorkspaceViewport(
-            workspaceId: workspaceId,
-            center: center,
-            zoom: zoom,
-            queueThumbnail: queueThumbnail,
-          );
-        },
-        showWorkspaceScreen:
-            ({
-              WorkspaceLayoutMode workspaceLayoutMode = WorkspaceLayoutMode.freeform,
-              bool resetEditMode = true,
-              bool clearExposeSelection = true,
-              bool refreshWorkspaceTracking = true,
-            }) => _runtime.appUiController.showWorkspaceScreen(
-              workspaceLayoutMode: workspaceLayoutMode,
-              resetEditMode: resetEditMode,
-              clearExposeSelection: clearExposeSelection,
-              refreshWorkspaceTrackingEnabled: refreshWorkspaceTracking,
-            ),
-        showLibraryScreen:
-            ({bool resetEditMode = true, bool clearExposeSelection = true, bool refreshWorkspaceTracking = true}) =>
-                _runtime.appUiController.showLibraryScreen(
-                  resetEditMode: resetEditMode,
-                  clearExposeSelection: clearExposeSelection,
-                  refreshWorkspaceTrackingEnabled: refreshWorkspaceTracking,
-                ),
-        toggleExpose: () => _runtime.appUiController.toggleExpose(),
-        toggleVideoPlayback: (windowId) => _runtime.workspaceController.playback.toggleVideoPlayback(windowId),
       ),
       windowTitle: () => deriveWindowTitle(_environmentStoreState),
       saveEnvironment: () => _documentPersistence.saveEnvironment(),

@@ -58,7 +58,6 @@ AppRuntime createAppRuntime({
   required WorkspaceState workspaceState,
   required WorkspaceRuntime workspaceRuntime,
   required WorkspaceQueries workspaceQueries,
-  required WorkspaceActions workspaceActions,
   required String Function() windowTitle,
   required Future<void> Function() saveEnvironment,
   required DocumentCreationActions documentCreation,
@@ -99,7 +98,6 @@ AppRuntime createAppRuntime({
       runtime: workspaceRuntime,
       state: workspaceState,
       queries: workspaceQueries,
-      actions: workspaceActions,
     ),
   );
   final documentCoordinator = createAppDocumentCoordinator(

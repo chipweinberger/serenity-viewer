@@ -24,20 +24,21 @@ class WorkspaceViewportController {
     required this.thumbnailController,
     required this.replaceWorkspace,
     required this.activeWorkspaceOrNull,
-    required SerenityWorkspaceViewportSetter applyWorkspaceViewport,
     required this.refreshActiveWorkspaceThumbnail,
-  }) : gesture = WorkspaceViewportGestureController(
-         appUiState: appUiState,
-         windowInteractionState: windowInteractionState,
-         workspaceViewportState: workspaceViewportState,
-         setWorkspaceViewport: applyWorkspaceViewport,
-         refreshActiveWorkspaceThumbnail: refreshActiveWorkspaceThumbnail,
-       ),
-       fit = WorkspaceViewportFitController(
-         workspaceViewportState: workspaceViewportState,
-         replaceWorkspace: replaceWorkspace,
-         setWorkspaceViewport: applyWorkspaceViewport,
-       );
+  }) {
+    gesture = WorkspaceViewportGestureController(
+      appUiState: appUiState,
+      windowInteractionState: windowInteractionState,
+      workspaceViewportState: workspaceViewportState,
+      setWorkspaceViewport: setWorkspaceViewport,
+      refreshActiveWorkspaceThumbnail: refreshActiveWorkspaceThumbnail,
+    );
+    fit = WorkspaceViewportFitController(
+      workspaceViewportState: workspaceViewportState,
+      replaceWorkspace: replaceWorkspace,
+      setWorkspaceViewport: setWorkspaceViewport,
+    );
+  }
 
   final EnvironmentStoreState environmentStoreState;
   final AppUiState appUiState;
@@ -47,8 +48,8 @@ class WorkspaceViewportController {
   final SerenityWorkspaceReplace replaceWorkspace;
   final Workspace? Function() activeWorkspaceOrNull;
   final Future<void> Function() refreshActiveWorkspaceThumbnail;
-  final WorkspaceViewportGestureController gesture;
-  final WorkspaceViewportFitController fit;
+  late final WorkspaceViewportGestureController gesture;
+  late final WorkspaceViewportFitController fit;
 
   void fitWorkspaceViewportToContent() {
     fit.toContent(activeWorkspaceOrNull());

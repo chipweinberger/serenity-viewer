@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller_types.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_playback_controller.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_navigation_controller.dart';
@@ -13,20 +15,20 @@ import 'package:serenity_viewer/src/environment/controller/environment_navigatio
 class WorkspaceShortcutDependencies {
   const WorkspaceShortcutDependencies({
     required this.appUiState,
+    required this.appUiController,
+    required this.playbackController,
     required this.workspaceLinksController,
     required this.focusedWindowOrNull,
     required this.showWorkspaceScreen,
-    required this.toggleExpose,
-    required this.toggleVideoPlayback,
     required this.navigation,
   });
 
   final AppUiState appUiState;
+  final AppUiController appUiController;
+  final WorkspacePlaybackController playbackController;
   final WorkspaceLinksController workspaceLinksController;
   final Window? Function() focusedWindowOrNull;
   final SerenityShowWorkspaceScreen showWorkspaceScreen;
-  final VoidCallback toggleExpose;
-  final ValueChanged<String> toggleVideoPlayback;
   final EnvironmentNavigationController navigation;
 }
 
@@ -41,7 +43,7 @@ class WorkspaceShortcutController {
         _dependencies.showWorkspaceScreen(clearExposeSelection: false);
       } else if (_dependencies.appUiState.screen == SerenityScreen.workspace &&
           _dependencies.appUiState.workspaceLayoutMode != WorkspaceLayoutMode.expose) {
-        _dependencies.toggleExpose();
+        _dependencies.appUiController.toggleExpose();
       }
       return;
     }
@@ -69,7 +71,7 @@ class WorkspaceShortcutController {
     if (key == LogicalKeyboardKey.space) {
       final focusedWindow = _dependencies.focusedWindowOrNull();
       if (focusedWindow?.asset.type == AssetType.video) {
-        _dependencies.toggleVideoPlayback(focusedWindow!.asset.id);
+        _dependencies.playbackController.toggleVideoPlayback(focusedWindow!.asset.id);
       }
     }
   }
