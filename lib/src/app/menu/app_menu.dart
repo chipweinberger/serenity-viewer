@@ -62,10 +62,7 @@ class _FileActions {
 }
 
 class _AssetActions {
-  const _AssetActions({
-    required this.revealAssetInFinder,
-    required this.convertVideoWindowToJpeg,
-  });
+  const _AssetActions({required this.revealAssetInFinder, required this.convertVideoWindowToJpeg});
 
   final Future<void> Function(Asset asset) revealAssetInFinder;
   final Future<void> Function(String windowId) convertVideoWindowToJpeg;
@@ -144,10 +141,7 @@ class AppMenu extends StatelessWidget {
     );
   }
 
-  _AppActions _buildAppActions({
-    required AppFeedbackController feedback,
-    required AppSettingsController settings,
-  }) {
+  _AppActions _buildAppActions({required AppFeedbackController feedback, required AppSettingsController settings}) {
     return _AppActions(showAboutSerenity: feedback.showAboutSerenity, openSettings: settings.openSettings);
   }
 
@@ -166,10 +160,7 @@ class AppMenu extends StatelessWidget {
 
   _AssetActions _buildAssetActions({
     required PlatformBridge platformBridge,
-    required EnvironmentController environmentController,
-    required WorkspaceWindowController workspaceWindowController,
     required WorkspaceVideoConversionController workspaceVideoConversionController,
-    required WorkspaceWindowHistoryController workspaceWindowHistoryController,
   }) {
     return _AssetActions(
       revealAssetInFinder: platformBridge.revealAssetInFinder,
@@ -178,10 +169,8 @@ class AppMenu extends StatelessWidget {
   }
 
   _WindowActions _buildWindowActions({
-    required PlatformBridge platformBridge,
     required EnvironmentController environmentController,
     required WorkspaceWindowController workspaceWindowController,
-    required WorkspaceVideoConversionController workspaceVideoConversionController,
     required WorkspaceWindowHistoryController workspaceWindowHistoryController,
   }) {
     return _WindowActions(
@@ -215,18 +204,11 @@ class AppMenu extends StatelessWidget {
     );
   }
 
-  _HistoryActions _buildHistoryActions({
-    required WorkspaceWindowHistoryController workspaceWindowHistoryController,
-  }) {
-    return _HistoryActions(
-      restoreRecentlyClosedWindow: workspaceWindowHistoryController.restoreRecentlyClosedWindow,
-    );
+  _HistoryActions _buildHistoryActions({required WorkspaceWindowHistoryController workspaceWindowHistoryController}) {
+    return _HistoryActions(restoreRecentlyClosedWindow: workspaceWindowHistoryController.restoreRecentlyClosedWindow);
   }
 
-  List<PlatformMenuItem> _buildHistoryMenuItems({
-    required _MenuState state,
-    required _HistoryActions window,
-  }) {
+  List<PlatformMenuItem> _buildHistoryMenuItems({required _MenuState state, required _HistoryActions window}) {
     final recentlyClosedItems = state.recentlyClosedWindows.take(8).map((entry) {
       return PlatformMenuItem(
         label: 'Restore ${entry.window.asset.filename}',
@@ -290,10 +272,7 @@ class AppMenu extends StatelessWidget {
     ];
   }
 
-  List<PlatformMenuItem> _buildAssetMenuItems({
-    required _MenuState state,
-    required _AssetActions asset,
-  }) {
+  List<PlatformMenuItem> _buildAssetMenuItems({required _MenuState state, required _AssetActions asset}) {
     final focusedWindow = state.focusedWindow;
     final focusedVideoWindow = focusedWindow?.asset.type == AssetType.video ? focusedWindow : null;
     final focusedWindowLabel = focusedWindow == null
@@ -321,11 +300,7 @@ class AppMenu extends StatelessWidget {
     ];
   }
 
-
-  List<PlatformMenuItem> _buildWindowMenuItems({
-    required _MenuState state,
-    required _WindowActions window,
-  }) {
+  List<PlatformMenuItem> _buildWindowMenuItems({required _MenuState state, required _WindowActions window}) {
     final focusedWindow = state.focusedWindow;
 
     return [
@@ -373,10 +348,7 @@ class AppMenu extends StatelessWidget {
     ];
   }
 
-  List<PlatformMenuItem> _buildWorkspaceMenuItems({
-    required _MenuState state,
-    required _WorkspaceActions workspace,
-  }) {
+  List<PlatformMenuItem> _buildWorkspaceMenuItems({required _MenuState state, required _WorkspaceActions workspace}) {
     return [
       PlatformMenuItem(
         label: 'New',
@@ -435,13 +407,34 @@ class AppMenu extends StatelessWidget {
     required _HistoryActions history,
   }) {
     return [
-      PlatformMenu(label: 'Serenity', menus: _buildAppMenuItems(app: app)),
-      PlatformMenu(label: 'File', menus: _buildFileMenuItems(file: file)),
-      PlatformMenu(label: 'Asset', menus: _buildAssetMenuItems(state: state, asset: asset)),
-      PlatformMenu(label: 'Window', menus: _buildWindowMenuItems(state: state, window: window)),
-      PlatformMenu(label: 'Workspace', menus: _buildWorkspaceMenuItems(state: state, workspace: workspace)),
-      PlatformMenu(label: 'View', menus: _buildViewMenuItems(workspace: workspace)),
-      PlatformMenu(label: 'History', menus: _buildHistoryMenuItems(state: state, window: history)),
+      PlatformMenu(
+        label: 'Serenity',
+        menus: _buildAppMenuItems(app: app),
+      ),
+      PlatformMenu(
+        label: 'File',
+        menus: _buildFileMenuItems(file: file),
+      ),
+      PlatformMenu(
+        label: 'Asset',
+        menus: _buildAssetMenuItems(state: state, asset: asset),
+      ),
+      PlatformMenu(
+        label: 'Window',
+        menus: _buildWindowMenuItems(state: state, window: window),
+      ),
+      PlatformMenu(
+        label: 'Workspace',
+        menus: _buildWorkspaceMenuItems(state: state, workspace: workspace),
+      ),
+      PlatformMenu(
+        label: 'View',
+        menus: _buildViewMenuItems(workspace: workspace),
+      ),
+      PlatformMenu(
+        label: 'History',
+        menus: _buildHistoryMenuItems(state: state, window: history),
+      ),
     ];
   }
 
@@ -490,16 +483,11 @@ class AppMenu extends StatelessWidget {
     );
     final asset = _buildAssetActions(
       platformBridge: platformBridge,
-      environmentController: environmentController,
-      workspaceWindowController: workspaceWindowController,
       workspaceVideoConversionController: workspaceVideoConversionController,
-      workspaceWindowHistoryController: workspaceWindowHistoryController,
     );
     final window = _buildWindowActions(
-      platformBridge: platformBridge,
       environmentController: environmentController,
       workspaceWindowController: workspaceWindowController,
-      workspaceVideoConversionController: workspaceVideoConversionController,
       workspaceWindowHistoryController: workspaceWindowHistoryController,
     );
     final workspace = _buildWorkspaceActions(

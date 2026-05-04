@@ -21,7 +21,6 @@ import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dar
 import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_collate_controller.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_expose_layout_controller.dart';
-import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_viewport_session_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
 import 'package:serenity_viewer/src/workspace/history/workspace_window_history_controller.dart';
@@ -41,7 +40,6 @@ class AppMainView extends StatelessWidget {
     required EnvironmentStoreState environmentStoreState,
     required WindowInteractionState windowInteractionState,
     required WorkspaceViewportState workspaceViewportState,
-    required WorkspaceController workspaceController,
   }) {
     return AppMainViewModel(
       uiState: appUiState,
@@ -51,7 +49,7 @@ class AppMainView extends StatelessWidget {
       openWorkspaces: deriveOpenWorkspaces(environmentStoreState),
       activeWorkspace: deriveActiveWorkspace(environmentStoreState),
       activeWorkspaceOrNull: deriveActiveWorkspaceOrNull(environmentStoreState),
-      selectedExposeWindowCount: workspaceController.expose.count(),
+      selectedExposeWindowCount: windowInteractionState.selectedExposeWindowIds.length,
       windowInteractionState: windowInteractionState,
       workspaceViewportState: workspaceViewportState,
     );
@@ -100,13 +98,13 @@ class AppMainView extends StatelessWidget {
       ),
       window: WindowActions(
         interaction: WindowInteractionActions(
-        handleOptionGestureHover: workspaceWindowController.handleOptionGestureHover,
-        focusWindow: workspaceWindowController.focusWindow,
-        setPinnedHoverWindow: workspaceWindowController.setPinnedHoverWindow,
-        clearPinnedHoverWindow: workspaceWindowController.clearPinnedHoverWindow,
-        flashWindow: (windowId) => workspaceWindowController.flashWindow(windowId, mounted: context.mounted),
-        setActiveGestureWindow: workspaceWindowController.setActiveGestureWindow,
-      ),
+          handleOptionGestureHover: workspaceWindowController.handleOptionGestureHover,
+          focusWindow: workspaceWindowController.focusWindow,
+          setPinnedHoverWindow: workspaceWindowController.setPinnedHoverWindow,
+          clearPinnedHoverWindow: workspaceWindowController.clearPinnedHoverWindow,
+          flashWindow: (windowId) => workspaceWindowController.flashWindow(windowId, mounted: context.mounted),
+          setActiveGestureWindow: workspaceWindowController.setActiveGestureWindow,
+        ),
         layout: WindowLayoutActions(
           restorePreviousWindowZOrder: workspaceWindowController.restorePreviousWindowZOrder,
           moveWindow: workspaceWindowController.moveWindow,
@@ -164,10 +162,7 @@ class AppMainView extends StatelessWidget {
     return LibraryView(model: model, services: services, actions: actions, workspaceLoadPlan: workspaceLoadPlan);
   }
 
-  Widget _buildWorkspaceUiOverlay({
-    required AppMainViewModel model,
-    required AppMainViewServices services,
-  }) {
+  Widget _buildWorkspaceUiOverlay({required AppMainViewModel model, required AppMainViewServices services}) {
     return AppHeader(
       windowTitle: model.windowTitle,
       openWorkspaces: model.openWorkspaces,
@@ -210,14 +205,12 @@ class AppMainView extends StatelessWidget {
     final workspaceWindowController = context.read<WorkspaceWindowController>();
     final workspaceViewportSessionController = context.read<WorkspaceViewportSessionController>();
     final workspaceCollateController = context.read<WorkspaceCollateController>();
-    final workspaceController = context.read<WorkspaceController>();
 
     final model = _buildModel(
       appUiState: appUiState,
       environmentStoreState: environmentStoreState,
       windowInteractionState: windowInteractionState,
       workspaceViewportState: workspaceViewportState,
-      workspaceController: workspaceController,
     );
     final services = _buildServices(
       appUiController: appUiController,
