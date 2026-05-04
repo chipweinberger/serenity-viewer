@@ -79,6 +79,7 @@ class _AppRootState extends State<AppRoot> {
         Provider<AppStateStore>.value(value: _stateStore),
         Provider<AppRuntime>.value(value: _runtime),
         Provider<AppUiHandles>.value(value: _uiHandles),
+        Provider<ValueGetter<bool>>.value(value: () => mounted),
         Provider<AppFeedbackController>.value(value: _feedback),
         Provider<AppSettingsController>.value(value: _settings),
         Provider<DocumentPersistenceController>.value(value: _documentPersistence),
@@ -120,7 +121,7 @@ class _AppRootState extends State<AppRoot> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    final bindings = buildAppMainViewBindings(context, uiHandles: _uiHandles, mounted: () => mounted);
+    final bindings = buildAppMainViewBindings(context);
     return AppMainView(model: bindings.model, services: bindings.services, actions: bindings.actions);
   }
 

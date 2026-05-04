@@ -5,9 +5,9 @@ import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/app/state/app_derived_state.dart';
 import 'package:serenity_viewer/src/app/state/app_state_store.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
-import 'package:serenity_viewer/src/app/runtime/app_runtime.dart';
 import 'package:serenity_viewer/src/environment/asset.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
+import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
 import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
 import 'package:serenity_viewer/src/media/import/workspace_media_import_controller.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_collate_controller.dart';
@@ -127,15 +127,13 @@ AppMainViewActions _buildAppMainViewActions({
   AppMainViewModel model,
   AppMainViewServices services,
   AppMainViewActions actions,
-}) buildAppMainViewBindings(
-  BuildContext context, {
-  required AppUiHandles uiHandles,
-  required bool Function() mounted,
-}) {
+}) buildAppMainViewBindings(BuildContext context) {
   final state = context.read<AppStateStore>();
-  final runtime = context.read<AppRuntime>();
+  final uiHandles = context.read<AppUiHandles>();
+  final mounted = context.read<ValueGetter<bool>>();
   final appUiController = context.read<AppUiController>();
   final sharedVideoControllerPool = context.read<SharedVideoControllerPool>();
+  final platformBridge = context.read<PlatformBridge>();
   final environmentController = context.read<EnvironmentController>();
   final workspaceExposeLayoutController = context.read<WorkspaceExposeLayoutController>();
   final workspaceLinksController = context.read<WorkspaceLinksController>();
@@ -168,7 +166,7 @@ AppMainViewActions _buildAppMainViewActions({
     ),
     actions: _buildAppMainViewActions(
       appUiController: appUiController,
-      revealAssetInFinder: runtime.platformBridge.revealAssetInFinder,
+      revealAssetInFinder: platformBridge.revealAssetInFinder,
       workspaceMediaImportController: workspaceMediaImportController,
       workspaceWindowController: workspaceWindowController,
       workspaceViewportSessionController: workspaceViewportSessionController,
