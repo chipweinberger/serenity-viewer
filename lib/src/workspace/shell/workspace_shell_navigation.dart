@@ -2,55 +2,95 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import 'package:serenity_viewer/src/app/environment/app_environment_state.dart';
+import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
+import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/expose/expose_layouts.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
+import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
+import 'package:serenity_viewer/src/workspace/controller/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/layout/workspace_layout.dart';
 import 'package:serenity_viewer/src/workspace/shell/workspace_shell_controller.dart';
+import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
+
+class WorkspaceShellNavigationDependencies {
+  const WorkspaceShellNavigationDependencies({
+    required this.persistenceState,
+    required this.chromeState,
+    required this.workspaceViewportState,
+    required this.workspaceController,
+    required this.context,
+    required this.mounted,
+    required this.openWorkspaces,
+    required this.activeWorkspace,
+    required this.updateEnvironment,
+    required this.replaceWorkspace,
+    required this.showWorkspaceScreen,
+    required this.showLibraryScreen,
+    required this.workspaceSwitchTarget,
+    required this.refreshActiveWorkspaceThumbnail,
+  });
+
+  final AppEnvironmentState persistenceState;
+  final ChromeState chromeState;
+  final WorkspaceViewportState workspaceViewportState;
+  final WorkspaceController workspaceController;
+  final BuildContext Function() context;
+  final bool Function() mounted;
+  final List<Workspace> Function() openWorkspaces;
+  final Workspace? Function() activeWorkspace;
+  final ValueChanged<Environment> updateEnvironment;
+  final void Function(Workspace workspace, {bool queueThumbnail}) replaceWorkspace;
+  final SerenityShowWorkspaceScreen showWorkspaceScreen;
+  final SerenityShowLibraryScreen showLibraryScreen;
+  final SerenityWorkspaceSwitchTargetResolver workspaceSwitchTarget;
+  final Future<void> Function() refreshActiveWorkspaceThumbnail;
+}
 
 class WorkspaceShellNavigationApi {
-  WorkspaceShellNavigationApi(this._controller);
+  WorkspaceShellNavigationApi(this._dependencies);
 
   static const double _appliedExposeViewportZoomFactor = 0.0625;
 
-  final WorkspaceShellController _controller;
+  final WorkspaceShellNavigationDependencies _dependencies;
 
   void toggleSelectedWindow(String windowId) {
-    _controller.workspaceController.expose.toggle(windowId);
+    _dependencies.workspaceController.expose.toggle(windowId);
   }
 
   void clearExposeSelection() {
-    _controller.workspaceController.expose.clear();
+    _dependencies.workspaceController.expose.clear();
   }
 
   void toggleOverview() {
-    if (_controller.chromeState.screen == SerenityScreen.workspace) {
-      unawaited(_controller.refreshActiveWorkspaceThumbnail());
+    if (_dependencies.chromeState.screen == SerenityScreen.workspace) {
+      unawaited(_dependencies.refreshActiveWorkspaceThumbnail());
     }
 
-    if (_controller.chromeState.screen == SerenityScreen.library) {
-      _controller.showWorkspaceScreen();
+    if (_dependencies.chromeState.screen == SerenityScreen.library) {
+      _dependencies.showWorkspaceScreen();
     } else {
-      _controller.showLibraryScreen();
+      _dependencies.showLibraryScreen();
     }
   }
 
   void showOverview() {
-    if (_controller.chromeState.screen == SerenityScreen.workspace) {
-      unawaited(_controller.refreshActiveWorkspaceThumbnail());
+    if (_dependencies.chromeState.screen == SerenityScreen.workspace) {
+      unawaited(_dependencies.refreshActiveWorkspaceThumbnail());
     }
 
-    _controller.showLibraryScreen();
+    _dependencies.showLibraryScreen();
   }
 
   void switchWorkspace(int direction) {
-    final environment = _controller.persistenceState.environment;
+    final environment = _dependencies.persistenceState.environment;
     if (environment == null) {
       return;
     }
 
-    final target = _controller.workspaceSwitchTarget(
-      openWorkspaces: _controller.openWorkspaces(),
+    final target = _dependencies.workspaceSwitchTarget(
+      openWorkspaces: _dependencies.openWorkspaces(),
       activeWorkspaceId: environment.activeWorkspaceId,
       direction: direction,
     );
@@ -63,20 +103,20 @@ class WorkspaceShellNavigationApi {
   }
 
   Future<void> setActiveWorkspace(String workspaceId) async {
-    final environment = _controller.persistenceState.environment;
+    final environment = _dependencies.persistenceState.environment;
     if (environment == null) {
       return;
     }
 
     final currentWorkspaceId = environment.activeWorkspaceId;
     if (currentWorkspaceId != workspaceId) {
-      unawaited(_controller.refreshActiveWorkspaceThumbnail());
+      unawaited(_dependencies.refreshActiveWorkspaceThumbnail());
     }
 
     final shouldPreserveExpose =
-        _controller.chromeState.screen == SerenityScreen.workspace &&
-        _controller.chromeState.workspaceLayoutMode == WorkspaceLayoutMode.expose;
-    _controller.updateEnvironment(
+        _dependencies.chromeState.screen == SerenityScreen.workspace &&
+        _dependencies.chromeState.workspaceLayoutMode == WorkspaceLayoutMode.expose;
+    _dependencies.updateEnvironment(
       environment.copyWith(
         activeWorkspaceId: workspaceId,
         workspaces: environment.workspaces
@@ -85,20 +125,20 @@ class WorkspaceShellNavigationApi {
       ),
     );
 
-    _controller.showWorkspaceScreen(
+    _dependencies.showWorkspaceScreen(
       workspaceLayoutMode: shouldPreserveExpose ? WorkspaceLayoutMode.expose : WorkspaceLayoutMode.freeform,
     );
   }
 
   void applyExposeGridToWorkspace() {
-    final workspace = _controller.activeWorkspace();
+    final workspace = _dependencies.activeWorkspace();
     if (workspace == null ||
-        _controller.chromeState.screen != SerenityScreen.workspace ||
-        _controller.chromeState.workspaceLayoutMode != WorkspaceLayoutMode.expose) {
+        _dependencies.chromeState.screen != SerenityScreen.workspace ||
+        _dependencies.chromeState.workspaceLayoutMode != WorkspaceLayoutMode.expose) {
       return;
     }
-    if (_controller.workspaceViewportState.viewportSize.width <= 0 ||
-        _controller.workspaceViewportState.viewportSize.height <= 0 ||
+    if (_dependencies.workspaceViewportState.viewportSize.width <= 0 ||
+        _dependencies.workspaceViewportState.viewportSize.height <= 0 ||
         workspace.windows.isEmpty) {
       return;
     }
@@ -106,13 +146,13 @@ class WorkspaceShellNavigationApi {
     final sortedWindows = [...workspace.windows]..sort((a, b) => a.asset.filename.compareTo(b.asset.filename));
     final exposeLayouts = computeExposeLayoutRects(
       windows: sortedWindows,
-      viewportSize: _controller.workspaceViewportState.viewportSize,
+      viewportSize: _dependencies.workspaceViewportState.viewportSize,
     );
     if (exposeLayouts.isEmpty) {
       return;
     }
 
-    final viewportCenter = _controller.workspaceViewportState.viewportSize.center(Offset.zero);
+    final viewportCenter = _dependencies.workspaceViewportState.viewportSize.center(Offset.zero);
     final safeViewportZoom = workspace.viewportZoom <= 0 ? 1.0 : workspace.viewportZoom;
     final nextViewportZoom = WorkspaceLayout.clampWorkspaceZoom(safeViewportZoom * _appliedExposeViewportZoomFactor);
     final relaidOutById = <String, Window>{};
@@ -129,27 +169,27 @@ class WorkspaceShellNavigationApi {
       relaidOutById[layout.window.asset.id] = layout.window.copyWith(position: nextPosition, size: nextSize);
     }
 
-    _controller.replaceWorkspace(
+    _dependencies.replaceWorkspace(
       workspace.copyWith(
         windows: workspace.windows.map((window) => relaidOutById[window.asset.id] ?? window).toList(),
         viewportZoom: nextViewportZoom,
       ),
     );
 
-    _controller.showWorkspaceScreen();
+    _dependencies.showWorkspaceScreen();
   }
 
   Future<void> confirmApplyExposeGridToWorkspace() async {
-    final workspace = _controller.activeWorkspace();
+    final workspace = _dependencies.activeWorkspace();
     if (workspace == null ||
-        _controller.chromeState.screen != SerenityScreen.workspace ||
-        _controller.chromeState.workspaceLayoutMode != WorkspaceLayoutMode.expose ||
+        _dependencies.chromeState.screen != SerenityScreen.workspace ||
+        _dependencies.chromeState.workspaceLayoutMode != WorkspaceLayoutMode.expose ||
         workspace.windows.isEmpty) {
       return;
     }
 
     final shouldApply = await showDialog<bool>(
-      context: _controller.context(),
+      context: _dependencies.context(),
       builder: (context) {
         return AlertDialog(
           title: const Text('Apply Grid?'),
@@ -164,7 +204,7 @@ class WorkspaceShellNavigationApi {
       },
     );
 
-    if (shouldApply == true && _controller.mounted()) {
+    if (shouldApply == true && _dependencies.mounted()) {
       applyExposeGridToWorkspace();
     }
   }

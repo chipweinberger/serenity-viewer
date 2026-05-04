@@ -61,10 +61,46 @@ class WorkspaceShellController {
     required this.queueWorkspaceRefresh,
     required this.toggleVideoPlayback,
   }) {
-    navigation = WorkspaceShellNavigationApi(this);
+    navigation = WorkspaceShellNavigationApi(
+      WorkspaceShellNavigationDependencies(
+        persistenceState: persistenceState,
+        chromeState: chromeState,
+        workspaceViewportState: workspaceViewportState,
+        workspaceController: workspaceController,
+        context: context,
+        mounted: mounted,
+        openWorkspaces: openWorkspaces,
+        activeWorkspace: activeWorkspace,
+        updateEnvironment: updateEnvironment,
+        replaceWorkspace: replaceWorkspace,
+        showWorkspaceScreen: showWorkspaceScreen,
+        showLibraryScreen: showLibraryScreen,
+        workspaceSwitchTarget: workspaceSwitchTarget,
+        refreshActiveWorkspaceThumbnail: refreshActiveWorkspaceThumbnail,
+      ),
+    );
     management = WorkspaceShellManagementApi(this);
-    shortcuts = WorkspaceShellShortcutsApi(this);
-    tracking = WorkspaceShellTrackingApi(this);
+    shortcuts = WorkspaceShellShortcutsApi(
+      WorkspaceShellShortcutsDependencies(
+        chromeState: chromeState,
+        workspaceLinksController: workspaceLinksController,
+        focusedWindowOrNull: focusedWindowOrNull,
+        showWorkspaceScreen: showWorkspaceScreen,
+        toggleExpose: toggleExpose,
+        toggleVideoPlayback: toggleVideoPlayback,
+        navigation: navigation,
+      ),
+    );
+    tracking = WorkspaceShellTrackingApi(
+      WorkspaceShellTrackingDependencies(
+        persistenceState: persistenceState,
+        chromeState: chromeState,
+        workspaceViewTrackingState: workspaceViewTrackingState,
+        mounted: mounted,
+        activeWorkspace: activeWorkspace,
+        updateEnvironment: updateEnvironment,
+      ),
+    );
   }
 
   final AppEnvironmentState persistenceState;
