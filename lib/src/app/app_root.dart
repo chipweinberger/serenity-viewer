@@ -39,14 +39,14 @@ class _AppRootState extends State<AppRoot> {
   }
 
   AppMainViewBindings _buildAppMainViewBindings() {
-    return AppMainViewBindingBuilder(
+    return buildAppMainViewBindings(
       state: _state,
       derivedState: _derivedState,
       foundation: _foundation,
       workspace: _workspaceRuntime,
       uiHandles: _uiHandles,
       mounted: () => mounted,
-    ).build();
+    );
   }
 
   Widget _buildContent(BuildContext context) {
@@ -106,7 +106,7 @@ class _AppRootState extends State<AppRoot> {
   }
 
   AppMenuBindings _buildAppMenuBindings() {
-    return AppMenuBindingBuilder(
+    return buildAppMenuBindings(
       state: _state,
       foundation: _foundation,
       documents: _documents,
@@ -114,7 +114,7 @@ class _AppRootState extends State<AppRoot> {
       feedback: _feedback,
       settings: _settings,
       openAssets: _workspaceRuntime.workspaceAssetPickerController.pickAndImportAssets,
-    ).build();
+    );
   }
 
   @override

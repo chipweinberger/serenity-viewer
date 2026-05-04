@@ -116,94 +116,98 @@ class AppMenuBindings {
   final AppMenuWindowActions window;
 }
 
-class AppMenuBindingBuilder {
-  const AppMenuBindingBuilder({
-    required this.state,
-    required this.foundation,
-    required this.documents,
-    required this.workspace,
-    required this.feedback,
-    required this.settings,
-    required this.openAssets,
-  });
+AppMenuState _buildAppMenuState({
+  required AppRuntimeState state,
+  required AppWorkspaceServices workspace,
+}) {
+  final focusedWindow = workspace.workspaceWindowController.focusedWindowOrNull();
+  final focusedWindowIsSelected =
+      focusedWindow != null && workspace.workspaceController.expose.contains(focusedWindow.asset.id);
 
-  final AppRuntimeState state;
-  final AppFoundation foundation;
-  final AppDocument documents;
-  final AppWorkspaceServices workspace;
-  final AppFeedbackController feedback;
-  final AppSettingsController settings;
-  final Future<void> Function() openAssets;
+  return AppMenuState(
+    activeWorkspaceId: state.environmentStoreState.environment?.activeWorkspaceId,
+    focusedWindow: focusedWindow,
+    focusedWindowIsSelected: focusedWindowIsSelected,
+    recentlyClosedWindows: state.workspaceWindowHistoryState.entries,
+  );
+}
 
-  AppMenuState _buildState() {
-    final focusedWindow = workspace.workspaceWindowController.focusedWindowOrNull();
-    final focusedWindowIsSelected =
-        focusedWindow != null && workspace.workspaceController.expose.contains(focusedWindow.asset.id);
+AppMenuAppActions _buildAppMenuAppActions({
+  required AppFeedbackController feedback,
+  required AppSettingsController settings,
+}) {
+  return AppMenuAppActions(showAboutSerenity: feedback.showAboutSerenity, openSettings: settings.openSettings);
+}
 
-    return AppMenuState(
-      activeWorkspaceId: state.environmentStoreState.environment?.activeWorkspaceId,
-      focusedWindow: focusedWindow,
-      focusedWindowIsSelected: focusedWindowIsSelected,
-      recentlyClosedWindows: state.workspaceWindowHistoryState.entries,
-    );
-  }
+AppMenuFileActions _buildAppMenuFileActions({
+  required AppDocument documents,
+  required Future<void> Function() openAssets,
+}) {
+  return AppMenuFileActions(
+    createEnvironment: documents.documentCoordinator.createDocument,
+    openEnvironment: documents.documentCoordinator.openDocument,
+    openAssets: openAssets,
+    saveEnvironment: documents.documentCoordinator.saveDocument,
+    saveEnvironmentAs: documents.documentCoordinator.saveDocumentAs,
+  );
+}
 
-  AppMenuAppActions _buildAppActions() {
-    return AppMenuAppActions(showAboutSerenity: feedback.showAboutSerenity, openSettings: settings.openSettings);
-  }
+AppMenuAssetActions _buildAppMenuAssetActions({
+  required AppFoundation foundation,
+  required AppWorkspaceServices workspace,
+}) {
+  return AppMenuAssetActions(
+    revealAssetInFinder: foundation.platformBridge.revealAssetInFinder,
+    toggleWindowSelected: workspace.environmentController.navigation.toggleSelectedWindow,
+    fitWindowToContent: workspace.workspaceWindowController.fitWindowToContent,
+    restorePreviousWindowZOrder: workspace.workspaceWindowController.restorePreviousWindowZOrder,
+    convertVideoWindowToJpeg: workspace.workspaceVideoConversionController.convertVideoWindowToJpeg,
+    closeWindow: workspace.workspaceWindowHistoryController.removeWindow,
+  );
+}
 
-  AppMenuFileActions _buildFileActions() {
-    return AppMenuFileActions(
-      createEnvironment: documents.documentCoordinator.createDocument,
-      openEnvironment: documents.documentCoordinator.openDocument,
-      openAssets: openAssets,
-      saveEnvironment: documents.documentCoordinator.saveDocument,
-      saveEnvironmentAs: documents.documentCoordinator.saveDocumentAs,
-    );
-  }
+AppMenuWorkspaceActions _buildAppMenuWorkspaceActions({
+  required AppFoundation foundation,
+  required AppWorkspaceServices workspace,
+  required AppFeedbackController feedback,
+}) {
+  return AppMenuWorkspaceActions(
+    toggleExpose: foundation.appUiController.toggleExpose,
+    toggleWorkspaceOverview: workspace.environmentController.navigation.toggleOverview,
+    createWorkspace: workspace.environmentController.management.create,
+    switchToPreviousWorkspace: () => workspace.environmentController.navigation.switchWorkspace(-1),
+    switchToNextWorkspace: () => workspace.environmentController.navigation.switchWorkspace(1),
+    fitWorkspaceViewportToContent: workspace.workspaceWindowController.fitWorkspaceViewportToContent,
+    confirmCollateWorkspaceWindows: workspace.workspaceCollateController.confirmCollateWorkspaceWindows,
+    pauseAllVideos: workspace.workspaceWindowController.pauseAllVideos,
+    showNoWorkspaceToRenameMessage: () => feedback.showMessage('There is no workspace to rename.'),
+    renameWorkspace: workspace.environmentController.management.renameWorkspace,
+    showNoWorkspaceToDeleteMessage: () => feedback.showMessage('There is no workspace to delete.'),
+    confirmDeleteWorkspace: workspace.environmentController.management.confirmDeleteWorkspace,
+  );
+}
 
-  AppMenuAssetActions _buildAssetActions() {
-    return AppMenuAssetActions(
-      revealAssetInFinder: foundation.platformBridge.revealAssetInFinder,
-      toggleWindowSelected: workspace.environmentController.navigation.toggleSelectedWindow,
-      fitWindowToContent: workspace.workspaceWindowController.fitWindowToContent,
-      restorePreviousWindowZOrder: workspace.workspaceWindowController.restorePreviousWindowZOrder,
-      convertVideoWindowToJpeg: workspace.workspaceVideoConversionController.convertVideoWindowToJpeg,
-      closeWindow: workspace.workspaceWindowHistoryController.removeWindow,
-    );
-  }
+AppMenuWindowActions _buildAppMenuWindowActions({required AppWorkspaceServices workspace}) {
+  return AppMenuWindowActions(
+    restoreRecentlyClosedWindow: workspace.workspaceWindowHistoryController.restoreRecentlyClosedWindow,
+  );
+}
 
-  AppMenuWorkspaceActions _buildWorkspaceActions() {
-    return AppMenuWorkspaceActions(
-      toggleExpose: foundation.appUiController.toggleExpose,
-      toggleWorkspaceOverview: workspace.environmentController.navigation.toggleOverview,
-      createWorkspace: workspace.environmentController.management.create,
-      switchToPreviousWorkspace: () => workspace.environmentController.navigation.switchWorkspace(-1),
-      switchToNextWorkspace: () => workspace.environmentController.navigation.switchWorkspace(1),
-      fitWorkspaceViewportToContent: workspace.workspaceWindowController.fitWorkspaceViewportToContent,
-      confirmCollateWorkspaceWindows: workspace.workspaceCollateController.confirmCollateWorkspaceWindows,
-      pauseAllVideos: workspace.workspaceWindowController.pauseAllVideos,
-      showNoWorkspaceToRenameMessage: () => feedback.showMessage('There is no workspace to rename.'),
-      renameWorkspace: workspace.environmentController.management.renameWorkspace,
-      showNoWorkspaceToDeleteMessage: () => feedback.showMessage('There is no workspace to delete.'),
-      confirmDeleteWorkspace: workspace.environmentController.management.confirmDeleteWorkspace,
-    );
-  }
-
-  AppMenuWindowActions _buildWindowActions() {
-    return AppMenuWindowActions(
-      restoreRecentlyClosedWindow: workspace.workspaceWindowHistoryController.restoreRecentlyClosedWindow,
-    );
-  }
-
-  AppMenuBindings build() {
-    return AppMenuBindings(
-      state: _buildState(),
-      app: _buildAppActions(),
-      file: _buildFileActions(),
-      asset: _buildAssetActions(),
-      workspace: _buildWorkspaceActions(),
-      window: _buildWindowActions(),
-    );
-  }
+AppMenuBindings buildAppMenuBindings({
+  required AppRuntimeState state,
+  required AppFoundation foundation,
+  required AppDocument documents,
+  required AppWorkspaceServices workspace,
+  required AppFeedbackController feedback,
+  required AppSettingsController settings,
+  required Future<void> Function() openAssets,
+}) {
+  return AppMenuBindings(
+    state: _buildAppMenuState(state: state, workspace: workspace),
+    app: _buildAppMenuAppActions(feedback: feedback, settings: settings),
+    file: _buildAppMenuFileActions(documents: documents, openAssets: openAssets),
+    asset: _buildAppMenuAssetActions(foundation: foundation, workspace: workspace),
+    workspace: _buildAppMenuWorkspaceActions(foundation: foundation, workspace: workspace, feedback: feedback),
+    window: _buildAppMenuWindowActions(workspace: workspace),
+  );
 }
