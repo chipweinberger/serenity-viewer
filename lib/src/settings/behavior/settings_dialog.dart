@@ -5,7 +5,7 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
-import 'package:serenity_viewer/src/media/video/settings_and_video_models.dart';
+import 'package:serenity_viewer/src/settings/behavior/settings_result.dart';
 
 class SettingsDialog extends StatefulWidget {
   const SettingsDialog({

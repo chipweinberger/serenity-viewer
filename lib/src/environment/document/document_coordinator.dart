@@ -10,7 +10,7 @@ import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/environment/document/document_codec.dart';
 import 'package:serenity_viewer/src/environment/document/document_missing_asset_resolver.dart';
-import 'package:serenity_viewer/src/media/video/settings_and_video_models.dart';
+import 'package:serenity_viewer/src/environment/document/startup_environment_choice.dart';
 
 part 'document_loader.dart';
 part 'document_saver.dart';

@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/media/video/media_bridge.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/media/video/settings_and_video_models.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
+import 'package:serenity_viewer/src/media/video/video_models.dart';
 import 'package:serenity_viewer/src/workspace/window/content/asset_zoom_utils.dart';
 
 class VideoConversionCoordinator {

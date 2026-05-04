@@ -10,8 +10,8 @@ import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
-import 'package:serenity_viewer/src/media/video/settings_and_video_models.dart';
 import 'package:serenity_viewer/src/environment/asset.dart';
+import 'package:serenity_viewer/src/media/video/video_models.dart';
 
 @immutable
 class SharedVideoState {

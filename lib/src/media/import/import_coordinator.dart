@@ -9,8 +9,8 @@ import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/media/import/import_window_layout.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
-import 'package:serenity_viewer/src/media/video/settings_and_video_models.dart';
 import 'package:serenity_viewer/src/environment/asset.dart';
+import 'package:serenity_viewer/src/media/video/video_models.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 
 typedef SerenitySingleFrameConversionConfirmer = Future<bool> Function(String filename);
