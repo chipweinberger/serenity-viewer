@@ -4,10 +4,8 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/foundation/keyboard_modifiers.dart';
 import 'package:serenity_viewer/src/window/content/workspace_window_content.dart';
 import 'package:serenity_viewer/src/window/frame/window_chrome.dart';
 import 'package:serenity_viewer/src/window/frame/window_overlay.dart';
@@ -75,8 +73,6 @@ class _WindowState extends State<WorkspaceWindow> with SingleTickerProviderState
   bool _isHovered = false;
   bool _isResizing = false;
   bool _isInteractingWithVideoControls = false;
-  bool _isCommandPressed = false;
-  bool _isOptionPressed = false;
   bool _isTrackpadWindowGestureActive = false;
   bool _isDraggingWindow = false;
   bool _claimedOptionGestureTarget = false;
@@ -98,10 +94,6 @@ class _WindowState extends State<WorkspaceWindow> with SingleTickerProviderState
       ),
       TweenSequenceItem(tween: Tween<double>(begin: 1, end: 0).chain(CurveTween(curve: Curves.easeInCubic)), weight: 1),
     ]).animate(_flashController);
-    HardwareKeyboard.instance.addHandler(_handleHardwareKey);
-    final pressedKeys = HardwareKeyboard.instance.logicalKeysPressed;
-    _isCommandPressed = isCommandPressed(pressedKeys);
-    _isOptionPressed = isOptionPressed(pressedKeys);
     if (widget.viewModel.flashNonce != 0) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) {
@@ -118,6 +110,7 @@ class _WindowState extends State<WorkspaceWindow> with SingleTickerProviderState
     if (widget.viewModel.flashNonce != 0 && widget.viewModel.flashNonce != oldWidget.viewModel.flashNonce) {
       unawaited(_flashController.forward(from: 0));
     }
+    _syncModifierState(oldWidget);
   }
 
   @override
@@ -125,7 +118,6 @@ class _WindowState extends State<WorkspaceWindow> with SingleTickerProviderState
     if (_isResizing) {
       _anyWindowResizing = false;
     }
-    HardwareKeyboard.instance.removeHandler(_handleHardwareKey);
     _syncNativeCursor(null);
     _flashController.dispose();
     super.dispose();

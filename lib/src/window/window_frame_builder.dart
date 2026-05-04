@@ -4,14 +4,14 @@ part of 'workspace_window.dart';
 
 extension on _WindowState {
   bool get _isOptionGestureTargetActive {
-    return _isOptionPressed &&
-        !_isCommandPressed &&
+    return widget.viewModel.isOptionPressed &&
+        !widget.viewModel.isCommandPressed &&
         (widget.viewModel.isOptionGestureTarget || _claimedOptionGestureTarget);
   }
 
   bool get _shouldShowCommandOverlay {
     return widget.viewModel.isPinnedHover ||
-        (_isCommandPressed && (_isHovered || _isResizing || widget.viewModel.isSelected));
+        (widget.viewModel.isCommandPressed && (_isHovered || _isResizing || widget.viewModel.isSelected));
   }
 
   bool get _showExpandedVideoControls => _shouldShowCommandOverlay;

@@ -11,6 +11,8 @@ class WindowInteractionState extends ChangeNotifier {
   String? _pinnedHoverWindowId;
   String? _flashedWindowId;
   int _windowFlashNonce = 0;
+  bool _isCommandPressed = false;
+  bool _isOptionPressed = false;
   Timer? windowFlashTimer;
   bool _isDisposed = false;
 
@@ -22,6 +24,8 @@ class WindowInteractionState extends ChangeNotifier {
   String? get pinnedHoverWindowId => _pinnedHoverWindowId;
   String? get flashedWindowId => _flashedWindowId;
   int get windowFlashNonce => _windowFlashNonce;
+  bool get isCommandPressed => _isCommandPressed;
+  bool get isOptionPressed => _isOptionPressed;
 
   bool toggleSelectedExposeWindow(String windowId) {
     final changed = _selectedExposeWindowIds.contains(windowId)
@@ -124,6 +128,17 @@ class WindowInteractionState extends ChangeNotifier {
     }
     _flashedWindowId = null;
     _notifyIfNeeded(true);
+  }
+
+  bool setModifierKeys({required bool isCommandPressed, required bool isOptionPressed}) {
+    if (_isCommandPressed == isCommandPressed && _isOptionPressed == isOptionPressed) {
+      return false;
+    }
+
+    _isCommandPressed = isCommandPressed;
+    _isOptionPressed = isOptionPressed;
+    _notifyIfNeeded(true);
+    return true;
   }
 
   void _notifyIfNeeded(bool changed) {

@@ -3,33 +3,39 @@
 part of 'workspace_window.dart';
 
 extension on _WindowState {
-  bool _handleHardwareKey(KeyEvent event) {
-    final pressedKeys = HardwareKeyboard.instance.logicalKeysPressed;
-    final nextIsCommandPressed = isCommandPressed(pressedKeys);
-    final nextIsOptionPressed = isOptionPressed(pressedKeys);
-    if ((nextIsCommandPressed == _isCommandPressed && nextIsOptionPressed == _isOptionPressed) || !mounted) {
-      return false;
+  void _syncModifierState(WorkspaceWindow oldWidget) {
+    final wasOptionPressed = oldWidget.viewModel.isOptionPressed;
+    final isOptionPressed = widget.viewModel.isOptionPressed;
+    final isCommandPressed = widget.viewModel.isCommandPressed;
+
+    if (isCommandPressed && !oldWidget.viewModel.isCommandPressed && widget.viewModel.isPinnedHover) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          widget.onPinnedHoverDismissed();
+        }
+      });
     }
-    final wasOptionPressed = _isOptionPressed;
-    setState(() {
-      _isCommandPressed = nextIsCommandPressed;
-      _isOptionPressed = nextIsOptionPressed;
-      if (!nextIsOptionPressed) {
-        _claimedOptionGestureTarget = false;
-      }
-    });
-    if (nextIsCommandPressed && widget.viewModel.isPinnedHover) {
-      widget.onPinnedHoverDismissed();
-    }
-    if (!wasOptionPressed && nextIsOptionPressed && _isHovered) {
+
+    if (!wasOptionPressed && isOptionPressed && _isHovered) {
       _claimedOptionGestureTarget = true;
-      widget.onOptionGestureWindowRequested();
-    } else if (wasOptionPressed && !nextIsOptionPressed) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          widget.onOptionGestureWindowRequested();
+        }
+      });
+      return;
+    }
+
+    if (wasOptionPressed && !isOptionPressed) {
       _isTrackpadWindowGestureActive = false;
       _lastTrackpadScale = 1.0;
-      widget.onOptionGestureReleased();
+      _claimedOptionGestureTarget = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          widget.onOptionGestureReleased();
+        }
+      });
     }
-    return false;
   }
 
   WindowResizeHandle? _resizeHandleForPosition(Offset localPosition) {

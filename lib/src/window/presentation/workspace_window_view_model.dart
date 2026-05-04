@@ -16,6 +16,8 @@ class WorkspaceWindowViewModel {
     required this.workspaceZoom,
     required this.flashNonce,
     required this.isVideoPaused,
+    required this.isCommandPressed,
+    required this.isOptionPressed,
     required this.isOptionGestureTarget,
   });
 
@@ -29,5 +31,7 @@ class WorkspaceWindowViewModel {
   final double workspaceZoom;
   final int flashNonce;
   final bool isVideoPaused;
+  final bool isCommandPressed;
+  final bool isOptionPressed;
   final bool isOptionGestureTarget;
 }

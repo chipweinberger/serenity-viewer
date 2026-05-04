@@ -2,11 +2,9 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/foundation/keyboard_modifiers.dart';
 import 'package:serenity_viewer/src/app/app_theme.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/window/content/asset_content.dart';
@@ -21,6 +19,7 @@ class ExposeWindowCard extends StatefulWidget {
     required this.sharedVideoInitialization,
     required this.isVideoPaused,
     required this.isSelected,
+    required this.isCommandPressed,
     required this.editMode,
     required this.onOpen,
     required this.onToggleSelected,
@@ -34,6 +33,7 @@ class ExposeWindowCard extends StatefulWidget {
   final Future<void>? sharedVideoInitialization;
   final bool isVideoPaused;
   final bool isSelected;
+  final bool isCommandPressed;
   final bool editMode;
   final VoidCallback onOpen;
   final VoidCallback onToggleSelected;
@@ -48,27 +48,6 @@ class _ExposeWindowCardState extends State<ExposeWindowCard> {
   static const double _maxCardCornerRadius = 20.0;
 
   bool _isHovered = false;
-  bool _isCommandPressed = false;
-
-  bool _handleHardwareKey(KeyEvent event) {
-    final pressedKeys = HardwareKeyboard.instance.logicalKeysPressed;
-    final nextIsCommandPressed = isCommandPressed(pressedKeys);
-    if (nextIsCommandPressed == _isCommandPressed || !mounted) {
-      return false;
-    }
-    setState(() {
-      _isCommandPressed = nextIsCommandPressed;
-    });
-    return false;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    HardwareKeyboard.instance.addHandler(_handleHardwareKey);
-    final pressedKeys = HardwareKeyboard.instance.logicalKeysPressed;
-    _isCommandPressed = isCommandPressed(pressedKeys);
-  }
 
   Window _windowForPreview(Size previewSize) {
     final scale = assetPreviewScaleForSize(widget.window, previewSize);
@@ -105,7 +84,7 @@ class _ExposeWindowCardState extends State<ExposeWindowCard> {
   }
 
   Widget _buildHoverOverlay(BuildContext context) {
-    if (!_isCommandPressed || (!_isHovered && !widget.isSelected)) {
+    if (!widget.isCommandPressed || (!_isHovered && !widget.isSelected)) {
       return const SizedBox.shrink();
     }
 
@@ -198,7 +177,7 @@ class _ExposeWindowCardState extends State<ExposeWindowCard> {
   }
 
   Widget _buildVideoBadge() {
-    final shouldShowHoverOverlay = _isCommandPressed && (_isHovered || widget.isSelected);
+    final shouldShowHoverOverlay = widget.isCommandPressed && (_isHovered || widget.isSelected);
     if (widget.window.asset.type != AssetType.video || shouldShowHoverOverlay) {
       return const SizedBox.shrink();
     }
@@ -247,12 +226,6 @@ class _ExposeWindowCardState extends State<ExposeWindowCard> {
         },
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    HardwareKeyboard.instance.removeHandler(_handleHardwareKey);
-    super.dispose();
   }
 }
 

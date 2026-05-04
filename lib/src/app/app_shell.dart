@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import 'package:serenity_viewer/src/app/header/app_header.dart';
@@ -9,7 +10,9 @@ import 'package:serenity_viewer/src/app/views/library_view.dart';
 import 'package:serenity_viewer/src/app/views/workspace_view.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
+import 'package:serenity_viewer/src/foundation/keyboard_modifiers.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
+import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
 
 class AppShell extends StatelessWidget {
   const AppShell({super.key});
@@ -51,17 +54,31 @@ class AppShell extends StatelessWidget {
     return _buildMainView(screen);
   }
 
+  KeyEventResult _handleKeyEvent(
+    KeyEvent event,
+    WorkspaceController workspaceController,
+    WindowInteractionState windowInteractionState,
+  ) {
+    final pressedKeys = HardwareKeyboard.instance.logicalKeysPressed;
+    windowInteractionState.setModifierKeys(
+      isCommandPressed: isCommandPressed(pressedKeys),
+      isOptionPressed: isOptionPressed(pressedKeys),
+    );
+    return workspaceController.shortcuts.onKeyEvent(event);
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = _watchState(context);
     final uiHandles = context.read<AppUiHandles>();
     final workspaceController = context.read<WorkspaceController>();
+    final windowInteractionState = context.read<WindowInteractionState>();
 
     return AppMenu(
       child: Focus(
         focusNode: uiHandles.focusNode,
         autofocus: true,
-        onKeyEvent: (_, event) => workspaceController.shortcuts.onKeyEvent(event),
+        onKeyEvent: (_, event) => _handleKeyEvent(event, workspaceController, windowInteractionState),
         child: Scaffold(
           body: SafeArea(
             top: false,

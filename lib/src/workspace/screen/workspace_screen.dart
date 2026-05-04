@@ -202,6 +202,8 @@ class WorkspaceScreen extends StatelessWidget {
           ? windowInteractionState.windowFlashNonce
           : 0,
       isVideoPaused: workspaceController.playback.isVideoWindowPaused(window.asset.id),
+      isCommandPressed: windowInteractionState.isCommandPressed,
+      isOptionPressed: windowInteractionState.isOptionPressed,
       isOptionGestureTarget: windowInteractionState.activeGestureWindowId == window.asset.id,
     );
 
@@ -294,6 +296,7 @@ class WorkspaceScreen extends StatelessWidget {
         sharedVideoInitialization: sharedVideoState?.initialization,
         isVideoPaused: workspaceController.playback.isVideoWindowPaused(window.asset.id),
         isSelected: windowInteractionState.selectedExposeWindowIds.contains(window.asset.id),
+        isCommandPressed: windowInteractionState.isCommandPressed,
         editMode: appUiState.editMode,
         onOpen: () {
           workspaceController.window.focusWindow(window.asset.id);
