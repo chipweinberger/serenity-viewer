@@ -20,12 +20,12 @@ class AppShellChromeOverlayBuilder {
       actions: WorkspaceChromeOverlayActions(
         onShowWorkspaceOverview: state.workspaceShellController.navigation.showOverview,
         onSetDraggingTabWorkspaceId: state.chromeController.setDraggingTabWorkspaceId,
-        onReorderOpenWorkspace: state.workspaceShellController.management.reorderOpenWorkspace,
+        onReorderOpenWorkspace: state.workspaceShellController.management.mutations.reorderOpen,
         onMoveSelectedExposeWindowsToWorkspace:
             state.workspaceShellController.management.moveSelectedExposeWindowsToWorkspace,
         onSetActiveWorkspace: state.workspaceShellController.navigation.setActiveWorkspace,
         onConfirmCloseTab: state.workspaceShellController.management.confirmCloseTab,
-        onCreateWorkspace: state.workspaceShellController.management.createWorkspace,
+        onCreateWorkspace: state.workspaceShellController.management.mutations.create,
       ),
     );
   }

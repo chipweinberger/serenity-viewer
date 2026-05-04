@@ -132,7 +132,7 @@ class _AppShellState extends State<AppShell> {
       closeWindow: _controllers.windowHistory.removeWindow,
       toggleExpose: _controllers.environment.toggleExpose,
       toggleWorkspaceOverview: _workspaceRuntime.workspaceShellController.navigation.toggleOverview,
-      createWorkspace: _workspaceRuntime.workspaceShellController.management.createWorkspace,
+      createWorkspace: _workspaceRuntime.workspaceShellController.management.mutations.create,
       switchToPreviousWorkspace: () => _workspaceRuntime.workspaceShellController.navigation.switchWorkspace(-1),
       switchToNextWorkspace: () => _workspaceRuntime.workspaceShellController.navigation.switchWorkspace(1),
       fitWorkspaceViewportToContent: _controllers.window.fitWorkspaceViewportToContent,

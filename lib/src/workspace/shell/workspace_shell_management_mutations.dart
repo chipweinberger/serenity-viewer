@@ -10,7 +10,7 @@ class WorkspaceShellManagementMutations {
 
   final WorkspaceShellController controller;
 
-  int nextWorkspaceOrdinal() {
+  int _nextWorkspaceOrdinal() {
     var maxOrdinal = 0;
     final idPattern = RegExp(r'^ws-(\d+)$');
     final namePattern = RegExp(r'^Workspace (\d+)$');
@@ -30,7 +30,7 @@ class WorkspaceShellManagementMutations {
     return maxOrdinal + 1;
   }
 
-  void toggleWorkspaceOpen(String workspaceId) {
+  void toggleOpen(String workspaceId) {
     final environment = controller.persistenceState.environment;
     if (environment == null) {
       return;
@@ -39,11 +39,11 @@ class WorkspaceShellManagementMutations {
     controller.workspaceController.environment.tabs.toggleOpen(environment, workspaceId, controller.updateEnvironment);
   }
 
-  void renameWorkspace(Workspace workspace, String nextName) {
+  void rename(Workspace workspace, String nextName) {
     controller.replaceWorkspace(workspace.copyWith(name: nextName));
   }
 
-  void deleteWorkspace(String workspaceId) {
+  void delete(String workspaceId) {
     final environment = controller.persistenceState.environment;
     if (environment == null) {
       return;
@@ -95,7 +95,7 @@ class WorkspaceShellManagementMutations {
     }
   }
 
-  void moveSelectedExposeWindowsToWorkspace({
+  void moveSelectedToWorkspace({
     required Environment environment,
     required Workspace sourceWorkspace,
     required Workspace destinationWorkspace,
@@ -111,7 +111,7 @@ class WorkspaceShellManagementMutations {
     );
   }
 
-  void reorderOpenWorkspace(String sourceWorkspaceId, String targetWorkspaceId) {
+  void reorderOpen(String sourceWorkspaceId, String targetWorkspaceId) {
     controller.workspaceController.environment.tabs.reorderOpen(
       controller.persistenceState.environment,
       controller.workspaces(),
@@ -121,13 +121,13 @@ class WorkspaceShellManagementMutations {
     );
   }
 
-  void createWorkspace() {
+  void create() {
     final environment = controller.persistenceState.environment;
     if (environment == null) {
       return;
     }
 
-    final nextIndex = nextWorkspaceOrdinal();
+    final nextIndex = _nextWorkspaceOrdinal();
     final now = DateTime.now();
     final workspace = Workspace(
       id: 'ws-$nextIndex',

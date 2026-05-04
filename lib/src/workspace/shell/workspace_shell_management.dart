@@ -4,16 +4,12 @@ import 'package:serenity_viewer/src/workspace/shell/workspace_shell_management_m
 
 class WorkspaceShellManagementApi {
   WorkspaceShellManagementApi(this._controller)
-    : _dialogs = WorkspaceShellManagementDialogs(context: _controller.context, mounted: _controller.mounted),
-      _mutations = WorkspaceShellManagementMutations(_controller);
+    : dialogs = WorkspaceShellManagementDialogs(context: _controller.context, mounted: _controller.mounted),
+      mutations = WorkspaceShellManagementMutations(_controller);
 
   final WorkspaceShellController _controller;
-  final WorkspaceShellManagementDialogs _dialogs;
-  final WorkspaceShellManagementMutations _mutations;
-
-  void toggleWorkspaceOpen(String workspaceId) {
-    _mutations.toggleWorkspaceOpen(workspaceId);
-  }
+  final WorkspaceShellManagementDialogs dialogs;
+  final WorkspaceShellManagementMutations mutations;
 
   Future<void> renameWorkspace(String workspaceId) async {
     final workspaceMatches = _controller.workspaces().where((entry) => entry.id == workspaceId);
@@ -22,12 +18,12 @@ class WorkspaceShellManagementApi {
     }
 
     final workspace = workspaceMatches.first;
-    final trimmedName = await _dialogs.promptWorkspaceRename(workspace);
+    final trimmedName = await dialogs.promptWorkspaceRename(workspace);
     if (trimmedName == null || trimmedName.isEmpty || trimmedName == workspace.name) {
       return;
     }
 
-    _mutations.renameWorkspace(workspace, trimmedName);
+    mutations.rename(workspace, trimmedName);
   }
 
   Future<void> confirmDeleteWorkspace(String workspaceId) async {
@@ -42,14 +38,10 @@ class WorkspaceShellManagementApi {
     }
 
     final workspace = workspaceMatches.first;
-    final shouldDelete = await _dialogs.confirmWorkspaceDeletion(workspace);
+    final shouldDelete = await dialogs.confirmWorkspaceDeletion(workspace);
     if (shouldDelete) {
-      deleteWorkspace(workspaceId);
+      mutations.delete(workspaceId);
     }
-  }
-
-  void deleteWorkspace(String workspaceId) {
-    _mutations.deleteWorkspace(workspaceId);
   }
 
   Future<void> moveSelectedExposeWindowsToWorkspace(String destinationWorkspaceId) async {
@@ -88,12 +80,12 @@ class WorkspaceShellManagementApi {
       return;
     }
 
-    final shouldMove = await _dialogs.confirmSelectedWindowMove(destinationWorkspace, selectedWindowCount);
+    final shouldMove = await dialogs.confirmSelectedWindowMove(destinationWorkspace, selectedWindowCount);
     if (!shouldMove) {
       return;
     }
 
-    _mutations.moveSelectedExposeWindowsToWorkspace(
+    mutations.moveSelectedToWorkspace(
       environment: environment,
       sourceWorkspace: sourceWorkspace,
       destinationWorkspace: destinationWorkspace,
@@ -107,17 +99,9 @@ class WorkspaceShellManagementApi {
     }
 
     final workspace = workspaceMatches.first;
-    final shouldClose = await _dialogs.confirmTabClose(workspace);
+    final shouldClose = await dialogs.confirmTabClose(workspace);
     if (shouldClose) {
-      toggleWorkspaceOpen(workspaceId);
+      mutations.toggleOpen(workspaceId);
     }
-  }
-
-  void reorderOpenWorkspace(String sourceWorkspaceId, String targetWorkspaceId) {
-    _mutations.reorderOpenWorkspace(sourceWorkspaceId, targetWorkspaceId);
-  }
-
-  void createWorkspace() {
-    _mutations.createWorkspace();
   }
 }
