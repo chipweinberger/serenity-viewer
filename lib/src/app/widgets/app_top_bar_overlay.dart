@@ -7,8 +7,8 @@ import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/settings/appearance/glass_chip.dart';
 
 @immutable
-class WorkspaceTopBarOverlayActions {
-  const WorkspaceTopBarOverlayActions({
+class AppTopBarOverlayActions {
+  const AppTopBarOverlayActions({
     required this.onShowWorkspaceOverview,
     required this.onSetDraggingTabWorkspaceId,
     required this.onReorderOpenWorkspace,
@@ -27,8 +27,8 @@ class WorkspaceTopBarOverlayActions {
   final VoidCallback onCreateWorkspace;
 }
 
-class WorkspaceTopBarOverlay extends StatelessWidget {
-  const WorkspaceTopBarOverlay({
+class AppTopBarOverlay extends StatelessWidget {
+  const AppTopBarOverlay({
     super.key,
     required this.windowTitle,
     required this.openWorkspaces,
@@ -47,7 +47,7 @@ class WorkspaceTopBarOverlay extends StatelessWidget {
   final bool shouldMoveSelectedWindows;
   final String? draggingTabWorkspaceId;
   final ScrollController tabScrollController;
-  final WorkspaceTopBarOverlayActions actions;
+  final AppTopBarOverlayActions actions;
 
   Widget _buildWindowTitleLabel(BuildContext context) {
     return IgnorePointer(
