@@ -124,7 +124,7 @@ class _AppShellState extends State<AppShell> {
       closeWindow: _controller.windowHistory.removeWindow,
       toggleExpose: _controller.chrome.toggleExpose,
       toggleWorkspaceOverview: _workspaceRuntime.workspaceShellController.navigation.toggleOverview,
-      createWorkspace: _workspaceRuntime.workspaceShellController.management.mutations.create,
+      createWorkspace: _workspaceRuntime.workspaceShellController.management.create,
       switchToPreviousWorkspace: () => _workspaceRuntime.workspaceShellController.navigation.switchWorkspace(-1),
       switchToNextWorkspace: () => _workspaceRuntime.workspaceShellController.navigation.switchWorkspace(1),
       fitWorkspaceViewportToContent: _controller.window.fitWorkspaceViewportToContent,

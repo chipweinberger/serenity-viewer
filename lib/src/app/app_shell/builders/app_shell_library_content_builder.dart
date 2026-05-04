@@ -21,7 +21,7 @@ class AppShellLibraryContentBuilder {
       actions: LibraryScreenActions(
         onSearchChanged: (_) => actions.commitStateChange(() {}),
         onWorkspaceSortChanged: state.chromeController.setWorkspaceSort,
-        onToggleWorkspaceOpen: state.workspaceShellController.management.mutations.toggleOpen,
+        onToggleWorkspaceOpen: state.workspaceShellController.management.toggleOpen,
         onRenameWorkspace: state.workspaceShellController.management.renameWorkspace,
         onDeleteWorkspace: state.workspaceShellController.management.confirmDeleteWorkspace,
         onSetActiveWorkspace: state.workspaceShellController.navigation.setActiveWorkspace,

@@ -5,11 +5,23 @@ import 'package:serenity_viewer/src/workspace/shell/workspace_shell_management_m
 class WorkspaceShellManagementApi {
   WorkspaceShellManagementApi(this._controller)
     : dialogs = WorkspaceShellManagementDialogs(context: _controller.context, mounted: _controller.mounted),
-      mutations = WorkspaceShellManagementMutations(_controller);
+      _mutations = WorkspaceShellManagementMutations(_controller);
 
   final WorkspaceShellController _controller;
   final WorkspaceShellManagementDialogs dialogs;
-  final WorkspaceShellManagementMutations mutations;
+  final WorkspaceShellManagementMutations _mutations;
+
+  void create() {
+    _mutations.create();
+  }
+
+  void toggleOpen(String workspaceId) {
+    _mutations.toggleOpen(workspaceId);
+  }
+
+  void reorderOpen(String sourceWorkspaceId, String targetWorkspaceId) {
+    _mutations.reorderOpen(sourceWorkspaceId, targetWorkspaceId);
+  }
 
   Future<void> renameWorkspace(String workspaceId) async {
     final workspaceMatches = _controller.workspaces().where((entry) => entry.id == workspaceId);
@@ -23,7 +35,7 @@ class WorkspaceShellManagementApi {
       return;
     }
 
-    mutations.rename(workspace, trimmedName);
+    _mutations.rename(workspace, trimmedName);
   }
 
   Future<void> confirmDeleteWorkspace(String workspaceId) async {
@@ -40,7 +52,7 @@ class WorkspaceShellManagementApi {
     final workspace = workspaceMatches.first;
     final shouldDelete = await dialogs.confirmWorkspaceDeletion(workspace);
     if (shouldDelete) {
-      mutations.delete(workspaceId);
+      _mutations.delete(workspaceId);
     }
   }
 
@@ -85,7 +97,7 @@ class WorkspaceShellManagementApi {
       return;
     }
 
-    mutations.moveSelectedToWorkspace(
+    _mutations.moveSelectedToWorkspace(
       environment: environment,
       sourceWorkspace: sourceWorkspace,
       destinationWorkspace: destinationWorkspace,
@@ -101,7 +113,7 @@ class WorkspaceShellManagementApi {
     final workspace = workspaceMatches.first;
     final shouldClose = await dialogs.confirmTabClose(workspace);
     if (shouldClose) {
-      mutations.toggleOpen(workspaceId);
+      _mutations.toggleOpen(workspaceId);
     }
   }
 }
