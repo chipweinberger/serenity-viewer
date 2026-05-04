@@ -85,7 +85,7 @@ class AppMainView extends StatelessWidget {
     required WorkspaceWindowController workspaceWindowController,
     required WorkspaceViewportSessionController workspaceViewportSessionController,
     required WorkspaceCollateController workspaceCollateController,
-    required bool Function() mounted,
+    required BuildContext context,
   }) {
     return AppMainViewActions(
       app: AppActions(
@@ -94,13 +94,13 @@ class AppMainView extends StatelessWidget {
       ),
       window: WindowActions(
         interaction: WindowInteractionActions(
-          handleOptionGestureHover: workspaceWindowController.handleOptionGestureHover,
-          focusWindow: workspaceWindowController.focusWindow,
-          setPinnedHoverWindow: workspaceWindowController.setPinnedHoverWindow,
-          clearPinnedHoverWindow: workspaceWindowController.clearPinnedHoverWindow,
-          flashWindow: (windowId) => workspaceWindowController.flashWindow(windowId, mounted: mounted()),
-          setActiveGestureWindow: workspaceWindowController.setActiveGestureWindow,
-        ),
+        handleOptionGestureHover: workspaceWindowController.handleOptionGestureHover,
+        focusWindow: workspaceWindowController.focusWindow,
+        setPinnedHoverWindow: workspaceWindowController.setPinnedHoverWindow,
+        clearPinnedHoverWindow: workspaceWindowController.clearPinnedHoverWindow,
+        flashWindow: (windowId) => workspaceWindowController.flashWindow(windowId, mounted: context.mounted),
+        setActiveGestureWindow: workspaceWindowController.setActiveGestureWindow,
+      ),
         layout: WindowLayoutActions(
           restorePreviousWindowZOrder: workspaceWindowController.restorePreviousWindowZOrder,
           moveWindow: workspaceWindowController.moveWindow,
@@ -187,7 +187,6 @@ class AppMainView extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.read<AppStateStore>();
     final uiHandles = context.read<AppUiHandles>();
-    final mounted = context.read<ValueGetter<bool>>();
     final appUiController = context.read<AppUiController>();
     final sharedVideoControllerPool = context.read<SharedVideoControllerPool>();
     final platformBridge = context.read<PlatformBridge>();
@@ -224,7 +223,7 @@ class AppMainView extends StatelessWidget {
       workspaceWindowController: workspaceWindowController,
       workspaceViewportSessionController: workspaceViewportSessionController,
       workspaceCollateController: workspaceCollateController,
-      mounted: mounted,
+      context: context,
     );
     final workspaceLoadPlan = buildWorkspaceLoadPlan(
       environment: model.environment,

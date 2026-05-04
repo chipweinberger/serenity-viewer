@@ -12,9 +12,6 @@ import 'package:serenity_viewer/src/app/seed_environment.dart';
 import 'package:serenity_viewer/src/app/menu/app_menu.dart';
 import 'package:serenity_viewer/src/app/views/app_main_view.dart';
 import 'package:serenity_viewer/src/environment/document/document_persistence_controller.dart';
-import 'package:serenity_viewer/src/environment/environment.dart';
-import 'package:serenity_viewer/src/environment/window.dart';
-import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/settings/behavior/app_settings_controller.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/foundation/serenity_identity.dart';
@@ -40,45 +37,11 @@ class _AppRootState extends State<AppRoot> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), behavior: SnackBarBehavior.floating));
   }
 
-  Window? _focusedWindowOrNull() {
-    return _runtime.workspaceWindowController.focusedWindowOrNull();
-  }
-
-  void _replaceWorkspace(Workspace workspace, {bool queueThumbnail = true}) {
-    _runtime.environmentStore.replaceWorkspace(workspace, queueThumbnail: queueThumbnail);
-  }
-
-  Future<void> _saveEnvironment() {
-    return _documentPersistence.saveEnvironment();
-  }
-
-  void _setWorkspaceViewport({required String workspaceId, Offset? center, double? zoom, bool queueThumbnail = true}) {
-    _runtime.workspaceViewportSessionController.setWorkspaceViewport(
-      workspaceId: workspaceId,
-      center: center,
-      zoom: zoom,
-      queueThumbnail: queueThumbnail,
-    );
-  }
-
-  void _toggleExpose() {
-    _runtime.appUiController.toggleExpose();
-  }
-
-  void _toggleVideoPlayback(String windowId) {
-    _runtime.workspaceWindowController.toggleVideoPlayback(windowId);
-  }
-
-  void _updateEnvironment(Environment environment) {
-    _runtime.environmentStore.updateEnvironment(environment);
-  }
-
   Widget _buildProviders({required Widget child}) {
     return MultiProvider(
       providers: [
         Provider<AppStateStore>.value(value: _stateStore),
         Provider<AppUiHandles>.value(value: _uiHandles),
-        Provider<ValueGetter<bool>>.value(value: () => mounted),
         Provider<AppFeedbackController>.value(value: _feedback),
         Provider<AppSettingsController>.value(value: _settings),
         ChangeNotifierProvider.value(value: _stateStore.appUiState),
@@ -138,16 +101,25 @@ class _AppRootState extends State<AppRoot> {
       mounted: () => mounted,
       showMessage: _showMessage,
       seedEnvironment: buildSeedEnvironment,
-      updateEnvironment: _updateEnvironment,
-      replaceWorkspace: _replaceWorkspace,
-      saveEnvironment: _saveEnvironment,
+      updateEnvironment: (environment) => _runtime.environmentStore.updateEnvironment(environment),
+      replaceWorkspace: (workspace, {queueThumbnail = true}) {
+        _runtime.environmentStore.replaceWorkspace(workspace, queueThumbnail: queueThumbnail);
+      },
+      saveEnvironment: () => _documentPersistence.saveEnvironment(),
       newId: newSerenityId,
       colorFromDigest: assetColorValueFromDigest,
       activeWorkspace: () => deriveActiveWorkspaceOrNull(_stateStore),
       workspaces: () => deriveWorkspaces(_stateStore),
       openWorkspaces: () => deriveOpenWorkspaces(_stateStore),
-      focusedWindowOrNull: _focusedWindowOrNull,
-      setWorkspaceViewport: _setWorkspaceViewport,
+      focusedWindowOrNull: () => _runtime.workspaceWindowController.focusedWindowOrNull(),
+      setWorkspaceViewport: ({required workspaceId, center, zoom, queueThumbnail = true}) {
+        _runtime.workspaceViewportSessionController.setWorkspaceViewport(
+          workspaceId: workspaceId,
+          center: center,
+          zoom: zoom,
+          queueThumbnail: queueThumbnail,
+        );
+      },
       showWorkspaceScreen:
           ({
             WorkspaceLayoutMode workspaceLayoutMode = WorkspaceLayoutMode.freeform,
@@ -170,8 +142,8 @@ class _AppRootState extends State<AppRoot> {
             clearExposeSelection: clearExposeSelection,
             refreshWorkspaceTrackingEnabled: refreshWorkspaceTracking,
           ),
-      toggleExpose: _toggleExpose,
-      toggleVideoPlayback: _toggleVideoPlayback,
+      toggleExpose: () => _runtime.appUiController.toggleExpose(),
+      toggleVideoPlayback: (windowId) => _runtime.workspaceWindowController.toggleVideoPlayback(windowId),
     );
     _feedback = AppFeedbackController(context: () => context);
     _settings = AppSettingsController(
