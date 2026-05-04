@@ -168,7 +168,7 @@ WorkspaceMediaImportController createWorkspaceMediaImportController({
   required WorkspaceVideoConversionPrompts workspaceVideoConversionPrompts,
 }) {
   return WorkspaceMediaImportController(
-    imageExtensions: const ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tif', 'tiff'],
+    imageExtensions: const ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tif', 'tiff', 'heic', 'heif'],
     videoExtensions: const ['mp4', 'mov', 'm4v', 'avi', 'mkv', 'webm'],
     appUiState: dependencies.rootObjects.appUiState,
     environmentStoreState: dependencies.services.environmentStore.environmentStoreState,
