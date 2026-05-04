@@ -3,18 +3,18 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/environment/environment.dart';
+import 'package:serenity_viewer/src/environment/history/environment_window_history_entry.dart';
+import 'package:serenity_viewer/src/environment/history/environment_window_history_state.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
-import 'package:serenity_viewer/src/workspace/history/workspace_window_history_entry.dart';
-import 'package:serenity_viewer/src/workspace/history/workspace_window_history_state.dart';
 
-class WorkspaceWindowHistoryController {
-  WorkspaceWindowHistoryController({
+class EnvironmentWindowHistoryController {
+  EnvironmentWindowHistoryController({
     required this.environment,
     required this.workspaces,
     required this.activeWorkspace,
-    required this.workspaceWindowHistoryState,
+    required this.environmentWindowHistoryState,
     required this.workspaceController,
     required this.updateEnvironment,
     required this.replaceWorkspace,
@@ -27,7 +27,7 @@ class WorkspaceWindowHistoryController {
   final Environment? Function() environment;
   final List<Workspace> Function() workspaces;
   final Workspace? Function() activeWorkspace;
-  final WorkspaceWindowHistoryState workspaceWindowHistoryState;
+  final EnvironmentWindowHistoryState environmentWindowHistoryState;
   final WorkspaceController workspaceController;
   final ValueChanged<Environment> updateEnvironment;
   final void Function(Workspace workspace, {bool queueThumbnail}) replaceWorkspace;
@@ -42,8 +42,8 @@ class WorkspaceWindowHistoryController {
   final SerenityScreen Function() screen;
   final int maxRecentlyClosedWindows;
 
-  List<WorkspaceWindowHistoryEntry> get entries {
-    return workspaceWindowHistoryState.entries;
+  List<EnvironmentWindowHistoryEntry> get entries {
+    return environmentWindowHistoryState.entries;
   }
 
   void closeWindow(String workspaceId, String windowId) {
@@ -60,7 +60,7 @@ class WorkspaceWindowHistoryController {
     }
 
     workspaceController.windows.runtime.rememberClosed(
-      workspaceWindowHistoryState,
+      environmentWindowHistoryState,
       maxRecentlyClosedWindows: maxRecentlyClosedWindows,
       workspace: workspace,
       window: window,
@@ -78,7 +78,7 @@ class WorkspaceWindowHistoryController {
     closeWindow(workspaceId, windowId);
   }
 
-  void restoreRecentlyClosedWindow([WorkspaceWindowHistoryEntry? entry]) {
+  void restoreRecentlyClosedWindow([EnvironmentWindowHistoryEntry? entry]) {
     final targetEntry = entry ?? (entries.isEmpty ? null : entries.first);
     final currentEnvironment = environment();
     if (targetEntry == null || currentEnvironment == null) {
@@ -89,7 +89,7 @@ class WorkspaceWindowHistoryController {
     final workspaceMatches = workspaces().where((workspace) => workspace.id == targetEntry.workspaceId);
     final workspace = workspaceMatches.isEmpty ? null : workspaceMatches.first;
     if (workspace == null) {
-      workspaceWindowHistoryState.removeEntry(targetEntry);
+      environmentWindowHistoryState.removeEntry(targetEntry);
       showMessage('The original workspace for that window is no longer available.');
       return;
     }
@@ -97,7 +97,7 @@ class WorkspaceWindowHistoryController {
     final nextZ = workspace.windows.fold<int>(0, (value, window) => math.max(value, window.zIndex));
     final restoredWindow = targetEntry.window.copyWith(zIndex: nextZ + 1);
 
-    workspaceWindowHistoryState.removeEntry(targetEntry);
+    environmentWindowHistoryState.removeEntry(targetEntry);
 
     updateEnvironment(
       currentEnvironment.copyWith(

@@ -11,7 +11,6 @@ import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/media/video/media_inspector.dart';
 import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
-import 'package:serenity_viewer/src/workspace/history/workspace_window_history_state.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresh_state.dart';
 import 'package:serenity_viewer/src/workspace/tracking/workspace_view_tracking_state.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
@@ -45,7 +44,6 @@ class WorkspaceFactoryScope {
     required this.trackingState,
     required this.viewportState,
     required this.thumbState,
-    required this.workspaceWindowHistoryState,
   });
 
   final PlatformBridge platform;
@@ -76,5 +74,4 @@ class WorkspaceFactoryScope {
   final WorkspaceViewTrackingState trackingState;
   final WorkspaceViewportState viewportState;
   final ThumbnailRefreshState thumbState;
-  final WorkspaceWindowHistoryState workspaceWindowHistoryState;
 }

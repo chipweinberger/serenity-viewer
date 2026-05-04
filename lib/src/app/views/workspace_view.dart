@@ -6,6 +6,7 @@ import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
 import 'package:serenity_viewer/src/app/state/app_derived_state.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
+import 'package:serenity_viewer/src/environment/history/environment_window_history_controller.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/media/import/workspace_media_import_controller.dart';
@@ -15,7 +16,6 @@ import 'package:serenity_viewer/src/workspace/actions/workspace_collate_controll
 import 'package:serenity_viewer/src/workspace/actions/workspace_expose_layout_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_viewport_session_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
-import 'package:serenity_viewer/src/workspace/history/workspace_window_history_controller.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_launcher.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_prompts.dart';
@@ -53,7 +53,7 @@ class WorkspaceView extends StatelessWidget {
     WorkspaceLinksLauncher workspaceLinksLauncher,
     WorkspaceLinksPrompts workspaceLinksPrompts,
     ThumbnailController thumbnailController,
-    WorkspaceWindowHistoryController workspaceWindowHistoryController,
+    EnvironmentWindowHistoryController environmentWindowHistoryController,
     WorkspaceMediaImportController workspaceMediaImportController,
     WorkspaceWindowController workspaceWindowController,
     WorkspaceViewportSessionController workspaceViewportSessionController,
@@ -70,7 +70,7 @@ class WorkspaceView extends StatelessWidget {
       workspaceLinksLauncher: context.read<WorkspaceLinksLauncher>(),
       workspaceLinksPrompts: context.read<WorkspaceLinksPrompts>(),
       thumbnailController: context.read<ThumbnailController>(),
-      workspaceWindowHistoryController: context.read<WorkspaceWindowHistoryController>(),
+      environmentWindowHistoryController: context.read<EnvironmentWindowHistoryController>(),
       workspaceMediaImportController: context.read<WorkspaceMediaImportController>(),
       workspaceWindowController: context.read<WorkspaceWindowController>(),
       workspaceViewportSessionController: context.read<WorkspaceViewportSessionController>(),
@@ -123,7 +123,7 @@ class WorkspaceView extends StatelessWidget {
       windowInteractionState: state.windowInteractionState,
       loadPlan: workspaceLoadPlan,
       sharedVideoLookup: dependencies.sharedVideoControllerPool.sharedVideoForWindow,
-      actions: WorkspaceScreenHostActions(
+      actions: WorkspaceScreenActions(
         setDropTargetActive: state.appUiState.setDropTargetActive,
         importFiles: dependencies.workspaceMediaImportController.importFiles,
         trackViewportSize: state.workspaceViewportState.setViewportSize,
@@ -149,7 +149,7 @@ class WorkspaceView extends StatelessWidget {
         flashWindow: (windowId) =>
             dependencies.workspaceWindowController.flashWindow(windowId, mounted: context.mounted),
         toggleSelectedWindow: dependencies.environmentController.navigation.toggleSelectedWindow,
-        removeWindow: dependencies.workspaceWindowHistoryController.removeWindow,
+        removeWindow: dependencies.environmentWindowHistoryController.removeWindow,
         setActiveGestureWindow: dependencies.workspaceWindowController.setActiveGestureWindow,
         revealAssetInFinder: dependencies.platformBridge.revealAssetInFinder,
       ),

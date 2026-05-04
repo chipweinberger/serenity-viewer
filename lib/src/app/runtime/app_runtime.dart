@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller_types.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
+import 'package:serenity_viewer/src/environment/history/environment_window_history_controller.dart';
+import 'package:serenity_viewer/src/environment/history/environment_window_history_state.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
@@ -28,7 +30,6 @@ import 'package:serenity_viewer/src/workspace/actions/workspace_video_conversion
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_viewport_session_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
-import 'package:serenity_viewer/src/workspace/history/workspace_window_history_controller.dart';
 import 'package:serenity_viewer/src/workspace/input/workspace_shortcut_controller.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_launcher.dart';
@@ -39,7 +40,6 @@ import 'package:serenity_viewer/src/workspace/tracking/workspace_view_tracking_c
 import 'package:serenity_viewer/src/workspace/tracking/workspace_view_tracking_state.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
-import 'package:serenity_viewer/src/workspace/history/workspace_window_history_state.dart';
 
 class AppRuntime {
   AppRuntime({
@@ -59,7 +59,7 @@ class AppRuntime {
     required this.workspaceLinksPrompts,
     required this.workspaceController,
     required this.workspaceWindowController,
-    required this.workspaceWindowHistoryController,
+    required this.environmentWindowHistoryController,
     required this.workspaceViewportSessionController,
     required this.environmentController,
     required this.workspaceExposeLayoutController,
@@ -85,7 +85,7 @@ class AppRuntime {
   final WorkspaceLinksPrompts workspaceLinksPrompts;
   final WorkspaceController workspaceController;
   final WorkspaceWindowController workspaceWindowController;
-  final WorkspaceWindowHistoryController workspaceWindowHistoryController;
+  final EnvironmentWindowHistoryController environmentWindowHistoryController;
   final WorkspaceViewportSessionController workspaceViewportSessionController;
   final EnvironmentController environmentController;
   final WorkspaceExposeLayoutController workspaceExposeLayoutController;
@@ -111,7 +111,7 @@ AppRuntime createAppRuntime({
   required WorkspaceViewTrackingState workspaceViewTrackingState,
   required WorkspaceViewportState workspaceViewportState,
   required ThumbnailRefreshState thumbnailRefreshState,
-  required WorkspaceWindowHistoryState workspaceWindowHistoryState,
+  required EnvironmentWindowHistoryState environmentWindowHistoryState,
   required String Function() windowTitle,
   required BuildContext Function() context,
   required bool Function() mounted,
@@ -140,7 +140,8 @@ AppRuntime createAppRuntime({
     SharedVideoControllerPool sharedVideoControllerPool,
     EnvironmentBookmarkSynchronizer environmentBookmarkSynchronizer,
     EnvironmentStore environmentStore,
-  }) foundation;
+  })
+  foundation;
   late final ({
     ThumbnailController thumbnailController,
     WorkspaceAssetPickerController workspaceAssetPickerController,
@@ -152,13 +153,13 @@ AppRuntime createAppRuntime({
     WorkspaceLinksPrompts workspaceLinksPrompts,
     WorkspaceController workspaceController,
     WorkspaceWindowController workspaceWindowController,
-    WorkspaceWindowHistoryController workspaceWindowHistoryController,
     WorkspaceViewportSessionController workspaceViewportSessionController,
     EnvironmentController environmentController,
     WorkspaceExposeLayoutController workspaceExposeLayoutController,
     WorkspaceShortcutController workspaceShortcutController,
     WorkspaceViewTrackingController workspaceViewTrackingController,
-  }) workspace;
+  })
+  workspace;
 
   foundation = createAppFoundation(
     isRunningInWidgetTest: isRunningInWidgetTest,
@@ -200,7 +201,19 @@ AppRuntime createAppRuntime({
     trackingState: workspaceViewTrackingState,
     viewportState: workspaceViewportState,
     thumbState: thumbnailRefreshState,
-    workspaceWindowHistoryState: workspaceWindowHistoryState,
+  );
+  final environmentWindowHistoryController = EnvironmentWindowHistoryController(
+    environment: () => environmentStoreState.environment,
+    workspaces: workspaces,
+    activeWorkspace: activeWorkspace,
+    environmentWindowHistoryState: environmentWindowHistoryState,
+    workspaceController: workspace.workspaceController,
+    updateEnvironment: foundation.environmentStore.updateEnvironment,
+    replaceWorkspace: foundation.environmentStore.replaceWorkspace,
+    showMessage: showMessage,
+    showWorkspaceScreen: showWorkspaceScreen,
+    screen: () => appUiState.screen,
+    maxRecentlyClosedWindows: 12,
   );
   final documentCoordinator = createAppDocumentCoordinator(
     environmentStoreState: environmentStoreState,
@@ -248,7 +261,7 @@ AppRuntime createAppRuntime({
     workspaceLinksPrompts: workspace.workspaceLinksPrompts,
     workspaceController: workspace.workspaceController,
     workspaceWindowController: workspace.workspaceWindowController,
-    workspaceWindowHistoryController: workspace.workspaceWindowHistoryController,
+    environmentWindowHistoryController: environmentWindowHistoryController,
     workspaceViewportSessionController: workspace.workspaceViewportSessionController,
     environmentController: workspace.environmentController,
     workspaceExposeLayoutController: workspace.workspaceExposeLayoutController,

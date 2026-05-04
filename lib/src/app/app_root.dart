@@ -13,6 +13,8 @@ import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/app/seed_environment.dart';
 import 'package:serenity_viewer/src/app/state/app_derived_state.dart';
+import 'package:serenity_viewer/src/environment/history/environment_window_history_controller.dart';
+import 'package:serenity_viewer/src/environment/history/environment_window_history_state.dart';
 import 'package:serenity_viewer/src/environment/document/document_persistence_controller.dart';
 import 'package:serenity_viewer/src/environment/document/document_coordinator.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
@@ -29,8 +31,6 @@ import 'package:serenity_viewer/src/workspace/actions/workspace_collate_controll
 import 'package:serenity_viewer/src/workspace/actions/workspace_expose_layout_controller.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_video_conversion_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
-import 'package:serenity_viewer/src/workspace/history/workspace_window_history_state.dart';
-import 'package:serenity_viewer/src/workspace/history/workspace_window_history_controller.dart';
 import 'package:serenity_viewer/src/workspace/input/workspace_shortcut_controller.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_launcher.dart';
@@ -56,7 +56,7 @@ class _AppRootState extends State<AppRoot> {
   final _workspaceViewTrackingState = WorkspaceViewTrackingState();
   final _workspaceViewportState = WorkspaceViewportState();
   final _thumbnailRefreshState = ThumbnailRefreshState();
-  final _workspaceWindowHistoryState = WorkspaceWindowHistoryState();
+  final _environmentWindowHistoryState = EnvironmentWindowHistoryState();
   final _uiHandles = AppUiHandles();
   late final AppRuntime _runtime;
   late final DocumentPersistenceController _documentPersistence;
@@ -74,7 +74,7 @@ class _AppRootState extends State<AppRoot> {
       workspaceViewTrackingState: _workspaceViewTrackingState,
       workspaceViewportState: _workspaceViewportState,
       thumbnailRefreshState: _thumbnailRefreshState,
-      workspaceWindowHistoryState: _workspaceWindowHistoryState,
+      environmentWindowHistoryState: _environmentWindowHistoryState,
       windowTitle: () => deriveWindowTitle(_environmentStoreState),
       context: () => context,
       mounted: () => mounted,
@@ -112,15 +112,12 @@ class _AppRootState extends State<AppRoot> {
             refreshWorkspaceTrackingEnabled: refreshWorkspaceTracking,
           ),
       showLibraryScreen:
-          ({
-            bool resetEditMode = true,
-            bool clearExposeSelection = true,
-            bool refreshWorkspaceTracking = true,
-          }) => _runtime.appUiController.showLibraryScreen(
-            resetEditMode: resetEditMode,
-            clearExposeSelection: clearExposeSelection,
-            refreshWorkspaceTrackingEnabled: refreshWorkspaceTracking,
-          ),
+          ({bool resetEditMode = true, bool clearExposeSelection = true, bool refreshWorkspaceTracking = true}) =>
+              _runtime.appUiController.showLibraryScreen(
+                resetEditMode: resetEditMode,
+                clearExposeSelection: clearExposeSelection,
+                refreshWorkspaceTrackingEnabled: refreshWorkspaceTracking,
+              ),
       toggleExpose: () => _runtime.appUiController.toggleExpose(),
       toggleVideoPlayback: (windowId) => _runtime.workspaceWindowController.toggleVideoPlayback(windowId),
     );
@@ -155,7 +152,7 @@ class _AppRootState extends State<AppRoot> {
       ChangeNotifierProvider.value(value: _windowInteractionState),
       ChangeNotifierProvider.value(value: _workspaceViewportState),
       ChangeNotifierProvider.value(value: _thumbnailRefreshState),
-      ChangeNotifierProvider.value(value: _workspaceWindowHistoryState),
+      ChangeNotifierProvider.value(value: _environmentWindowHistoryState),
       ChangeNotifierProvider.value(value: _workspaceViewTrackingState),
       Provider<AppUiController>.value(value: _runtime.appUiController),
       Provider<SharedVideoControllerPool>.value(value: _runtime.sharedVideoControllerPool),
@@ -169,7 +166,7 @@ class _AppRootState extends State<AppRoot> {
       Provider<WorkspaceLinksLauncher>.value(value: _runtime.workspaceLinksLauncher),
       Provider<WorkspaceLinksPrompts>.value(value: _runtime.workspaceLinksPrompts),
       Provider<ThumbnailController>.value(value: _runtime.thumbnailController),
-      Provider<WorkspaceWindowHistoryController>.value(value: _runtime.workspaceWindowHistoryController),
+      Provider<EnvironmentWindowHistoryController>.value(value: _runtime.environmentWindowHistoryController),
       Provider<WorkspaceMediaImportController>.value(value: _runtime.workspaceMediaImportController),
       Provider<WorkspaceWindowController>.value(value: _runtime.workspaceWindowController),
       Provider<WorkspaceViewportSessionController>.value(value: _runtime.workspaceViewportSessionController),
@@ -197,7 +194,7 @@ class _AppRootState extends State<AppRoot> {
     _workspaceViewTrackingState.dispose();
     _workspaceViewportState.dispose();
     _thumbnailRefreshState.dispose();
-    _workspaceWindowHistoryState.dispose();
+    _environmentWindowHistoryState.dispose();
     _uiHandles.dispose();
     super.dispose();
   }
@@ -209,9 +206,6 @@ class _AppRootState extends State<AppRoot> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: _buildProviders(),
-      child: const AppShell(),
-    );
+    return MultiProvider(providers: _buildProviders(), child: const AppShell());
   }
 }

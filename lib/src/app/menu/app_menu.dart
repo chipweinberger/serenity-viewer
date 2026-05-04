@@ -10,6 +10,9 @@ import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
 import 'package:serenity_viewer/src/environment/document/document_coordinator.dart';
+import 'package:serenity_viewer/src/environment/history/environment_window_history_controller.dart';
+import 'package:serenity_viewer/src/environment/history/environment_window_history_entry.dart';
+import 'package:serenity_viewer/src/environment/history/environment_window_history_state.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
@@ -19,9 +22,6 @@ import 'package:serenity_viewer/src/workspace/actions/workspace_asset_picker_con
 import 'package:serenity_viewer/src/workspace/actions/workspace_collate_controller.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_video_conversion_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
-import 'package:serenity_viewer/src/workspace/history/workspace_window_history_entry.dart';
-import 'package:serenity_viewer/src/workspace/history/workspace_window_history_controller.dart';
-import 'package:serenity_viewer/src/workspace/history/workspace_window_history_state.dart';
 
 class _MenuState {
   const _MenuState({
@@ -34,7 +34,7 @@ class _MenuState {
   final String? activeWorkspaceId;
   final Window? focusedWindow;
   final bool focusedWindowIsSelected;
-  final List<WorkspaceWindowHistoryEntry> recentlyClosedWindows;
+  final List<EnvironmentWindowHistoryEntry> recentlyClosedWindows;
 }
 
 class AppMenu extends StatelessWidget {
@@ -44,7 +44,7 @@ class AppMenu extends StatelessWidget {
 
   ({
     String? activeWorkspaceId,
-    List<WorkspaceWindowHistoryEntry> recentlyClosedWindows,
+    List<EnvironmentWindowHistoryEntry> recentlyClosedWindows,
     Set<String> selectedExposeWindowIds,
   })
   _watchState(BuildContext context) {
@@ -54,7 +54,7 @@ class AppMenu extends StatelessWidget {
         (WindowInteractionState state) => Set<String>.of(state.selectedExposeWindowIds),
       ),
       recentlyClosedWindows: context.select(
-        (WorkspaceWindowHistoryState state) => List<WorkspaceWindowHistoryEntry>.of(state.entries),
+        (EnvironmentWindowHistoryState state) => List<EnvironmentWindowHistoryEntry>.of(state.entries),
       ),
     );
   }
@@ -66,7 +66,7 @@ class AppMenu extends StatelessWidget {
     WorkspaceWindowController workspaceWindowController,
     EnvironmentController environmentController,
     WorkspaceVideoConversionController workspaceVideoConversionController,
-    WorkspaceWindowHistoryController workspaceWindowHistoryController,
+    EnvironmentWindowHistoryController environmentWindowHistoryController,
     WorkspaceCollateController workspaceCollateController,
     WorkspaceAssetPickerController workspaceAssetPickerController,
     AppFeedbackController feedback,
@@ -80,7 +80,7 @@ class AppMenu extends StatelessWidget {
       workspaceWindowController: context.read<WorkspaceWindowController>(),
       environmentController: context.read<EnvironmentController>(),
       workspaceVideoConversionController: context.read<WorkspaceVideoConversionController>(),
-      workspaceWindowHistoryController: context.read<WorkspaceWindowHistoryController>(),
+      environmentWindowHistoryController: context.read<EnvironmentWindowHistoryController>(),
       workspaceCollateController: context.read<WorkspaceCollateController>(),
       workspaceAssetPickerController: context.read<WorkspaceAssetPickerController>(),
       feedback: context.read<AppFeedbackController>(),
@@ -91,7 +91,7 @@ class AppMenu extends StatelessWidget {
   _MenuState _buildState({
     required String? activeWorkspaceId,
     required Set<String> selectedExposeWindowIds,
-    required List<WorkspaceWindowHistoryEntry> recentlyClosedWindows,
+    required List<EnvironmentWindowHistoryEntry> recentlyClosedWindows,
     required WorkspaceWindowController workspaceWindowController,
   }) {
     final focusedWindow = workspaceWindowController.focusedWindowOrNull();
@@ -107,12 +107,12 @@ class AppMenu extends StatelessWidget {
 
   List<PlatformMenuItem> _buildHistoryMenuItems({
     required _MenuState state,
-    required WorkspaceWindowHistoryController workspaceWindowHistoryController,
+    required EnvironmentWindowHistoryController environmentWindowHistoryController,
   }) {
     final recentlyClosedItems = state.recentlyClosedWindows.take(8).map((entry) {
       return PlatformMenuItem(
         label: 'Restore ${entry.window.asset.filename}',
-        onSelected: () => workspaceWindowHistoryController.restoreRecentlyClosedWindow(entry),
+        onSelected: () => environmentWindowHistoryController.restoreRecentlyClosedWindow(entry),
       );
     }).toList();
 
@@ -121,7 +121,7 @@ class AppMenu extends StatelessWidget {
         label: 'Restore Last Closed',
         onSelected: state.recentlyClosedWindows.isEmpty
             ? null
-            : workspaceWindowHistoryController.restoreRecentlyClosedWindow,
+            : environmentWindowHistoryController.restoreRecentlyClosedWindow,
         shortcut: const SingleActivator(LogicalKeyboardKey.keyT, meta: true, shift: true),
       ),
       ...recentlyClosedItems,
@@ -220,7 +220,7 @@ class AppMenu extends StatelessWidget {
     required _MenuState state,
     required EnvironmentController environmentController,
     required WorkspaceWindowController workspaceWindowController,
-    required WorkspaceWindowHistoryController workspaceWindowHistoryController,
+    required EnvironmentWindowHistoryController environmentWindowHistoryController,
   }) {
     final focusedWindow = state.focusedWindow;
 
@@ -252,7 +252,8 @@ class AppMenu extends StatelessWidget {
             label: 'Close',
             onSelected: focusedWindow == null || state.activeWorkspaceId == null
                 ? null
-                : () => workspaceWindowHistoryController.removeWindow(state.activeWorkspaceId!, focusedWindow.asset.id),
+                : () =>
+                      environmentWindowHistoryController.removeWindow(state.activeWorkspaceId!, focusedWindow.asset.id),
             shortcut: const SingleActivator(LogicalKeyboardKey.backspace, meta: true),
           ),
         ],
@@ -342,7 +343,7 @@ class AppMenu extends StatelessWidget {
       WorkspaceWindowController workspaceWindowController,
       EnvironmentController environmentController,
       WorkspaceVideoConversionController workspaceVideoConversionController,
-      WorkspaceWindowHistoryController workspaceWindowHistoryController,
+      EnvironmentWindowHistoryController environmentWindowHistoryController,
       WorkspaceCollateController workspaceCollateController,
       WorkspaceAssetPickerController workspaceAssetPickerController,
       AppFeedbackController feedback,
@@ -376,7 +377,7 @@ class AppMenu extends StatelessWidget {
           state: state,
           environmentController: dependencies.environmentController,
           workspaceWindowController: dependencies.workspaceWindowController,
-          workspaceWindowHistoryController: dependencies.workspaceWindowHistoryController,
+          environmentWindowHistoryController: dependencies.environmentWindowHistoryController,
         ),
       ),
       PlatformMenu(
@@ -400,7 +401,7 @@ class AppMenu extends StatelessWidget {
         label: 'History',
         menus: _buildHistoryMenuItems(
           state: state,
-          workspaceWindowHistoryController: dependencies.workspaceWindowHistoryController,
+          environmentWindowHistoryController: dependencies.environmentWindowHistoryController,
         ),
       ),
     ];

@@ -20,7 +20,6 @@ import 'package:serenity_viewer/src/workspace/actions/workspace_video_conversion
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_viewport_session_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
-import 'package:serenity_viewer/src/workspace/history/workspace_window_history_controller.dart';
 import 'package:serenity_viewer/src/workspace/input/workspace_shortcut_controller.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_launcher.dart';
@@ -30,7 +29,6 @@ import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresh_state
 import 'package:serenity_viewer/src/workspace/tracking/workspace_view_tracking_controller.dart';
 import 'package:serenity_viewer/src/workspace/tracking/workspace_view_tracking_state.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
-import 'package:serenity_viewer/src/workspace/history/workspace_window_history_state.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_core.dart';
 import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_environment.dart';
@@ -48,13 +46,13 @@ import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_
   WorkspaceLinksPrompts workspaceLinksPrompts,
   WorkspaceController workspaceController,
   WorkspaceWindowController workspaceWindowController,
-  WorkspaceWindowHistoryController workspaceWindowHistoryController,
   WorkspaceViewportSessionController workspaceViewportSessionController,
   EnvironmentController environmentController,
   WorkspaceExposeLayoutController workspaceExposeLayoutController,
   WorkspaceShortcutController workspaceShortcutController,
   WorkspaceViewTrackingController workspaceViewTrackingController,
-}) createAppWorkspaceServices({
+})
+createAppWorkspaceServices({
   required PlatformBridge platformBridge,
   required EnvironmentStore environmentStore,
   required MediaInspector mediaInspector,
@@ -83,7 +81,6 @@ import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_
   required WorkspaceViewTrackingState trackingState,
   required WorkspaceViewportState viewportState,
   required ThumbnailRefreshState thumbState,
-  required WorkspaceWindowHistoryState workspaceWindowHistoryState,
 }) {
   final scope = WorkspaceFactoryScope(
     platform: platformBridge,
@@ -113,7 +110,6 @@ import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_
     trackingState: trackingState,
     viewportState: viewportState,
     thumbState: thumbState,
-    workspaceWindowHistoryState: workspaceWindowHistoryState,
   );
 
   final thumbnailController = createThumbnailController(scope: scope);
@@ -122,10 +118,6 @@ import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_
   final workspaceLinksPrompts = createWorkspaceLinksPrompts(scope: scope);
   final workspaceController = createWorkspaceController(scope: scope, thumbnailController: thumbnailController);
   final workspaceWindowController = createWorkspaceWindowController(
-    scope: scope,
-    workspaceController: workspaceController,
-  );
-  final workspaceWindowHistoryController = createWorkspaceWindowHistoryController(
     scope: scope,
     workspaceController: workspaceController,
   );
@@ -186,7 +178,6 @@ import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_
     workspaceLinksPrompts: workspaceLinksPrompts,
     workspaceController: workspaceController,
     workspaceWindowController: workspaceWindowController,
-    workspaceWindowHistoryController: workspaceWindowHistoryController,
     workspaceViewportSessionController: workspaceViewportSessionController,
     environmentController: environmentController,
     workspaceExposeLayoutController: workspaceExposeLayoutController,

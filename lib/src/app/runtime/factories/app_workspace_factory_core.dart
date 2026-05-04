@@ -4,7 +4,6 @@ import 'package:serenity_viewer/src/media/import/workspace_media_import_controll
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_viewport_session_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
-import 'package:serenity_viewer/src/workspace/history/workspace_window_history_controller.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_launcher.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_prompts.dart';
@@ -94,25 +93,6 @@ WorkspaceWindowController createWorkspaceWindowController({
     activeWorkspace: () => scope.activeWorkspace()!,
     activeWorkspaceOrNull: scope.activeWorkspace,
     workspaceController: workspaceController,
-  );
-}
-
-WorkspaceWindowHistoryController createWorkspaceWindowHistoryController({
-  required WorkspaceFactoryScope scope,
-  required WorkspaceController workspaceController,
-}) {
-  return WorkspaceWindowHistoryController(
-    environment: () => scope.envState.environment,
-    workspaces: scope.workspaces,
-    activeWorkspace: scope.activeWorkspace,
-    workspaceWindowHistoryState: scope.workspaceWindowHistoryState,
-    workspaceController: workspaceController,
-    updateEnvironment: scope.store.updateEnvironment,
-    replaceWorkspace: scope.store.replaceWorkspace,
-    showMessage: scope.showMessage,
-    showWorkspaceScreen: scope.showWorkspaceScreen,
-    screen: () => scope.uiState.screen,
-    maxRecentlyClosedWindows: 12,
   );
 }
 
