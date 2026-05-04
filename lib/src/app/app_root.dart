@@ -108,8 +108,10 @@ class _AppRootState extends State<AppRoot> {
       mounted: () => mounted,
       showMessage: _showMessage,
       isRunningInWidgetTest: _isRunningInWidgetTest,
-      foundation: () => _foundation,
-      workspace: () => _workspaceRuntime,
+      environmentStore: () => _foundation.environmentStore,
+      appUiController: () => _foundation.appUiController,
+      workspaceWindowController: () => _workspaceRuntime.workspaceWindowController,
+      workspaceViewportSessionController: () => _workspaceRuntime.workspaceViewportSessionController,
       documentPersistence: () => _documentPersistence,
     );
   }

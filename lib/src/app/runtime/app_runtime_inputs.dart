@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/app/runtime/app_runtime_groups.dart';
 import 'package:serenity_viewer/src/app/seed_environment.dart';
 import 'package:serenity_viewer/src/app/state/app_derived_state.dart';
 import 'package:serenity_viewer/src/app/state/app_state_store.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
+import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller_types.dart';
 import 'package:serenity_viewer/src/environment/document/document_persistence_controller.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
+import 'package:serenity_viewer/src/environment/store/environment_store.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/foundation/serenity_identity.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_viewport_session_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
 
 class AppRuntimeInputs {
   const AppRuntimeInputs({
@@ -75,16 +78,16 @@ Environment Function() _buildRuntimeSeedEnvironment() {
 }
 
 ValueChanged<Environment> _buildRuntimeUpdateEnvironment({
-  required AppFoundation Function() foundation,
+  required EnvironmentStore Function() environmentStore,
 }) {
-  return (environment) => foundation().environmentStore.updateEnvironment(environment);
+  return (environment) => environmentStore().updateEnvironment(environment);
 }
 
 void Function(Workspace workspace, {bool queueThumbnail}) _buildRuntimeReplaceWorkspace({
-  required AppFoundation Function() foundation,
+  required EnvironmentStore Function() environmentStore,
 }) {
   return (workspace, {queueThumbnail = true}) =>
-      foundation().environmentStore.replaceWorkspace(workspace, queueThumbnail: queueThumbnail);
+      environmentStore().replaceWorkspace(workspace, queueThumbnail: queueThumbnail);
 }
 
 Future<void> Function() _buildRuntimeSaveEnvironment({
@@ -100,8 +103,10 @@ AppRuntimeInputs buildAppRuntimeInputs({
   required bool Function() mounted,
   required ValueChanged<String> showMessage,
   required bool isRunningInWidgetTest,
-  required AppFoundation Function() foundation,
-  required AppWorkspaceServices Function() workspace,
+  required EnvironmentStore Function() environmentStore,
+  required AppUiController Function() appUiController,
+  required WorkspaceWindowController Function() workspaceWindowController,
+  required WorkspaceViewportSessionController Function() workspaceViewportSessionController,
   required DocumentPersistenceController Function() documentPersistence,
 }) {
   return AppRuntimeInputs(
@@ -113,18 +118,18 @@ AppRuntimeInputs buildAppRuntimeInputs({
     mounted: mounted,
     showMessage: showMessage,
     seedEnvironment: _buildRuntimeSeedEnvironment(),
-    updateEnvironment: _buildRuntimeUpdateEnvironment(foundation: foundation),
-    replaceWorkspace: _buildRuntimeReplaceWorkspace(foundation: foundation),
+    updateEnvironment: _buildRuntimeUpdateEnvironment(environmentStore: environmentStore),
+    replaceWorkspace: _buildRuntimeReplaceWorkspace(environmentStore: environmentStore),
     saveEnvironment: _buildRuntimeSaveEnvironment(documentPersistence: documentPersistence),
     newId: newSerenityId,
     colorFromDigest: assetColorValueFromDigest,
     activeWorkspace: () => deriveActiveWorkspaceOrNull(stateStore),
     workspaces: () => deriveWorkspaces(stateStore),
     openWorkspaces: () => deriveOpenWorkspaces(stateStore),
-    focusedWindowOrNull: () => workspace().workspaceWindowController.focusedWindowOrNull(),
+    focusedWindowOrNull: () => workspaceWindowController().focusedWindowOrNull(),
     setWorkspaceViewport:
         ({required String workspaceId, Offset? center, double? zoom, bool queueThumbnail = false}) =>
-            workspace().workspaceViewportSessionController.setWorkspaceViewport(
+            workspaceViewportSessionController().setWorkspaceViewport(
               workspaceId: workspaceId,
               center: center,
               zoom: zoom,
@@ -136,7 +141,7 @@ AppRuntimeInputs buildAppRuntimeInputs({
           bool resetEditMode = true,
           bool clearExposeSelection = true,
           bool refreshWorkspaceTracking = true,
-        }) => foundation().appUiController.showWorkspaceScreen(
+        }) => appUiController().showWorkspaceScreen(
           workspaceLayoutMode: workspaceLayoutMode,
           resetEditMode: resetEditMode,
           clearExposeSelection: clearExposeSelection,
@@ -144,12 +149,12 @@ AppRuntimeInputs buildAppRuntimeInputs({
         ),
     showLibraryScreen:
         ({bool resetEditMode = true, bool clearExposeSelection = true, bool refreshWorkspaceTracking = true}) =>
-            foundation().appUiController.showLibraryScreen(
+            appUiController().showLibraryScreen(
               resetEditMode: resetEditMode,
               clearExposeSelection: clearExposeSelection,
               refreshWorkspaceTrackingEnabled: refreshWorkspaceTracking,
             ),
-    toggleExpose: () => foundation().appUiController.toggleExpose(),
-    toggleVideoPlayback: (windowId) => workspace().workspaceWindowController.toggleVideoPlayback(windowId),
+    toggleExpose: () => appUiController().toggleExpose(),
+    toggleVideoPlayback: (windowId) => workspaceWindowController().toggleVideoPlayback(windowId),
   );
 }
