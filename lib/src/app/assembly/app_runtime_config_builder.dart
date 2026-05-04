@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/app_actions.dart';
-import 'package:serenity_viewer/src/app/app_persistence_controller.dart';
 import 'package:serenity_viewer/src/app/assembly/app_runtime_config.dart';
 import 'package:serenity_viewer/src/app/assembly/app_runtime_services.dart';
 import 'package:serenity_viewer/src/app/app_view_state.dart';
 import 'package:serenity_viewer/src/app/seed_environment.dart';
+import 'package:serenity_viewer/src/environment/document/document_persistence_controller.dart';
 import 'package:serenity_viewer/src/foundation/serenity_identity.dart';
 import 'package:serenity_viewer/src/app/app_dependencies.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
@@ -21,7 +21,7 @@ class AppRuntimeConfigBuilder {
     required this.viewState,
     required this.foundation,
     required this.controller,
-    required this.persistence,
+    required this.documentPersistence,
   });
 
   final AppDependencies dependencies;
@@ -33,7 +33,7 @@ class AppRuntimeConfigBuilder {
   final AppViewState Function() viewState;
   final AppFoundation Function() foundation;
   final AppActions Function() controller;
-  final AppPersistenceController Function() persistence;
+  final DocumentPersistenceController Function() documentPersistence;
 
   AppRuntimeConfig build() {
     return AppRuntimeConfig(
@@ -51,7 +51,7 @@ class AppRuntimeConfigBuilder {
         updateEnvironment: (environment) => foundation().environmentStore.updateEnvironment(environment),
         replaceWorkspace: (workspace, {queueThumbnail = true}) =>
             foundation().environmentStore.replaceWorkspace(workspace, queueThumbnail: queueThumbnail),
-        saveEnvironment: () => persistence().saveEnvironment(),
+        saveEnvironment: () => documentPersistence().saveEnvironment(),
       ),
       workspace: WorkspaceConfig(
         newId: newSerenityId,

@@ -6,8 +6,8 @@ import 'package:flutter/widgets.dart';
 import 'package:serenity_viewer/src/app/assembly/app_runtime.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 
-class AppPersistenceController {
-  const AppPersistenceController({
+class DocumentPersistenceController {
+  const DocumentPersistenceController({
     required this.state,
     required this.foundation,
     required this.documents,

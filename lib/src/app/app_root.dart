@@ -7,12 +7,12 @@ import 'package:serenity_viewer/src/app/assembly/app_runtime.dart';
 import 'package:serenity_viewer/src/app/assembly/app_runtime_config_builder.dart';
 import 'package:serenity_viewer/src/app/app_dependencies.dart';
 import 'package:serenity_viewer/src/app/app_actions.dart';
-import 'package:serenity_viewer/src/app/app_persistence_controller.dart';
 import 'package:serenity_viewer/src/app/app_view_state.dart';
 import 'package:serenity_viewer/src/app/builders/app_screen_host_builder.dart';
 import 'package:serenity_viewer/src/app/builders/app_screen_host_scope.dart';
 import 'package:serenity_viewer/src/app/builders/menu_builder.dart';
 import 'package:serenity_viewer/src/app/seed_environment.dart';
+import 'package:serenity_viewer/src/environment/document/document_persistence_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_windows_controller.dart';
 
 class AppRoot extends StatefulWidget {
@@ -26,7 +26,7 @@ class _AppRootState extends State<AppRoot> {
   final _dependencies = AppDependencies();
   late final AppRuntime _runtime;
   late final AppActions _controller;
-  late final AppPersistenceController _persistence;
+  late final DocumentPersistenceController _documentPersistence;
 
   AppStateServices get _state => _runtime.state;
   AppViewState get _viewState => AppViewState(_state);
@@ -185,7 +185,7 @@ class _AppRootState extends State<AppRoot> {
       foundation: _foundation,
       workspace: _workspaceRuntime,
     );
-    _persistence = AppPersistenceController(
+    _documentPersistence = DocumentPersistenceController(
       state: _state,
       foundation: _foundation,
       documents: _documents,
@@ -193,7 +193,7 @@ class _AppRootState extends State<AppRoot> {
       seedEnvironment: buildSeedEnvironment,
       isRunningInWidgetTest: _isRunningInWidgetTest,
     );
-    _persistence.restoreEnvironment();
+    _documentPersistence.restoreEnvironment();
   }
 
   @override
@@ -213,7 +213,7 @@ class _AppRootState extends State<AppRoot> {
       viewState: () => _viewState,
       foundation: () => _foundation,
       controller: () => _controller,
-      persistence: () => _persistence,
+      documentPersistence: () => _documentPersistence,
     ).build();
   }
 
