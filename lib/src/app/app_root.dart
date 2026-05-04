@@ -13,6 +13,7 @@ import 'package:serenity_viewer/src/app/runtime/app_runtime.dart';
 import 'package:serenity_viewer/src/app/app_shell.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
+import 'package:serenity_viewer/src/app/state/window_workspace_drag_state.dart';
 import 'package:serenity_viewer/src/app/seed_environment.dart';
 import 'package:serenity_viewer/src/app/state/app_derived_state.dart';
 import 'package:serenity_viewer/src/environment/history/environment_window_history_state.dart';
@@ -32,6 +33,7 @@ import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.
 class AppRootObjects {
   AppRootObjects()
     : appUiState = AppUiState(),
+      windowWorkspaceDragState = WindowWorkspaceDragState(),
       environmentStoreState = EnvironmentStoreState(),
       windowInteractionState = WindowInteractionState(),
       workspaceViewTrackingState = WorkspaceViewTrackingState(),
@@ -41,6 +43,7 @@ class AppRootObjects {
       uiHandles = AppUiHandles();
 
   final AppUiState appUiState;
+  final WindowWorkspaceDragState windowWorkspaceDragState;
   final EnvironmentStoreState environmentStoreState;
   final WindowInteractionState windowInteractionState;
   final WorkspaceViewTrackingState workspaceViewTrackingState;
@@ -52,6 +55,7 @@ class AppRootObjects {
   void dispose() {
     environmentStoreState.dispose();
     appUiState.dispose();
+    windowWorkspaceDragState.dispose();
     windowInteractionState.dispose();
     workspaceViewTrackingState.dispose();
     workspaceViewportState.dispose();
@@ -148,6 +152,7 @@ class _AppRootState extends State<AppRoot> {
         ),
       ),
       ChangeNotifierProvider.value(value: _rootObjects.appUiState),
+      ChangeNotifierProvider.value(value: _rootObjects.windowWorkspaceDragState),
       ChangeNotifierProvider.value(value: _rootObjects.environmentStoreState),
       ChangeNotifierProvider.value(value: _rootObjects.windowInteractionState),
       ChangeNotifierProvider.value(value: _rootObjects.workspaceViewportState),

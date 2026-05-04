@@ -3,16 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
+import 'package:serenity_viewer/src/app/state/window_workspace_drag_state.dart';
 import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
 
 class AppUiController {
   AppUiController({
     required this.appUiState,
+    required this.windowWorkspaceDragState,
     required this.windowInteractionState,
     required this.refreshWorkspaceTracking,
   });
 
   final AppUiState appUiState;
+  final WindowWorkspaceDragState windowWorkspaceDragState;
   final WindowInteractionState windowInteractionState;
   final VoidCallback refreshWorkspaceTracking;
 
@@ -30,7 +33,7 @@ class AppUiController {
   }
 
   bool isWorkspaceWindowDropTarget(String workspaceId) {
-    return appUiState.windowDragTargetWorkspaceId == workspaceId;
+    return windowWorkspaceDragState.targetWorkspaceId == workspaceId;
   }
 
   bool get shouldMoveSelectedWindowsToWorkspaceOnTap {
@@ -98,16 +101,15 @@ class AppUiController {
   }
 
   void setWindowDragTargetWorkspaceId(String? workspaceId) {
-    appUiState.setWindowDragTargetWorkspaceId(workspaceId);
+    windowWorkspaceDragState.setTargetWorkspaceId(workspaceId);
   }
 
   void beginWindowDrag(String sourceWorkspaceId) {
-    appUiState.setDraggingWindowSourceWorkspaceId(sourceWorkspaceId);
+    windowWorkspaceDragState.begin(sourceWorkspaceId);
   }
 
   void endWindowDrag() {
-    appUiState.setDraggingWindowSourceWorkspaceId(null);
-    appUiState.setWindowDragTargetWorkspaceId(null);
+    windowWorkspaceDragState.end();
   }
 
   void setWorkspaceSort(WorkspaceSort sort) {

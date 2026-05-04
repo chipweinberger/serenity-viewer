@@ -8,6 +8,7 @@ import 'package:serenity_viewer/src/app/header/app_window_title.dart';
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
+import 'package:serenity_viewer/src/app/state/window_workspace_drag_state.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
@@ -38,7 +39,7 @@ class AppHeader extends StatelessWidget {
       hasUnsavedChanges: context.select((EnvironmentStoreState state) => state.hasUnsavedChanges),
       screen: context.select((AppUiState state) => state.screen),
       draggingTabWorkspaceId: context.select((AppUiState state) => state.draggingTabWorkspaceId),
-      windowDragTargetWorkspaceId: context.select((AppUiState state) => state.windowDragTargetWorkspaceId),
+      windowDragTargetWorkspaceId: context.select((WindowWorkspaceDragState state) => state.targetWorkspaceId),
       hasSelectedExposeWindows: context.select(
         (WindowInteractionState state) => state.selectedExposeWindowIds.isNotEmpty,
       ),

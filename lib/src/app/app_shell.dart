@@ -8,6 +8,7 @@ import 'package:serenity_viewer/src/app/menu/app_menu.dart';
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
+import 'package:serenity_viewer/src/app/state/window_workspace_drag_state.dart';
 import 'package:serenity_viewer/src/app/views/library_view.dart';
 import 'package:serenity_viewer/src/app/views/workspace_view.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
@@ -24,7 +25,7 @@ class AppShell extends StatelessWidget {
   ) {
     return (
       screen: context.select((AppUiState state) => state.screen),
-      draggingWindowSourceWorkspaceId: context.select((AppUiState state) => state.draggingWindowSourceWorkspaceId),
+      draggingWindowSourceWorkspaceId: context.select((WindowWorkspaceDragState state) => state.sourceWorkspaceId),
       isLoading: context.select((EnvironmentStoreState state) => state.isLoading),
       hasEnvironment: context.select((EnvironmentStoreState state) => state.environment != null),
     );
@@ -74,11 +75,11 @@ class AppShell extends StatelessWidget {
 
   void _handlePointerMove(
     PointerMoveEvent event,
-    AppUiState appUiState,
+    WindowWorkspaceDragState windowWorkspaceDragState,
     AppUiController appUiController,
     AppUiHandles uiHandles,
   ) {
-    final sourceWorkspaceId = appUiState.draggingWindowSourceWorkspaceId;
+    final sourceWorkspaceId = windowWorkspaceDragState.sourceWorkspaceId;
     if (sourceWorkspaceId == null || event.buttons != kPrimaryMouseButton) {
       return;
     }
@@ -87,8 +88,8 @@ class AppShell extends StatelessWidget {
     appUiController.setWindowDragTargetWorkspaceId(targetWorkspaceId);
   }
 
-  void _handlePointerEnd(AppUiState appUiState, AppUiController appUiController) {
-    if (appUiState.draggingWindowSourceWorkspaceId == null) {
+  void _handlePointerEnd(WindowWorkspaceDragState windowWorkspaceDragState, AppUiController appUiController) {
+    if (windowWorkspaceDragState.sourceWorkspaceId == null) {
       return;
     }
 
@@ -99,7 +100,7 @@ class AppShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = _watchState(context);
     final uiHandles = context.read<AppUiHandles>();
-    final appUiState = context.read<AppUiState>();
+    final windowWorkspaceDragState = context.read<WindowWorkspaceDragState>();
     final appUiController = context.read<AppUiController>();
     final workspaceController = context.read<WorkspaceController>();
     final windowInteractionState = context.read<WindowInteractionState>();
@@ -107,9 +108,9 @@ class AppShell extends StatelessWidget {
     return AppMenu(
       child: Listener(
         behavior: HitTestBehavior.translucent,
-        onPointerMove: (event) => _handlePointerMove(event, appUiState, appUiController, uiHandles),
-        onPointerUp: (_) => _handlePointerEnd(appUiState, appUiController),
-        onPointerCancel: (_) => _handlePointerEnd(appUiState, appUiController),
+        onPointerMove: (event) => _handlePointerMove(event, windowWorkspaceDragState, appUiController, uiHandles),
+        onPointerUp: (_) => _handlePointerEnd(windowWorkspaceDragState, appUiController),
+        onPointerCancel: (_) => _handlePointerEnd(windowWorkspaceDragState, appUiController),
         child: Focus(
           focusNode: uiHandles.focusNode,
           autofocus: true,

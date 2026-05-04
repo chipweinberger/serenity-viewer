@@ -92,6 +92,7 @@ AppRuntime createAppRuntime({
 
   appUiController = AppUiController(
     appUiState: rootObjects.appUiState,
+    windowWorkspaceDragState: rootObjects.windowWorkspaceDragState,
     windowInteractionState: rootObjects.windowInteractionState,
     refreshWorkspaceTracking: () => workspace.workspaceController.tracking.refresh(),
   );

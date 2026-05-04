@@ -11,8 +11,6 @@ class AppUiState extends ChangeNotifier {
   bool _editMode = false;
   bool _isDropTargetActive = false;
   String? _draggingTabWorkspaceId;
-  String? _windowDragTargetWorkspaceId;
-  String? _draggingWindowSourceWorkspaceId;
   final List<int> _activeWorkspaceImportAssetCounts = [];
 
   SerenityScreen get screen => _screen;
@@ -21,8 +19,6 @@ class AppUiState extends ChangeNotifier {
   bool get editMode => _editMode;
   bool get isDropTargetActive => _isDropTargetActive;
   String? get draggingTabWorkspaceId => _draggingTabWorkspaceId;
-  String? get windowDragTargetWorkspaceId => _windowDragTargetWorkspaceId;
-  String? get draggingWindowSourceWorkspaceId => _draggingWindowSourceWorkspaceId;
   bool get isWorkspaceImporting => _activeWorkspaceImportAssetCounts.isNotEmpty;
   int get workspaceImportAssetCount =>
       _activeWorkspaceImportAssetCounts.fold<int>(0, (currentMax, count) => count > currentMax ? count : currentMax);
@@ -34,8 +30,6 @@ class AppUiState extends ChangeNotifier {
     bool? editMode,
     bool? isDropTargetActive,
     Object? draggingTabWorkspaceId = _noChange,
-    Object? windowDragTargetWorkspaceId = _noChange,
-    Object? draggingWindowSourceWorkspaceId = _noChange,
   }) {
     final nextScreen = screen ?? _screen;
     final nextWorkspaceLayoutMode = workspaceLayoutMode ?? _workspaceLayoutMode;
@@ -45,21 +39,13 @@ class AppUiState extends ChangeNotifier {
     final nextDraggingTabWorkspaceId = draggingTabWorkspaceId == _noChange
         ? _draggingTabWorkspaceId
         : draggingTabWorkspaceId as String?;
-    final nextWindowDragTargetWorkspaceId = windowDragTargetWorkspaceId == _noChange
-        ? _windowDragTargetWorkspaceId
-        : windowDragTargetWorkspaceId as String?;
-    final nextDraggingWindowSourceWorkspaceId = draggingWindowSourceWorkspaceId == _noChange
-        ? _draggingWindowSourceWorkspaceId
-        : draggingWindowSourceWorkspaceId as String?;
     final changed =
         nextScreen != _screen ||
         nextWorkspaceLayoutMode != _workspaceLayoutMode ||
         nextWorkspaceSort != _workspaceSort ||
         nextEditMode != _editMode ||
         nextIsDropTargetActive != _isDropTargetActive ||
-        nextDraggingTabWorkspaceId != _draggingTabWorkspaceId ||
-        nextWindowDragTargetWorkspaceId != _windowDragTargetWorkspaceId ||
-        nextDraggingWindowSourceWorkspaceId != _draggingWindowSourceWorkspaceId;
+        nextDraggingTabWorkspaceId != _draggingTabWorkspaceId;
     if (!changed) {
       return false;
     }
@@ -70,8 +56,6 @@ class AppUiState extends ChangeNotifier {
     _editMode = nextEditMode;
     _isDropTargetActive = nextIsDropTargetActive;
     _draggingTabWorkspaceId = nextDraggingTabWorkspaceId;
-    _windowDragTargetWorkspaceId = nextWindowDragTargetWorkspaceId;
-    _draggingWindowSourceWorkspaceId = nextDraggingWindowSourceWorkspaceId;
     notifyListeners();
     return true;
   }
@@ -82,14 +66,6 @@ class AppUiState extends ChangeNotifier {
 
   bool setDraggingTabWorkspaceId(String? workspaceId) {
     return update(draggingTabWorkspaceId: workspaceId);
-  }
-
-  bool setWindowDragTargetWorkspaceId(String? workspaceId) {
-    return update(windowDragTargetWorkspaceId: workspaceId);
-  }
-
-  bool setDraggingWindowSourceWorkspaceId(String? workspaceId) {
-    return update(draggingWindowSourceWorkspaceId: workspaceId);
   }
 
   bool setWorkspaceSort(WorkspaceSort sort) {
