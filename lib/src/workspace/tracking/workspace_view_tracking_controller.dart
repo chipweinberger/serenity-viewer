@@ -60,7 +60,7 @@ class WorkspaceViewTrackingController {
       return;
     }
 
-    _dependencies.workspaceViewTrackingState.isAppForeground = nextForeground;
+    _dependencies.workspaceViewTrackingState.setAppForeground(nextForeground);
     refresh();
   }
 
@@ -72,10 +72,7 @@ class WorkspaceViewTrackingController {
     }
 
     if (_dependencies.workspaceViewTrackingState.candidateWorkspaceId != candidateId) {
-      _dependencies.workspaceViewTrackingState.timer?.cancel();
-      _dependencies.workspaceViewTrackingState.timer = null;
-      _dependencies.workspaceViewTrackingState.candidateWorkspaceId = candidateId;
-      _dependencies.workspaceViewTrackingState.countedForCurrentContext = false;
+      _dependencies.workspaceViewTrackingState.replaceCandidateWorkspace(candidateId);
     }
 
     if (_dependencies.workspaceViewTrackingState.countedForCurrentContext ||
@@ -83,8 +80,8 @@ class WorkspaceViewTrackingController {
       return;
     }
 
-    _dependencies.workspaceViewTrackingState.timer = Timer(_workspaceViewThreshold, () {
-      _dependencies.workspaceViewTrackingState.timer = null;
+    _dependencies.workspaceViewTrackingState.setTimer(Timer(_workspaceViewThreshold, () {
+      _dependencies.workspaceViewTrackingState.setTimer(null);
       if (!_dependencies.mounted()) {
         return;
       }
@@ -94,16 +91,13 @@ class WorkspaceViewTrackingController {
         return;
       }
 
-      _dependencies.workspaceViewTrackingState.countedForCurrentContext = true;
+      _dependencies.workspaceViewTrackingState.markCountedForCurrentContext();
       _incrementWorkspaceViews(candidateId);
-    });
+    }));
   }
 
   void cancel() {
-    _dependencies.workspaceViewTrackingState.timer?.cancel();
-    _dependencies.workspaceViewTrackingState.timer = null;
-    _dependencies.workspaceViewTrackingState.candidateWorkspaceId = null;
-    _dependencies.workspaceViewTrackingState.countedForCurrentContext = false;
+    _dependencies.workspaceViewTrackingState.clear();
   }
 
   void _incrementWorkspaceViews(String workspaceId) {
