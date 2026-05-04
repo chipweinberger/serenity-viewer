@@ -92,23 +92,11 @@ class AppUiController {
   }
 
   void setDraggingTabWorkspaceId(String? workspaceId) {
-    if (appUiState.draggingTabWorkspaceId == workspaceId) {
-      return;
-    }
-
-    commitStateChange(() {
-      appUiState.draggingTabWorkspaceId = workspaceId;
-    });
+    appUiState.setDraggingTabWorkspaceId(workspaceId);
   }
 
   void setWorkspaceSort(WorkspaceSort sort) {
-    if (appUiState.workspaceSort == sort) {
-      return;
-    }
-
-    commitStateChange(() {
-      appUiState.workspaceSort = sort;
-    });
+    appUiState.setWorkspaceSort(sort);
   }
 
   WorkspaceSwitchTarget workspaceSwitchTarget({
@@ -145,26 +133,19 @@ class AppUiController {
     final nextWorkspaceLayoutMode = workspaceLayoutMode ?? appUiState.workspaceLayoutMode;
     final nextEditMode = resetEditMode ? false : appUiState.editMode;
     final shouldClearSelection = clearExposeSelection && windowInteractionState.selectedExposeWindowIds.isNotEmpty;
-    final changed =
-        nextScreen != appUiState.screen ||
-        nextWorkspaceLayoutMode != appUiState.workspaceLayoutMode ||
-        nextEditMode != appUiState.editMode ||
-        shouldClearSelection;
+    final stateChanged = appUiState.update(
+      screen: nextScreen,
+      workspaceLayoutMode: nextWorkspaceLayoutMode,
+      editMode: nextEditMode,
+    );
 
-    if (changed) {
+    if (shouldClearSelection) {
       commitStateChange(() {
-        appUiState.screen = nextScreen;
-        appUiState.workspaceLayoutMode = nextWorkspaceLayoutMode;
-        if (resetEditMode) {
-          appUiState.editMode = false;
-        }
-        if (clearExposeSelection) {
-          windowInteractionState.selectedExposeWindowIds.clear();
-        }
+        windowInteractionState.selectedExposeWindowIds.clear();
       });
     }
 
-    if (refreshWorkspaceTrackingEnabled) {
+    if (refreshWorkspaceTrackingEnabled && (stateChanged || shouldClearSelection)) {
       refreshWorkspaceTracking();
     }
   }

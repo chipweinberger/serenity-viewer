@@ -121,20 +121,25 @@ class _AppRootState extends State<AppRoot> {
 
   @override
   Widget build(BuildContext context) {
-    final menu = _buildAppMenuBindings();
-    return AppMenu(
-      state: menu.state,
-      app: menu.app,
-      file: menu.file,
-      asset: menu.asset,
-      workspace: menu.workspace,
-      window: menu.window,
-      child: Focus(
-        focusNode: _uiHandles.focusNode,
-        autofocus: true,
-        onKeyEvent: (_, event) => _workspaceRuntime.workspaceShortcutController.onKeyEvent(event),
-        child: Scaffold(body: SafeArea(top: false, child: _buildContent(context))),
-      ),
+    return ListenableBuilder(
+      listenable: _state.appUiState,
+      builder: (context, _) {
+        final menu = _buildAppMenuBindings();
+        return AppMenu(
+          state: menu.state,
+          app: menu.app,
+          file: menu.file,
+          asset: menu.asset,
+          workspace: menu.workspace,
+          window: menu.window,
+          child: Focus(
+            focusNode: _uiHandles.focusNode,
+            autofocus: true,
+            onKeyEvent: (_, event) => _workspaceRuntime.workspaceShortcutController.onKeyEvent(event),
+            child: Scaffold(body: SafeArea(top: false, child: _buildContent(context))),
+          ),
+        );
+      },
     );
   }
 }

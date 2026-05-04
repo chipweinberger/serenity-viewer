@@ -47,8 +47,7 @@ class WorkspaceView extends StatelessWidget {
       loadPlan: workspaceLoadPlan,
       sharedVideoLookup: services.sharedVideoControllerPool.sharedVideoForWindow,
       actions: WorkspaceScreenHostActions(
-        setDropTargetActive: (isActive) =>
-            actions.app.state.commitStateChange(() => model.uiState.isDropTargetActive = isActive),
+        setDropTargetActive: model.uiState.setDropTargetActive,
         importFiles: actions.app.files.importFiles,
         trackViewportSize: (viewportSize) => model.workspaceViewportState.viewportSize = viewportSize,
         handleOptionGestureHover: actions.window.interaction.handleOptionGestureHover,

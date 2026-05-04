@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/workspace/mutations/workspace_environment_mutations.dart';
@@ -89,10 +88,8 @@ class EnvironmentStore {
       environmentStoreState.currentEnvironmentPath = path;
       environmentStoreState.hasUnsavedChanges = false;
       environmentStoreState.isLoading = false;
-      appUiState.screen = SerenityScreen.workspace;
-      appUiState.workspaceLayoutMode = WorkspaceLayoutMode.freeform;
-      appUiState.editMode = false;
     });
+    appUiState.showWorkspaceScreenDefaults();
     refreshWorkspaceTracking();
     unawaited(syncWindowTitle());
   }
@@ -103,10 +100,8 @@ class EnvironmentStore {
       environmentStoreState.currentEnvironmentPath = path;
       environmentStoreState.hasUnsavedChanges = false;
       environmentStoreState.isLoading = false;
-      appUiState.screen = SerenityScreen.workspace;
-      appUiState.workspaceLayoutMode = WorkspaceLayoutMode.freeform;
-      appUiState.editMode = false;
     });
+    appUiState.showWorkspaceScreenDefaults();
     refreshWorkspaceTracking();
     unawaited(syncWindowTitle());
   }
