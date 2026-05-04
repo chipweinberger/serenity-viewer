@@ -6,7 +6,6 @@ import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/app/app_theme.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
-import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/library/workspace_card.dart';
 import 'package:serenity_viewer/src/media/loading/workspace_load_plan.dart';
@@ -17,7 +16,6 @@ class LibraryScreen extends StatelessWidget {
     super.key,
     required this.allWorkspaces,
     required this.openWorkspaces,
-    required this.loadPlan,
     required this.searchController,
     required this.workspaceSort,
     required this.refreshingWorkspaceIds,
@@ -27,7 +25,6 @@ class LibraryScreen extends StatelessWidget {
 
   final List<Workspace> allWorkspaces;
   final List<Workspace> openWorkspaces;
-  final MediaLoadPlan loadPlan;
   final TextEditingController searchController;
   final WorkspaceSort workspaceSort;
   final Set<String> refreshingWorkspaceIds;
@@ -99,7 +96,6 @@ class LibraryScreen extends StatelessWidget {
       child: WorkspaceCard(
         workspace: workspace,
         mediaCounts: workspaceMediaCounts(workspace),
-        unloadedCount: unloadedWorkspaceWindowCount(workspace, loadPlan),
         isRefreshing: refreshingWorkspaceIds.contains(workspace.id),
         isDimmed: isDimmed,
         statusLabel: statusLabel,

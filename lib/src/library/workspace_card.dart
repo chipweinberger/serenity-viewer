@@ -11,7 +11,6 @@ class WorkspaceCard extends StatefulWidget {
     super.key,
     required this.workspace,
     required this.mediaCounts,
-    required this.unloadedCount,
     required this.hoverActions,
     this.onTap,
     this.isRefreshing = false,
@@ -21,7 +20,6 @@ class WorkspaceCard extends StatefulWidget {
 
   final Workspace workspace;
   final WorkspaceMediaCounts mediaCounts;
-  final int unloadedCount;
   final List<Widget> hoverActions;
   final VoidCallback? onTap;
   final bool isRefreshing;
@@ -280,8 +278,6 @@ class _WorkspaceCardState extends State<WorkspaceCard> {
                             _buildFooterMetric(context, Icons.image_outlined, '${mediaCounts.images}'),
                             _buildFooterMetric(context, Icons.videocam_outlined, '${mediaCounts.videos}'),
                             _buildFooterMetric(context, Icons.link_rounded, '${mediaCounts.links}'),
-                            if (widget.unloadedCount > 0)
-                              _buildFooterMetric(context, Icons.downloading_rounded, '${widget.unloadedCount}'),
                           ],
                         ),
                       ],

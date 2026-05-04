@@ -9,7 +9,6 @@ import 'package:serenity_viewer/src/environment/controller/environment_controlle
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/library/library_screen.dart';
-import 'package:serenity_viewer/src/media/loading/workspace_load_plan.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 
 class LibraryView extends StatelessWidget {
@@ -41,13 +40,9 @@ class LibraryView extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = _watchState(context);
     final dependencies = _readDependencies(context);
-    final environment = state.environmentStoreState.environment!;
-    final activeWorkspace = deriveActiveWorkspaceOrNull(state.environmentStoreState);
-
     return LibraryScreen(
       allWorkspaces: deriveWorkspaces(state.environmentStoreState),
       openWorkspaces: deriveOpenWorkspaces(state.environmentStoreState),
-      loadPlan: buildWorkspaceLoadPlan(environment: environment, activeWorkspace: activeWorkspace),
       searchController: dependencies.uiHandles.searchController,
       workspaceSort: state.workspaceSort,
       refreshingWorkspaceIds: dependencies.workspaceController.thumbnails.refreshingWorkspaceIds,
