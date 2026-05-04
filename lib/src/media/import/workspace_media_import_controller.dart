@@ -9,8 +9,8 @@ import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/foundation/serenity_identity.dart';
 import 'package:serenity_viewer/src/media/import/import_coordinator.dart';
 import 'package:serenity_viewer/src/media/video/media_inspector.dart';
+import 'package:serenity_viewer/src/media/video/video_frame_exporter.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
-import 'package:serenity_viewer/src/workspace/actions/workspace_video_conversion_controller.dart';
 
 class WorkspaceMediaImportController {
   const WorkspaceMediaImportController({
@@ -18,7 +18,8 @@ class WorkspaceMediaImportController {
     required this.videoExtensions,
     required this.environmentStoreState,
     required this.activeWorkspace,
-    required this.workspaceVideoConversionController,
+    required this.confirmSingleFrameConversion,
+    required this.videoFrameExporter,
     required this.createFileBookmark,
     required this.mediaInspector,
     required this.updateEnvironment,
@@ -30,7 +31,8 @@ class WorkspaceMediaImportController {
   final List<String> videoExtensions;
   final EnvironmentStoreState environmentStoreState;
   final Workspace Function() activeWorkspace;
-  final WorkspaceVideoConversionController workspaceVideoConversionController;
+  final Future<bool> Function(String filename) confirmSingleFrameConversion;
+  final VideoFrameExporter videoFrameExporter;
   final Future<String?> Function(String path) createFileBookmark;
   final MediaInspector mediaInspector;
   final ValueChanged<Environment> updateEnvironment;
@@ -77,14 +79,8 @@ class WorkspaceMediaImportController {
     return ImportCoordinator(
       imageExtensions: imageExtensions,
       videoExtensions: videoExtensions,
-      confirmSingleFrameConversion: workspaceVideoConversionController.confirmSingleFrameConversion,
-      exportVideoFrameToJpeg: ({required sourcePath, required probe, positionMs}) {
-        return workspaceVideoConversionController.exportVideoFrameToJpeg(
-          sourcePath: sourcePath,
-          probe: probe,
-          positionMs: positionMs,
-        );
-      },
+      confirmSingleFrameConversion: confirmSingleFrameConversion,
+      exportVideoFrameToJpeg: videoFrameExporter.exportVideoFrameToJpeg,
       createFileBookmark: createFileBookmark,
       md5ForFile: mediaInspector.md5ForFile,
       imageDimensionsForFile: mediaInspector.imageDimensionsForFile,
