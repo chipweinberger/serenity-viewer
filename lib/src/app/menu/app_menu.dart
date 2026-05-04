@@ -164,9 +164,24 @@ class AppMenu extends StatelessWidget {
     );
   }
 
-  _WindowActions _buildWindowActions({
+  _AssetActions _buildAssetActions({
+    required PlatformBridge platformBridge,
     required EnvironmentController environmentController,
     required WorkspaceWindowController workspaceWindowController,
+    required WorkspaceVideoConversionController workspaceVideoConversionController,
+    required WorkspaceWindowHistoryController workspaceWindowHistoryController,
+  }) {
+    return _AssetActions(
+      revealAssetInFinder: platformBridge.revealAssetInFinder,
+      convertVideoWindowToJpeg: workspaceVideoConversionController.convertVideoWindowToJpeg,
+    );
+  }
+
+  _WindowActions _buildWindowActions({
+    required PlatformBridge platformBridge,
+    required EnvironmentController environmentController,
+    required WorkspaceWindowController workspaceWindowController,
+    required WorkspaceVideoConversionController workspaceVideoConversionController,
     required WorkspaceWindowHistoryController workspaceWindowHistoryController,
   }) {
     return _WindowActions(
@@ -174,16 +189,6 @@ class AppMenu extends StatelessWidget {
       fitWindowToContent: workspaceWindowController.fitWindowToContent,
       restorePreviousWindowZOrder: workspaceWindowController.restorePreviousWindowZOrder,
       closeWindow: workspaceWindowHistoryController.removeWindow,
-    );
-  }
-
-  _AssetActions _buildAssetActions({
-    required PlatformBridge platformBridge,
-    required WorkspaceVideoConversionController workspaceVideoConversionController,
-  }) {
-    return _AssetActions(
-      revealAssetInFinder: platformBridge.revealAssetInFinder,
-      convertVideoWindowToJpeg: workspaceVideoConversionController.convertVideoWindowToJpeg,
     );
   }
 
@@ -210,7 +215,7 @@ class AppMenu extends StatelessWidget {
     );
   }
 
-  _HistoryActions _buildHistoryActionsController({
+  _HistoryActions _buildHistoryActions({
     required WorkspaceWindowHistoryController workspaceWindowHistoryController,
   }) {
     return _HistoryActions(
@@ -218,7 +223,7 @@ class AppMenu extends StatelessWidget {
     );
   }
 
-  List<PlatformMenuItem> _buildHistoryActions({
+  List<PlatformMenuItem> _buildHistoryMenuItems({
     required _MenuState state,
     required _HistoryActions window,
   }) {
@@ -285,10 +290,9 @@ class AppMenu extends StatelessWidget {
     ];
   }
 
-  List<PlatformMenuItem> _buildWindowMenuItems({
+  List<PlatformMenuItem> _buildAssetMenuItems({
     required _MenuState state,
     required _AssetActions asset,
-    required _WindowActions window,
   }) {
     final focusedWindow = state.focusedWindow;
     final focusedVideoWindow = focusedWindow?.asset.type == AssetType.video ? focusedWindow : null;
@@ -306,6 +310,28 @@ class AppMenu extends StatelessWidget {
             shortcut: const SingleActivator(LogicalKeyboardKey.keyR, meta: true, shift: true),
           ),
           PlatformMenuItem(
+            label: 'Convert to JPEG',
+            onSelected: focusedVideoWindow == null
+                ? null
+                : () => unawaited(asset.convertVideoWindowToJpeg(focusedVideoWindow.asset.id)),
+            shortcut: const SingleActivator(LogicalKeyboardKey.keyJ, meta: true, shift: true),
+          ),
+        ],
+      ),
+    ];
+  }
+
+
+  List<PlatformMenuItem> _buildWindowMenuItems({
+    required _MenuState state,
+    required _WindowActions window,
+  }) {
+    final focusedWindow = state.focusedWindow;
+
+    return [
+      PlatformMenuItemGroup(
+        members: [
+          PlatformMenuItem(
             label: state.focusedWindowIsSelected ? 'Deselect' : 'Select',
             onSelected: focusedWindow == null ? null : () => window.toggleWindowSelected(focusedWindow.asset.id),
             shortcut: const SingleActivator(LogicalKeyboardKey.keyE, meta: true),
@@ -317,16 +343,8 @@ class AppMenu extends StatelessWidget {
           ),
           PlatformMenuItem(
             label: 'Send Back',
-            onSelected:
-                focusedWindow == null ? null : () => window.restorePreviousWindowZOrder(focusedWindow.asset.id),
+            onSelected: focusedWindow == null ? null : () => window.restorePreviousWindowZOrder(focusedWindow.asset.id),
             shortcut: const SingleActivator(LogicalKeyboardKey.keyB, meta: true, shift: true),
-          ),
-          PlatformMenuItem(
-            label: 'Convert to JPEG',
-            onSelected: focusedVideoWindow == null
-                ? null
-                : () => unawaited(asset.convertVideoWindowToJpeg(focusedVideoWindow.asset.id)),
-            shortcut: const SingleActivator(LogicalKeyboardKey.keyJ, meta: true, shift: true),
           ),
           PlatformMenuItem(
             label: 'Close',
@@ -412,17 +430,18 @@ class AppMenu extends StatelessWidget {
     required _AppActions app,
     required _FileActions file,
     required _AssetActions asset,
+    required _WindowActions window,
     required _WorkspaceActions workspace,
     required _HistoryActions history,
-    required _WindowActions window,
   }) {
     return [
       PlatformMenu(label: 'Serenity', menus: _buildAppMenuItems(app: app)),
       PlatformMenu(label: 'File', menus: _buildFileMenuItems(file: file)),
-      PlatformMenu(label: 'Window', menus: _buildWindowMenuItems(state: state, asset: asset, window: window)),
-      PlatformMenu(label: 'View', menus: _buildViewMenuItems(workspace: workspace)),
+      PlatformMenu(label: 'Asset', menus: _buildAssetMenuItems(state: state, asset: asset)),
+      PlatformMenu(label: 'Window', menus: _buildWindowMenuItems(state: state, window: window)),
       PlatformMenu(label: 'Workspace', menus: _buildWorkspaceMenuItems(state: state, workspace: workspace)),
-      PlatformMenu(label: 'History', menus: _buildHistoryActions(state: state, window: history)),
+      PlatformMenu(label: 'View', menus: _buildViewMenuItems(workspace: workspace)),
+      PlatformMenu(label: 'History', menus: _buildHistoryMenuItems(state: state, window: history)),
     ];
   }
 
@@ -471,11 +490,16 @@ class AppMenu extends StatelessWidget {
     );
     final asset = _buildAssetActions(
       platformBridge: platformBridge,
-      workspaceVideoConversionController: workspaceVideoConversionController,
-    );
-    final window = _buildWindowActions(
       environmentController: environmentController,
       workspaceWindowController: workspaceWindowController,
+      workspaceVideoConversionController: workspaceVideoConversionController,
+      workspaceWindowHistoryController: workspaceWindowHistoryController,
+    );
+    final window = _buildWindowActions(
+      platformBridge: platformBridge,
+      environmentController: environmentController,
+      workspaceWindowController: workspaceWindowController,
+      workspaceVideoConversionController: workspaceVideoConversionController,
       workspaceWindowHistoryController: workspaceWindowHistoryController,
     );
     final workspace = _buildWorkspaceActions(
@@ -485,17 +509,17 @@ class AppMenu extends StatelessWidget {
       workspaceCollateController: workspaceCollateController,
       feedback: feedback,
     );
-    final history = _buildHistoryActionsController(workspaceWindowHistoryController: workspaceWindowHistoryController);
+    final history = _buildHistoryActions(workspaceWindowHistoryController: workspaceWindowHistoryController);
 
     return PlatformMenuBar(
       menus: _buildMenus(
         state: state,
         app: app,
         file: file,
+        window: window,
         asset: asset,
         workspace: workspace,
         history: history,
-        window: window,
       ),
       child: child,
     );
