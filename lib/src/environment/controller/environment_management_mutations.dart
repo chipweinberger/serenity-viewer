@@ -8,13 +8,17 @@ import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
-import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_environment_tabs_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_environment_window_transfer_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_expose_controller.dart';
 
 class EnvironmentManagementMutationDependencies {
   const EnvironmentManagementMutationDependencies({
     required this.environmentStoreState,
     required this.appUiState,
-    required this.workspaceController,
+    required this.tabsController,
+    required this.windowTransferController,
+    required this.exposeController,
     required this.workspaces,
     required this.updateEnvironment,
     required this.replaceWorkspace,
@@ -25,7 +29,9 @@ class EnvironmentManagementMutationDependencies {
 
   final EnvironmentStoreState environmentStoreState;
   final AppUiState appUiState;
-  final WorkspaceController workspaceController;
+  final WorkspaceEnvironmentTabsController tabsController;
+  final WorkspaceEnvironmentWindowTransferController windowTransferController;
+  final WorkspaceExposeController exposeController;
   final List<Workspace> Function() workspaces;
   final ValueChanged<Environment> updateEnvironment;
   final void Function(Workspace workspace, {bool queueThumbnail}) replaceWorkspace;
@@ -65,11 +71,7 @@ class EnvironmentManagementMutations {
       return;
     }
 
-    _dependencies.workspaceController.environment.tabs.toggleOpen(
-      environment,
-      workspaceId,
-      _dependencies.updateEnvironment,
-    );
+    _dependencies.tabsController.toggleOpen(environment, workspaceId, _dependencies.updateEnvironment);
   }
 
   void rename(Workspace workspace, String nextName) {
@@ -133,19 +135,19 @@ class EnvironmentManagementMutations {
     required Workspace sourceWorkspace,
     required Workspace destinationWorkspace,
   }) {
-    _dependencies.workspaceController.environment.windowTransfer.moveSelectedToWorkspace(
+    _dependencies.windowTransferController.moveSelectedToWorkspace(
       environment: environment,
       sourceWorkspace: sourceWorkspace,
       destinationWorkspace: destinationWorkspace,
-      selectedWindowIds: _dependencies.workspaceController.expose.ids(),
+      selectedWindowIds: _dependencies.exposeController.ids(),
       updateEnvironment: _dependencies.updateEnvironment,
       queueThumbnailRefresh: _dependencies.queueWorkspaceRefresh,
-      clearExposeSelection: _dependencies.workspaceController.expose.clear,
+      clearExposeSelection: _dependencies.exposeController.clear,
     );
   }
 
   void reorderOpen(String sourceWorkspaceId, String targetWorkspaceId) {
-    _dependencies.workspaceController.environment.tabs.reorderOpen(
+    _dependencies.tabsController.reorderOpen(
       _dependencies.environmentStoreState.environment,
       _dependencies.workspaces(),
       sourceWorkspaceId: sourceWorkspaceId,

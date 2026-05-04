@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller_types.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
-import 'package:serenity_viewer/src/environment/history/environment_window_history_controller.dart';
 import 'package:serenity_viewer/src/environment/history/environment_window_history_state.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
@@ -144,21 +143,8 @@ AppRuntime createAppRuntime({
     trackingState: workspaceViewTrackingState,
     viewportState: workspaceViewportState,
     thumbState: thumbnailRefreshState,
-  );
-  final environmentWindowHistoryController = EnvironmentWindowHistoryController(
-    environment: () => environmentStoreState.environment,
-    workspaces: workspaces,
-    activeWorkspace: activeWorkspace,
     environmentWindowHistoryState: environmentWindowHistoryState,
-    workspaceController: workspace.workspaceController,
-    updateEnvironment: foundation.environmentStore.updateEnvironment,
-    replaceWorkspace: foundation.environmentStore.replaceWorkspace,
-    showMessage: showMessage,
-    showWorkspaceScreen: showWorkspaceScreen,
-    screen: () => appUiState.screen,
-    maxRecentlyClosedWindows: 12,
   );
-  workspace.workspaceController.attachEnvironmentHistoryController(environmentWindowHistoryController);
   final documentCoordinator = createAppDocumentCoordinator(
     environmentStoreState: environmentStoreState,
     environmentStore: foundation.environmentStore,

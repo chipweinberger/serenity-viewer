@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
-import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_management_dialogs.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_management_mutations.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_navigation_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_environment_window_transfer_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_expose_controller.dart';
 
 class EnvironmentManagementDependencies {
   const EnvironmentManagementDependencies({
     required this.environmentStoreState,
-    required this.workspaceController,
+    required this.windowTransferController,
+    required this.exposeController,
     required this.context,
     required this.mounted,
     required this.workspaces,
@@ -21,7 +23,8 @@ class EnvironmentManagementDependencies {
   });
 
   final EnvironmentStoreState environmentStoreState;
-  final WorkspaceController workspaceController;
+  final WorkspaceEnvironmentWindowTransferController windowTransferController;
+  final WorkspaceExposeController exposeController;
   final BuildContext Function() context;
   final bool Function() mounted;
   final List<Workspace> Function() workspaces;
@@ -88,11 +91,11 @@ class EnvironmentManagementController {
   Future<void> moveSelectedExposeWindowsToWorkspace(String destinationWorkspaceId) async {
     final environment = _dependencies.environmentStoreState.environment;
     final sourceWorkspace = _dependencies.activeWorkspace();
-    if (!_dependencies.workspaceController.environment.windowTransfer.canMoveSelectedToWorkspace(
+    if (!_dependencies.windowTransferController.canMoveSelectedToWorkspace(
       environment: environment,
       sourceWorkspace: sourceWorkspace,
       destinationWorkspaceId: destinationWorkspaceId,
-      hasSelectedWindowIds: _dependencies.workspaceController.expose.hasSelection(),
+      hasSelectedWindowIds: _dependencies.exposeController.hasSelection(),
     )) {
       if (sourceWorkspace != null && destinationWorkspaceId == sourceWorkspace.id) {
         _dependencies.showMessage('Choose a different tab to move those windows.');
@@ -115,7 +118,7 @@ class EnvironmentManagementController {
     }
 
     final destinationWorkspace = destinationMatches.first;
-    final selectedWindowCount = _dependencies.workspaceController.expose.countIn(sourceWorkspace);
+    final selectedWindowCount = _dependencies.exposeController.countIn(sourceWorkspace);
     if (selectedWindowCount == 0) {
       _dependencies.navigation.clearExposeSelection();
       return;

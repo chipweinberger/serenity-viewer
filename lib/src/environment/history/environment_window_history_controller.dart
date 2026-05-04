@@ -7,7 +7,9 @@ import 'package:serenity_viewer/src/environment/history/environment_window_histo
 import 'package:serenity_viewer/src/environment/history/environment_window_history_state.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_expose_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_playback_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_windows_controller.dart';
 
 class EnvironmentWindowHistoryController {
   EnvironmentWindowHistoryController({
@@ -15,7 +17,9 @@ class EnvironmentWindowHistoryController {
     required this.workspaces,
     required this.activeWorkspace,
     required this.environmentWindowHistoryState,
-    required this.workspaceController,
+    required this.exposeController,
+    required this.windowsController,
+    required this.playbackController,
     required this.updateEnvironment,
     required this.replaceWorkspace,
     required this.showMessage,
@@ -28,7 +32,9 @@ class EnvironmentWindowHistoryController {
   final List<Workspace> Function() workspaces;
   final Workspace? Function() activeWorkspace;
   final EnvironmentWindowHistoryState environmentWindowHistoryState;
-  final WorkspaceController workspaceController;
+  final WorkspaceExposeController exposeController;
+  final WorkspaceWindowsController windowsController;
+  final WorkspacePlaybackController playbackController;
   final ValueChanged<Environment> updateEnvironment;
   final void Function(Workspace workspace, {bool queueThumbnail}) replaceWorkspace;
   final ValueChanged<String> showMessage;
@@ -59,14 +65,14 @@ class EnvironmentWindowHistoryController {
       return;
     }
 
-    workspaceController.windows.runtime.rememberClosed(
+    windowsController.runtime.rememberClosed(
       environmentWindowHistoryState,
       maxRecentlyClosedWindows: maxRecentlyClosedWindows,
       workspace: workspace,
       window: window,
     );
-    workspaceController.playback.runtime.clear(windowId);
-    workspaceController.windows.runtime.clear(windowId);
+    playbackController.runtime.clear(windowId);
+    windowsController.runtime.clear(windowId);
 
     replaceWorkspace(
       workspace.copyWith(windows: workspace.windows.where((entry) => entry.asset.id != windowId).toList()),
@@ -74,7 +80,7 @@ class EnvironmentWindowHistoryController {
   }
 
   void removeWindow(String workspaceId, String windowId) {
-    workspaceController.expose.remove(windowId);
+    exposeController.remove(windowId);
     closeWindow(workspaceId, windowId);
   }
 

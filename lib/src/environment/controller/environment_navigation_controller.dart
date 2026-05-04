@@ -8,13 +8,13 @@ import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
-import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_expose_controller.dart';
 
 class EnvironmentNavigationDependencies {
   const EnvironmentNavigationDependencies({
     required this.environmentStoreState,
     required this.appUiState,
-    required this.workspaceController,
+    required this.exposeController,
     required this.openWorkspaces,
     required this.updateEnvironment,
     required this.showWorkspaceScreen,
@@ -25,7 +25,7 @@ class EnvironmentNavigationDependencies {
 
   final EnvironmentStoreState environmentStoreState;
   final AppUiState appUiState;
-  final WorkspaceController workspaceController;
+  final WorkspaceExposeController exposeController;
   final List<Workspace> Function() openWorkspaces;
   final ValueChanged<Environment> updateEnvironment;
   final SerenityShowWorkspaceScreen showWorkspaceScreen;
@@ -40,11 +40,11 @@ class EnvironmentNavigationController {
   final EnvironmentNavigationDependencies _dependencies;
 
   void toggleSelectedWindow(String windowId) {
-    _dependencies.workspaceController.expose.toggle(windowId);
+    _dependencies.exposeController.toggle(windowId);
   }
 
   void clearExposeSelection() {
-    _dependencies.workspaceController.expose.clear();
+    _dependencies.exposeController.clear();
   }
 
   void toggleOverview() {

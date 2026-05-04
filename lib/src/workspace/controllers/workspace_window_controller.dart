@@ -11,31 +11,43 @@ import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/foundation/keyboard_modifiers.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
-import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
+import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_gesture_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_playback_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_viewport_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_windows_controller.dart';
 import 'package:serenity_viewer/src/window/frame/window_resize_helpers.dart';
 import 'package:serenity_viewer/src/window/interaction/window_zoom_update.dart';
 
 class WorkspaceWindowController {
   const WorkspaceWindowController({
     required this.appUiState,
+    required this.windowInteractionState,
     required this.environment,
     required this.activeWorkspace,
     required this.activeWorkspaceOrNull,
-    required this.workspaceController,
+    required this.gestureController,
+    required this.windowsController,
+    required this.viewportController,
+    required this.playbackController,
   });
 
   final AppUiState appUiState;
+  final WindowInteractionState windowInteractionState;
   final Environment? Function() environment;
   final Workspace Function() activeWorkspace;
   final Workspace? Function() activeWorkspaceOrNull;
-  final WorkspaceController workspaceController;
+  final WorkspaceGestureController gestureController;
+  final WorkspaceWindowsController windowsController;
+  final WorkspaceViewportController viewportController;
+  final WorkspacePlaybackController playbackController;
 
   void setActiveGestureWindow(String? windowId) {
-    workspaceController.gesture.setActive(windowId);
+    gestureController.setActive(windowId);
   }
 
   void setPinnedHoverWindow(String? windowId) {
-    workspaceController.gesture.setPinnedHover(windowId);
+    gestureController.setPinnedHover(windowId);
   }
 
   void clearPinnedHoverWindow() {
@@ -43,7 +55,7 @@ class WorkspaceWindowController {
   }
 
   void handleOptionGestureHover(PointerHoverEvent event, Workspace workspace) {
-    workspaceController.windows.editing.handleOptionHover(
+    windowsController.editing.handleOptionHover(
       event,
       workspace,
       isCommandPressedForContentGesture: isCommandPressed(),
@@ -52,47 +64,47 @@ class WorkspaceWindowController {
   }
 
   void focusWindow(String windowId) {
-    final result = workspaceController.windows.arrangement.focus(activeWorkspace(), windowId);
+    final result = windowsController.arrangement.focus(activeWorkspace(), windowId);
     if (result?.previousZOrder != null) {
-      workspaceController.windowInteractionState.rememberPreviousWindowZOrder(windowId, result!.previousZOrder!);
+      windowInteractionState.rememberPreviousWindowZOrder(windowId, result!.previousZOrder!);
     }
   }
 
   Window? focusedWindowOrNull() {
-    return workspaceController.windows.arrangement.focusedOrNull(activeWorkspaceOrNull());
+    return windowsController.arrangement.focusedOrNull(activeWorkspaceOrNull());
   }
 
   void restorePreviousWindowZOrder(String windowId) {
-    final previousZOrder = workspaceController.windowInteractionState.takePreviousWindowZOrder(windowId);
+    final previousZOrder = windowInteractionState.takePreviousWindowZOrder(windowId);
     if (previousZOrder == null) {
       return;
     }
 
-    workspaceController.windows.arrangement.restorePreviousZOrder(activeWorkspace(), windowId, previousZOrder);
+    windowsController.arrangement.restorePreviousZOrder(activeWorkspace(), windowId, previousZOrder);
   }
 
   void moveWindow(String windowId, Offset delta) {
-    workspaceController.windows.editing.move(activeWorkspace(), windowId, delta);
+    windowsController.editing.move(activeWorkspace(), windowId, delta);
   }
 
   void resizeWindow(String windowId, WindowResizeHandle handle, Offset delta) {
-    workspaceController.windows.editing.resize(activeWorkspace(), windowId, handle, delta);
+    windowsController.editing.resize(activeWorkspace(), windowId, handle, delta);
   }
 
   void transformWindowFromTrackpad(String windowId, double scaleDelta, Offset localFocalPoint) {
-    workspaceController.windows.editing.transformFromTrackpad(activeWorkspace(), windowId, scaleDelta);
+    windowsController.editing.transformFromTrackpad(activeWorkspace(), windowId, scaleDelta);
   }
 
   void fitWindowToContent(String windowId) {
-    workspaceController.windows.editing.fitToContent(activeWorkspaceOrNull(), windowId);
+    windowsController.editing.fitToContent(activeWorkspaceOrNull(), windowId);
   }
 
   void fitWorkspaceViewportToContent() {
-    workspaceController.viewport.fit.toContent(activeWorkspaceOrNull());
+    viewportController.fit.toContent(activeWorkspaceOrNull());
   }
 
   void handleWorkspacePanZoomStart(PointerPanZoomStartEvent event, Workspace workspace) {
-    workspaceController.viewport.gesture.handlePanZoomStart(
+    viewportController.gesture.handlePanZoomStart(
       event,
       workspace,
       isCommandPressedForContentGesture: isCommandPressed(),
@@ -101,11 +113,11 @@ class WorkspaceWindowController {
   }
 
   void handleWorkspacePanZoomUpdate(PointerPanZoomUpdateEvent event, Workspace workspace, Size viewportSize) {
-    workspaceController.viewport.gesture.handlePanZoomUpdate(event, workspace, viewportSize);
+    viewportController.gesture.handlePanZoomUpdate(event, workspace, viewportSize);
   }
 
   void handleWorkspacePanZoomEnd() {
-    unawaited(workspaceController.viewport.gesture.handlePanZoomEnd());
+    unawaited(viewportController.gesture.handlePanZoomEnd());
   }
 
   int collatableWindowCount() {
@@ -114,55 +126,55 @@ class WorkspaceWindowController {
       return 0;
     }
 
-    return workspaceController.windows.arrangement.collatableCount(workspace);
+    return windowsController.arrangement.collatableCount(workspace);
   }
 
   bool canCollateActiveWorkspace() {
-    return workspaceController.windows.arrangement.canCollate(activeWorkspaceOrNull());
+    return windowsController.arrangement.canCollate(activeWorkspaceOrNull());
   }
 
   void collateActiveWorkspace() {
     final workspace = activeWorkspaceOrNull();
-    if (!workspaceController.windows.arrangement.canCollate(workspace)) {
+    if (!windowsController.arrangement.canCollate(workspace)) {
       return;
     }
 
-    workspaceController.windows.arrangement.collate(workspace!);
+    windowsController.arrangement.collate(workspace!);
   }
 
   void setWindowZoom(String windowId, WindowZoomUpdate update) {
-    workspaceController.windows.editing.setZoom(activeWorkspace(), windowId, update);
+    windowsController.editing.setZoom(activeWorkspace(), windowId, update);
   }
 
   void setVideoPosition(String windowId, int positionMs) {
-    workspaceController.playback.workspace.setPosition(activeWorkspaceOrNull(), windowId, positionMs);
+    playbackController.workspace.setPosition(activeWorkspaceOrNull(), windowId, positionMs);
   }
 
   void cycleVideoPlaybackSpeed(String windowId) {
-    workspaceController.playback.workspace.cycleSpeed(activeWorkspaceOrNull(), windowId);
+    playbackController.workspace.cycleSpeed(activeWorkspaceOrNull(), windowId);
   }
 
   void setWindowIntrinsicSize(String windowId, Size intrinsicSize) {
-    workspaceController.windows.editing.setIntrinsicSize(activeWorkspaceOrNull(), windowId, intrinsicSize);
+    windowsController.editing.setIntrinsicSize(activeWorkspaceOrNull(), windowId, intrinsicSize);
   }
 
   bool isVideoWindowPaused(String windowId) {
-    return workspaceController.playback.runtime.isPaused(windowId);
+    return playbackController.runtime.isPaused(windowId);
   }
 
   void toggleVideoPlayback(String windowId) {
-    if (!workspaceController.playback.workspace.canToggle(activeWorkspaceOrNull(), windowId)) {
+    if (!playbackController.workspace.canToggle(activeWorkspaceOrNull(), windowId)) {
       return;
     }
 
-    workspaceController.playback.runtime.toggle(windowId);
+    playbackController.runtime.toggle(windowId);
   }
 
   void pauseAllVideos() {
-    workspaceController.playback.runtime.stopAll(environment());
+    playbackController.runtime.stopAll(environment());
   }
 
   void flashWindow(String windowId, {required bool mounted}) {
-    workspaceController.windows.runtime.flash(windowId, mounted: mounted);
+    windowsController.runtime.flash(windowId, mounted: mounted);
   }
 }

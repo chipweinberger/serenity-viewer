@@ -13,6 +13,7 @@ import 'package:serenity_viewer/src/window/interaction/window_interaction_state.
 import 'package:serenity_viewer/src/media/video/video_frame_exporter.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_video_conversion_prompts.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
+import 'package:serenity_viewer/src/environment/history/environment_window_history_state.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresh_state.dart';
 import 'package:serenity_viewer/src/workspace/tracking/workspace_view_tracking_state.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
@@ -51,6 +52,7 @@ import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_
   required WorkspaceViewTrackingState trackingState,
   required WorkspaceViewportState viewportState,
   required ThumbnailRefreshState thumbState,
+  required EnvironmentWindowHistoryState environmentWindowHistoryState,
 }) {
   final scope = WorkspaceFactoryScope(
     platform: platformBridge,
@@ -86,15 +88,26 @@ import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_
   final workspaceLinksController = createWorkspaceLinksController(scope: scope);
   final workspaceLinksLauncher = createWorkspaceLinksLauncher(scope: scope);
   final workspaceLinksPrompts = createWorkspaceLinksPrompts(scope: scope);
-  final workspaceController = createWorkspaceController(scope: scope, thumbnailController: thumbnailController);
+  final workspaceGestureController = createWorkspaceGestureController(scope: scope);
+  final workspaceExposeController = createWorkspaceExposeController(scope: scope);
+  final workspaceWindowsController = createWorkspaceWindowsController(scope: scope);
+  final workspaceViewportController = createWorkspaceViewportController(
+    scope: scope,
+    thumbnailController: thumbnailController,
+  );
+  final workspacePlaybackController = createWorkspacePlaybackController(scope: scope);
+  final workspaceEnvironmentController = createWorkspaceEnvironmentController();
   final workspaceWindowController = createWorkspaceWindowController(
     scope: scope,
-    workspaceController: workspaceController,
+    gestureController: workspaceGestureController,
+    windowsController: workspaceWindowsController,
+    viewportController: workspaceViewportController,
+    playbackController: workspacePlaybackController,
   );
   final environmentNavigationController = createEnvironmentNavigationController(
     scope: scope,
     thumbnailController: thumbnailController,
-    workspaceController: workspaceController,
+    exposeController: workspaceExposeController,
   );
   final workspaceExposeLayoutController = createWorkspaceExposeLayoutController(
     scope: scope,
@@ -104,7 +117,8 @@ import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_
     scope: scope,
     navigationController: environmentNavigationController,
     thumbnailController: thumbnailController,
-    workspaceController: workspaceController,
+    environmentController: workspaceEnvironmentController,
+    exposeController: workspaceExposeController,
   );
   final environmentController = EnvironmentController(
     navigation: environmentNavigationController,
@@ -132,8 +146,22 @@ import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_
   final workspaceAssetPickerController = createWorkspaceAssetPickerController(
     workspaceMediaImportController: workspaceMediaImportController,
   );
-  workspaceController.attachWorkspaceUiControllers(
+  final environmentWindowHistoryController = createEnvironmentWindowHistoryController(
+    scope: scope,
+    environmentWindowHistoryState: environmentWindowHistoryState,
+    exposeController: workspaceExposeController,
+    windowsController: workspaceWindowsController,
+    playbackController: workspacePlaybackController,
+  );
+  final workspaceController = createWorkspaceController(
+    gesture: workspaceGestureController,
+    expose: workspaceExposeController,
+    windows: workspaceWindowsController,
+    viewport: workspaceViewportController,
+    playback: workspacePlaybackController,
+    environment: workspaceEnvironmentController,
     window: workspaceWindowController,
+    history: environmentWindowHistoryController,
     media: workspaceMediaImportController,
     layout: workspaceExposeLayoutController,
     videoConversion: workspaceVideoConversionController,
