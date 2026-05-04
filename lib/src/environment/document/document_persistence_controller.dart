@@ -5,12 +5,13 @@ import 'package:flutter/widgets.dart';
 
 import 'package:serenity_viewer/src/app/runtime/app_runtime.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
+import 'package:serenity_viewer/src/environment/document/document_coordinator.dart';
 
 class DocumentPersistenceController {
   const DocumentPersistenceController({
     required this.state,
     required this.foundation,
-    required this.documents,
+    required this.documentCoordinator,
     required this.mounted,
     required this.seedEnvironment,
     required this.isRunningInWidgetTest,
@@ -18,7 +19,7 @@ class DocumentPersistenceController {
 
   final AppRuntimeState state;
   final AppFoundation foundation;
-  final AppDocument documents;
+  final DocumentCoordinator documentCoordinator;
   final bool Function() mounted;
   final Environment Function() seedEnvironment;
   final bool isRunningInWidgetTest;
@@ -32,7 +33,7 @@ class DocumentPersistenceController {
     try {
       final lastEnvironmentPath = await foundation.platformBridge.loadLastEnvironmentPath();
       if (lastEnvironmentPath != null && lastEnvironmentPath.isNotEmpty && await File(lastEnvironmentPath).exists()) {
-        await documents.documentCoordinator.loadDocumentFromPath(
+        await documentCoordinator.loadDocumentFromPath(
           lastEnvironmentPath,
           showSuccessMessage: false,
           persistAsLastOpened: true,
@@ -46,7 +47,7 @@ class DocumentPersistenceController {
 
     foundation.environmentStore.showMissingStartupState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(documents.documentCoordinator.promptForStartupDocument());
+      unawaited(documentCoordinator.promptForStartupDocument());
     });
   }
 
@@ -67,7 +68,7 @@ class DocumentPersistenceController {
         savedEnvironment: sessionToSave,
         mounted: mounted(),
       );
-      await documents.documentCoordinator.saveDocumentToPath(
+      await documentCoordinator.saveDocumentToPath(
         environmentPath,
         environmentOverride: sessionToSave,
         showMessageOnFailure: false,

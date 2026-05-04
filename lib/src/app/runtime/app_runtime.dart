@@ -9,6 +9,7 @@ import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory.
 import 'package:serenity_viewer/src/app/runtime/app_runtime_groups.dart';
 import 'package:serenity_viewer/src/app/runtime/app_runtime_inputs.dart';
 import 'package:serenity_viewer/src/app/state/app_state_store.dart';
+import 'package:serenity_viewer/src/environment/document/document_coordinator.dart';
 
 export 'package:serenity_viewer/src/app/runtime/app_runtime_groups.dart';
 export 'package:serenity_viewer/src/app/runtime/app_runtime_inputs.dart';
@@ -18,7 +19,7 @@ class AppRuntime {
     required this.stateStore,
     required this.state,
     required this.foundation,
-    required this.documents,
+    required this.documentCoordinator,
     required this.workspace,
     required this.autosaveTimer,
     required this.appLifecycleListener,
@@ -27,7 +28,7 @@ class AppRuntime {
   final AppStateStore stateStore;
   final AppRuntimeState state;
   final AppFoundation foundation;
-  final AppDocument documents;
+  final DocumentCoordinator documentCoordinator;
   final AppWorkspaceServices workspace;
   final Timer autosaveTimer;
   final AppLifecycleListener appLifecycleListener;
@@ -45,7 +46,11 @@ class AppRuntime {
       syncWindowTitle: () async => foundation.platformBridge.syncWindowTitle(),
     );
     workspace = createAppWorkspaceServices(inputs: inputs, foundation: foundation);
-    final documents = createAppDocument(inputs: inputs, foundation: foundation, workspace: workspace);
+    final documentCoordinator = createAppDocumentCoordinator(
+      inputs: inputs,
+      foundation: foundation,
+      workspace: workspace,
+    );
     final autosaveTimer = Timer.periodic(const Duration(minutes: 1), (_) {
       if (environmentStoreState.hasUnsavedChanges) {
         unawaited(inputs.environment.saveEnvironment());
@@ -72,7 +77,7 @@ class AppRuntime {
         workspaceWindowHistoryState: stateStore.workspaceWindowHistoryState,
       ),
       foundation: foundation,
-      documents: documents,
+      documentCoordinator: documentCoordinator,
       workspace: workspace,
       autosaveTimer: autosaveTimer,
       appLifecycleListener: appLifecycleListener,

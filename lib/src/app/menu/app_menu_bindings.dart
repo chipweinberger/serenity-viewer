@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:serenity_viewer/src/app/controllers/app_feedback_controller.dart';
 import 'package:serenity_viewer/src/app/runtime/app_runtime_groups.dart';
 import 'package:serenity_viewer/src/environment/asset.dart';
+import 'package:serenity_viewer/src/environment/document/document_coordinator.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/settings/behavior/app_settings_controller.dart';
 import 'package:serenity_viewer/src/workspace/history/workspace_window_history_entry.dart';
@@ -140,15 +141,15 @@ AppMenuAppActions _buildAppMenuAppActions({
 }
 
 AppMenuFileActions _buildAppMenuFileActions({
-  required AppDocument documents,
+  required DocumentCoordinator documentCoordinator,
   required Future<void> Function() openAssets,
 }) {
   return AppMenuFileActions(
-    createEnvironment: documents.documentCoordinator.createDocument,
-    openEnvironment: documents.documentCoordinator.openDocument,
+    createEnvironment: documentCoordinator.createDocument,
+    openEnvironment: documentCoordinator.openDocument,
     openAssets: openAssets,
-    saveEnvironment: documents.documentCoordinator.saveDocument,
-    saveEnvironmentAs: documents.documentCoordinator.saveDocumentAs,
+    saveEnvironment: documentCoordinator.saveDocument,
+    saveEnvironmentAs: documentCoordinator.saveDocumentAs,
   );
 }
 
@@ -196,7 +197,7 @@ AppMenuWindowActions _buildAppMenuWindowActions({required AppWorkspaceServices w
 AppMenuBindings buildAppMenuBindings({
   required AppRuntimeState state,
   required AppFoundation foundation,
-  required AppDocument documents,
+  required DocumentCoordinator documentCoordinator,
   required AppWorkspaceServices workspace,
   required AppFeedbackController feedback,
   required AppSettingsController settings,
@@ -205,7 +206,7 @@ AppMenuBindings buildAppMenuBindings({
   return AppMenuBindings(
     state: _buildAppMenuState(state: state, workspace: workspace),
     app: _buildAppMenuAppActions(feedback: feedback, settings: settings),
-    file: _buildAppMenuFileActions(documents: documents, openAssets: openAssets),
+    file: _buildAppMenuFileActions(documentCoordinator: documentCoordinator, openAssets: openAssets),
     asset: _buildAppMenuAssetActions(foundation: foundation, workspace: workspace),
     workspace: _buildAppMenuWorkspaceActions(foundation: foundation, workspace: workspace, feedback: feedback),
     window: _buildAppMenuWindowActions(workspace: workspace),

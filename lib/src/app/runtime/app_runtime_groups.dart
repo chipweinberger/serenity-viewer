@@ -3,7 +3,6 @@ import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
-import 'package:serenity_viewer/src/environment/document/document_coordinator.dart';
 import 'package:serenity_viewer/src/environment/store/environment_bookmark_synchronizer.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
@@ -68,12 +67,6 @@ class AppFoundation {
   final SharedVideoControllerPool sharedVideoControllerPool;
   final EnvironmentBookmarkSynchronizer environmentBookmarkSynchronizer;
   final EnvironmentStore environmentStore;
-}
-
-class AppDocument {
-  const AppDocument({required this.documentCoordinator});
-
-  final DocumentCoordinator documentCoordinator;
 }
 
 class AppWorkspaceServices {

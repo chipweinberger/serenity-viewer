@@ -11,6 +11,7 @@ import 'package:serenity_viewer/src/app/seed_environment.dart';
 import 'package:serenity_viewer/src/app/menu/app_menu.dart';
 import 'package:serenity_viewer/src/app/views/app_main_view.dart';
 import 'package:serenity_viewer/src/environment/document/document_persistence_controller.dart';
+import 'package:serenity_viewer/src/environment/document/document_coordinator.dart';
 import 'package:serenity_viewer/src/settings/behavior/app_settings_controller.dart';
 
 class AppRoot extends StatefulWidget {
@@ -31,7 +32,7 @@ class _AppRootState extends State<AppRoot> {
   AppRuntimeState get _state => _runtime.state;
   AppDerivedState get _derivedState => AppDerivedState(_state);
   AppFoundation get _foundation => _runtime.foundation;
-  AppDocument get _documents => _runtime.documents;
+  DocumentCoordinator get _documentCoordinator => _runtime.documentCoordinator;
   AppWorkspaceServices get _workspaceRuntime => _runtime.workspace;
 
   void _showMessage(String message) {
@@ -71,7 +72,7 @@ class _AppRootState extends State<AppRoot> {
     _documentPersistence = DocumentPersistenceController(
       state: _state,
       foundation: _foundation,
-      documents: _documents,
+      documentCoordinator: _documentCoordinator,
       mounted: () => mounted,
       seedEnvironment: buildSeedEnvironment,
       isRunningInWidgetTest: _isRunningInWidgetTest,
@@ -109,7 +110,7 @@ class _AppRootState extends State<AppRoot> {
     return buildAppMenuBindings(
       state: _state,
       foundation: _foundation,
-      documents: _documents,
+      documentCoordinator: _documentCoordinator,
       workspace: _workspaceRuntime,
       feedback: _feedback,
       settings: _settings,

@@ -1,13 +1,13 @@
-import 'package:serenity_viewer/src/app/runtime/app_runtime_groups.dart';
 import 'package:serenity_viewer/src/app/runtime/app_runtime_inputs.dart';
 import 'package:serenity_viewer/src/environment/document/document_coordinator.dart';
+import 'package:serenity_viewer/src/app/runtime/app_runtime_groups.dart';
 
-AppDocument createAppDocument({
+DocumentCoordinator createAppDocumentCoordinator({
   required AppRuntimeInputs inputs,
   required AppFoundation foundation,
   required AppWorkspaceServices workspace,
 }) {
-  final documentCoordinator = DocumentCoordinator(
+  return DocumentCoordinator(
     environmentStoreState: inputs.stateStore.environmentStoreState,
     environmentStore: foundation.environmentStore,
     context: inputs.app.context,
@@ -23,6 +23,4 @@ AppDocument createAppDocument({
     updateEnvironment: inputs.environment.updateEnvironment,
     saveEnvironment: inputs.environment.saveEnvironment,
   );
-
-  return AppDocument(documentCoordinator: documentCoordinator);
 }
