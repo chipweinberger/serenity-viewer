@@ -1,6 +1,6 @@
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
-import 'package:serenity_viewer/src/environment/session/environment_api.dart';
+import 'package:serenity_viewer/src/environment/session/environment_session.dart';
 
 class AppNavigationController {
   const AppNavigationController({required this.appUiController});

@@ -2,7 +2,7 @@ import 'package:serenity_viewer/src/app/app_dependencies.dart';
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
 import 'package:serenity_viewer/src/environment/document/document_coordinator.dart';
-import 'package:serenity_viewer/src/environment/session/environment_api.dart';
+import 'package:serenity_viewer/src/environment/session/environment_session.dart';
 import 'package:serenity_viewer/src/environment/session/environment_bookmark_synchronizer.dart';
 import 'package:serenity_viewer/src/environment/session/environment_store.dart';
 import 'package:serenity_viewer/src/environment/session/environment_store_state.dart';
@@ -76,7 +76,7 @@ class AppWorkspaceServices {
     required this.workspaceWindowController,
     required this.workspaceWindowHistoryController,
     required this.workspaceViewportSessionController,
-    required this.environmentController,
+    required this.environmentSession,
   });
 
   final ThumbnailController thumbnailController;
@@ -87,5 +87,5 @@ class AppWorkspaceServices {
   final WorkspaceWindowController workspaceWindowController;
   final WorkspaceWindowHistoryController workspaceWindowHistoryController;
   final WorkspaceViewportSessionController workspaceViewportSessionController;
-  final EnvironmentApi environmentController;
+  final EnvironmentSession environmentSession;
 }

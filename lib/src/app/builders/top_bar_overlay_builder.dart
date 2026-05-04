@@ -18,14 +18,14 @@ class TopBarOverlayBuilder {
       draggingTabWorkspaceId: state.uiState.draggingTabWorkspaceId,
       tabScrollController: state.tabScrollController,
       actions: WorkspaceTopBarOverlayActions(
-        onShowWorkspaceOverview: state.environmentController.navigation.showOverview,
+        onShowWorkspaceOverview: state.environmentSession.navigation.showOverview,
         onSetDraggingTabWorkspaceId: state.appUiController.setDraggingTabWorkspaceId,
-        onReorderOpenWorkspace: state.environmentController.management.reorderOpen,
+        onReorderOpenWorkspace: state.environmentSession.management.reorderOpen,
         onMoveSelectedExposeWindowsToWorkspace:
-            state.environmentController.management.moveSelectedExposeWindowsToWorkspace,
-        onSetActiveWorkspace: state.environmentController.navigation.setActiveWorkspace,
-        onConfirmCloseTab: state.environmentController.management.confirmCloseTab,
-        onCreateWorkspace: state.environmentController.management.create,
+            state.environmentSession.management.moveSelectedExposeWindowsToWorkspace,
+        onSetActiveWorkspace: state.environmentSession.navigation.setActiveWorkspace,
+        onConfirmCloseTab: state.environmentSession.management.confirmCloseTab,
+        onCreateWorkspace: state.environmentSession.management.create,
       ),
     );
   }

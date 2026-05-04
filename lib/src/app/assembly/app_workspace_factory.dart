@@ -9,7 +9,7 @@ import 'package:serenity_viewer/src/media/video/video_conversion_coordinator.dar
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_viewport_session_controller.dart';
-import 'package:serenity_viewer/src/environment/session/environment_api.dart';
+import 'package:serenity_viewer/src/environment/session/environment_session.dart';
 import 'package:serenity_viewer/src/workspace/window/session/workspace_window_history_controller.dart';
 
 class AppWorkspaceFactory {
@@ -26,7 +26,7 @@ class AppWorkspaceFactory {
     final workspaceViewportState = dependencies.workspaceViewportState;
     final thumbnailRefreshState = dependencies.thumbnailRefreshState;
 
-    late final EnvironmentApi environmentController;
+    late final EnvironmentSession environmentSession;
 
     final thumbnailController = ThumbnailController(
       state: thumbnailRefreshState,
@@ -89,8 +89,8 @@ class AppWorkspaceFactory {
       thumbnailController: thumbnailController,
       replaceWorkspace: foundation.environmentStore.replaceWorkspace,
     );
-    environmentController = EnvironmentApi(
-      EnvironmentApiDependencies(
+    environmentSession = EnvironmentSession(
+      EnvironmentSessionDependencies(
         environmentStoreState: environmentStoreState,
         appUiState: appUiState,
         workspaceViewTrackingState: workspaceViewTrackingState,
@@ -152,7 +152,7 @@ class AppWorkspaceFactory {
       workspaceWindowController: workspaceWindowController,
       workspaceWindowHistoryController: workspaceWindowHistoryController,
       workspaceViewportSessionController: workspaceViewportSessionController,
-      environmentController: environmentController,
+      environmentSession: environmentSession,
       videoConversionCoordinator: videoConversionCoordinator,
     );
   }

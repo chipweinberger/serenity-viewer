@@ -18,7 +18,7 @@ class AppRuntimeBridge {
   }
 
   void bindWorkspace(AppWorkspaceServices workspace) {
-    _refreshWorkspaceTracking = workspace.environmentController.tracking.refresh;
+    _refreshWorkspaceTracking = workspace.environmentSession.tracking.refresh;
     _markWorkspaceThumbnailDirty = workspace.thumbnailController.markWorkspaceDirty;
   }
 

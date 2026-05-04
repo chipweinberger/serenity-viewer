@@ -53,7 +53,7 @@ class AppRuntime {
       }
     });
     final appLifecycleListener = AppLifecycleListener(
-      onStateChange: workspace.environmentController.tracking.handleAppLifecycleStateChanged,
+      onStateChange: workspace.environmentSession.tracking.handleAppLifecycleStateChanged,
       onExitRequested: () async {
         await config.environment.saveEnvironment();
         return ui.AppExitResponse.exit;
@@ -83,7 +83,7 @@ class AppRuntime {
   void dispose() {
     autosaveTimer.cancel();
     appLifecycleListener.dispose();
-    workspace.environmentController.tracking.cancel();
+    workspace.environmentSession.tracking.cancel();
     dependencies.workspaceViewTrackingState.dispose();
     dependencies.windowInteractionState.dispose();
     workspace.thumbnailController.dispose();

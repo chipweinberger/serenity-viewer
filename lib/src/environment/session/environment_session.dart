@@ -36,8 +36,8 @@ typedef SerenityWorkspaceSwitchTargetResolver =
       required int direction,
     });
 
-class EnvironmentApi {
-  EnvironmentApi(EnvironmentApiDependencies dependencies)
+class EnvironmentSession {
+  EnvironmentSession(EnvironmentSessionDependencies dependencies)
     : navigation = EnvironmentViewController(
         EnvironmentViewDependencies(
           environmentStoreState: dependencies.environmentStoreState,
@@ -111,8 +111,8 @@ class EnvironmentApi {
   late final WorkspaceViewTrackingController tracking;
 }
 
-class EnvironmentApiDependencies {
-  const EnvironmentApiDependencies({
+class EnvironmentSessionDependencies {
+  const EnvironmentSessionDependencies({
     required this.environmentStoreState,
     required this.appUiState,
     required this.workspaceViewTrackingState,

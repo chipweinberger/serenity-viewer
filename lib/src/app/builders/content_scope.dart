@@ -12,7 +12,7 @@ import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/settings/behavior/app_ui_state.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
 import 'package:serenity_viewer/src/media/video/media_bridge.dart';
-import 'package:serenity_viewer/src/environment/session/environment_api.dart';
+import 'package:serenity_viewer/src/environment/session/environment_session.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 import 'package:serenity_viewer/src/workspace/window/session/workspace_window_history_controller.dart';
 
@@ -31,7 +31,7 @@ class ContentState {
     required this.workspaceViewportState,
     required this.appUiController,
     required this.mediaBridge,
-    required this.environmentController,
+    required this.environmentSession,
     required this.workspaceLinksController,
     required this.thumbnailController,
     required this.windowHistoryController,
@@ -52,7 +52,7 @@ class ContentState {
   final WorkspaceViewportState workspaceViewportState;
   final AppUiController appUiController;
   final MediaBridge mediaBridge;
-  final EnvironmentApi environmentController;
+  final EnvironmentSession environmentSession;
   final WorkspaceLinksController workspaceLinksController;
   final ThumbnailController thumbnailController;
   final WorkspaceWindowHistoryController windowHistoryController;

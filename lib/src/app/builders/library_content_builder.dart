@@ -21,10 +21,10 @@ class LibraryContentBuilder {
       actions: LibraryScreenActions(
         onSearchChanged: (_) => actions.commitStateChange(() {}),
         onWorkspaceSortChanged: state.appUiController.setWorkspaceSort,
-        onToggleWorkspaceOpen: state.environmentController.management.toggleOpen,
-        onRenameWorkspace: state.environmentController.management.renameWorkspace,
-        onDeleteWorkspace: state.environmentController.management.confirmDeleteWorkspace,
-        onSetActiveWorkspace: state.environmentController.navigation.setActiveWorkspace,
+        onToggleWorkspaceOpen: state.environmentSession.management.toggleOpen,
+        onRenameWorkspace: state.environmentSession.management.renameWorkspace,
+        onDeleteWorkspace: state.environmentSession.management.confirmDeleteWorkspace,
+        onSetActiveWorkspace: state.environmentSession.navigation.setActiveWorkspace,
       ),
     );
   }
