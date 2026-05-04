@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/app/builders/top_bar_overlay_builder.dart';
+import 'package:serenity_viewer/src/app/builders/app_top_bar_overlay_builder.dart';
 import 'package:serenity_viewer/src/app/builders/content_scope.dart';
 import 'package:serenity_viewer/src/app/builders/library_content_builder.dart';
 import 'package:serenity_viewer/src/app/builders/workspace_content_builder.dart';
@@ -8,8 +8,8 @@ import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
 import 'package:serenity_viewer/src/media/loading/workspace_load_plan.dart';
 
-class ContentBuilder {
-  const ContentBuilder({required this.state, required this.actions});
+class AppScreenHostBuilder {
+  const AppScreenHostBuilder({required this.state, required this.actions});
 
   final ContentState state;
   final ContentActions actions;
@@ -53,6 +53,6 @@ class ContentBuilder {
   }
 
   Widget _buildWorkspaceUiOverlay() {
-    return TopBarOverlayBuilder(state: state).build();
+    return AppTopBarOverlayBuilder(state: state).build();
   }
 }

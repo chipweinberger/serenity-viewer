@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:serenity_viewer/src/app/builders/content_scope.dart';
 import 'package:serenity_viewer/src/workspace/screen/workspace_top_bar_overlay.dart';
 
-class TopBarOverlayBuilder {
-  const TopBarOverlayBuilder({required this.state});
+class AppTopBarOverlayBuilder {
+  const AppTopBarOverlayBuilder({required this.state});
 
   final ContentState state;
 
