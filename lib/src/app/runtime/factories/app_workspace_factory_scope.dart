@@ -21,17 +21,3 @@ class _WorkspaceFactoryScope {
   WorkspaceViewportState get viewportState => stateStore.workspaceViewportState;
   ThumbnailRefreshState get thumbState => stateStore.thumbnailRefreshState;
 }
-
-class _WorkspaceControllers {
-  const _WorkspaceControllers({
-    required this.workspaceController,
-    required this.workspaceWindowController,
-    required this.workspaceWindowHistoryController,
-    required this.workspaceViewportSessionController,
-  });
-
-  final WorkspaceController workspaceController;
-  final WorkspaceWindowController workspaceWindowController;
-  final WorkspaceWindowHistoryController workspaceWindowHistoryController;
-  final WorkspaceViewportSessionController workspaceViewportSessionController;
-}

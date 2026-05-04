@@ -55,11 +55,11 @@ WorkspaceLinksPrompts _createWorkspaceLinksPrompts({required _WorkspaceFactorySc
   return WorkspaceLinksPrompts(context: scope.app.context);
 }
 
-_WorkspaceControllers _createWorkspaceControllers({
+WorkspaceController _createWorkspaceController({
   required _WorkspaceFactoryScope scope,
   required ThumbnailController thumbnailController,
 }) {
-  final workspaceController = WorkspaceController(
+  return WorkspaceController(
     appUiState: scope.uiState,
     windowInteractionState: scope.interactionState,
     workspaceViewportState: scope.viewportState,
@@ -67,14 +67,26 @@ _WorkspaceControllers _createWorkspaceControllers({
     setWorkspaceViewport: scope.ws.setWorkspaceViewport,
     refreshActiveWorkspaceThumbnail: thumbnailController.refreshActiveWorkspaceIfNeeded,
   );
-  final workspaceWindowController = WorkspaceWindowController(
+}
+
+WorkspaceWindowController _createWorkspaceWindowController({
+  required _WorkspaceFactoryScope scope,
+  required WorkspaceController workspaceController,
+}) {
+  return WorkspaceWindowController(
     appUiState: scope.uiState,
     environment: () => scope.envState.environment,
     activeWorkspace: () => scope.ws.activeWorkspace()!,
     activeWorkspaceOrNull: scope.ws.activeWorkspace,
     workspaceController: workspaceController,
   );
-  final workspaceWindowHistoryController = WorkspaceWindowHistoryController(
+}
+
+WorkspaceWindowHistoryController _createWorkspaceWindowHistoryController({
+  required _WorkspaceFactoryScope scope,
+  required WorkspaceController workspaceController,
+}) {
+  return WorkspaceWindowHistoryController(
     environment: () => scope.envState.environment,
     workspaces: scope.ws.workspaces,
     activeWorkspace: scope.ws.activeWorkspace,
@@ -87,17 +99,16 @@ _WorkspaceControllers _createWorkspaceControllers({
     screen: () => scope.uiState.screen,
     maxRecentlyClosedWindows: 12,
   );
-  final workspaceViewportSessionController = WorkspaceViewportSessionController(
+}
+
+WorkspaceViewportSessionController _createWorkspaceViewportSessionController({
+  required _WorkspaceFactoryScope scope,
+  required ThumbnailController thumbnailController,
+}) {
+  return WorkspaceViewportSessionController(
     environmentStoreState: scope.envState,
     workspaceViewportState: scope.viewportState,
     thumbnailController: thumbnailController,
     replaceWorkspace: scope.store.replaceWorkspace,
-  );
-
-  return _WorkspaceControllers(
-    workspaceController: workspaceController,
-    workspaceWindowController: workspaceWindowController,
-    workspaceWindowHistoryController: workspaceWindowHistoryController,
-    workspaceViewportSessionController: workspaceViewportSessionController,
   );
 }

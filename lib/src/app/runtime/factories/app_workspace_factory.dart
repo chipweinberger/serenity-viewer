@@ -51,22 +51,34 @@ AppWorkspaceServices createAppWorkspaceServices({required AppRuntimeInputs input
   final workspaceLinksController = _createWorkspaceLinksController(scope: scope);
   final workspaceLinksLauncher = _createWorkspaceLinksLauncher(scope: scope);
   final workspaceLinksPrompts = _createWorkspaceLinksPrompts(scope: scope);
-  final workspaceControllers = _createWorkspaceControllers(scope: scope, thumbnailController: thumbnailController);
+  final workspaceController = _createWorkspaceController(scope: scope, thumbnailController: thumbnailController);
+  final workspaceWindowController = _createWorkspaceWindowController(
+    scope: scope,
+    workspaceController: workspaceController,
+  );
+  final workspaceWindowHistoryController = _createWorkspaceWindowHistoryController(
+    scope: scope,
+    workspaceController: workspaceController,
+  );
+  final workspaceViewportSessionController = _createWorkspaceViewportSessionController(
+    scope: scope,
+    thumbnailController: thumbnailController,
+  );
   final workspaceCollateController = _createWorkspaceCollateController(
     scope: scope,
-    workspaceWindowController: workspaceControllers.workspaceWindowController,
+    workspaceWindowController: workspaceWindowController,
   );
   final environmentNavigationController = _createEnvironmentNavigationController(
     scope: scope,
     thumbnailController: thumbnailController,
-    workspaceController: workspaceControllers.workspaceController,
+    workspaceController: workspaceController,
   );
   final workspaceExposeLayoutController = _createWorkspaceExposeLayoutController(scope: scope);
   final environmentManagementController = _createEnvironmentManagementController(
     scope: scope,
     navigationController: environmentNavigationController,
     thumbnailController: thumbnailController,
-    workspaceController: workspaceControllers.workspaceController,
+    workspaceController: workspaceController,
   );
   final environmentController = EnvironmentController(
     navigation: environmentNavigationController,
@@ -103,10 +115,10 @@ AppWorkspaceServices createAppWorkspaceServices({required AppRuntimeInputs input
     workspaceLinksController: workspaceLinksController,
     workspaceLinksLauncher: workspaceLinksLauncher,
     workspaceLinksPrompts: workspaceLinksPrompts,
-    workspaceController: workspaceControllers.workspaceController,
-    workspaceWindowController: workspaceControllers.workspaceWindowController,
-    workspaceWindowHistoryController: workspaceControllers.workspaceWindowHistoryController,
-    workspaceViewportSessionController: workspaceControllers.workspaceViewportSessionController,
+    workspaceController: workspaceController,
+    workspaceWindowController: workspaceWindowController,
+    workspaceWindowHistoryController: workspaceWindowHistoryController,
+    workspaceViewportSessionController: workspaceViewportSessionController,
     environmentController: environmentController,
     workspaceExposeLayoutController: workspaceExposeLayoutController,
     workspaceShortcutController: workspaceShortcutController,
