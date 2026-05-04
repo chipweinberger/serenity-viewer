@@ -18,7 +18,6 @@ class WorkspaceWindowHistoryController {
     required this.workspaceController,
     required this.updateEnvironment,
     required this.replaceWorkspace,
-    required this.commitStateChange,
     required this.showMessage,
     required this.showWorkspaceScreen,
     required this.screen,
@@ -32,7 +31,6 @@ class WorkspaceWindowHistoryController {
   final WorkspaceController workspaceController;
   final ValueChanged<Environment> updateEnvironment;
   final void Function(Workspace workspace, {bool queueThumbnail}) replaceWorkspace;
-  final StateSetter commitStateChange;
   final ValueChanged<String> showMessage;
   final void Function({
     WorkspaceLayoutMode workspaceLayoutMode,
@@ -61,16 +59,14 @@ class WorkspaceWindowHistoryController {
       return;
     }
 
-    commitStateChange(() {
-      workspaceController.windows.runtime.rememberClosed(
-        entries,
-        maxRecentlyClosedWindows: maxRecentlyClosedWindows,
-        workspace: workspace,
-        window: window,
-      );
-      workspaceController.playback.runtime.clear(windowId);
-      workspaceController.windows.runtime.clear(windowId);
-    });
+    workspaceController.windows.runtime.rememberClosed(
+      workspaceWindowHistoryState,
+      maxRecentlyClosedWindows: maxRecentlyClosedWindows,
+      workspace: workspace,
+      window: window,
+    );
+    workspaceController.playback.runtime.clear(windowId);
+    workspaceController.windows.runtime.clear(windowId);
 
     replaceWorkspace(
       workspace.copyWith(windows: workspace.windows.where((entry) => entry.asset.id != windowId).toList()),
@@ -93,9 +89,7 @@ class WorkspaceWindowHistoryController {
     final workspaceMatches = workspaces().where((workspace) => workspace.id == targetEntry.workspaceId);
     final workspace = workspaceMatches.isEmpty ? null : workspaceMatches.first;
     if (workspace == null) {
-      commitStateChange(() {
-        entries.remove(targetEntry);
-      });
+      workspaceWindowHistoryState.removeEntry(targetEntry);
       showMessage('The original workspace for that window is no longer available.');
       return;
     }
@@ -103,9 +97,7 @@ class WorkspaceWindowHistoryController {
     final nextZ = workspace.windows.fold<int>(0, (value, window) => math.max(value, window.zIndex));
     final restoredWindow = targetEntry.window.copyWith(zIndex: nextZ + 1);
 
-    commitStateChange(() {
-      entries.remove(targetEntry);
-    });
+    workspaceWindowHistoryState.removeEntry(targetEntry);
 
     updateEnvironment(
       currentEnvironment.copyWith(

@@ -4,6 +4,7 @@ import 'package:serenity_viewer/src/window/interaction/window_interaction_state.
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/workspace/history/workspace_window_history_entry.dart';
+import 'package:serenity_viewer/src/workspace/history/workspace_window_history_state.dart';
 
 import 'workspace_controller.dart';
 
@@ -34,23 +35,19 @@ class WorkspaceWindowRuntimeController {
   }
 
   void rememberClosed(
-    List<WorkspaceWindowHistoryEntry> recentlyClosedWindows, {
+    WorkspaceWindowHistoryState state, {
     required int maxRecentlyClosedWindows,
     required Workspace workspace,
     required Window window,
   }) {
-    recentlyClosedWindows.insert(
-      0,
+    state.insertClosed(
       WorkspaceWindowHistoryEntry(
         workspaceId: workspace.id,
         workspaceName: workspace.name,
         window: window,
         closedAt: DateTime.now(),
       ),
+      maxEntries: maxRecentlyClosedWindows,
     );
-
-    if (recentlyClosedWindows.length > maxRecentlyClosedWindows) {
-      recentlyClosedWindows.removeRange(maxRecentlyClosedWindows, recentlyClosedWindows.length);
-    }
   }
 }

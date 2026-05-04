@@ -79,7 +79,6 @@ _WorkspaceControllers _createWorkspaceControllers({
     workspaceController: workspaceController,
     updateEnvironment: scope.store.updateEnvironment,
     replaceWorkspace: scope.store.replaceWorkspace,
-    commitStateChange: scope.app.commitStateChange,
     showMessage: scope.app.showMessage,
     showWorkspaceScreen: scope.ws.showWorkspaceScreen,
     screen: () => scope.uiState.screen,
