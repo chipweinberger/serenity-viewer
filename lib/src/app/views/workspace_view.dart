@@ -49,7 +49,7 @@ class WorkspaceView extends StatelessWidget {
       actions: WorkspaceScreenHostActions(
         setDropTargetActive: model.uiState.setDropTargetActive,
         importFiles: actions.app.files.importFiles,
-        trackViewportSize: (viewportSize) => model.workspaceViewportState.viewportSize = viewportSize,
+        trackViewportSize: model.workspaceViewportState.setViewportSize,
         handleOptionGestureHover: actions.window.interaction.handleOptionGestureHover,
         handleWorkspacePanZoomStart: actions.workspace.viewport.handleWorkspacePanZoomStart,
         handleWorkspacePanZoomUpdate: actions.workspace.viewport.handleWorkspacePanZoomUpdate,

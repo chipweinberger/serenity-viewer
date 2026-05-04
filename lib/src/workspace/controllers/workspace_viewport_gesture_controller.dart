@@ -37,15 +37,15 @@ class WorkspaceViewportGestureController {
         windowInteractionState.pinnedHoverWindowId != null ||
         isCommandPressedForContentGesture ||
         isOptionPressedForWindowGesture) {
-      workspaceViewportState.isGestureActive = false;
+      workspaceViewportState.setGestureInactive();
       return;
     }
 
-    workspaceViewportState.isGestureActive = true;
-    workspaceViewportState.gestureStartCenter = workspace.viewportCenter;
-    workspaceViewportState.gestureStartZoom = workspace.viewportZoom;
-    workspaceViewportState.gestureStartLocalFocalPoint = event.localPosition;
-    workspaceViewportState.gestureAccumulatedPan = Offset.zero;
+    workspaceViewportState.startGesture(
+      center: workspace.viewportCenter,
+      zoom: workspace.viewportZoom,
+      localFocalPoint: event.localPosition,
+    );
   }
 
   void handlePanZoomUpdate(PointerPanZoomUpdateEvent event, Workspace workspace, Size viewportSize) {
@@ -53,7 +53,7 @@ class WorkspaceViewportGestureController {
       return;
     }
 
-    workspaceViewportState.gestureAccumulatedPan += event.panDelta;
+    workspaceViewportState.accumulateGesturePan(event.panDelta);
     final nextZoom = WorkspaceLayout.clampWorkspaceZoom(
       workspaceViewportState.gestureStartZoom * math.pow(event.scale, 1.15).toDouble(),
     );
@@ -73,8 +73,7 @@ class WorkspaceViewportGestureController {
   }
 
   Future<void> handlePanZoomEnd() async {
-    workspaceViewportState.isGestureActive = false;
-    workspaceViewportState.gestureAccumulatedPan = Offset.zero;
+    workspaceViewportState.endGesture();
     await refreshActiveWorkspaceThumbnail();
   }
 }
