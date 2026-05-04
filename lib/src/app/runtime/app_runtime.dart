@@ -49,6 +49,7 @@ class AppRuntime {
     workspaceController.tracking.cancel();
     workspaceController.thumbnails.dispose();
     sharedVideoControllerPool.dispose();
+    unawaited(platformBridge.dispose());
   }
 }
 

@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'dart:async';
 
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
@@ -68,8 +70,10 @@ class AppRoot extends StatefulWidget {
 
 class _AppRootState extends State<AppRoot> {
   final _rootObjects = AppRootObjects();
+  final List<String> _pendingDockImportPaths = [];
   late final AppRuntime _runtime;
   late final DocumentPersistenceController _documentPersistence;
+  StreamSubscription<List<String>>? _dockDroppedPathsSubscription;
 
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), behavior: SnackBarBehavior.floating));
@@ -100,6 +104,36 @@ class _AppRootState extends State<AppRoot> {
       seedEnvironment: buildSeedEnvironment,
       isRunningInWidgetTest: _isRunningInWidgetTest,
     );
+  }
+
+  Future<void> _importDockDroppedPaths(List<String> paths) async {
+    if (paths.isEmpty) {
+      return;
+    }
+
+    final environment = _rootObjects.environmentStoreState.environment;
+    if (environment == null) {
+      _pendingDockImportPaths.addAll(paths);
+      return;
+    }
+
+    await _runtime.workspaceController.media.importFiles(paths.map(XFile.new).toList(growable: false));
+  }
+
+  Future<void> _flushPendingDockImports() async {
+    if (_pendingDockImportPaths.isEmpty || _rootObjects.environmentStoreState.environment == null) {
+      return;
+    }
+
+    final paths = List<String>.from(_pendingDockImportPaths);
+    _pendingDockImportPaths.clear();
+    await _runtime.workspaceController.media.importFiles(paths.map(XFile.new).toList(growable: false));
+  }
+
+  void _handleEnvironmentStoreChanged() {
+    if (_rootObjects.environmentStoreState.environment != null && _pendingDockImportPaths.isNotEmpty) {
+      unawaited(_flushPendingDockImports());
+    }
   }
 
   List<SingleChildWidget> _buildProviders() {
@@ -135,11 +169,17 @@ class _AppRootState extends State<AppRoot> {
     super.initState();
     _runtime = _createRuntime();
     _documentPersistence = _createDocumentPersistenceController();
+    _dockDroppedPathsSubscription = _runtime.platformBridge.dockDroppedPaths.listen((paths) {
+      unawaited(_importDockDroppedPaths(paths));
+    });
+    _rootObjects.environmentStoreState.addListener(_handleEnvironmentStoreChanged);
     _documentPersistence.restoreEnvironment();
   }
 
   @override
   void dispose() {
+    _rootObjects.environmentStoreState.removeListener(_handleEnvironmentStoreChanged);
+    unawaited(_dockDroppedPathsSubscription?.cancel());
     _runtime.dispose();
     _rootObjects.dispose();
     super.dispose();

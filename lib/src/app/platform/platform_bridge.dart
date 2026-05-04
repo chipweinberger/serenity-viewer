@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter/services.dart';
 
 import 'package:serenity_viewer/src/environment/asset.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
@@ -14,13 +16,20 @@ class PlatformBridge {
     required this.windowTitle,
     required this.showMessage,
     required this.isMounted,
-  });
+  }) {
+    if (!isRunningInWidgetTest && Platform.isMacOS) {
+      dockImportChannel.setMethodCallHandler(_handleDockImportCall);
+    }
+  }
 
   final EnvironmentStoreState environmentStoreState;
   final bool isRunningInWidgetTest;
   final String Function() windowTitle;
   final void Function(String message) showMessage;
   final bool Function() isMounted;
+  final _dockDroppedPathsController = StreamController<List<String>>.broadcast();
+
+  Stream<List<String>> get dockDroppedPaths => _dockDroppedPathsController.stream;
 
   Future<Directory> thumbnailDirectory() async {
     final environmentPath = environmentStoreState.currentEnvironmentPath ?? 'startup';
@@ -118,6 +127,28 @@ class PlatformBridge {
     } catch (_) {
       _showMessageIfMounted('Serenity could not reveal that file in Finder.');
     }
+  }
+
+  Future<void> dispose() async {
+    if (!isRunningInWidgetTest && Platform.isMacOS) {
+      dockImportChannel.setMethodCallHandler(null);
+    }
+    await _dockDroppedPathsController.close();
+  }
+
+  Future<void> _handleDockImportCall(MethodCall call) async {
+    if (call.method != 'importDockFiles') {
+      throw MissingPluginException();
+    }
+
+    final arguments = call.arguments as Map<Object?, Object?>?;
+    final rawPaths = arguments?['paths'] as List<Object?>? ?? const [];
+    final paths = rawPaths.whereType<String>().where((path) => path.isNotEmpty).toList(growable: false);
+    if (paths.isEmpty) {
+      return;
+    }
+
+    _dockDroppedPathsController.add(paths);
   }
 
   void _showMessageIfMounted(String message) {

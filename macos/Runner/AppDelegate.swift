@@ -5,6 +5,8 @@ import FlutterMacOS
 @main
 class AppDelegate: FlutterAppDelegate {
   private var activeSecurityScopedUrls: [URL] = []
+  private var dockImportChannel: FlutterMethodChannel?
+  private var pendingDockImportPaths: [[String]] = []
 
   override func applicationDidFinishLaunching(_ notification: Notification) {
     if #available(macOS 10.12, *) {
@@ -23,6 +25,10 @@ class AppDelegate: FlutterAppDelegate {
       name: "serenity/mouse_cursor",
       binaryMessenger: controller.engine.binaryMessenger
     )
+    let dockImportChannel = FlutterMethodChannel(
+      name: "serenity/dock_import",
+      binaryMessenger: controller.engine.binaryMessenger
+    )
     let fileActionsChannel = FlutterMethodChannel(
       name: "serenity/file_actions",
       binaryMessenger: controller.engine.binaryMessenger
@@ -39,6 +45,8 @@ class AppDelegate: FlutterAppDelegate {
       name: "serenity/window",
       binaryMessenger: controller.engine.binaryMessenger
     )
+    self.dockImportChannel = dockImportChannel
+    flushPendingDockImports()
 
     bookmarkChannel.setMethodCallHandler { [weak self] call, result in
       guard let self else {
@@ -215,6 +223,17 @@ class AppDelegate: FlutterAppDelegate {
     return true
   }
 
+  override func application(_ sender: NSApplication, openFiles filenames: [String]) {
+    let paths = filenames.filter { !$0.isEmpty }
+    if paths.isEmpty {
+      sender.reply(toOpenOrPrint: .failure)
+      return
+    }
+
+    enqueueDockImport(paths)
+    sender.reply(toOpenOrPrint: .success)
+  }
+
   private func createBookmark(for path: String) -> String? {
     let fileUrl = URL(fileURLWithPath: path)
 
@@ -305,6 +324,26 @@ class AppDelegate: FlutterAppDelegate {
     image.unlockFocus()
     image.isTemplate = true
     return NSCursor(image: image, hotSpot: NSPoint(x: imageSize.width / 2, y: imageSize.height / 2))
+  }
+
+  private func enqueueDockImport(_ paths: [String]) {
+    guard !paths.isEmpty else {
+      return
+    }
+
+    pendingDockImportPaths.append(paths)
+    flushPendingDockImports()
+  }
+
+  private func flushPendingDockImports() {
+    guard let dockImportChannel else {
+      return
+    }
+
+    while !pendingDockImportPaths.isEmpty {
+      let paths = pendingDockImportPaths.removeFirst()
+      dockImportChannel.invokeMethod("importDockFiles", arguments: ["paths": paths])
+    }
   }
 
   private func copyFileDates(sourcePath: String, destinationPath: String) -> Bool {
