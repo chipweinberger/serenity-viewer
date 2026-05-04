@@ -40,7 +40,13 @@ class AppRuntime {
       markWorkspaceThumbnailDirty: (workspaceId) => workspace.thumbnailController.markWorkspaceDirty(workspaceId),
       syncWindowTitle: () async => foundation.platformBridge.syncWindowTitle(),
     );
-    workspace = createAppWorkspaceServices(inputs: inputs, foundation: foundation);
+    workspace = createAppWorkspaceServices(
+      inputs: inputs,
+      platformBridge: foundation.platformBridge,
+      environmentStore: foundation.environmentStore,
+      mediaInspector: foundation.mediaInspector,
+      appUiController: foundation.appUiController,
+    );
     final documentCoordinator = createAppDocumentCoordinator(
       inputs: inputs,
       environmentStore: foundation.environmentStore,

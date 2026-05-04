@@ -1,6 +1,10 @@
+import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
+import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
 import 'package:serenity_viewer/src/app/runtime/app_runtime_groups.dart';
 import 'package:serenity_viewer/src/app/runtime/app_runtime_inputs.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
+import 'package:serenity_viewer/src/environment/store/environment_store.dart';
+import 'package:serenity_viewer/src/media/video/media_inspector.dart';
 import 'package:serenity_viewer/src/media/video/video_frame_exporter.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_video_conversion_prompts.dart';
 import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_core.dart';
@@ -8,13 +12,19 @@ import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_
 import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_media.dart';
 import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_scope.dart';
 
-AppWorkspaceServices createAppWorkspaceServices({required AppRuntimeInputs inputs, required AppFoundation foundation}) {
+AppWorkspaceServices createAppWorkspaceServices({
+  required AppRuntimeInputs inputs,
+  required PlatformBridge platformBridge,
+  required EnvironmentStore environmentStore,
+  required MediaInspector mediaInspector,
+  required AppUiController appUiController,
+}) {
   final scope = WorkspaceFactoryScope(
     inputs: inputs,
-    platform: foundation.platformBridge,
-    store: foundation.environmentStore,
-    media: foundation.mediaInspector,
-    ui: foundation.appUiController,
+    platform: platformBridge,
+    store: environmentStore,
+    media: mediaInspector,
+    ui: appUiController,
   );
 
   final thumbnailController = createThumbnailController(scope: scope);
