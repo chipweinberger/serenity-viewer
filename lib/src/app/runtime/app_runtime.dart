@@ -94,162 +94,6 @@ class AppRuntime {
   final Timer autosaveTimer;
   final AppLifecycleListener appLifecycleListener;
 
-  static AppRuntime create({
-    required bool isRunningInWidgetTest,
-    required EnvironmentStoreState environmentStoreState,
-    required AppUiState appUiState,
-    required WindowInteractionState windowInteractionState,
-    required WorkspaceViewTrackingState workspaceViewTrackingState,
-    required WorkspaceViewportState workspaceViewportState,
-    required ThumbnailRefreshState thumbnailRefreshState,
-    required WorkspaceWindowHistoryState workspaceWindowHistoryState,
-    required String Function() windowTitle,
-    required BuildContext Function() context,
-    required bool Function() mounted,
-    required ValueChanged<String> showMessage,
-    required Environment Function() seedEnvironment,
-    required ValueChanged<Environment> updateEnvironment,
-    required void Function(Workspace workspace, {bool queueThumbnail}) replaceWorkspace,
-    required Future<void> Function() saveEnvironment,
-    required String Function(String prefix) newId,
-    required int Function(String value) colorFromDigest,
-    required Workspace? Function() activeWorkspace,
-    required List<Workspace> Function() workspaces,
-    required List<Workspace> Function() openWorkspaces,
-    required Window? Function() focusedWindowOrNull,
-    required void Function({required String workspaceId, Offset? center, double? zoom, bool queueThumbnail})
-    setWorkspaceViewport,
-    required SerenityShowWorkspaceScreen showWorkspaceScreen,
-    required SerenityShowLibraryScreen showLibraryScreen,
-    required VoidCallback toggleExpose,
-    required ValueChanged<String> toggleVideoPlayback,
-  }) {
-    late final ({
-      AppUiController appUiController,
-      MediaInspector mediaInspector,
-      PlatformBridge platformBridge,
-      SharedVideoControllerPool sharedVideoControllerPool,
-      EnvironmentBookmarkSynchronizer environmentBookmarkSynchronizer,
-      EnvironmentStore environmentStore,
-    }) foundation;
-    late final ({
-      ThumbnailController thumbnailController,
-      WorkspaceAssetPickerController workspaceAssetPickerController,
-      WorkspaceCollateController workspaceCollateController,
-      WorkspaceVideoConversionController workspaceVideoConversionController,
-      WorkspaceMediaImportController workspaceMediaImportController,
-      WorkspaceLinksController workspaceLinksController,
-      WorkspaceLinksLauncher workspaceLinksLauncher,
-      WorkspaceLinksPrompts workspaceLinksPrompts,
-      WorkspaceController workspaceController,
-      WorkspaceWindowController workspaceWindowController,
-      WorkspaceWindowHistoryController workspaceWindowHistoryController,
-      WorkspaceViewportSessionController workspaceViewportSessionController,
-      EnvironmentController environmentController,
-      WorkspaceExposeLayoutController workspaceExposeLayoutController,
-      WorkspaceShortcutController workspaceShortcutController,
-      WorkspaceViewTrackingController workspaceViewTrackingController,
-    }) workspace;
-
-    foundation = createAppFoundation(
-      isRunningInWidgetTest: isRunningInWidgetTest,
-      environmentStoreState: environmentStoreState,
-      appUiState: appUiState,
-      windowInteractionState: windowInteractionState,
-      windowTitle: windowTitle,
-      showMessage: showMessage,
-      mounted: mounted,
-      refreshWorkspaceTracking: () async => workspace.workspaceViewTrackingController.refresh(),
-      markWorkspaceThumbnailDirty: (workspaceId) => workspace.thumbnailController.markWorkspaceDirty(workspaceId),
-      syncWindowTitle: () async => foundation.platformBridge.syncWindowTitle(),
-    );
-    workspace = createAppWorkspaceServices(
-      platformBridge: foundation.platformBridge,
-      environmentStore: foundation.environmentStore,
-      mediaInspector: foundation.mediaInspector,
-      appUiController: foundation.appUiController,
-      isRunningInWidgetTest: isRunningInWidgetTest,
-      context: context,
-      mounted: mounted,
-      showMessage: showMessage,
-      updateEnvironment: updateEnvironment,
-      replaceWorkspace: replaceWorkspace,
-      newId: newId,
-      colorFromDigest: colorFromDigest,
-      activeWorkspace: activeWorkspace,
-      workspaces: workspaces,
-      openWorkspaces: openWorkspaces,
-      focusedWindowOrNull: focusedWindowOrNull,
-      setWorkspaceViewport: setWorkspaceViewport,
-      showWorkspaceScreen: showWorkspaceScreen,
-      showLibraryScreen: showLibraryScreen,
-      toggleExpose: toggleExpose,
-      toggleVideoPlayback: toggleVideoPlayback,
-      envState: environmentStoreState,
-      uiState: appUiState,
-      interactionState: windowInteractionState,
-      trackingState: workspaceViewTrackingState,
-      viewportState: workspaceViewportState,
-      thumbState: thumbnailRefreshState,
-      workspaceWindowHistoryState: workspaceWindowHistoryState,
-    );
-    final documentCoordinator = createAppDocumentCoordinator(
-      environmentStoreState: environmentStoreState,
-      environmentStore: foundation.environmentStore,
-      context: context,
-      mounted: mounted,
-      seedEnvironment: seedEnvironment,
-      showMessage: showMessage,
-      refreshActiveWorkspaceThumbnailIfNeeded: () async => workspace.thumbnailController.refreshActiveWorkspaceIfNeeded(),
-      storeLastEnvironmentPath: foundation.platformBridge.storeLastEnvironmentPath,
-      syncWindowTitle: foundation.platformBridge.syncWindowTitle,
-      resolveFileBookmark: foundation.platformBridge.resolveFileBookmark,
-      createFileBookmark: foundation.platformBridge.createFileBookmark,
-      thumbnailDirectory: foundation.platformBridge.thumbnailDirectory,
-      updateEnvironment: updateEnvironment,
-      saveEnvironment: saveEnvironment,
-    );
-    final autosaveTimer = Timer.periodic(const Duration(minutes: 1), (_) {
-      if (environmentStoreState.hasUnsavedChanges) {
-        unawaited(saveEnvironment());
-      }
-    });
-    final appLifecycleListener = AppLifecycleListener(
-      onStateChange: workspace.workspaceViewTrackingController.handleAppLifecycleStateChanged,
-      onExitRequested: () async {
-        await saveEnvironment();
-        return ui.AppExitResponse.exit;
-      },
-    );
-
-    return AppRuntime(
-      appUiController: foundation.appUiController,
-      platformBridge: foundation.platformBridge,
-      sharedVideoControllerPool: foundation.sharedVideoControllerPool,
-      environmentStore: foundation.environmentStore,
-      environmentBookmarkSynchronizer: foundation.environmentBookmarkSynchronizer,
-      documentCoordinator: documentCoordinator,
-      thumbnailController: workspace.thumbnailController,
-      workspaceAssetPickerController: workspace.workspaceAssetPickerController,
-      workspaceCollateController: workspace.workspaceCollateController,
-      workspaceVideoConversionController: workspace.workspaceVideoConversionController,
-      workspaceMediaImportController: workspace.workspaceMediaImportController,
-      workspaceLinksController: workspace.workspaceLinksController,
-      workspaceLinksLauncher: workspace.workspaceLinksLauncher,
-      workspaceLinksPrompts: workspace.workspaceLinksPrompts,
-      workspaceController: workspace.workspaceController,
-      workspaceWindowController: workspace.workspaceWindowController,
-      workspaceWindowHistoryController: workspace.workspaceWindowHistoryController,
-      workspaceViewportSessionController: workspace.workspaceViewportSessionController,
-      environmentController: workspace.environmentController,
-      workspaceExposeLayoutController: workspace.workspaceExposeLayoutController,
-      workspaceShortcutController: workspace.workspaceShortcutController,
-      workspaceViewTrackingController: workspace.workspaceViewTrackingController,
-      autosaveTimer: autosaveTimer,
-      appLifecycleListener: appLifecycleListener,
-    );
-  }
-
   void dispose() {
     autosaveTimer.cancel();
     appLifecycleListener.dispose();
@@ -257,4 +101,160 @@ class AppRuntime {
     thumbnailController.dispose();
     sharedVideoControllerPool.dispose();
   }
+}
+
+AppRuntime createAppRuntime({
+  required bool isRunningInWidgetTest,
+  required EnvironmentStoreState environmentStoreState,
+  required AppUiState appUiState,
+  required WindowInteractionState windowInteractionState,
+  required WorkspaceViewTrackingState workspaceViewTrackingState,
+  required WorkspaceViewportState workspaceViewportState,
+  required ThumbnailRefreshState thumbnailRefreshState,
+  required WorkspaceWindowHistoryState workspaceWindowHistoryState,
+  required String Function() windowTitle,
+  required BuildContext Function() context,
+  required bool Function() mounted,
+  required ValueChanged<String> showMessage,
+  required Environment Function() seedEnvironment,
+  required ValueChanged<Environment> updateEnvironment,
+  required void Function(Workspace workspace, {bool queueThumbnail}) replaceWorkspace,
+  required Future<void> Function() saveEnvironment,
+  required String Function(String prefix) newId,
+  required int Function(String value) colorFromDigest,
+  required Workspace? Function() activeWorkspace,
+  required List<Workspace> Function() workspaces,
+  required List<Workspace> Function() openWorkspaces,
+  required Window? Function() focusedWindowOrNull,
+  required void Function({required String workspaceId, Offset? center, double? zoom, bool queueThumbnail})
+  setWorkspaceViewport,
+  required SerenityShowWorkspaceScreen showWorkspaceScreen,
+  required SerenityShowLibraryScreen showLibraryScreen,
+  required VoidCallback toggleExpose,
+  required ValueChanged<String> toggleVideoPlayback,
+}) {
+  late final ({
+    AppUiController appUiController,
+    MediaInspector mediaInspector,
+    PlatformBridge platformBridge,
+    SharedVideoControllerPool sharedVideoControllerPool,
+    EnvironmentBookmarkSynchronizer environmentBookmarkSynchronizer,
+    EnvironmentStore environmentStore,
+  }) foundation;
+  late final ({
+    ThumbnailController thumbnailController,
+    WorkspaceAssetPickerController workspaceAssetPickerController,
+    WorkspaceCollateController workspaceCollateController,
+    WorkspaceVideoConversionController workspaceVideoConversionController,
+    WorkspaceMediaImportController workspaceMediaImportController,
+    WorkspaceLinksController workspaceLinksController,
+    WorkspaceLinksLauncher workspaceLinksLauncher,
+    WorkspaceLinksPrompts workspaceLinksPrompts,
+    WorkspaceController workspaceController,
+    WorkspaceWindowController workspaceWindowController,
+    WorkspaceWindowHistoryController workspaceWindowHistoryController,
+    WorkspaceViewportSessionController workspaceViewportSessionController,
+    EnvironmentController environmentController,
+    WorkspaceExposeLayoutController workspaceExposeLayoutController,
+    WorkspaceShortcutController workspaceShortcutController,
+    WorkspaceViewTrackingController workspaceViewTrackingController,
+  }) workspace;
+
+  foundation = createAppFoundation(
+    isRunningInWidgetTest: isRunningInWidgetTest,
+    environmentStoreState: environmentStoreState,
+    appUiState: appUiState,
+    windowInteractionState: windowInteractionState,
+    windowTitle: windowTitle,
+    showMessage: showMessage,
+    mounted: mounted,
+    refreshWorkspaceTracking: () async => workspace.workspaceViewTrackingController.refresh(),
+    markWorkspaceThumbnailDirty: (workspaceId) => workspace.thumbnailController.markWorkspaceDirty(workspaceId),
+    syncWindowTitle: () async => foundation.platformBridge.syncWindowTitle(),
+  );
+  workspace = createAppWorkspaceServices(
+    platformBridge: foundation.platformBridge,
+    environmentStore: foundation.environmentStore,
+    mediaInspector: foundation.mediaInspector,
+    appUiController: foundation.appUiController,
+    isRunningInWidgetTest: isRunningInWidgetTest,
+    context: context,
+    mounted: mounted,
+    showMessage: showMessage,
+    updateEnvironment: updateEnvironment,
+    replaceWorkspace: replaceWorkspace,
+    newId: newId,
+    colorFromDigest: colorFromDigest,
+    activeWorkspace: activeWorkspace,
+    workspaces: workspaces,
+    openWorkspaces: openWorkspaces,
+    focusedWindowOrNull: focusedWindowOrNull,
+    setWorkspaceViewport: setWorkspaceViewport,
+    showWorkspaceScreen: showWorkspaceScreen,
+    showLibraryScreen: showLibraryScreen,
+    toggleExpose: toggleExpose,
+    toggleVideoPlayback: toggleVideoPlayback,
+    envState: environmentStoreState,
+    uiState: appUiState,
+    interactionState: windowInteractionState,
+    trackingState: workspaceViewTrackingState,
+    viewportState: workspaceViewportState,
+    thumbState: thumbnailRefreshState,
+    workspaceWindowHistoryState: workspaceWindowHistoryState,
+  );
+  final documentCoordinator = createAppDocumentCoordinator(
+    environmentStoreState: environmentStoreState,
+    environmentStore: foundation.environmentStore,
+    context: context,
+    mounted: mounted,
+    seedEnvironment: seedEnvironment,
+    showMessage: showMessage,
+    refreshActiveWorkspaceThumbnailIfNeeded: () async => workspace.thumbnailController.refreshActiveWorkspaceIfNeeded(),
+    storeLastEnvironmentPath: foundation.platformBridge.storeLastEnvironmentPath,
+    syncWindowTitle: foundation.platformBridge.syncWindowTitle,
+    resolveFileBookmark: foundation.platformBridge.resolveFileBookmark,
+    createFileBookmark: foundation.platformBridge.createFileBookmark,
+    thumbnailDirectory: foundation.platformBridge.thumbnailDirectory,
+    updateEnvironment: updateEnvironment,
+    saveEnvironment: saveEnvironment,
+  );
+  final autosaveTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+    if (environmentStoreState.hasUnsavedChanges) {
+      unawaited(saveEnvironment());
+    }
+  });
+  final appLifecycleListener = AppLifecycleListener(
+    onStateChange: workspace.workspaceViewTrackingController.handleAppLifecycleStateChanged,
+    onExitRequested: () async {
+      await saveEnvironment();
+      return ui.AppExitResponse.exit;
+    },
+  );
+
+  return AppRuntime(
+    appUiController: foundation.appUiController,
+    platformBridge: foundation.platformBridge,
+    sharedVideoControllerPool: foundation.sharedVideoControllerPool,
+    environmentStore: foundation.environmentStore,
+    environmentBookmarkSynchronizer: foundation.environmentBookmarkSynchronizer,
+    documentCoordinator: documentCoordinator,
+    thumbnailController: workspace.thumbnailController,
+    workspaceAssetPickerController: workspace.workspaceAssetPickerController,
+    workspaceCollateController: workspace.workspaceCollateController,
+    workspaceVideoConversionController: workspace.workspaceVideoConversionController,
+    workspaceMediaImportController: workspace.workspaceMediaImportController,
+    workspaceLinksController: workspace.workspaceLinksController,
+    workspaceLinksLauncher: workspace.workspaceLinksLauncher,
+    workspaceLinksPrompts: workspace.workspaceLinksPrompts,
+    workspaceController: workspace.workspaceController,
+    workspaceWindowController: workspace.workspaceWindowController,
+    workspaceWindowHistoryController: workspace.workspaceWindowHistoryController,
+    workspaceViewportSessionController: workspace.workspaceViewportSessionController,
+    environmentController: workspace.environmentController,
+    workspaceExposeLayoutController: workspace.workspaceExposeLayoutController,
+    workspaceShortcutController: workspace.workspaceShortcutController,
+    workspaceViewTrackingController: workspace.workspaceViewTrackingController,
+    autosaveTimer: autosaveTimer,
+    appLifecycleListener: appLifecycleListener,
+  );
 }

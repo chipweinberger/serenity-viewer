@@ -66,7 +66,7 @@ class _AppRootState extends State<AppRoot> {
   }
 
   AppRuntime _createRuntime() {
-    return AppRuntime.create(
+    return createAppRuntime(
       isRunningInWidgetTest: _isRunningInWidgetTest,
       environmentStoreState: _environmentStoreState,
       appUiState: _appUiState,
