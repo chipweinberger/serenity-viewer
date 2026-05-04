@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
+import 'package:serenity_viewer/src/app/app_providers.dart';
 import 'package:serenity_viewer/src/app/runtime/app_runtime.dart';
 import 'package:serenity_viewer/src/app/state/app_state_store.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
@@ -35,45 +35,6 @@ class _AppRootState extends State<AppRoot> {
 
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), behavior: SnackBarBehavior.floating));
-  }
-
-  Widget _buildProviders({required Widget child}) {
-    return MultiProvider(
-      providers: [
-        Provider<AppStateStore>.value(value: _stateStore),
-        Provider<AppUiHandles>.value(value: _uiHandles),
-        Provider<AppFeedbackController>.value(value: _feedback),
-        Provider<AppSettingsController>.value(value: _settings),
-        ChangeNotifierProvider.value(value: _stateStore.appUiState),
-        ChangeNotifierProvider.value(value: _stateStore.environmentStoreState),
-        ChangeNotifierProvider.value(value: _stateStore.windowInteractionState),
-        ChangeNotifierProvider.value(value: _stateStore.workspaceViewportState),
-        ChangeNotifierProvider.value(value: _stateStore.thumbnailRefreshState),
-        ChangeNotifierProvider.value(value: _stateStore.workspaceWindowHistoryState),
-        ChangeNotifierProvider.value(value: _stateStore.workspaceViewTrackingState),
-        Provider.value(value: _runtime.appUiController),
-        Provider.value(value: _runtime.sharedVideoControllerPool),
-        Provider.value(value: _runtime.platformBridge),
-        Provider.value(value: _runtime.environmentStore),
-        Provider.value(value: _runtime.documentCoordinator),
-        Provider.value(value: _runtime.workspaceController),
-        Provider.value(value: _runtime.environmentController),
-        Provider.value(value: _runtime.workspaceExposeLayoutController),
-        Provider.value(value: _runtime.workspaceLinksController),
-        Provider.value(value: _runtime.workspaceLinksLauncher),
-        Provider.value(value: _runtime.workspaceLinksPrompts),
-        Provider.value(value: _runtime.thumbnailController),
-        Provider.value(value: _runtime.workspaceWindowHistoryController),
-        Provider.value(value: _runtime.workspaceMediaImportController),
-        Provider.value(value: _runtime.workspaceWindowController),
-        Provider.value(value: _runtime.workspaceViewportSessionController),
-        Provider.value(value: _runtime.workspaceCollateController),
-        Provider.value(value: _runtime.workspaceVideoConversionController),
-        Provider.value(value: _runtime.workspaceAssetPickerController),
-        Provider.value(value: _runtime.workspaceShortcutController),
-      ],
-      child: child,
-    );
   }
 
   Widget _buildContent(BuildContext context) {
@@ -182,7 +143,12 @@ class _AppRootState extends State<AppRoot> {
     return ListenableBuilder(
       listenable: _stateStore.shellListenable,
       builder: (context, _) {
-        return _buildProviders(
+        return AppProviders(
+          stateStore: _stateStore,
+          uiHandles: _uiHandles,
+          feedback: _feedback,
+          settings: _settings,
+          runtime: _runtime,
           child: AppMenu(
             child: Focus(
               focusNode: _uiHandles.focusNode,
