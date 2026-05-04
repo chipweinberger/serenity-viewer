@@ -3,16 +3,13 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
+import 'package:serenity_viewer/src/app/runtime/app_runtime_factories.dart';
+import 'package:serenity_viewer/src/app/runtime/app_runtime_groups.dart';
+import 'package:serenity_viewer/src/app/runtime/app_runtime_inputs.dart';
 import 'package:serenity_viewer/src/app/state/app_state_store.dart';
-import 'package:serenity_viewer/src/app/assembly/app_document_factory.dart';
-import 'package:serenity_viewer/src/app/assembly/app_foundation_factory.dart';
-import 'package:serenity_viewer/src/app/assembly/app_runtime_config.dart';
-import 'package:serenity_viewer/src/app/assembly/app_runtime_bridge.dart';
-import 'package:serenity_viewer/src/app/assembly/app_runtime_services.dart';
-import 'package:serenity_viewer/src/app/assembly/app_workspace_factory.dart';
 
-export 'package:serenity_viewer/src/app/assembly/app_runtime_config.dart';
-export 'package:serenity_viewer/src/app/assembly/app_runtime_services.dart';
+export 'package:serenity_viewer/src/app/runtime/app_runtime_groups.dart';
+export 'package:serenity_viewer/src/app/runtime/app_runtime_inputs.dart';
 
 class AppRuntime {
   AppRuntime.assembled({
@@ -33,29 +30,29 @@ class AppRuntime {
   final Timer autosaveTimer;
   final AppLifecycleListener appLifecycleListener;
 
-  static AppRuntime create(AppRuntimeConfig config) {
-    final stateStore = config.stateStore;
+  static AppRuntime create(AppRuntimeInputs inputs) {
+    final stateStore = inputs.stateStore;
     final environmentStoreState = stateStore.environmentStoreState;
-    final bridge = AppRuntimeBridge();
+    late final AppFoundation foundation;
+    late final AppWorkspaceServices workspace;
 
-    final foundation = AppFoundationFactory(config).create(
-      refreshWorkspaceTracking: bridge.refreshWorkspaceTracking,
-      markWorkspaceThumbnailDirty: bridge.markWorkspaceThumbnailDirty,
-      syncWindowTitle: bridge.syncWindowTitle,
+    foundation = createAppFoundation(
+      inputs: inputs,
+      refreshWorkspaceTracking: () async => workspace.workspaceViewTrackingController.refresh(),
+      markWorkspaceThumbnailDirty: (workspaceId) => workspace.thumbnailController.markWorkspaceDirty(workspaceId),
+      syncWindowTitle: () async => foundation.platformBridge.syncWindowTitle(),
     );
-    bridge.bindFoundation(foundation);
-    final workspace = AppWorkspaceFactory(config).create(foundation: foundation);
-    bridge.bindWorkspace(workspace);
-    final documentCoordinator = AppDocumentFactory(config).create(foundation: foundation, workspace: workspace);
+    workspace = createAppWorkspaceServices(inputs: inputs, foundation: foundation);
+    final documents = createAppDocument(inputs: inputs, foundation: foundation, workspace: workspace);
     final autosaveTimer = Timer.periodic(const Duration(minutes: 1), (_) {
       if (environmentStoreState.hasUnsavedChanges) {
-        unawaited(config.environment.saveEnvironment());
+        unawaited(inputs.environment.saveEnvironment());
       }
     });
     final appLifecycleListener = AppLifecycleListener(
       onStateChange: workspace.workspaceViewTrackingController.handleAppLifecycleStateChanged,
       onExitRequested: () async {
-        await config.environment.saveEnvironment();
+        await inputs.environment.saveEnvironment();
         return ui.AppExitResponse.exit;
       },
     );
@@ -63,7 +60,7 @@ class AppRuntime {
     return AppRuntime.assembled(
       stateStore: stateStore,
       state: AppRuntimeState(
-        uiHandles: config.uiHandles,
+        uiHandles: inputs.uiHandles,
         environmentStoreState: stateStore.environmentStoreState,
         appUiState: stateStore.appUiState,
         windowInteractionState: stateStore.windowInteractionState,
@@ -73,7 +70,7 @@ class AppRuntime {
         workspaceWindowHistoryState: stateStore.workspaceWindowHistoryState,
       ),
       foundation: foundation,
-      documents: AppDocument(documentCoordinator: documentCoordinator),
+      documents: documents,
       workspace: workspace,
       autosaveTimer: autosaveTimer,
       appLifecycleListener: appLifecycleListener,

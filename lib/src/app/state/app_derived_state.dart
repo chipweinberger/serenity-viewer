@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:serenity_viewer/src/app/assembly/app_runtime_services.dart';
+import 'package:serenity_viewer/src/app/runtime/app_runtime_groups.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 
 class AppDerivedState {

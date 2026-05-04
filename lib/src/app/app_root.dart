@@ -3,8 +3,7 @@ import 'dart:io';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/app/assembly/app_runtime.dart';
-import 'package:serenity_viewer/src/app/assembly/app_runtime_config_builder.dart';
+import 'package:serenity_viewer/src/app/runtime/app_runtime.dart';
 import 'package:serenity_viewer/src/app/state/app_derived_state.dart';
 import 'package:serenity_viewer/src/app/state/app_state_store.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
@@ -151,7 +150,7 @@ class _AppRootState extends State<AppRoot> {
   @override
   void initState() {
     super.initState();
-    _runtime = AppRuntime.create(_buildRuntimeConfig());
+    _runtime = AppRuntime.create(_buildRuntimeInputs());
     _feedback = AppFeedbackController(context: () => context);
     _settings = AppSettingsController(
       context: () => context,
@@ -175,8 +174,8 @@ class _AppRootState extends State<AppRoot> {
     super.dispose();
   }
 
-  AppRuntimeConfig _buildRuntimeConfig() {
-    return AppRuntimeConfigBuilder(
+  AppRuntimeInputs _buildRuntimeInputs() {
+    return AppRuntimeInputBuilder(
       stateStore: _stateStore,
       uiHandles: _uiHandles,
       context: () => context,

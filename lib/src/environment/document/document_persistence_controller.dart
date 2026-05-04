@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 
-import 'package:serenity_viewer/src/app/assembly/app_runtime.dart';
+import 'package:serenity_viewer/src/app/runtime/app_runtime.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 
 class DocumentPersistenceController {

@@ -1,17 +1,97 @@
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/app/assembly/app_runtime_config.dart';
-import 'package:serenity_viewer/src/app/assembly/app_runtime_services.dart';
+import 'package:serenity_viewer/src/app/runtime/app_runtime_groups.dart';
 import 'package:serenity_viewer/src/app/seed_environment.dart';
-import 'package:serenity_viewer/src/environment/document/document_persistence_controller.dart';
-import 'package:serenity_viewer/src/foundation/serenity_identity.dart';
-import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/app/state/app_derived_state.dart';
 import 'package:serenity_viewer/src/app/state/app_state_store.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
+import 'package:serenity_viewer/src/environment/controller/environment_controller_types.dart';
+import 'package:serenity_viewer/src/environment/document/document_persistence_controller.dart';
+import 'package:serenity_viewer/src/environment/environment.dart';
+import 'package:serenity_viewer/src/environment/window.dart';
+import 'package:serenity_viewer/src/environment/workspace.dart';
+import 'package:serenity_viewer/src/foundation/app_constants.dart';
+import 'package:serenity_viewer/src/foundation/serenity_identity.dart';
 
-class AppRuntimeConfigBuilder {
-  const AppRuntimeConfigBuilder({
+class AppRuntimeInputs {
+  const AppRuntimeInputs({
+    required this.isRunningInWidgetTest,
+    required this.stateStore,
+    required this.uiHandles,
+    required this.app,
+    required this.environment,
+    required this.workspace,
+  });
+
+  final bool isRunningInWidgetTest;
+  final AppStateStore stateStore;
+  final AppUiHandles uiHandles;
+  final AppRuntimeAppInputs app;
+  final AppRuntimeEnvironmentInputs environment;
+  final AppRuntimeWorkspaceInputs workspace;
+}
+
+class AppRuntimeAppInputs {
+  const AppRuntimeAppInputs({
+    required this.windowTitle,
+    required this.context,
+    required this.mounted,
+    required this.commitStateChange,
+    required this.showMessage,
+  });
+
+  final String Function() windowTitle;
+  final BuildContext Function() context;
+  final bool Function() mounted;
+  final StateSetter commitStateChange;
+  final ValueChanged<String> showMessage;
+}
+
+class AppRuntimeEnvironmentInputs {
+  const AppRuntimeEnvironmentInputs({
+    required this.seedEnvironment,
+    required this.updateEnvironment,
+    required this.replaceWorkspace,
+    required this.saveEnvironment,
+  });
+
+  final Environment Function() seedEnvironment;
+  final ValueChanged<Environment> updateEnvironment;
+  final void Function(Workspace workspace, {bool queueThumbnail}) replaceWorkspace;
+  final Future<void> Function() saveEnvironment;
+}
+
+class AppRuntimeWorkspaceInputs {
+  const AppRuntimeWorkspaceInputs({
+    required this.newId,
+    required this.colorFromDigest,
+    required this.activeWorkspace,
+    required this.workspaces,
+    required this.openWorkspaces,
+    required this.focusedWindowOrNull,
+    required this.setWorkspaceViewport,
+    required this.showWorkspaceScreen,
+    required this.showLibraryScreen,
+    required this.toggleExpose,
+    required this.toggleVideoPlayback,
+  });
+
+  final String Function(String prefix) newId;
+  final int Function(String value) colorFromDigest;
+  final Workspace? Function() activeWorkspace;
+  final List<Workspace> Function() workspaces;
+  final List<Workspace> Function() openWorkspaces;
+  final Window? Function() focusedWindowOrNull;
+  final void Function({required String workspaceId, Offset? center, double? zoom, bool queueThumbnail})
+  setWorkspaceViewport;
+  final SerenityShowWorkspaceScreen showWorkspaceScreen;
+  final SerenityShowLibraryScreen showLibraryScreen;
+  final VoidCallback toggleExpose;
+  final ValueChanged<String> toggleVideoPlayback;
+}
+
+class AppRuntimeInputBuilder {
+  const AppRuntimeInputBuilder({
     required this.stateStore,
     required this.uiHandles,
     required this.context,
@@ -37,26 +117,26 @@ class AppRuntimeConfigBuilder {
   final AppWorkspaceServices Function() workspace;
   final DocumentPersistenceController Function() documentPersistence;
 
-  AppRuntimeConfig build() {
-    return AppRuntimeConfig(
+  AppRuntimeInputs build() {
+    return AppRuntimeInputs(
       isRunningInWidgetTest: isRunningInWidgetTest,
       stateStore: stateStore,
       uiHandles: uiHandles,
-      shell: AppConfig(
+      app: AppRuntimeAppInputs(
         windowTitle: () => derivedState().windowTitle,
         context: context,
         mounted: mounted,
         commitStateChange: commitStateChange,
         showMessage: showMessage,
       ),
-      environment: EnvironmentConfig(
+      environment: AppRuntimeEnvironmentInputs(
         seedEnvironment: buildSeedEnvironment,
         updateEnvironment: (environment) => foundation().environmentStore.updateEnvironment(environment),
         replaceWorkspace: (workspace, {queueThumbnail = true}) =>
             foundation().environmentStore.replaceWorkspace(workspace, queueThumbnail: queueThumbnail),
         saveEnvironment: () => documentPersistence().saveEnvironment(),
       ),
-      workspace: WorkspaceConfig(
+      workspace: AppRuntimeWorkspaceInputs(
         newId: newSerenityId,
         colorFromDigest: assetColorValueFromDigest,
         activeWorkspace: () => derivedState().activeWorkspaceOrNull,
