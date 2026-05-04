@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
@@ -13,8 +12,7 @@ import 'package:serenity_viewer/src/app/builders/content_builder.dart';
 import 'package:serenity_viewer/src/app/builders/content_scope.dart';
 import 'package:serenity_viewer/src/app/builders/menu_builder.dart';
 import 'package:serenity_viewer/src/app/seed_environment.dart';
-import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/workspace/window/session/recently_closed_window_entry.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_windows_controller.dart';
 
 class AppRoot extends StatefulWidget {
   const AppRoot({super.key});
@@ -24,12 +22,10 @@ class AppRoot extends StatefulWidget {
 }
 
 class _AppRootState extends State<AppRoot> {
-  static const int _maxRecentlyClosedWindows = 12;
   static const List<String> _imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tif', 'tiff'];
   static const List<String> _videoExtensions = ['mp4', 'mov', 'm4v', 'avi', 'mkv', 'webm'];
 
   final _dependencies = AppDependencies();
-  final List<RecentlyClosedWindowEntry> _recentlyClosedWindows = [];
   late final AppRuntime _runtime;
   late final AppActions _controller;
   late final AppPersistenceController _persistence;
@@ -44,8 +40,38 @@ class _AppRootState extends State<AppRoot> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), behavior: SnackBarBehavior.floating));
   }
 
+  Future<void> _confirmCollateWorkspaceWindows() async {
+    final collatableWindowCount = _workspaceRuntime.workspaceWindowController.collatableWindowCount();
+    if (collatableWindowCount == 0) {
+      _controller.feedback.showMessage('There are no image or video windows to collate.');
+      return;
+    }
+
+    final shouldCollate = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Collate Windows?'),
+          content: Text(
+            'Center and resize $collatableWindowCount image/video window'
+            '${collatableWindowCount == 1 ? '' : 's'} into a fixed ${workspaceCollateTargetBox.width.toInt()} × '
+            '${workspaceCollateTargetBox.height.toInt()} box?',
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
+            FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Collate')),
+          ],
+        );
+      },
+    );
+
+    if (shouldCollate == true && mounted) {
+      _workspaceRuntime.workspaceWindowController.collateActiveWorkspace();
+    }
+  }
+
   List<PlatformMenuItem> _buildMenus() {
-    final focusedWindow = _controller.windowHistory.focusedWindowOrNull();
+    final focusedWindow = _workspaceRuntime.workspaceWindowController.focusedWindowOrNull();
     final focusedWindowIsSelected =
         focusedWindow != null && _workspaceRuntime.workspaceController.expose.contains(focusedWindow.asset.id);
 
@@ -59,29 +85,29 @@ class _AppRootState extends State<AppRoot> {
       saveEnvironmentAs: _documents.documentCoordinator.saveDocumentAs,
       revealAssetInFinder: _foundation.mediaBridge.revealAssetInFinder,
       toggleWindowSelected: _workspaceRuntime.environmentController.navigation.toggleSelectedWindow,
-      fitWindowToContent: _controller.window.fitWindowToContent,
-      restorePreviousWindowZOrder: _controller.window.restorePreviousWindowZOrder,
+      fitWindowToContent: _workspaceRuntime.workspaceWindowController.fitWindowToContent,
+      restorePreviousWindowZOrder: _workspaceRuntime.workspaceWindowController.restorePreviousWindowZOrder,
       convertVideoWindowToJpeg: (windowId) =>
           _workspaceRuntime.videoConversionCoordinator.convertVideoWindowToJpeg(windowId),
-      closeWindow: _controller.windowHistory.removeWindow,
+      closeWindow: _workspaceRuntime.workspaceWindowHistoryController.removeWindow,
       toggleExpose: _controller.appUi.toggleExpose,
       toggleWorkspaceOverview: _workspaceRuntime.environmentController.navigation.toggleOverview,
       createWorkspace: _workspaceRuntime.environmentController.management.create,
       switchToPreviousWorkspace: () => _workspaceRuntime.environmentController.navigation.switchWorkspace(-1),
       switchToNextWorkspace: () => _workspaceRuntime.environmentController.navigation.switchWorkspace(1),
-      fitWorkspaceViewportToContent: _controller.window.fitWorkspaceViewportToContent,
-      confirmCollateWorkspaceWindows: _controller.window.confirmCollateWorkspaceWindows,
-      pauseAllVideos: _controller.window.pauseAllVideos,
+      fitWorkspaceViewportToContent: _workspaceRuntime.workspaceWindowController.fitWorkspaceViewportToContent,
+      confirmCollateWorkspaceWindows: _confirmCollateWorkspaceWindows,
+      pauseAllVideos: _workspaceRuntime.workspaceWindowController.pauseAllVideos,
       showNoWorkspaceToRenameMessage: () => _controller.feedback.showMessage('There is no workspace to rename.'),
       renameWorkspace: _workspaceRuntime.environmentController.management.renameWorkspace,
       showNoWorkspaceToDeleteMessage: () => _controller.feedback.showMessage('There is no workspace to delete.'),
       confirmDeleteWorkspace: _workspaceRuntime.environmentController.management.confirmDeleteWorkspace,
-      restoreRecentlyClosedWindow: _controller.windowHistory.restoreRecentlyClosedWindow,
+      restoreRecentlyClosedWindow: _workspaceRuntime.workspaceWindowHistoryController.restoreRecentlyClosedWindow,
     ).build(
       activeWorkspaceId: _state.environmentStoreState.environment?.activeWorkspaceId,
       focusedWindow: focusedWindow,
       focusedWindowIsSelected: focusedWindowIsSelected,
-      recentlyClosedWindows: _recentlyClosedWindows,
+      recentlyClosedWindows: _state.recentlyClosedWindowsState.entries,
     );
   }
 
@@ -108,37 +134,37 @@ class _AppRootState extends State<AppRoot> {
         environmentController: _workspaceRuntime.environmentController,
         workspaceLinksController: _workspaceRuntime.workspaceLinksController,
         thumbnailController: _workspaceRuntime.thumbnailController,
-        windowHistoryController: _controller.windowHistory,
+        windowHistoryController: _workspaceRuntime.workspaceWindowHistoryController,
         searchController: _state.handles.searchController,
         tabScrollController: _state.handles.tabScrollController,
       ),
       actions: ContentActions(
         commitStateChange: setState,
         importFiles: _controller.mediaImport.importFiles,
-        handleOptionGestureHover: _controller.window.handleOptionGestureHover,
-        handleWorkspacePanZoomStart: _controller.window.handleWorkspacePanZoomStart,
-        handleWorkspacePanZoomUpdate: _controller.window.handleWorkspacePanZoomUpdate,
-        handleWorkspacePanZoomEnd: _controller.window.handleWorkspacePanZoomEnd,
-        focusWindow: _controller.window.focusWindow,
-        restorePreviousWindowZOrder: _controller.window.restorePreviousWindowZOrder,
-        moveWindow: _controller.window.moveWindow,
-        resizeWindow: _controller.window.resizeWindow,
-        transformWindowFromTrackpad: _controller.window.transformWindowFromTrackpad,
-        fitWindowToContent: _controller.window.fitWindowToContent,
-        setWindowZoom: _controller.window.setWindowZoom,
-        setVideoPosition: _controller.window.setVideoPosition,
-        cycleVideoPlaybackSpeed: _controller.window.cycleVideoPlaybackSpeed,
-        setWindowIntrinsicSize: _controller.window.setWindowIntrinsicSize,
-        isVideoWindowPaused: _controller.window.isVideoWindowPaused,
-        toggleVideoPlayback: _controller.window.toggleVideoPlayback,
+        handleOptionGestureHover: _workspaceRuntime.workspaceWindowController.handleOptionGestureHover,
+        handleWorkspacePanZoomStart: _workspaceRuntime.workspaceWindowController.handleWorkspacePanZoomStart,
+        handleWorkspacePanZoomUpdate: _workspaceRuntime.workspaceWindowController.handleWorkspacePanZoomUpdate,
+        handleWorkspacePanZoomEnd: _workspaceRuntime.workspaceWindowController.handleWorkspacePanZoomEnd,
+        focusWindow: _workspaceRuntime.workspaceWindowController.focusWindow,
+        restorePreviousWindowZOrder: _workspaceRuntime.workspaceWindowController.restorePreviousWindowZOrder,
+        moveWindow: _workspaceRuntime.workspaceWindowController.moveWindow,
+        resizeWindow: _workspaceRuntime.workspaceWindowController.resizeWindow,
+        transformWindowFromTrackpad: _workspaceRuntime.workspaceWindowController.transformWindowFromTrackpad,
+        fitWindowToContent: _workspaceRuntime.workspaceWindowController.fitWindowToContent,
+        setWindowZoom: _workspaceRuntime.workspaceWindowController.setWindowZoom,
+        setVideoPosition: _workspaceRuntime.workspaceWindowController.setVideoPosition,
+        cycleVideoPlaybackSpeed: _workspaceRuntime.workspaceWindowController.cycleVideoPlaybackSpeed,
+        setWindowIntrinsicSize: _workspaceRuntime.workspaceWindowController.setWindowIntrinsicSize,
+        isVideoWindowPaused: _workspaceRuntime.workspaceWindowController.isVideoWindowPaused,
+        toggleVideoPlayback: _workspaceRuntime.workspaceWindowController.toggleVideoPlayback,
         toggleExpose: _controller.appUi.toggleExpose,
-        setPinnedHoverWindow: _controller.window.setPinnedHoverWindow,
-        clearPinnedHoverWindow: _controller.window.clearPinnedHoverWindow,
-        flashWindow: (windowId) => _controller.window.flashWindow(windowId, mounted: mounted),
-        setActiveGestureWindow: _controller.window.setActiveGestureWindow,
-        fitWorkspaceViewportToContent: _controller.window.fitWorkspaceViewportToContent,
-        confirmCollateWorkspaceWindows: _controller.window.confirmCollateWorkspaceWindows,
-        setWorkspaceViewport: _controller.geometry.setWorkspaceViewport,
+        setPinnedHoverWindow: _workspaceRuntime.workspaceWindowController.setPinnedHoverWindow,
+        clearPinnedHoverWindow: _workspaceRuntime.workspaceWindowController.clearPinnedHoverWindow,
+        flashWindow: (windowId) => _workspaceRuntime.workspaceWindowController.flashWindow(windowId, mounted: mounted),
+        setActiveGestureWindow: _workspaceRuntime.workspaceWindowController.setActiveGestureWindow,
+        fitWorkspaceViewportToContent: _workspaceRuntime.workspaceWindowController.fitWorkspaceViewportToContent,
+        confirmCollateWorkspaceWindows: _confirmCollateWorkspaceWindows,
+        setWorkspaceViewport: _workspaceRuntime.workspaceViewportSessionController.setWorkspaceViewport,
       ),
     ).build();
   }
@@ -149,10 +175,6 @@ class _AppRootState extends State<AppRoot> {
     _runtime = AppRuntime.create(_buildRuntimeConfig());
     _controller = AppActions(
       context: () => context,
-      mounted: () => mounted,
-      commitStateChange: setState,
-      recentlyClosedWindows: _recentlyClosedWindows,
-      maxRecentlyClosedWindows: _AppRootState._maxRecentlyClosedWindows,
       imageExtensions: _AppRootState._imageExtensions,
       videoExtensions: _AppRootState._videoExtensions,
       state: _state,
@@ -178,14 +200,6 @@ class _AppRootState extends State<AppRoot> {
     super.dispose();
   }
 
-  String _newId(String prefix) {
-    return '$prefix-${DateTime.now().microsecondsSinceEpoch}-${math.Random().nextInt(9999)}';
-  }
-
-  int _colorFromDigest(String value) {
-    return assetColorFromMd5(value).toARGB32();
-  }
-
   AppRuntimeConfig _buildRuntimeConfig() {
     return AppRuntimeConfigBuilder(
       dependencies: _dependencies,
@@ -198,8 +212,6 @@ class _AppRootState extends State<AppRoot> {
       foundation: () => _foundation,
       controller: () => _controller,
       persistence: () => _persistence,
-      newId: _newId,
-      colorFromDigest: _colorFromDigest,
     ).build();
   }
 

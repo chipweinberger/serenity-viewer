@@ -5,6 +5,7 @@ import 'package:serenity_viewer/src/app/app_derived_state.dart';
 import 'package:serenity_viewer/src/app/app_persistence_controller.dart';
 import 'package:serenity_viewer/src/app/assembly/app_runtime.dart';
 import 'package:serenity_viewer/src/app/seed_environment.dart';
+import 'package:serenity_viewer/src/foundation/serenity_identity.dart';
 import 'package:serenity_viewer/src/app/app_dependencies.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 
@@ -20,8 +21,6 @@ class AppRuntimeConfigBuilder {
     required this.foundation,
     required this.controller,
     required this.persistence,
-    required this.newId,
-    required this.colorFromDigest,
   });
 
   final AppDependencies dependencies;
@@ -34,8 +33,6 @@ class AppRuntimeConfigBuilder {
   final AppFoundation Function() foundation;
   final AppActions Function() controller;
   final AppPersistenceController Function() persistence;
-  final String Function(String prefix) newId;
-  final int Function(String value) colorFromDigest;
 
   AppRuntimeConfig build() {
     return AppRuntimeConfig(
@@ -56,15 +53,15 @@ class AppRuntimeConfigBuilder {
         saveEnvironment: () => persistence().saveEnvironment(),
       ),
       workspace: WorkspaceConfig(
-        newId: newId,
-        colorFromDigest: colorFromDigest,
+        newId: newSerenityId,
+        colorFromDigest: assetColorValueFromDigest,
         activeWorkspace: () => derivedState().activeWorkspaceOrNull,
         workspaces: () => derivedState().workspaces,
         openWorkspaces: () => derivedState().openWorkspaces,
-        focusedWindowOrNull: () => controller().windowHistory.focusedWindowOrNull(),
+        focusedWindowOrNull: () => controller().workspace.workspaceWindowController.focusedWindowOrNull(),
         setWorkspaceViewport:
             ({required String workspaceId, Offset? center, double? zoom, bool queueThumbnail = false}) =>
-                controller().geometry.setWorkspaceViewport(
+                controller().workspace.workspaceViewportSessionController.setWorkspaceViewport(
                   workspaceId: workspaceId,
                   center: center,
                   zoom: zoom,
@@ -90,7 +87,8 @@ class AppRuntimeConfigBuilder {
                   refreshWorkspaceTrackingEnabled: refreshWorkspaceTracking,
                 ),
         toggleExpose: () => foundation().appUiController.toggleExpose(),
-        toggleVideoPlayback: (windowId) => controller().window.toggleVideoPlayback(windowId),
+        toggleVideoPlayback: (windowId) =>
+            controller().workspace.workspaceWindowController.toggleVideoPlayback(windowId),
       ),
     );
   }

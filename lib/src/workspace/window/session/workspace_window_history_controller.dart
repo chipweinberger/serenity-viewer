@@ -3,18 +3,18 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/environment/environment.dart';
-import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/window/session/recently_closed_window_entry.dart';
+import 'package:serenity_viewer/src/workspace/window/session/recently_closed_windows_state.dart';
 
-class WindowHistoryController {
-  WindowHistoryController({
+class WorkspaceWindowHistoryController {
+  WorkspaceWindowHistoryController({
     required this.environment,
     required this.workspaces,
     required this.activeWorkspace,
-    required this.recentlyClosedWindows,
+    required this.recentlyClosedWindowsState,
     required this.workspaceController,
     required this.updateEnvironment,
     required this.replaceWorkspace,
@@ -28,7 +28,7 @@ class WindowHistoryController {
   final Environment? Function() environment;
   final List<Workspace> Function() workspaces;
   final Workspace? Function() activeWorkspace;
-  final List<RecentlyClosedWindowEntry> recentlyClosedWindows;
+  final RecentlyClosedWindowsState recentlyClosedWindowsState;
   final WorkspaceController workspaceController;
   final ValueChanged<Environment> updateEnvironment;
   final void Function(Workspace workspace, {bool queueThumbnail}) replaceWorkspace;
@@ -44,8 +44,8 @@ class WindowHistoryController {
   final SerenityScreen Function() screen;
   final int maxRecentlyClosedWindows;
 
-  Window? focusedWindowOrNull() {
-    return workspaceController.windows.arrangement.focusedOrNull(activeWorkspace());
+  List<RecentlyClosedWindowEntry> get entries {
+    return recentlyClosedWindowsState.entries;
   }
 
   void closeWindow(String workspaceId, String windowId) {
@@ -63,7 +63,7 @@ class WindowHistoryController {
 
     commitStateChange(() {
       workspaceController.windows.runtime.rememberClosed(
-        recentlyClosedWindows,
+        entries,
         maxRecentlyClosedWindows: maxRecentlyClosedWindows,
         workspace: workspace,
         window: window,
@@ -83,7 +83,7 @@ class WindowHistoryController {
   }
 
   void restoreRecentlyClosedWindow([RecentlyClosedWindowEntry? entry]) {
-    final targetEntry = entry ?? (recentlyClosedWindows.isEmpty ? null : recentlyClosedWindows.first);
+    final targetEntry = entry ?? (entries.isEmpty ? null : entries.first);
     final currentEnvironment = environment();
     if (targetEntry == null || currentEnvironment == null) {
       showMessage('There are no recently closed windows to restore.');
@@ -94,7 +94,7 @@ class WindowHistoryController {
     final workspace = workspaceMatches.isEmpty ? null : workspaceMatches.first;
     if (workspace == null) {
       commitStateChange(() {
-        recentlyClosedWindows.remove(targetEntry);
+        entries.remove(targetEntry);
       });
       showMessage('The original workspace for that window is no longer available.');
       return;
@@ -104,7 +104,7 @@ class WindowHistoryController {
     final restoredWindow = targetEntry.window.copyWith(zIndex: nextZ + 1);
 
     commitStateChange(() {
-      recentlyClosedWindows.remove(targetEntry);
+      entries.remove(targetEntry);
     });
 
     updateEnvironment(

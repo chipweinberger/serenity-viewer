@@ -2,7 +2,6 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/app/controllers/window_history_controller.dart';
 import 'package:serenity_viewer/src/workspace/window/frame/window_resize_helpers.dart';
 import 'package:serenity_viewer/src/workspace/window/interaction/window_interaction_state.dart';
 import 'package:serenity_viewer/src/workspace/window/interaction/window_zoom_update.dart';
@@ -15,6 +14,7 @@ import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.da
 import 'package:serenity_viewer/src/media/video/media_bridge.dart';
 import 'package:serenity_viewer/src/environment/session/environment_api.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
+import 'package:serenity_viewer/src/workspace/window/session/workspace_window_history_controller.dart';
 
 class ContentState {
   const ContentState({
@@ -55,7 +55,7 @@ class ContentState {
   final EnvironmentApi environmentController;
   final LinksController workspaceLinksController;
   final ThumbnailController thumbnailController;
-  final WindowHistoryController windowHistoryController;
+  final WorkspaceWindowHistoryController windowHistoryController;
   final TextEditingController searchController;
   final ScrollController tabScrollController;
 }

@@ -6,7 +6,10 @@ import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_renderer.dart
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_store.dart';
 import 'package:serenity_viewer/src/media/video/video_conversion_coordinator.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_viewport_session_controller.dart';
 import 'package:serenity_viewer/src/environment/session/environment_api.dart';
+import 'package:serenity_viewer/src/workspace/window/session/workspace_window_history_controller.dart';
 
 class AppWorkspaceFactory {
   const AppWorkspaceFactory(this.config);
@@ -58,6 +61,33 @@ class AppWorkspaceFactory {
       setWorkspaceViewport: config.workspace.setWorkspaceViewport,
       refreshActiveWorkspaceThumbnail: thumbnailController.refreshActiveWorkspaceIfNeeded,
     );
+    final workspaceWindowController = WorkspaceWindowController(
+      appUiState: appUiState,
+      environment: () => environmentStoreState.environment,
+      activeWorkspace: () => config.workspace.activeWorkspace()!,
+      activeWorkspaceOrNull: config.workspace.activeWorkspace,
+      workspaceController: workspaceController,
+    );
+    final workspaceWindowHistoryController = WorkspaceWindowHistoryController(
+      environment: () => environmentStoreState.environment,
+      workspaces: config.workspace.workspaces,
+      activeWorkspace: config.workspace.activeWorkspace,
+      recentlyClosedWindowsState: dependencies.recentlyClosedWindowsState,
+      workspaceController: workspaceController,
+      updateEnvironment: foundation.environmentStore.updateEnvironment,
+      replaceWorkspace: foundation.environmentStore.replaceWorkspace,
+      commitStateChange: config.shell.commitStateChange,
+      showMessage: config.shell.showMessage,
+      showWorkspaceScreen: config.workspace.showWorkspaceScreen,
+      screen: () => appUiState.screen,
+      maxRecentlyClosedWindows: 12,
+    );
+    final workspaceViewportSessionController = WorkspaceViewportSessionController(
+      environmentStoreState: environmentStoreState,
+      workspaceViewportState: workspaceViewportState,
+      thumbnailController: thumbnailController,
+      replaceWorkspace: foundation.environmentStore.replaceWorkspace,
+    );
     environmentController = EnvironmentApi(
       environmentStoreState: environmentStoreState,
       appUiState: appUiState,
@@ -103,6 +133,9 @@ class AppWorkspaceFactory {
       thumbnailController: thumbnailController,
       workspaceLinksController: workspaceLinksController,
       workspaceController: workspaceController,
+      workspaceWindowController: workspaceWindowController,
+      workspaceWindowHistoryController: workspaceWindowHistoryController,
+      workspaceViewportSessionController: workspaceViewportSessionController,
       environmentController: environmentController,
       videoConversionCoordinator: videoConversionCoordinator,
     );

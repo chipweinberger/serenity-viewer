@@ -25,9 +25,13 @@ import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresh_state
 import 'package:serenity_viewer/src/media/video/media_bridge.dart';
 import 'package:serenity_viewer/src/media/video/video_conversion_coordinator.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_viewport_session_controller.dart';
 import 'package:serenity_viewer/src/environment/session/workspace_view_tracking_state.dart';
 import 'package:serenity_viewer/src/environment/session/environment_api.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
+import 'package:serenity_viewer/src/workspace/window/session/recently_closed_windows_state.dart';
+import 'package:serenity_viewer/src/workspace/window/session/workspace_window_history_controller.dart';
 
 class AppRuntime {
   AppRuntime.assembled({
@@ -85,6 +89,7 @@ class AppRuntime {
         workspaceViewTrackingState: dependencies.workspaceViewTrackingState,
         workspaceViewportState: dependencies.workspaceViewportState,
         thumbnailRefreshState: dependencies.thumbnailRefreshState,
+        recentlyClosedWindowsState: dependencies.recentlyClosedWindowsState,
       ),
       foundation: foundation,
       documents: AppDocument(documentCoordinator: documentCoordinator),
@@ -115,6 +120,7 @@ class AppStateServices {
     required this.workspaceViewTrackingState,
     required this.workspaceViewportState,
     required this.thumbnailRefreshState,
+    required this.recentlyClosedWindowsState,
   });
 
   final AppHandles handles;
@@ -124,6 +130,7 @@ class AppStateServices {
   final WorkspaceViewTrackingState workspaceViewTrackingState;
   final WorkspaceViewportState workspaceViewportState;
   final ThumbnailRefreshState thumbnailRefreshState;
+  final RecentlyClosedWindowsState recentlyClosedWindowsState;
 }
 
 class AppFoundation {
@@ -154,6 +161,9 @@ class AppWorkspaceServices {
     required this.videoConversionCoordinator,
     required this.workspaceLinksController,
     required this.workspaceController,
+    required this.workspaceWindowController,
+    required this.workspaceWindowHistoryController,
+    required this.workspaceViewportSessionController,
     required this.environmentController,
   });
 
@@ -161,6 +171,9 @@ class AppWorkspaceServices {
   final VideoConversionCoordinator videoConversionCoordinator;
   final LinksController workspaceLinksController;
   final WorkspaceController workspaceController;
+  final WorkspaceWindowController workspaceWindowController;
+  final WorkspaceWindowHistoryController workspaceWindowHistoryController;
+  final WorkspaceViewportSessionController workspaceViewportSessionController;
   final EnvironmentApi environmentController;
 }
 
