@@ -111,8 +111,7 @@ class WorkspaceExposeLayoutController {
         return AlertDialog(
           title: const Text('Collate Windows?'),
           content: Text(
-            'Gather $collatableWindowCount image/video window'
-            '${collatableWindowCount == 1 ? '' : 's'} into the center and make them a consistent size?',
+            'Gather windows into the center?',
           ),
           actions: [
             TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),

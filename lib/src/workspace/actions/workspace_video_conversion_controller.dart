@@ -34,6 +34,14 @@ class WorkspaceVideoConversionController {
   final int Function(String value) colorFromDigest;
   final ValueChanged<String> removePausedVideoWindow;
 
+  bool isConvertibleWindow(Window? window) {
+    if (window == null) {
+      return false;
+    }
+
+    return _isConvertibleWindow(window);
+  }
+
   bool get hasConvertibleWindowsInActiveWorkspace {
     final workspace = activeWorkspace();
     if (workspace == null) {
@@ -47,18 +55,29 @@ class WorkspaceVideoConversionController {
     await _convertWindowToJpeg(windowId, showSuccessMessage: true);
   }
 
-  Future<void> convertActiveWorkspaceToJpeg() async {
+  bool hasConvertibleWindows(Iterable<String> windowIds) {
+    final workspace = activeWorkspace();
+    if (workspace == null) {
+      return false;
+    }
+
+    final selectedIds = windowIds.toSet();
+    return workspace.windows.any((window) => selectedIds.contains(window.asset.id) && _isConvertibleWindow(window));
+  }
+
+  Future<void> convertWindowsToJpeg(List<String> windowIds) async {
     final workspace = activeWorkspace();
     if (workspace == null) {
       return;
     }
 
+    final selectedIds = windowIds.toSet();
     final convertibleWindowIds = workspace.windows
-        .where(_isConvertibleWindow)
+        .where((window) => selectedIds.contains(window.asset.id) && _isConvertibleWindow(window))
         .map((window) => window.asset.id)
         .toList();
     if (convertibleWindowIds.isEmpty) {
-      showMessage('There are no video or PNG windows to convert in this workspace.');
+      showMessage('There are no selected video or PNG windows to convert.');
       return;
     }
 
@@ -71,7 +90,7 @@ class WorkspaceVideoConversionController {
     }
 
     if (convertedCount > 0) {
-      showMessage('Converted $convertedCount window${convertedCount == 1 ? '' : 's'} to JPEG in this workspace.');
+      showMessage('Converted $convertedCount window${convertedCount == 1 ? '' : 's'} to JPEG.');
     }
   }
 
@@ -240,11 +259,12 @@ class WorkspaceVideoConversionController {
     }
 
     final sourcePath = window.asset.filePath;
-    if (sourcePath == null || sourcePath.isEmpty) {
+    final candidate = (sourcePath == null || sourcePath.isEmpty) ? window.asset.filename : sourcePath;
+    if (candidate.isEmpty) {
       return false;
     }
 
-    return sourcePath.toLowerCase().endsWith('.png');
+    return candidate.toLowerCase().endsWith('.png');
   }
 
   String _jpegPathFor(File sourceFile) {

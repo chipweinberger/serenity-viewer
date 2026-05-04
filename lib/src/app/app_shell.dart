@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/gestures.dart';
 import 'package:provider/provider.dart';
 
 import 'package:serenity_viewer/src/app/header/app_header.dart';
 import 'package:serenity_viewer/src/app/menu/app_menu.dart';
+import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/app/views/library_view.dart';
@@ -17,9 +19,12 @@ import 'package:serenity_viewer/src/window/interaction/window_interaction_state.
 class AppShell extends StatelessWidget {
   const AppShell({super.key});
 
-  ({bool hasEnvironment, bool isLoading, SerenityScreen screen}) _watchState(BuildContext context) {
+  ({bool hasEnvironment, bool isLoading, SerenityScreen screen, String? draggingWindowSourceWorkspaceId}) _watchState(
+    BuildContext context,
+  ) {
     return (
       screen: context.select((AppUiState state) => state.screen),
+      draggingWindowSourceWorkspaceId: context.select((AppUiState state) => state.draggingWindowSourceWorkspaceId),
       isLoading: context.select((EnvironmentStoreState state) => state.isLoading),
       hasEnvironment: context.select((EnvironmentStoreState state) => state.environment != null),
     );
@@ -67,25 +72,56 @@ class AppShell extends StatelessWidget {
     return workspaceController.shortcuts.onKeyEvent(event);
   }
 
+  void _handlePointerMove(
+    PointerMoveEvent event,
+    AppUiState appUiState,
+    AppUiController appUiController,
+    AppUiHandles uiHandles,
+  ) {
+    final sourceWorkspaceId = appUiState.draggingWindowSourceWorkspaceId;
+    if (sourceWorkspaceId == null || event.buttons != kPrimaryMouseButton) {
+      return;
+    }
+
+    final targetWorkspaceId = uiHandles.workspaceTabAt(event.position, excludingWorkspaceId: sourceWorkspaceId);
+    appUiController.setWindowDragTargetWorkspaceId(targetWorkspaceId);
+  }
+
+  void _handlePointerEnd(AppUiState appUiState, AppUiController appUiController) {
+    if (appUiState.draggingWindowSourceWorkspaceId == null) {
+      return;
+    }
+
+    appUiController.endWindowDrag();
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = _watchState(context);
     final uiHandles = context.read<AppUiHandles>();
+    final appUiState = context.read<AppUiState>();
+    final appUiController = context.read<AppUiController>();
     final workspaceController = context.read<WorkspaceController>();
     final windowInteractionState = context.read<WindowInteractionState>();
 
     return AppMenu(
-      child: Focus(
-        focusNode: uiHandles.focusNode,
-        autofocus: true,
-        onKeyEvent: (_, event) => _handleKeyEvent(event, workspaceController, windowInteractionState),
-        child: Scaffold(
-          body: SafeArea(
-            top: false,
-            child: _buildContent(
-              isLoading: state.isLoading,
-              hasEnvironment: state.hasEnvironment,
-              screen: state.screen,
+      child: Listener(
+        behavior: HitTestBehavior.translucent,
+        onPointerMove: (event) => _handlePointerMove(event, appUiState, appUiController, uiHandles),
+        onPointerUp: (_) => _handlePointerEnd(appUiState, appUiController),
+        onPointerCancel: (_) => _handlePointerEnd(appUiState, appUiController),
+        child: Focus(
+          focusNode: uiHandles.focusNode,
+          autofocus: true,
+          onKeyEvent: (_, event) => _handleKeyEvent(event, workspaceController, windowInteractionState),
+          child: Scaffold(
+            body: SafeArea(
+              top: false,
+              child: _buildContent(
+                isLoading: state.isLoading,
+                hasEnvironment: state.hasEnvironment,
+                screen: state.screen,
+              ),
             ),
           ),
         ),

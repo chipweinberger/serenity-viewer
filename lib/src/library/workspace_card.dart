@@ -257,43 +257,34 @@ class _WorkspaceCardState extends State<WorkspaceCard> {
                       ],
                     ),
                   ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            workspace.name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(
-                              context,
-                            ).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary, fontWeight: FontWeight.w800),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${workspace.windows.length} windows',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppTheme.textMuted),
-                          ),
-                          const Spacer(),
-                          Wrap(
-                            spacing: 10,
-                            runSpacing: 6,
-                            children: [
-                              _buildFooterMetric(context, Icons.photo_library_outlined, '${mediaCounts.total} media'),
-                              if (widget.unloadedCount > 0)
-                                _buildFooterMetric(
-                                  context,
-                                  Icons.downloading_rounded,
-                                  '${widget.unloadedCount} pending',
-                                ),
-                            ],
-                          ),
-                        ],
-                      ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          workspace.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary, fontWeight: FontWeight.w800),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 10,
+                          runSpacing: 6,
+                          children: [
+                            _buildFooterMetric(context, Icons.visibility_outlined, '${workspace.views}'),
+                            _buildFooterMetric(context, Icons.image_outlined, '${mediaCounts.images}'),
+                            _buildFooterMetric(context, Icons.videocam_outlined, '${mediaCounts.videos}'),
+                            _buildFooterMetric(context, Icons.link_rounded, '${mediaCounts.links}'),
+                            if (widget.unloadedCount > 0)
+                              _buildFooterMetric(context, Icons.downloading_rounded, '${widget.unloadedCount}'),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ],

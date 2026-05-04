@@ -6,6 +6,7 @@ import FlutterMacOS
 class AppDelegate: FlutterAppDelegate {
   private var activeSecurityScopedUrls: [URL] = []
   private var dockImportChannel: FlutterMethodChannel?
+  private var isDockImportReady = false
   private var pendingDockImportPaths: [[String]] = []
 
   override func applicationDidFinishLaunching(_ notification: Notification) {
@@ -46,7 +47,22 @@ class AppDelegate: FlutterAppDelegate {
       binaryMessenger: controller.engine.binaryMessenger
     )
     self.dockImportChannel = dockImportChannel
-    flushPendingDockImports()
+
+    dockImportChannel.setMethodCallHandler { [weak self] call, result in
+      guard let self else {
+        result(nil)
+        return
+      }
+
+      guard call.method == "setDockImportReady" else {
+        result(FlutterMethodNotImplemented)
+        return
+      }
+
+      self.isDockImportReady = true
+      self.flushPendingDockImports()
+      result(nil)
+    }
 
     bookmarkChannel.setMethodCallHandler { [weak self] call, result in
       guard let self else {
@@ -223,6 +239,29 @@ class AppDelegate: FlutterAppDelegate {
     return true
   }
 
+  override func application(_ application: NSApplication, open urls: [URL]) {
+    let fileUrls = urls.filter { $0.isFileURL }
+    let paths = fileUrls.map(\.path).filter { !$0.isEmpty }
+    guard !paths.isEmpty else {
+      return
+    }
+
+    for path in paths {
+      startAccessingDockImportPath(path)
+    }
+    enqueueDockImport(paths)
+  }
+
+  override func application(_ sender: NSApplication, openFile filename: String) -> Bool {
+    guard !filename.isEmpty else {
+      return false
+    }
+
+    startAccessingDockImportPath(filename)
+    enqueueDockImport([filename])
+    return true
+  }
+
   override func application(_ sender: NSApplication, openFiles filenames: [String]) {
     let paths = filenames.filter { !$0.isEmpty }
     if paths.isEmpty {
@@ -230,8 +269,18 @@ class AppDelegate: FlutterAppDelegate {
       return
     }
 
+    for path in paths {
+      startAccessingDockImportPath(path)
+    }
     enqueueDockImport(paths)
     sender.reply(toOpenOrPrint: .success)
+  }
+
+  private func startAccessingDockImportPath(_ path: String) {
+    let fileUrl = URL(fileURLWithPath: path)
+    if fileUrl.startAccessingSecurityScopedResource() {
+      activeSecurityScopedUrls.append(fileUrl)
+    }
   }
 
   private func createBookmark(for path: String) -> String? {
@@ -281,9 +330,9 @@ class AppDelegate: FlutterAppDelegate {
     case "upDown":
       cursor = .resizeUpDown
     case "diagonalPrimary":
-      cursor = diagonalCursor(systemSymbolName: "arrow.up.left.and.arrow.down.right", fallback: .crosshair)
+      cursor = diagonalResizeCursor(primary: true)
     case "diagonalSecondary":
-      cursor = diagonalCursor(systemSymbolName: "arrow.up.right.and.arrow.down.left", fallback: .crosshair)
+      cursor = diagonalResizeCursor(primary: false)
     default:
       cursor = .arrow
     }
@@ -291,33 +340,16 @@ class AppDelegate: FlutterAppDelegate {
     cursor.set()
   }
 
-  private func diagonalCursor(systemSymbolName: String, fallback: NSCursor) -> NSCursor {
-    guard #available(macOS 11.0, *) else {
-      return fallback
+  private func diagonalResizeCursor(primary: Bool) -> NSCursor {
+    if #available(macOS 15.0, *) {
+      let position: NSCursor.FrameResizePosition =
+        primary
+        ? .topLeading(relativeTo: .leftToRight)
+        : .topTrailing(relativeTo: .leftToRight)
+      return NSCursor.frameResize(position: position, directions: .all)
     }
 
-    let imageSize = NSSize(width: 20, height: 20)
-    guard let symbol = NSImage(systemSymbolName: systemSymbolName, accessibilityDescription: nil) else {
-      return fallback
-    }
-
-    let outlineSymbol = symbol.withSymbolConfiguration(
-      NSImage.SymbolConfiguration(pointSize: 18, weight: .black)
-    ) ?? symbol
-    let foregroundSymbol = symbol.withSymbolConfiguration(
-      NSImage.SymbolConfiguration(pointSize: 13, weight: .black)
-    ) ?? symbol
-
-    let image = NSImage(size: imageSize)
-    image.lockFocus()
-    let drawRect = NSRect(origin: .zero, size: imageSize)
-    NSColor.white.set()
-    outlineSymbol.draw(in: drawRect)
-    NSColor.black.set()
-    foregroundSymbol.draw(in: drawRect)
-    image.unlockFocus()
-    image.isTemplate = true
-    return NSCursor(image: image, hotSpot: NSPoint(x: imageSize.width / 2, y: imageSize.height / 2))
+    return .resizeLeftRight
   }
 
   private func enqueueDockImport(_ paths: [String]) {
@@ -330,7 +362,7 @@ class AppDelegate: FlutterAppDelegate {
   }
 
   private func flushPendingDockImports() {
-    guard let dockImportChannel else {
+    guard let dockImportChannel, isDockImportReady else {
       return
     }
 

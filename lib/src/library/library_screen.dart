@@ -35,7 +35,6 @@ class LibraryScreen extends StatelessWidget {
   final EnvironmentController environmentController;
 
   static const double _thumbnailWidth = 224;
-  static const double _thumbnailHeight = 192;
 
   List<Workspace> _visibleOpenWorkspaces() {
     return openWorkspaces.where(_matchesWorkspaceSearch).toList();
@@ -97,7 +96,6 @@ class LibraryScreen extends StatelessWidget {
   }) {
     return SizedBox(
       width: _thumbnailWidth,
-      height: _thumbnailHeight,
       child: WorkspaceCard(
         workspace: workspace,
         mediaCounts: workspaceMediaCounts(workspace),

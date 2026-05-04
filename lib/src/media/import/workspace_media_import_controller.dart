@@ -5,11 +5,13 @@ import 'dart:io';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 
+import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/foundation/serenity_identity.dart';
 import 'package:serenity_viewer/src/media/import/import_coordinator.dart';
+import 'package:serenity_viewer/src/media/import/import_result.dart';
 import 'package:serenity_viewer/src/media/video/media_inspector.dart';
 import 'package:serenity_viewer/src/media/video/video_frame_exporter.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
@@ -18,6 +20,7 @@ class WorkspaceMediaImportController {
   const WorkspaceMediaImportController({
     required this.imageExtensions,
     required this.videoExtensions,
+    required this.appUiState,
     required this.environmentStoreState,
     required this.activeWorkspace,
     required this.confirmSingleFrameConversion,
@@ -31,6 +34,7 @@ class WorkspaceMediaImportController {
 
   final List<String> imageExtensions;
   final List<String> videoExtensions;
+  final AppUiState appUiState;
   final EnvironmentStoreState environmentStoreState;
   final Workspace Function() activeWorkspace;
   final Future<bool> Function(String filename) confirmSingleFrameConversion;
@@ -60,11 +64,17 @@ class WorkspaceMediaImportController {
     }
 
     final workspace = activeWorkspace();
-    final result = await _buildImportCoordinator().importFiles(
-      environment: environment,
-      workspace: workspace,
-      files: expandedFiles,
-    );
+    appUiState.beginWorkspaceImport(expandedFiles.length);
+    late final ImportResult result;
+    try {
+      result = await _buildImportCoordinator().importFiles(
+        environment: environment,
+        workspace: workspace,
+        files: expandedFiles,
+      );
+    } finally {
+      appUiState.endWorkspaceImport(expandedFiles.length);
+    }
 
     if (!result.hadSupportedFiles) {
       showMessage('No supported image or video files were found in that selection.');

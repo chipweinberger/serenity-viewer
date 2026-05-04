@@ -101,6 +101,15 @@ class AppUiController {
     appUiState.setWindowDragTargetWorkspaceId(workspaceId);
   }
 
+  void beginWindowDrag(String sourceWorkspaceId) {
+    appUiState.setDraggingWindowSourceWorkspaceId(sourceWorkspaceId);
+  }
+
+  void endWindowDrag() {
+    appUiState.setDraggingWindowSourceWorkspaceId(null);
+    appUiState.setWindowDragTargetWorkspaceId(null);
+  }
+
   void setWorkspaceSort(WorkspaceSort sort) {
     appUiState.setWorkspaceSort(sort);
   }

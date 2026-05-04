@@ -10,8 +10,9 @@ extension on _WindowState {
   }
 
   bool get _shouldShowCommandOverlay {
-    return widget.viewModel.isPinnedHover ||
-        (widget.viewModel.isCommandPressed && (_isHovered || _isResizing || widget.viewModel.isSelected));
+    return widget.viewModel.isSelected ||
+        widget.viewModel.isPinnedHover ||
+        (widget.viewModel.isCommandPressed && (_isHovered || _isResizing));
   }
 
   bool get _showExpandedVideoControls => _shouldShowCommandOverlay;

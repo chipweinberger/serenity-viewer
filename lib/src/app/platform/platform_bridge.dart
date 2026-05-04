@@ -136,6 +136,18 @@ class PlatformBridge {
     await _dockDroppedPathsController.close();
   }
 
+  Future<void> markDockImportReady() async {
+    if (isRunningInWidgetTest || !Platform.isMacOS) {
+      return;
+    }
+
+    try {
+      await dockImportChannel.invokeMethod<void>('setDockImportReady');
+    } catch (_) {
+      // Ignore readiness handoff failures; Dock import just won't be available.
+    }
+  }
+
   Future<void> _handleDockImportCall(MethodCall call) async {
     if (call.method != 'importDockFiles') {
       throw MissingPluginException();

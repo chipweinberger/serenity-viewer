@@ -14,7 +14,6 @@ import 'package:serenity_viewer/src/app/app_theme.dart';
 import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
-import 'package:serenity_viewer/src/media/loading/workspace_load_plan.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
@@ -166,13 +165,14 @@ class WorkspaceScreen extends StatelessWidget {
   }
 
   void _updateWindowTabDropTarget(String sourceWorkspaceId, Offset globalPosition) {
+    appUiController.beginWindowDrag(sourceWorkspaceId);
     final targetWorkspaceId = appUiHandles.workspaceTabAt(globalPosition, excludingWorkspaceId: sourceWorkspaceId);
     appUiController.setWindowDragTargetWorkspaceId(targetWorkspaceId);
   }
 
   Future<void> _handleWindowDragEnd(Window window, String sourceWorkspaceId, Offset globalPosition) async {
     final targetWorkspaceId = appUiHandles.workspaceTabAt(globalPosition, excludingWorkspaceId: sourceWorkspaceId);
-    appUiController.setWindowDragTargetWorkspaceId(null);
+    appUiController.endWindowDrag();
     if (targetWorkspaceId == null) {
       return;
     }
@@ -369,8 +369,8 @@ class WorkspaceScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildWorkspaceLoadingIndicator(BuildContext context, {required int unloadedCount}) {
-    final label = unloadedCount == 1 ? 'Loading 1 asset…' : 'Loading $unloadedCount assets…';
+  Widget _buildWorkspaceLoadingIndicator(BuildContext context, {required int assetCount}) {
+    final label = assetCount == 1 ? 'Loading 1 asset…' : 'Loading $assetCount assets…';
 
     return Positioned.fill(
       child: IgnorePointer(
@@ -414,8 +414,8 @@ class WorkspaceScreen extends StatelessWidget {
   }
 
   Widget _buildWorkspaceCanvasLayers(BuildContext context, _WorkspaceCanvasViewModel canvasViewModel) {
-    final unloadedCount = unloadedWorkspaceWindowCount(canvasViewModel.workspace, canvasViewModel.loadPlan);
-    final showsLoadingIndicator = unloadedCount > 0;
+    final importAssetCount = appUiState.workspaceImportAssetCount;
+    final showsLoadingIndicator = appUiState.isWorkspaceImporting && importAssetCount > 0;
 
     return Stack(
       children: [
@@ -427,7 +427,7 @@ class WorkspaceScreen extends StatelessWidget {
         if (!canvasViewModel.isExposeMode && canvasViewModel.windows.isEmpty)
           Positioned.fill(child: _buildEmptyWorkspaceCanvasState(context)),
         if (canvasViewModel.isDropTargetActive) _buildWorkspaceDropOverlay(),
-        if (showsLoadingIndicator) _buildWorkspaceLoadingIndicator(context, unloadedCount: unloadedCount),
+        if (showsLoadingIndicator) _buildWorkspaceLoadingIndicator(context, assetCount: importAssetCount),
         Positioned(left: 18, bottom: 18, child: workspaceHud),
       ],
     );

@@ -172,6 +172,7 @@ class _AppRootState extends State<AppRoot> {
     _dockDroppedPathsSubscription = _runtime.platformBridge.dockDroppedPaths.listen((paths) {
       unawaited(_importDockDroppedPaths(paths));
     });
+    unawaited(_runtime.platformBridge.markDockImportReady());
     _rootObjects.environmentStoreState.addListener(_handleEnvironmentStoreChanged);
     _documentPersistence.restoreEnvironment();
   }

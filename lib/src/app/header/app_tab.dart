@@ -15,6 +15,7 @@ class AppTab extends StatelessWidget {
     required this.shouldMoveSelectedWindows,
     required this.draggingTabWorkspaceId,
     required this.isDropTarget,
+    required this.showMoveHereTooltip,
     required this.onMoveSelectedExposeWindowsToWorkspace,
     required this.onSetActiveWorkspace,
     required this.onConfirmCloseTab,
@@ -26,16 +27,13 @@ class AppTab extends StatelessWidget {
   final bool shouldMoveSelectedWindows;
   final String? draggingTabWorkspaceId;
   final bool isDropTarget;
+  final bool showMoveHereTooltip;
   final Future<void> Function(String workspaceId) onMoveSelectedExposeWindowsToWorkspace;
   final Future<void> Function(String workspaceId) onSetActiveWorkspace;
   final Future<void> Function(String workspaceId) onConfirmCloseTab;
 
   bool get _isSelected {
     return !isLibraryScreen && workspace.id == activeWorkspaceId;
-  }
-
-  bool get _showsSelectedStyle {
-    return _isSelected || isDropTarget;
   }
 
   void _handleTap() {
@@ -52,13 +50,14 @@ class AppTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedScale(
+    final tab = AnimatedScale(
       duration: const Duration(milliseconds: 120),
       scale: isDropTarget ? 1.04 : 1,
       child: Opacity(
         opacity: draggingTabWorkspaceId == workspace.id ? 0.7 : 1,
         child: GlassChip(
-          selected: _showsSelectedStyle,
+          selected: _isSelected,
+          dropTarget: isDropTarget,
           onTap: _handleTap,
           trailing: Material(
             color: Colors.transparent,
@@ -70,7 +69,7 @@ class AppTab extends StatelessWidget {
                 child: Icon(
                   Icons.close_rounded,
                   size: 14,
-                  color: _showsSelectedStyle ? Colors.white : AppTheme.textMuted,
+                  color: (_isSelected || isDropTarget) ? Colors.white : AppTheme.textMuted,
                 ),
               ),
             ),
@@ -78,6 +77,17 @@ class AppTab extends StatelessWidget {
           child: Text(workspace.name, overflow: TextOverflow.ellipsis),
         ),
       ),
+    );
+
+    if (!showMoveHereTooltip) {
+      return tab;
+    }
+
+    return Tooltip(
+      message: 'Move Here',
+      waitDuration: const Duration(milliseconds: 550),
+      showDuration: const Duration(seconds: 2),
+      child: tab,
     );
   }
 }

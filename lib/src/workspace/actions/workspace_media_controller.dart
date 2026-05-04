@@ -1,5 +1,6 @@
 import 'package:file_selector/file_selector.dart';
 
+import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/media/import/workspace_media_import_controller.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_video_conversion_controller.dart';
 
@@ -32,9 +33,15 @@ class WorkspaceMediaController {
     return videoConversionController.convertWindowToJpeg(windowId);
   }
 
-  bool get hasConvertibleWindowsInActiveWorkspace => videoConversionController.hasConvertibleWindowsInActiveWorkspace;
+  bool isConvertibleWindow(Window? window) {
+    return videoConversionController.isConvertibleWindow(window);
+  }
 
-  Future<void> convertActiveWorkspaceToJpeg() {
-    return videoConversionController.convertActiveWorkspaceToJpeg();
+  bool hasConvertibleWindows(Iterable<String> windowIds) {
+    return videoConversionController.hasConvertibleWindows(windowIds);
+  }
+
+  Future<void> convertWindowsToJpeg(List<String> windowIds) {
+    return videoConversionController.convertWindowsToJpeg(windowIds);
   }
 }

@@ -12,9 +12,9 @@ import 'package:serenity_viewer/src/environment/controller/environment_controlle
 import 'package:serenity_viewer/src/environment/document/document_coordinator.dart';
 import 'package:serenity_viewer/src/environment/history/environment_window_history_entry.dart';
 import 'package:serenity_viewer/src/environment/history/environment_window_history_state.dart';
+import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
-import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/settings/app_settings_controller.dart';
 import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
@@ -23,12 +23,16 @@ class _MenuState {
   const _MenuState({
     required this.activeWorkspaceId,
     required this.focusedWindow,
+    required this.pinnedHoverWindow,
+    required this.selectedExposeWindowIds,
     required this.focusedWindowIsSelected,
     required this.recentlyClosedWindows,
   });
 
   final String? activeWorkspaceId;
   final Window? focusedWindow;
+  final Window? pinnedHoverWindow;
+  final Set<String> selectedExposeWindowIds;
   final bool focusedWindowIsSelected;
   final List<EnvironmentWindowHistoryEntry> recentlyClosedWindows;
 }
@@ -40,12 +44,16 @@ class AppMenu extends StatelessWidget {
 
   ({
     String? activeWorkspaceId,
+    Environment? environment,
+    String? pinnedHoverWindowId,
     List<EnvironmentWindowHistoryEntry> recentlyClosedWindows,
     Set<String> selectedExposeWindowIds,
   })
   _watchState(BuildContext context) {
     return (
       activeWorkspaceId: context.select((EnvironmentStoreState state) => state.environment?.activeWorkspaceId),
+      environment: context.select((EnvironmentStoreState state) => state.environment),
+      pinnedHoverWindowId: context.select((WindowInteractionState state) => state.pinnedHoverWindowId),
       selectedExposeWindowIds: context.select(
         (WindowInteractionState state) => Set<String>.of(state.selectedExposeWindowIds),
       ),
@@ -78,19 +86,40 @@ class AppMenu extends StatelessWidget {
 
   _MenuState _buildState({
     required String? activeWorkspaceId,
+    required Environment? environment,
+    required String? pinnedHoverWindowId,
     required Set<String> selectedExposeWindowIds,
     required List<EnvironmentWindowHistoryEntry> recentlyClosedWindows,
     required WorkspaceController workspaceController,
   }) {
     final focusedWindow = workspaceController.window.focusedWindowOrNull();
+    final pinnedHoverWindow = _findWindowById(environment, pinnedHoverWindowId);
     final focusedWindowIsSelected = focusedWindow != null && selectedExposeWindowIds.contains(focusedWindow.asset.id);
 
     return _MenuState(
       activeWorkspaceId: activeWorkspaceId,
       focusedWindow: focusedWindow,
+      pinnedHoverWindow: pinnedHoverWindow,
+      selectedExposeWindowIds: selectedExposeWindowIds,
       focusedWindowIsSelected: focusedWindowIsSelected,
       recentlyClosedWindows: recentlyClosedWindows,
     );
+  }
+
+  Window? _findWindowById(Environment? environment, String? windowId) {
+    if (environment == null || windowId == null) {
+      return null;
+    }
+
+    for (final workspace in environment.workspaces) {
+      for (final window in workspace.windows) {
+        if (window.asset.id == windowId) {
+          return window;
+        }
+      }
+    }
+
+    return null;
   }
 
   List<PlatformMenuItem> _buildHistoryMenuItems({
@@ -176,41 +205,50 @@ class AppMenu extends StatelessWidget {
     required _MenuState state,
     required PlatformBridge platformBridge,
     required WorkspaceController workspaceController,
+    required bool mounted,
   }) {
-    final focusedWindow = state.focusedWindow;
-    final focusedConvertibleWindow = switch (focusedWindow?.asset.type) {
-      AssetType.video => focusedWindow,
-      AssetType.image when focusedWindow?.asset.filePath?.toLowerCase().endsWith('.png') ?? false => focusedWindow,
-      _ => null,
-    };
-    final focusedWindowLabel = focusedWindow == null
-        ? 'No Asset Selected'
-        : _middleTruncatedLabel(focusedWindow.asset.filename);
-    final hasConvertibleWindowsInActiveWorkspace = workspaceController.media.hasConvertibleWindowsInActiveWorkspace;
+    final pinnedHoverWindow = state.pinnedHoverWindow;
+    final selectedWindowIds = state.selectedExposeWindowIds.toList(growable: false);
+    final selectedWindowCount = selectedWindowIds.length;
+    final hasSelectedWindows = selectedWindowIds.isNotEmpty;
+    final canConvertSelection =
+        hasSelectedWindows && workspaceController.media.hasConvertibleWindows(selectedWindowIds);
+    final focusedConvertibleWindow = workspaceController.media.isConvertibleWindow(pinnedHoverWindow)
+        ? pinnedHoverWindow
+        : null;
+    final focusedWindowLabel = hasSelectedWindows
+        ? '$selectedWindowCount Asset${selectedWindowCount == 1 ? '' : 's'} Selected'
+        : (pinnedHoverWindow == null ? 'No Active Asset' : _middleTruncatedLabel(pinnedHoverWindow.asset.filename));
+    final convertLabel = hasSelectedWindows ? 'Convert $selectedWindowCount Selected to JPEG' : 'Convert to JPEG';
 
     return [
-      PlatformMenuItem(label: focusedWindowLabel, onSelected: null),
+      PlatformMenuItem(
+        label: focusedWindowLabel,
+        onSelected: pinnedHoverWindow == null
+            ? null
+            : () => workspaceController.window.flashWindow(pinnedHoverWindow.asset.id, mounted: mounted),
+      ),
       PlatformMenuItemGroup(
         members: [
           PlatformMenuItem(
             label: 'Reveal in Finder',
-            onSelected: focusedWindow == null
+            onSelected: pinnedHoverWindow == null
                 ? null
-                : () => unawaited(platformBridge.revealAssetInFinder(focusedWindow.asset)),
+                : () => unawaited(platformBridge.revealAssetInFinder(pinnedHoverWindow.asset)),
             shortcut: const SingleActivator(LogicalKeyboardKey.keyR, meta: true, shift: true),
           ),
           PlatformMenuItem(
-            label: 'Convert to JPEG',
-            onSelected: focusedConvertibleWindow == null
-                ? null
-                : () => unawaited(workspaceController.media.convertWindowToJpeg(focusedConvertibleWindow.asset.id)),
+            label: convertLabel,
+            onSelected: hasSelectedWindows
+                ? (canConvertSelection
+                      ? () => unawaited(workspaceController.media.convertWindowsToJpeg(selectedWindowIds))
+                      : null)
+                : (focusedConvertibleWindow == null
+                      ? null
+                      : () => unawaited(
+                          workspaceController.media.convertWindowToJpeg(focusedConvertibleWindow.asset.id),
+                        )),
             shortcut: const SingleActivator(LogicalKeyboardKey.keyJ, meta: true, shift: true),
-          ),
-          PlatformMenuItem(
-            label: 'Convert Workspace to JPEG',
-            onSelected: hasConvertibleWindowsInActiveWorkspace
-                ? () => unawaited(workspaceController.media.convertActiveWorkspaceToJpeg())
-                : null,
           ),
         ],
       ),
@@ -346,8 +384,9 @@ class AppMenu extends StatelessWidget {
       AppSettingsController settings,
     })
     dependencies,
+    required bool mounted,
   }) {
-    return [
+    final menus = <PlatformMenu>[
       PlatformMenu(
         label: 'Serenity',
         menus: _buildAppMenuItems(feedback: dependencies.feedback, settings: dependencies.settings),
@@ -365,8 +404,12 @@ class AppMenu extends StatelessWidget {
           state: state,
           platformBridge: dependencies.platformBridge,
           workspaceController: dependencies.workspaceController,
+          mounted: mounted,
         ),
       ),
+    ];
+
+    menus.addAll([
       PlatformMenu(
         label: 'Window',
         menus: _buildWindowMenuItems(
@@ -395,7 +438,9 @@ class AppMenu extends StatelessWidget {
         label: 'History',
         menus: _buildHistoryMenuItems(state: state, environmentController: dependencies.environmentController),
       ),
-    ];
+    ]);
+
+    return menus;
   }
 
   static String _middleTruncatedLabel(String value, {int maxLength = 42}) {
@@ -420,13 +465,15 @@ class AppMenu extends StatelessWidget {
 
     final menuState = _buildState(
       activeWorkspaceId: state.activeWorkspaceId,
+      environment: state.environment,
+      pinnedHoverWindowId: state.pinnedHoverWindowId,
       selectedExposeWindowIds: state.selectedExposeWindowIds,
       recentlyClosedWindows: state.recentlyClosedWindows,
       workspaceController: dependencies.workspaceController,
     );
 
     return PlatformMenuBar(
-      menus: _buildMenus(state: menuState, dependencies: dependencies),
+      menus: _buildMenus(state: menuState, dependencies: dependencies, mounted: context.mounted),
       child: child,
     );
   }
