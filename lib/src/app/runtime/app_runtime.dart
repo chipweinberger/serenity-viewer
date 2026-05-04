@@ -130,14 +130,20 @@ class AppRuntime {
       appUiController: foundation.appUiController,
     );
     final documentCoordinator = createAppDocumentCoordinator(
-      inputs: inputs,
+      environmentStoreState: inputs.stateStore.environmentStoreState,
       environmentStore: foundation.environmentStore,
+      context: inputs.context,
+      mounted: inputs.mounted,
+      seedEnvironment: inputs.seedEnvironment,
+      showMessage: inputs.showMessage,
       refreshActiveWorkspaceThumbnailIfNeeded: () async => workspace.thumbnailController.refreshActiveWorkspaceIfNeeded(),
       storeLastEnvironmentPath: foundation.platformBridge.storeLastEnvironmentPath,
       syncWindowTitle: foundation.platformBridge.syncWindowTitle,
       resolveFileBookmark: foundation.platformBridge.resolveFileBookmark,
       createFileBookmark: foundation.platformBridge.createFileBookmark,
       thumbnailDirectory: foundation.platformBridge.thumbnailDirectory,
+      updateEnvironment: inputs.updateEnvironment,
+      saveEnvironment: inputs.saveEnvironment,
     );
     final autosaveTimer = Timer.periodic(const Duration(minutes: 1), (_) {
       if (environmentStoreState.hasUnsavedChanges) {
