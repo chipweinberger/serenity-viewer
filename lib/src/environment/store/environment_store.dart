@@ -8,7 +8,6 @@ import 'package:serenity_viewer/src/workspace/mutations/workspace_environment_mu
 import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 
-typedef SerenityEnvironmentCommit = void Function(VoidCallback update);
 typedef SerenityWorkspaceThumbnailMarker = void Function(String workspaceId);
 
 class EnvironmentStore {
@@ -16,7 +15,6 @@ class EnvironmentStore {
     required this.environmentStoreState,
     required this.appUiState,
     required this.markWorkspaceThumbnailDirty,
-    required this.commitStateChange,
     required this.refreshWorkspaceTracking,
     required this.syncWindowTitle,
   });
@@ -24,14 +22,11 @@ class EnvironmentStore {
   final EnvironmentStoreState environmentStoreState;
   final AppUiState appUiState;
   final SerenityWorkspaceThumbnailMarker markWorkspaceThumbnailDirty;
-  final SerenityEnvironmentCommit commitStateChange;
   final VoidCallback refreshWorkspaceTracking;
   final Future<void> Function() syncWindowTitle;
 
   void updateEnvironment(Environment nextEnvironment) {
-    commitStateChange(() {
-      environmentStoreState.environment = nextEnvironment;
-    });
+    environmentStoreState.update(environment: nextEnvironment);
     refreshWorkspaceTracking();
     unawaited(syncWindowTitle());
     markDirty();
@@ -47,27 +42,24 @@ class EnvironmentStore {
 
   void markDirty() {
     final shouldSyncTitle = !environmentStoreState.hasUnsavedChanges;
-    environmentStoreState.hasUnsavedChanges = true;
+    environmentStoreState.update(hasUnsavedChanges: true);
     if (shouldSyncTitle) {
       unawaited(syncWindowTitle());
     }
   }
 
   void restoreWidgetTestEnvironment(Environment seedEnvironment) {
-    commitStateChange(() {
-      environmentStoreState.environment = seedEnvironment;
-      environmentStoreState.isLoading = false;
-    });
+    environmentStoreState.update(environment: seedEnvironment, isLoading: false);
     refreshWorkspaceTracking();
   }
 
   void showMissingStartupState() {
-    commitStateChange(() {
-      environmentStoreState.environment = null;
-      environmentStoreState.currentEnvironmentPath = null;
-      environmentStoreState.isLoading = false;
-      environmentStoreState.hasUnsavedChanges = false;
-    });
+    environmentStoreState.update(
+      environment: null,
+      currentEnvironmentPath: null,
+      isLoading: false,
+      hasUnsavedChanges: false,
+    );
     refreshWorkspaceTracking();
     unawaited(syncWindowTitle());
   }
@@ -79,44 +71,35 @@ class EnvironmentStore {
   }
 
   void setStartupPromptInProgress(bool isPrompting) {
-    environmentStoreState.isPromptingForStartupEnvironment = isPrompting;
+    environmentStoreState.update(isPromptingForStartupEnvironment: isPrompting);
   }
 
   void applyLoadedEnvironment({required Environment environment, required String path}) {
-    commitStateChange(() {
-      environmentStoreState.environment = environment;
-      environmentStoreState.currentEnvironmentPath = path;
-      environmentStoreState.hasUnsavedChanges = false;
-      environmentStoreState.isLoading = false;
-    });
+    environmentStoreState.update(
+      environment: environment,
+      currentEnvironmentPath: path,
+      hasUnsavedChanges: false,
+      isLoading: false,
+    );
     appUiState.showWorkspaceScreenDefaults();
     refreshWorkspaceTracking();
     unawaited(syncWindowTitle());
   }
 
   void applyCreatedEnvironment({required Environment environment, required String path}) {
-    commitStateChange(() {
-      environmentStoreState.environment = environment;
-      environmentStoreState.currentEnvironmentPath = path;
-      environmentStoreState.hasUnsavedChanges = false;
-      environmentStoreState.isLoading = false;
-    });
+    environmentStoreState.update(
+      environment: environment,
+      currentEnvironmentPath: path,
+      hasUnsavedChanges: false,
+      isLoading: false,
+    );
     appUiState.showWorkspaceScreenDefaults();
     refreshWorkspaceTracking();
     unawaited(syncWindowTitle());
   }
 
   void noteEnvironmentPathSaved(String path, {required bool mounted}) {
-    if (mounted) {
-      commitStateChange(() {
-        environmentStoreState.currentEnvironmentPath = path;
-        environmentStoreState.hasUnsavedChanges = false;
-      });
-      return;
-    }
-
-    environmentStoreState.currentEnvironmentPath = path;
-    environmentStoreState.hasUnsavedChanges = false;
+    environmentStoreState.update(currentEnvironmentPath: path, hasUnsavedChanges: false);
   }
 
   void applySavedEnvironment({
@@ -124,19 +107,11 @@ class EnvironmentStore {
     required Environment savedEnvironment,
     required bool mounted,
   }) {
-    if (mounted) {
-      commitStateChange(() {
-        if (!identical(savedEnvironment, originalEnvironment)) {
-          environmentStoreState.environment = savedEnvironment;
-        }
-        environmentStoreState.hasUnsavedChanges = false;
-      });
+    if (identical(savedEnvironment, originalEnvironment)) {
+      environmentStoreState.update(hasUnsavedChanges: false);
       return;
     }
 
-    if (!identical(savedEnvironment, originalEnvironment)) {
-      environmentStoreState.environment = savedEnvironment;
-    }
-    environmentStoreState.hasUnsavedChanges = false;
+    environmentStoreState.update(environment: savedEnvironment, hasUnsavedChanges: false);
   }
 }

@@ -12,7 +12,7 @@ class _DocumentSaver {
       return;
     }
 
-    coordinator.environmentStoreState.currentEnvironmentPath = path;
+    coordinator.environmentStoreState.update(currentEnvironmentPath: path);
     try {
       await coordinator.refreshActiveWorkspaceThumbnailIfNeeded();
 

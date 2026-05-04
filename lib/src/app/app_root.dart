@@ -33,6 +33,7 @@ class _AppRootState extends State<AppRoot> {
   AppFoundation get _foundation => _runtime.foundation;
   AppDocument get _documents => _runtime.documents;
   AppWorkspaceServices get _workspaceRuntime => _runtime.workspace;
+  late final Listenable _shellStateListenable;
 
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), behavior: SnackBarBehavior.floating));
@@ -63,6 +64,7 @@ class _AppRootState extends State<AppRoot> {
   void initState() {
     super.initState();
     _runtime = AppRuntime.create(_buildRuntimeInputs());
+    _shellStateListenable = Listenable.merge([_state.environmentStoreState, _state.appUiState]);
     _feedback = AppFeedbackController(context: () => context);
     _settings = AppSettingsController(
       context: () => context,
@@ -122,7 +124,7 @@ class _AppRootState extends State<AppRoot> {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: _state.appUiState,
+      listenable: _shellStateListenable,
       builder: (context, _) {
         final menu = _buildAppMenuBindings();
         return AppMenu(

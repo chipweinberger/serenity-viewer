@@ -36,7 +36,6 @@ AppFoundation createAppFoundation({
     environmentStoreState: environmentStoreState,
     appUiState: appUiState,
     markWorkspaceThumbnailDirty: markWorkspaceThumbnailDirty,
-    commitStateChange: inputs.app.commitStateChange,
     refreshWorkspaceTracking: refreshWorkspaceTracking,
     syncWindowTitle: syncWindowTitle,
   );
