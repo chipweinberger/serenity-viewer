@@ -86,7 +86,7 @@ class _AppRootState extends State<AppRoot> {
   }
 
   AppRuntimeInputs _buildRuntimeInputs() {
-    return AppRuntimeInputBuilder(
+    return buildAppRuntimeInputs(
       stateStore: _stateStore,
       uiHandles: _uiHandles,
       context: () => context,
@@ -97,7 +97,7 @@ class _AppRootState extends State<AppRoot> {
       foundation: () => _foundation,
       workspace: () => _workspaceRuntime,
       documentPersistence: () => _documentPersistence,
-    ).build();
+    );
   }
 
   bool get _isRunningInWidgetTest {

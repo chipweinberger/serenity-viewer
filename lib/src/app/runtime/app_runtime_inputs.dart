@@ -88,98 +88,107 @@ class AppRuntimeWorkspaceInputs {
   final ValueChanged<String> toggleVideoPlayback;
 }
 
-class AppRuntimeInputBuilder {
-  const AppRuntimeInputBuilder({
-    required this.stateStore,
-    required this.uiHandles,
-    required this.context,
-    required this.mounted,
-    required this.showMessage,
-    required this.isRunningInWidgetTest,
-    required this.derivedState,
-    required this.foundation,
-    required this.workspace,
-    required this.documentPersistence,
-  });
+AppRuntimeAppInputs _buildAppRuntimeAppInputs({
+  required AppDerivedState Function() derivedState,
+  required BuildContext Function() context,
+  required bool Function() mounted,
+  required ValueChanged<String> showMessage,
+}) {
+  return AppRuntimeAppInputs(
+    windowTitle: () => derivedState().windowTitle,
+    context: context,
+    mounted: mounted,
+    showMessage: showMessage,
+  );
+}
 
-  final AppStateStore stateStore;
-  final AppUiHandles uiHandles;
-  final BuildContext Function() context;
-  final bool Function() mounted;
-  final ValueChanged<String> showMessage;
-  final bool isRunningInWidgetTest;
-  final AppDerivedState Function() derivedState;
-  final AppFoundation Function() foundation;
-  final AppWorkspaceServices Function() workspace;
-  final DocumentPersistenceController Function() documentPersistence;
+AppRuntimeEnvironmentInputs _buildAppRuntimeEnvironmentInputs({
+  required AppFoundation Function() foundation,
+  required DocumentPersistenceController Function() documentPersistence,
+}) {
+  return AppRuntimeEnvironmentInputs(
+    seedEnvironment: buildSeedEnvironment,
+    updateEnvironment: (environment) => foundation().environmentStore.updateEnvironment(environment),
+    replaceWorkspace: (workspace, {queueThumbnail = true}) =>
+        foundation().environmentStore.replaceWorkspace(workspace, queueThumbnail: queueThumbnail),
+    saveEnvironment: () => documentPersistence().saveEnvironment(),
+  );
+}
 
-  AppRuntimeAppInputs _buildAppInputs() {
-    return AppRuntimeAppInputs(
-      windowTitle: () => derivedState().windowTitle,
+AppRuntimeWorkspaceInputs _buildAppRuntimeWorkspaceInputs({
+  required AppDerivedState Function() derivedState,
+  required AppFoundation Function() foundation,
+  required AppWorkspaceServices Function() workspace,
+}) {
+  return AppRuntimeWorkspaceInputs(
+    newId: newSerenityId,
+    colorFromDigest: assetColorValueFromDigest,
+    activeWorkspace: () => derivedState().activeWorkspaceOrNull,
+    workspaces: () => derivedState().workspaces,
+    openWorkspaces: () => derivedState().openWorkspaces,
+    focusedWindowOrNull: () => workspace().workspaceWindowController.focusedWindowOrNull(),
+    setWorkspaceViewport:
+        ({required String workspaceId, Offset? center, double? zoom, bool queueThumbnail = false}) =>
+            workspace().workspaceViewportSessionController.setWorkspaceViewport(
+              workspaceId: workspaceId,
+              center: center,
+              zoom: zoom,
+              queueThumbnail: queueThumbnail,
+            ),
+    showWorkspaceScreen:
+        ({
+          WorkspaceLayoutMode workspaceLayoutMode = WorkspaceLayoutMode.freeform,
+          bool resetEditMode = true,
+          bool clearExposeSelection = true,
+          bool refreshWorkspaceTracking = true,
+        }) => foundation().appUiController.showWorkspaceScreen(
+          workspaceLayoutMode: workspaceLayoutMode,
+          resetEditMode: resetEditMode,
+          clearExposeSelection: clearExposeSelection,
+          refreshWorkspaceTrackingEnabled: refreshWorkspaceTracking,
+        ),
+    showLibraryScreen:
+        ({bool resetEditMode = true, bool clearExposeSelection = true, bool refreshWorkspaceTracking = true}) =>
+            foundation().appUiController.showLibraryScreen(
+              resetEditMode: resetEditMode,
+              clearExposeSelection: clearExposeSelection,
+              refreshWorkspaceTrackingEnabled: refreshWorkspaceTracking,
+            ),
+    toggleExpose: () => foundation().appUiController.toggleExpose(),
+    toggleVideoPlayback: (windowId) => workspace().workspaceWindowController.toggleVideoPlayback(windowId),
+  );
+}
+
+AppRuntimeInputs buildAppRuntimeInputs({
+  required AppStateStore stateStore,
+  required AppUiHandles uiHandles,
+  required BuildContext Function() context,
+  required bool Function() mounted,
+  required ValueChanged<String> showMessage,
+  required bool isRunningInWidgetTest,
+  required AppDerivedState Function() derivedState,
+  required AppFoundation Function() foundation,
+  required AppWorkspaceServices Function() workspace,
+  required DocumentPersistenceController Function() documentPersistence,
+}) {
+  return AppRuntimeInputs(
+    isRunningInWidgetTest: isRunningInWidgetTest,
+    stateStore: stateStore,
+    uiHandles: uiHandles,
+    app: _buildAppRuntimeAppInputs(
+      derivedState: derivedState,
       context: context,
       mounted: mounted,
       showMessage: showMessage,
-    );
-  }
-
-  AppRuntimeEnvironmentInputs _buildEnvironmentInputs() {
-    return AppRuntimeEnvironmentInputs(
-      seedEnvironment: buildSeedEnvironment,
-      updateEnvironment: (environment) => foundation().environmentStore.updateEnvironment(environment),
-      replaceWorkspace: (workspace, {queueThumbnail = true}) =>
-          foundation().environmentStore.replaceWorkspace(workspace, queueThumbnail: queueThumbnail),
-      saveEnvironment: () => documentPersistence().saveEnvironment(),
-    );
-  }
-
-  AppRuntimeWorkspaceInputs _buildWorkspaceInputs() {
-    return AppRuntimeWorkspaceInputs(
-      newId: newSerenityId,
-      colorFromDigest: assetColorValueFromDigest,
-      activeWorkspace: () => derivedState().activeWorkspaceOrNull,
-      workspaces: () => derivedState().workspaces,
-      openWorkspaces: () => derivedState().openWorkspaces,
-      focusedWindowOrNull: () => workspace().workspaceWindowController.focusedWindowOrNull(),
-      setWorkspaceViewport:
-          ({required String workspaceId, Offset? center, double? zoom, bool queueThumbnail = false}) =>
-              workspace().workspaceViewportSessionController.setWorkspaceViewport(
-                workspaceId: workspaceId,
-                center: center,
-                zoom: zoom,
-                queueThumbnail: queueThumbnail,
-              ),
-      showWorkspaceScreen:
-          ({
-            WorkspaceLayoutMode workspaceLayoutMode = WorkspaceLayoutMode.freeform,
-            bool resetEditMode = true,
-            bool clearExposeSelection = true,
-            bool refreshWorkspaceTracking = true,
-          }) => foundation().appUiController.showWorkspaceScreen(
-            workspaceLayoutMode: workspaceLayoutMode,
-            resetEditMode: resetEditMode,
-            clearExposeSelection: clearExposeSelection,
-            refreshWorkspaceTrackingEnabled: refreshWorkspaceTracking,
-          ),
-      showLibraryScreen:
-          ({bool resetEditMode = true, bool clearExposeSelection = true, bool refreshWorkspaceTracking = true}) =>
-              foundation().appUiController.showLibraryScreen(
-                resetEditMode: resetEditMode,
-                clearExposeSelection: clearExposeSelection,
-                refreshWorkspaceTrackingEnabled: refreshWorkspaceTracking,
-              ),
-      toggleExpose: () => foundation().appUiController.toggleExpose(),
-      toggleVideoPlayback: (windowId) => workspace().workspaceWindowController.toggleVideoPlayback(windowId),
-    );
-  }
-
-  AppRuntimeInputs build() {
-    return AppRuntimeInputs(
-      isRunningInWidgetTest: isRunningInWidgetTest,
-      stateStore: stateStore,
-      uiHandles: uiHandles,
-      app: _buildAppInputs(),
-      environment: _buildEnvironmentInputs(),
-      workspace: _buildWorkspaceInputs(),
-    );
-  }
+    ),
+    environment: _buildAppRuntimeEnvironmentInputs(
+      foundation: foundation,
+      documentPersistence: documentPersistence,
+    ),
+    workspace: _buildAppRuntimeWorkspaceInputs(
+      derivedState: derivedState,
+      foundation: foundation,
+      workspace: workspace,
+    ),
+  );
 }
