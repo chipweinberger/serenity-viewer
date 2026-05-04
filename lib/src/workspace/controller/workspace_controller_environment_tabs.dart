@@ -2,8 +2,8 @@ import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/workspace/operations/workspace_environment_operations.dart';
 
-class WorkspaceEnvironmentTabsState {
-  const WorkspaceEnvironmentTabsState();
+class WorkspaceEnvironmentTabsController {
+  const WorkspaceEnvironmentTabsController();
 
   void toggleOpen(Environment environment, String workspaceId, void Function(Environment) updateEnvironment) {
     updateEnvironment(WorkspaceEnvironmentOperations.toggleWorkspaceOpen(environment, workspaceId));

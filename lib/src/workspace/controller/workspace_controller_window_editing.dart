@@ -11,8 +11,8 @@ import 'package:serenity_viewer/src/workspace/layout/workspace_layout.dart';
 
 import 'workspace_controller.dart';
 
-class WorkspaceWindowEditingState {
-  const WorkspaceWindowEditingState({
+class WorkspaceWindowEditingController {
+  const WorkspaceWindowEditingController({
     required this.chromeState,
     required this.windowInteractionState,
     required this.replaceWorkspace,

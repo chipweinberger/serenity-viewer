@@ -27,21 +27,21 @@ class WorkspaceController {
     required this.replaceWorkspace,
     required this.setWorkspaceViewport,
     required this.refreshActiveWorkspaceThumbnail,
-  }) : gesture = WorkspaceGestureControllerState(
+  }) : gesture = WorkspaceGestureController(
          windowInteractionState: windowInteractionState,
          commitInteractionState: commitInteractionState,
        ),
-       expose = WorkspaceExposeControllerState(
+       expose = WorkspaceExposeController(
          windowInteractionState: windowInteractionState,
          commitInteractionState: commitInteractionState,
        ),
-       windows = WorkspaceWindowControllerState(
+       windows = WorkspaceWindowsController(
          chromeState: chromeState,
          commitInteractionState: commitInteractionState,
          windowInteractionState: windowInteractionState,
          replaceWorkspace: replaceWorkspace,
        ),
-       viewport = WorkspaceViewportControllerState(
+       viewport = WorkspaceViewportController(
          chromeState: chromeState,
          windowInteractionState: windowInteractionState,
          workspaceViewportState: workspaceViewportState,
@@ -49,12 +49,12 @@ class WorkspaceController {
          setWorkspaceViewport: setWorkspaceViewport,
          refreshActiveWorkspaceThumbnail: refreshActiveWorkspaceThumbnail,
        ),
-       playback = WorkspacePlaybackControllerState(
+       playback = WorkspacePlaybackController(
          windowInteractionState: windowInteractionState,
          commitInteractionState: commitInteractionState,
          replaceWorkspace: replaceWorkspace,
        ),
-       environment = WorkspaceEnvironmentControllerState();
+       environment = WorkspaceEnvironmentController();
 
   final ChromeState chromeState;
   final AssetWindowInteractionState windowInteractionState;
@@ -63,10 +63,10 @@ class WorkspaceController {
   final SerenityWorkspaceReplace replaceWorkspace;
   final SerenityWorkspaceViewportSetter setWorkspaceViewport;
   final Future<void> Function() refreshActiveWorkspaceThumbnail;
-  final WorkspaceGestureControllerState gesture;
-  final WorkspaceExposeControllerState expose;
-  final WorkspaceWindowControllerState windows;
-  final WorkspaceViewportControllerState viewport;
-  final WorkspacePlaybackControllerState playback;
-  final WorkspaceEnvironmentControllerState environment;
+  final WorkspaceGestureController gesture;
+  final WorkspaceExposeController expose;
+  final WorkspaceWindowsController windows;
+  final WorkspaceViewportController viewport;
+  final WorkspacePlaybackController playback;
+  final WorkspaceEnvironmentController environment;
 }

@@ -10,19 +10,19 @@ import 'workspace_controller_window_runtime.dart';
 
 const Size workspaceCollateTargetBox = Size(700, 700);
 
-class WorkspaceWindowControllerState {
-  WorkspaceWindowControllerState({
+class WorkspaceWindowsController {
+  WorkspaceWindowsController({
     required this.chromeState,
     required this.commitInteractionState,
     required this.windowInteractionState,
     required this.replaceWorkspace,
-  }) : arrangement = WorkspaceWindowArrangementState(chromeState: chromeState, replaceWorkspace: replaceWorkspace),
-       editing = WorkspaceWindowEditingState(
+  }) : arrangement = WorkspaceWindowArrangementController(chromeState: chromeState, replaceWorkspace: replaceWorkspace),
+       editing = WorkspaceWindowEditingController(
          chromeState: chromeState,
          windowInteractionState: windowInteractionState,
          replaceWorkspace: replaceWorkspace,
        ),
-       runtime = WorkspaceWindowRuntimeState(
+       runtime = WorkspaceWindowRuntimeController(
          commitInteractionState: commitInteractionState,
          windowInteractionState: windowInteractionState,
        );
@@ -31,7 +31,7 @@ class WorkspaceWindowControllerState {
   final SerenityWorkspaceCommit commitInteractionState;
   final AssetWindowInteractionState windowInteractionState;
   final SerenityWorkspaceReplace replaceWorkspace;
-  final WorkspaceWindowArrangementState arrangement;
-  final WorkspaceWindowEditingState editing;
-  final WorkspaceWindowRuntimeState runtime;
+  final WorkspaceWindowArrangementController arrangement;
+  final WorkspaceWindowEditingController editing;
+  final WorkspaceWindowRuntimeController runtime;
 }

@@ -2,8 +2,8 @@ import 'package:serenity_viewer/src/asset_window/interaction/asset_window_intera
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/workspace/controller/workspace_controller.dart';
 
-class WorkspaceExposeControllerState {
-  WorkspaceExposeControllerState({required this.windowInteractionState, required this.commitInteractionState});
+class WorkspaceExposeController {
+  WorkspaceExposeController({required this.windowInteractionState, required this.commitInteractionState});
 
   final AssetWindowInteractionState windowInteractionState;
   final SerenityWorkspaceCommit commitInteractionState;

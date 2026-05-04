@@ -8,8 +8,8 @@ import 'package:serenity_viewer/src/workspace/operations/workspace_stacking_oper
 import 'workspace_controller.dart';
 import 'workspace_controller_windows.dart';
 
-class WorkspaceWindowArrangementState {
-  const WorkspaceWindowArrangementState({required this.chromeState, required this.replaceWorkspace});
+class WorkspaceWindowArrangementController {
+  const WorkspaceWindowArrangementController({required this.chromeState, required this.replaceWorkspace});
 
   final ChromeState chromeState;
   final SerenityWorkspaceReplace replaceWorkspace;

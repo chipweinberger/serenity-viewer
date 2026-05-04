@@ -4,8 +4,8 @@ import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/workspace/operations/workspace_environment_operations.dart';
 
-class WorkspaceEnvironmentWindowTransferState {
-  const WorkspaceEnvironmentWindowTransferState();
+class WorkspaceEnvironmentWindowTransferController {
+  const WorkspaceEnvironmentWindowTransferController();
 
   bool canMoveSelectedToWorkspace({
     required Environment? environment,

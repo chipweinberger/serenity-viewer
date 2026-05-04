@@ -4,8 +4,11 @@ import 'package:serenity_viewer/src/foundation/app_constants.dart';
 
 import 'workspace_controller.dart';
 
-class WorkspacePlaybackRuntimeState {
-  const WorkspacePlaybackRuntimeState({required this.windowInteractionState, required this.commitInteractionState});
+class WorkspacePlaybackRuntimeController {
+  const WorkspacePlaybackRuntimeController({
+    required this.windowInteractionState,
+    required this.commitInteractionState,
+  });
 
   final AssetWindowInteractionState windowInteractionState;
   final SerenityWorkspaceCommit commitInteractionState;

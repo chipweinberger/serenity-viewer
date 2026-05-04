@@ -1,11 +1,11 @@
 import 'package:serenity_viewer/src/workspace/controller/workspace_controller_environment_tabs.dart';
 import 'package:serenity_viewer/src/workspace/controller/workspace_controller_environment_window_transfer.dart';
 
-class WorkspaceEnvironmentControllerState {
-  WorkspaceEnvironmentControllerState()
-    : tabs = const WorkspaceEnvironmentTabsState(),
-      windowTransfer = const WorkspaceEnvironmentWindowTransferState();
+class WorkspaceEnvironmentController {
+  WorkspaceEnvironmentController()
+    : tabs = const WorkspaceEnvironmentTabsController(),
+      windowTransfer = const WorkspaceEnvironmentWindowTransferController();
 
-  final WorkspaceEnvironmentTabsState tabs;
-  final WorkspaceEnvironmentWindowTransferState windowTransfer;
+  final WorkspaceEnvironmentTabsController tabs;
+  final WorkspaceEnvironmentWindowTransferController windowTransfer;
 }

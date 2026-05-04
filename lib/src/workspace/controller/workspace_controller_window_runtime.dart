@@ -7,8 +7,8 @@ import 'package:serenity_viewer/src/workspace/session/recently_closed_window_ent
 
 import 'workspace_controller.dart';
 
-class WorkspaceWindowRuntimeState {
-  const WorkspaceWindowRuntimeState({required this.commitInteractionState, required this.windowInteractionState});
+class WorkspaceWindowRuntimeController {
+  const WorkspaceWindowRuntimeController({required this.commitInteractionState, required this.windowInteractionState});
 
   final SerenityWorkspaceCommit commitInteractionState;
   final AssetWindowInteractionState windowInteractionState;

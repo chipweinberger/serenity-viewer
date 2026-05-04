@@ -3,20 +3,20 @@ import 'package:serenity_viewer/src/workspace/controller/workspace_controller.da
 import 'package:serenity_viewer/src/workspace/controller/workspace_controller_playback_runtime.dart';
 import 'package:serenity_viewer/src/workspace/controller/workspace_controller_playback_workspace.dart';
 
-class WorkspacePlaybackControllerState {
-  WorkspacePlaybackControllerState({
+class WorkspacePlaybackController {
+  WorkspacePlaybackController({
     required this.windowInteractionState,
     required this.commitInteractionState,
     required this.replaceWorkspace,
-  }) : runtime = WorkspacePlaybackRuntimeState(
+  }) : runtime = WorkspacePlaybackRuntimeController(
          windowInteractionState: windowInteractionState,
          commitInteractionState: commitInteractionState,
        ),
-       workspace = WorkspacePlaybackWorkspaceState(replaceWorkspace: replaceWorkspace);
+       workspace = WorkspacePlaybackWorkspaceController(replaceWorkspace: replaceWorkspace);
 
   final AssetWindowInteractionState windowInteractionState;
   final SerenityWorkspaceCommit commitInteractionState;
   final SerenityWorkspaceReplace replaceWorkspace;
-  final WorkspacePlaybackRuntimeState runtime;
-  final WorkspacePlaybackWorkspaceState workspace;
+  final WorkspacePlaybackRuntimeController runtime;
+  final WorkspacePlaybackWorkspaceController workspace;
 }

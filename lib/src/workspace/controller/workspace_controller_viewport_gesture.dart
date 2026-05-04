@@ -11,8 +11,8 @@ import 'package:serenity_viewer/src/workspace/controller/workspace_controller.da
 import 'package:serenity_viewer/src/workspace/layout/workspace_layout.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 
-class WorkspaceViewportGestureState {
-  const WorkspaceViewportGestureState({
+class WorkspaceViewportGestureController {
+  const WorkspaceViewportGestureController({
     required this.chromeState,
     required this.windowInteractionState,
     required this.workspaceViewportState,

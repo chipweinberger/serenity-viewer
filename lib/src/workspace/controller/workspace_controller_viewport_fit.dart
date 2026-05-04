@@ -4,8 +4,8 @@ import 'package:serenity_viewer/src/workspace/controller/workspace_controller.da
 import 'package:serenity_viewer/src/workspace/layout/workspace_layout.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 
-class WorkspaceViewportFitState {
-  const WorkspaceViewportFitState({
+class WorkspaceViewportFitController {
+  const WorkspaceViewportFitController({
     required this.workspaceViewportState,
     required this.replaceWorkspace,
     required this.setWorkspaceViewport,

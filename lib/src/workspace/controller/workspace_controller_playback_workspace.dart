@@ -4,8 +4,8 @@ import 'package:serenity_viewer/src/workspace/operations/workspace_playback_oper
 
 import 'workspace_controller.dart';
 
-class WorkspacePlaybackWorkspaceState {
-  const WorkspacePlaybackWorkspaceState({required this.replaceWorkspace});
+class WorkspacePlaybackWorkspaceController {
+  const WorkspacePlaybackWorkspaceController({required this.replaceWorkspace});
 
   final SerenityWorkspaceReplace replaceWorkspace;
 

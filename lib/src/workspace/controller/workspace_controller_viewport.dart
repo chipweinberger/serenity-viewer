@@ -5,22 +5,22 @@ import 'package:serenity_viewer/src/workspace/controller/workspace_controller_vi
 import 'package:serenity_viewer/src/workspace/controller/workspace_controller_viewport_gesture.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 
-class WorkspaceViewportControllerState {
-  WorkspaceViewportControllerState({
+class WorkspaceViewportController {
+  WorkspaceViewportController({
     required this.chromeState,
     required this.windowInteractionState,
     required this.workspaceViewportState,
     required this.replaceWorkspace,
     required this.setWorkspaceViewport,
     required this.refreshActiveWorkspaceThumbnail,
-  }) : gesture = WorkspaceViewportGestureState(
+  }) : gesture = WorkspaceViewportGestureController(
          chromeState: chromeState,
          windowInteractionState: windowInteractionState,
          workspaceViewportState: workspaceViewportState,
          setWorkspaceViewport: setWorkspaceViewport,
          refreshActiveWorkspaceThumbnail: refreshActiveWorkspaceThumbnail,
        ),
-       fit = WorkspaceViewportFitState(
+       fit = WorkspaceViewportFitController(
          workspaceViewportState: workspaceViewportState,
          replaceWorkspace: replaceWorkspace,
          setWorkspaceViewport: setWorkspaceViewport,
@@ -32,6 +32,6 @@ class WorkspaceViewportControllerState {
   final SerenityWorkspaceReplace replaceWorkspace;
   final SerenityWorkspaceViewportSetter setWorkspaceViewport;
   final Future<void> Function() refreshActiveWorkspaceThumbnail;
-  final WorkspaceViewportGestureState gesture;
-  final WorkspaceViewportFitState fit;
+  final WorkspaceViewportGestureController gesture;
+  final WorkspaceViewportFitController fit;
 }
