@@ -56,7 +56,7 @@ extension on _WindowState {
   }
 
   Widget _buildContent({required bool shrinkContent, required double inset}) {
-    return WindowContent(
+    return WorkspaceWindowContent(
       viewModel: widget.viewModel,
       showExpandedVideoControls: _showExpandedVideoControls,
       shrinkContent: shrinkContent,

@@ -4,8 +4,8 @@ import 'package:video_player/video_player.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 
 @immutable
-class WindowViewModel {
-  const WindowViewModel({
+class WorkspaceWindowViewModel {
+  const WorkspaceWindowViewModel({
     required this.window,
     required this.isLoaded,
     required this.sharedVideoController,

@@ -4,10 +4,10 @@ import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/workspace/window/content/asset_content.dart';
 import 'package:serenity_viewer/src/workspace/window/content/asset_preview_transforms.dart';
 import 'package:serenity_viewer/src/workspace/window/interaction/window_zoom_update.dart';
-import 'package:serenity_viewer/src/workspace/window/presentation/window_view_model.dart';
+import 'package:serenity_viewer/src/workspace/window/presentation/workspace_window_view_model.dart';
 
-class WindowContent extends StatelessWidget {
-  const WindowContent({
+class WorkspaceWindowContent extends StatelessWidget {
+  const WorkspaceWindowContent({
     super.key,
     required this.viewModel,
     required this.showExpandedVideoControls,
@@ -22,7 +22,7 @@ class WindowContent extends StatelessWidget {
     required this.onCycleVideoPlaybackSpeed,
   });
 
-  final WindowViewModel viewModel;
+  final WorkspaceWindowViewModel viewModel;
   final bool showExpandedVideoControls;
   final bool shrinkContent;
   final double inset;

@@ -8,12 +8,12 @@ import 'package:flutter/services.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/foundation/keyboard_modifiers.dart';
-import 'package:serenity_viewer/src/workspace/window/content/window_content.dart';
+import 'package:serenity_viewer/src/workspace/window/content/workspace_window_content.dart';
 import 'package:serenity_viewer/src/workspace/window/frame/window_chrome.dart';
 import 'package:serenity_viewer/src/workspace/window/frame/window_overlay.dart';
 import 'package:serenity_viewer/src/workspace/window/frame/window_resize_helpers.dart';
 import 'package:serenity_viewer/src/workspace/window/interaction/window_zoom_update.dart';
-import 'package:serenity_viewer/src/workspace/window/presentation/window_view_model.dart';
+import 'package:serenity_viewer/src/workspace/window/presentation/workspace_window_view_model.dart';
 
 part 'window_pointer_interactions.dart';
 part 'window_frame_builder.dart';
@@ -42,7 +42,7 @@ class WorkspaceWindow extends StatefulWidget {
     required this.onOptionGestureReleased,
   });
 
-  final WindowViewModel viewModel;
+  final WorkspaceWindowViewModel viewModel;
   final VoidCallback onTap;
   final VoidCallback onPinnedHoverRequested;
   final VoidCallback onPinnedHoverDismissed;

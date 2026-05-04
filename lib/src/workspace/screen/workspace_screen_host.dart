@@ -10,8 +10,8 @@ import 'package:serenity_viewer/src/workspace/window/window.dart';
 import 'package:serenity_viewer/src/workspace/window/frame/window_resize_helpers.dart';
 import 'package:serenity_viewer/src/workspace/window/interaction/window_interaction_state.dart';
 import 'package:serenity_viewer/src/workspace/window/interaction/window_zoom_update.dart';
-import 'package:serenity_viewer/src/workspace/window/presentation/window_view_model.dart';
 import 'package:serenity_viewer/src/workspace/window/presentation/expose_window_card.dart';
+import 'package:serenity_viewer/src/workspace/window/presentation/workspace_window_view_model.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
@@ -243,7 +243,7 @@ class WorkspaceScreenHost extends StatelessWidget {
     final screenOffset = workspaceScreenOffsetForWindow(workspace, window, viewportSize);
     final isLoaded = _isWindowLoaded(canvasViewModel.loadPlan, window);
     final sharedVideoState = sharedVideoLookup(window, isLoaded: isLoaded);
-    final windowViewModel = WindowViewModel(
+    final windowViewModel = WorkspaceWindowViewModel(
       window: window,
       isLoaded: isLoaded,
       sharedVideoController: sharedVideoState?.controller,
