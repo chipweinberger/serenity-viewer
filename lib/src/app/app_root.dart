@@ -58,8 +58,6 @@ class _AppRootState extends State<AppRoot> {
   final _workspaceWindowHistoryState = WorkspaceWindowHistoryState();
   final _uiHandles = AppUiHandles();
   late final AppRuntime _runtime;
-  late final AppFeedbackController _feedback;
-  late final AppSettingsController _settings;
   late final DocumentPersistenceController _documentPersistence;
 
   void _showMessage(String message) {
@@ -127,12 +125,6 @@ class _AppRootState extends State<AppRoot> {
       toggleExpose: () => _runtime.appUiController.toggleExpose(),
       toggleVideoPlayback: (windowId) => _runtime.workspaceWindowController.toggleVideoPlayback(windowId),
     );
-    _feedback = AppFeedbackController(context: () => context);
-    _settings = AppSettingsController(
-      context: () => context,
-      environmentStoreState: _environmentStoreState,
-      updateEnvironment: _runtime.environmentStore.updateEnvironment,
-    );
     _documentPersistence = DocumentPersistenceController(
       environmentStoreState: _environmentStoreState,
       environmentStore: _runtime.environmentStore,
@@ -170,8 +162,14 @@ class _AppRootState extends State<AppRoot> {
     return MultiProvider(
       providers: [
         Provider<AppUiHandles>.value(value: _uiHandles),
-        Provider<AppFeedbackController>.value(value: _feedback),
-        Provider<AppSettingsController>.value(value: _settings),
+        Provider<AppFeedbackController>(create: (context) => AppFeedbackController(context: () => context)),
+        Provider<AppSettingsController>(
+          create: (context) => AppSettingsController(
+            context: () => context,
+            environmentStoreState: _environmentStoreState,
+            updateEnvironment: _runtime.environmentStore.updateEnvironment,
+          ),
+        ),
         ChangeNotifierProvider.value(value: _appUiState),
         ChangeNotifierProvider.value(value: _environmentStoreState),
         ChangeNotifierProvider.value(value: _windowInteractionState),
