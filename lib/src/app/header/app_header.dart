@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:serenity_viewer/src/app/header/app_tab_bar_actions.dart';
-import 'package:serenity_viewer/src/app/header/app_window_title.dart';
 import 'package:serenity_viewer/src/app/header/app_tab_bar.dart';
+import 'package:serenity_viewer/src/app/header/app_window_title.dart';
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/app/state/app_derived_state.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
@@ -56,15 +55,13 @@ class AppHeader extends StatelessWidget {
         shouldMoveSelectedWindows: appUiController.shouldMoveSelectedWindowsToWorkspaceOnTap,
         draggingTabWorkspaceId: appUiState.draggingTabWorkspaceId,
         tabScrollController: uiHandles.tabScrollController,
-        actions: AppTabBarActions(
-          onShowWorkspaceOverview: environmentController.navigation.showOverview,
-          onSetDraggingTabWorkspaceId: appUiController.setDraggingTabWorkspaceId,
-          onReorderOpenWorkspace: environmentController.management.reorderOpen,
-          onMoveSelectedExposeWindowsToWorkspace: environmentController.management.moveSelectedExposeWindowsToWorkspace,
-          onSetActiveWorkspace: environmentController.navigation.setActiveWorkspace,
-          onConfirmCloseTab: environmentController.management.confirmCloseTab,
-          onCreateWorkspace: environmentController.management.create,
-        ),
+        onShowWorkspaceOverview: environmentController.navigation.showOverview,
+        onSetDraggingTabWorkspaceId: appUiController.setDraggingTabWorkspaceId,
+        onReorderOpenWorkspace: environmentController.management.reorderOpen,
+        onMoveSelectedExposeWindowsToWorkspace: environmentController.management.moveSelectedExposeWindowsToWorkspace,
+        onSetActiveWorkspace: environmentController.navigation.setActiveWorkspace,
+        onConfirmCloseTab: environmentController.management.confirmCloseTab,
+        onCreateWorkspace: environmentController.management.create,
       ),
     );
   }

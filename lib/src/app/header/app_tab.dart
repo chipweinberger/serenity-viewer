@@ -2,10 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/app/header/app_tab_bar_actions.dart';
+import 'package:serenity_viewer/src/app/app_theme.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/shared_widgets/glass_chip.dart';
-import 'package:serenity_viewer/src/app/app_theme.dart';
 
 class AppTab extends StatelessWidget {
   const AppTab({
@@ -16,7 +15,9 @@ class AppTab extends StatelessWidget {
     required this.shouldMoveSelectedWindows,
     required this.draggingTabWorkspaceId,
     required this.isDropTarget,
-    required this.actions,
+    required this.onMoveSelectedExposeWindowsToWorkspace,
+    required this.onSetActiveWorkspace,
+    required this.onConfirmCloseTab,
   });
 
   final Workspace workspace;
@@ -25,7 +26,9 @@ class AppTab extends StatelessWidget {
   final bool shouldMoveSelectedWindows;
   final String? draggingTabWorkspaceId;
   final bool isDropTarget;
-  final AppTabBarActions actions;
+  final Future<void> Function(String workspaceId) onMoveSelectedExposeWindowsToWorkspace;
+  final Future<void> Function(String workspaceId) onSetActiveWorkspace;
+  final Future<void> Function(String workspaceId) onConfirmCloseTab;
 
   bool get _isSelected {
     return !isLibraryScreen && workspace.id == activeWorkspaceId;
@@ -33,14 +36,14 @@ class AppTab extends StatelessWidget {
 
   void _handleTap() {
     if (shouldMoveSelectedWindows) {
-      unawaited(actions.onMoveSelectedExposeWindowsToWorkspace(workspace.id));
+      unawaited(onMoveSelectedExposeWindowsToWorkspace(workspace.id));
       return;
     }
-    unawaited(actions.onSetActiveWorkspace(workspace.id));
+    unawaited(onSetActiveWorkspace(workspace.id));
   }
 
   void _handleCloseTap() {
-    unawaited(actions.onConfirmCloseTab(workspace.id));
+    unawaited(onConfirmCloseTab(workspace.id));
   }
 
   @override

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/app/header/app_tab_bar_actions.dart';
 import 'package:serenity_viewer/src/app/header/app_tab.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/shared_widgets/glass_chip.dart';
@@ -14,7 +13,13 @@ class AppTabBar extends StatelessWidget {
     required this.shouldMoveSelectedWindows,
     required this.draggingTabWorkspaceId,
     required this.tabScrollController,
-    required this.actions,
+    required this.onShowWorkspaceOverview,
+    required this.onSetDraggingTabWorkspaceId,
+    required this.onReorderOpenWorkspace,
+    required this.onMoveSelectedExposeWindowsToWorkspace,
+    required this.onSetActiveWorkspace,
+    required this.onConfirmCloseTab,
+    required this.onCreateWorkspace,
   });
 
   final List<Workspace> openWorkspaces;
@@ -23,21 +28,27 @@ class AppTabBar extends StatelessWidget {
   final bool shouldMoveSelectedWindows;
   final String? draggingTabWorkspaceId;
   final ScrollController tabScrollController;
-  final AppTabBarActions actions;
+  final VoidCallback onShowWorkspaceOverview;
+  final ValueChanged<String?> onSetDraggingTabWorkspaceId;
+  final void Function(String sourceWorkspaceId, String targetWorkspaceId) onReorderOpenWorkspace;
+  final Future<void> Function(String workspaceId) onMoveSelectedExposeWindowsToWorkspace;
+  final Future<void> Function(String workspaceId) onSetActiveWorkspace;
+  final Future<void> Function(String workspaceId) onConfirmCloseTab;
+  final VoidCallback onCreateWorkspace;
 
   Widget _buildWorkspaceTabDragTarget(BuildContext context, Workspace workspace) {
     return DragTarget<String>(
       onWillAcceptWithDetails: (details) => details.data != workspace.id,
-      onAcceptWithDetails: (details) => actions.onReorderOpenWorkspace(details.data, workspace.id),
+      onAcceptWithDetails: (details) => onReorderOpenWorkspace(details.data, workspace.id),
       builder: (context, candidateData, rejectedData) {
         final isDropTarget = candidateData.isNotEmpty;
         return Draggable<String>(
           data: workspace.id,
           maxSimultaneousDrags: 1,
           dragAnchorStrategy: pointerDragAnchorStrategy,
-          onDragStarted: () => actions.onSetDraggingTabWorkspaceId(workspace.id),
-          onDragEnd: (_) => actions.onSetDraggingTabWorkspaceId(null),
-          onDraggableCanceled: (_, __) => actions.onSetDraggingTabWorkspaceId(null),
+          onDragStarted: () => onSetDraggingTabWorkspaceId(workspace.id),
+          onDragEnd: (_) => onSetDraggingTabWorkspaceId(null),
+          onDraggableCanceled: (_, __) => onSetDraggingTabWorkspaceId(null),
           feedback: Material(
             color: Colors.transparent,
             child: AppTab(
@@ -47,7 +58,9 @@ class AppTabBar extends StatelessWidget {
               shouldMoveSelectedWindows: shouldMoveSelectedWindows,
               draggingTabWorkspaceId: draggingTabWorkspaceId,
               isDropTarget: false,
-              actions: actions,
+              onMoveSelectedExposeWindowsToWorkspace: onMoveSelectedExposeWindowsToWorkspace,
+              onSetActiveWorkspace: onSetActiveWorkspace,
+              onConfirmCloseTab: onConfirmCloseTab,
             ),
           ),
           childWhenDragging: Opacity(
@@ -59,7 +72,9 @@ class AppTabBar extends StatelessWidget {
               shouldMoveSelectedWindows: shouldMoveSelectedWindows,
               draggingTabWorkspaceId: draggingTabWorkspaceId,
               isDropTarget: isDropTarget,
-              actions: actions,
+              onMoveSelectedExposeWindowsToWorkspace: onMoveSelectedExposeWindowsToWorkspace,
+              onSetActiveWorkspace: onSetActiveWorkspace,
+              onConfirmCloseTab: onConfirmCloseTab,
             ),
           ),
           child: AppTab(
@@ -69,7 +84,9 @@ class AppTabBar extends StatelessWidget {
             shouldMoveSelectedWindows: shouldMoveSelectedWindows,
             draggingTabWorkspaceId: draggingTabWorkspaceId,
             isDropTarget: isDropTarget,
-            actions: actions,
+            onMoveSelectedExposeWindowsToWorkspace: onMoveSelectedExposeWindowsToWorkspace,
+            onSetActiveWorkspace: onSetActiveWorkspace,
+            onConfirmCloseTab: onConfirmCloseTab,
           ),
         );
       },
@@ -79,7 +96,7 @@ class AppTabBar extends StatelessWidget {
   Widget _buildOverviewChip() {
     return GlassChip(
       selected: isLibraryScreen,
-      onTap: actions.onShowWorkspaceOverview,
+      onTap: onShowWorkspaceOverview,
       child: const Row(
         mainAxisSize: MainAxisSize.min,
         children: [Icon(Icons.dashboard_outlined, size: 15), SizedBox(width: 6), Text('View All')],
@@ -88,7 +105,7 @@ class AppTabBar extends StatelessWidget {
   }
 
   Widget _buildAddWorkspaceChip() {
-    return GlassChip(onTap: actions.onCreateWorkspace, child: const Icon(Icons.add_rounded, size: 16));
+    return GlassChip(onTap: onCreateWorkspace, child: const Icon(Icons.add_rounded, size: 16));
   }
 
   @override
