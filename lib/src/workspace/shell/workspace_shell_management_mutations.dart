@@ -1,21 +1,50 @@
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
+
+import 'package:serenity_viewer/src/app/environment/app_environment_state.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
+import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
 import 'package:serenity_viewer/src/workspace/shell/workspace_shell_controller.dart';
+import 'package:serenity_viewer/src/workspace/controller/workspace_controller.dart';
+
+class WorkspaceShellManagementMutationDependencies {
+  const WorkspaceShellManagementMutationDependencies({
+    required this.persistenceState,
+    required this.chromeState,
+    required this.workspaceController,
+    required this.workspaces,
+    required this.updateEnvironment,
+    required this.replaceWorkspace,
+    required this.showWorkspaceScreen,
+    required this.newId,
+    required this.queueWorkspaceRefresh,
+  });
+
+  final AppEnvironmentState persistenceState;
+  final ChromeState chromeState;
+  final WorkspaceController workspaceController;
+  final List<Workspace> Function() workspaces;
+  final ValueChanged<Environment> updateEnvironment;
+  final void Function(Workspace workspace, {bool queueThumbnail}) replaceWorkspace;
+  final SerenityShowWorkspaceScreen showWorkspaceScreen;
+  final String Function(String prefix) newId;
+  final SerenityQueueWorkspaceRefresh queueWorkspaceRefresh;
+}
 
 class WorkspaceShellManagementMutations {
-  const WorkspaceShellManagementMutations(this.controller);
+  const WorkspaceShellManagementMutations(this._dependencies);
 
-  final WorkspaceShellController controller;
+  final WorkspaceShellManagementMutationDependencies _dependencies;
 
   int _nextWorkspaceOrdinal() {
     var maxOrdinal = 0;
     final idPattern = RegExp(r'^ws-(\d+)$');
     final namePattern = RegExp(r'^Workspace (\d+)$');
 
-    for (final workspace in controller.workspaces()) {
+    for (final workspace in _dependencies.workspaces()) {
       final idMatch = idPattern.firstMatch(workspace.id);
       if (idMatch != null) {
         maxOrdinal = math.max(maxOrdinal, int.parse(idMatch.group(1)!));
@@ -31,20 +60,24 @@ class WorkspaceShellManagementMutations {
   }
 
   void toggleOpen(String workspaceId) {
-    final environment = controller.persistenceState.environment;
+    final environment = _dependencies.persistenceState.environment;
     if (environment == null) {
       return;
     }
 
-    controller.workspaceController.environment.tabs.toggleOpen(environment, workspaceId, controller.updateEnvironment);
+    _dependencies.workspaceController.environment.tabs.toggleOpen(
+      environment,
+      workspaceId,
+      _dependencies.updateEnvironment,
+    );
   }
 
   void rename(Workspace workspace, String nextName) {
-    controller.replaceWorkspace(workspace.copyWith(name: nextName));
+    _dependencies.replaceWorkspace(workspace.copyWith(name: nextName));
   }
 
   void delete(String workspaceId) {
-    final environment = controller.persistenceState.environment;
+    final environment = _dependencies.persistenceState.environment;
     if (environment == null) {
       return;
     }
@@ -53,7 +86,7 @@ class WorkspaceShellManagementMutations {
     if (remainingWorkspaces.isEmpty) {
       final now = DateTime.now();
       final replacementWorkspace = Workspace(
-        id: controller.newId('ws'),
+        id: _dependencies.newId('ws'),
         name: 'Workspace 1',
         createdAt: now,
         lastViewedAt: now,
@@ -65,11 +98,11 @@ class WorkspaceShellManagementMutations {
         viewportCenterDy: defaultWorkspaceCenter.dy,
         viewportZoom: 1,
       );
-      controller.updateEnvironment(
+      _dependencies.updateEnvironment(
         environment.copyWith(workspaces: [replacementWorkspace], activeWorkspaceId: replacementWorkspace.id),
       );
-      controller.showWorkspaceScreen(resetEditMode: false, clearExposeSelection: false);
-      controller.queueWorkspaceRefresh(replacementWorkspace.id, delay: Duration.zero);
+      _dependencies.showWorkspaceScreen(resetEditMode: false, clearExposeSelection: false);
+      _dependencies.queueWorkspaceRefresh(replacementWorkspace.id, delay: Duration.zero);
       return;
     }
 
@@ -86,12 +119,12 @@ class WorkspaceShellManagementMutations {
         )
         .toList();
 
-    controller.updateEnvironment(
+    _dependencies.updateEnvironment(
       environment.copyWith(workspaces: normalizedWorkspaces, activeWorkspaceId: nextActiveWorkspace.id),
     );
 
-    if (controller.chromeState.screen != SerenityScreen.library && nextActiveWorkspace.id != workspaceId) {
-      controller.showWorkspaceScreen(resetEditMode: false);
+    if (_dependencies.chromeState.screen != SerenityScreen.library && nextActiveWorkspace.id != workspaceId) {
+      _dependencies.showWorkspaceScreen(resetEditMode: false);
     }
   }
 
@@ -100,29 +133,29 @@ class WorkspaceShellManagementMutations {
     required Workspace sourceWorkspace,
     required Workspace destinationWorkspace,
   }) {
-    controller.workspaceController.environment.windowTransfer.moveSelectedToWorkspace(
+    _dependencies.workspaceController.environment.windowTransfer.moveSelectedToWorkspace(
       environment: environment,
       sourceWorkspace: sourceWorkspace,
       destinationWorkspace: destinationWorkspace,
-      selectedWindowIds: controller.workspaceController.expose.ids(),
-      updateEnvironment: controller.updateEnvironment,
-      queueThumbnailRefresh: controller.queueWorkspaceRefresh,
-      clearExposeSelection: controller.workspaceController.expose.clear,
+      selectedWindowIds: _dependencies.workspaceController.expose.ids(),
+      updateEnvironment: _dependencies.updateEnvironment,
+      queueThumbnailRefresh: _dependencies.queueWorkspaceRefresh,
+      clearExposeSelection: _dependencies.workspaceController.expose.clear,
     );
   }
 
   void reorderOpen(String sourceWorkspaceId, String targetWorkspaceId) {
-    controller.workspaceController.environment.tabs.reorderOpen(
-      controller.persistenceState.environment,
-      controller.workspaces(),
+    _dependencies.workspaceController.environment.tabs.reorderOpen(
+      _dependencies.persistenceState.environment,
+      _dependencies.workspaces(),
       sourceWorkspaceId: sourceWorkspaceId,
       targetWorkspaceId: targetWorkspaceId,
-      updateEnvironment: controller.updateEnvironment,
+      updateEnvironment: _dependencies.updateEnvironment,
     );
   }
 
   void create() {
-    final environment = controller.persistenceState.environment;
+    final environment = _dependencies.persistenceState.environment;
     if (environment == null) {
       return;
     }
@@ -143,11 +176,11 @@ class WorkspaceShellManagementMutations {
       windows: const [],
     );
 
-    controller.updateEnvironment(
+    _dependencies.updateEnvironment(
       environment.copyWith(workspaces: [workspace, ...environment.workspaces], activeWorkspaceId: workspace.id),
     );
 
-    controller.showWorkspaceScreen(resetEditMode: false, clearExposeSelection: false);
-    controller.queueWorkspaceRefresh(workspace.id, delay: Duration.zero);
+    _dependencies.showWorkspaceScreen(resetEditMode: false, clearExposeSelection: false);
+    _dependencies.queueWorkspaceRefresh(workspace.id, delay: Duration.zero);
   }
 }

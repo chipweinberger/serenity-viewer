@@ -15,6 +15,7 @@ import 'package:serenity_viewer/src/workspace/shell/workspace_shell_management.d
 import 'package:serenity_viewer/src/workspace/shell/workspace_shell_navigation.dart';
 import 'package:serenity_viewer/src/workspace/shell/workspace_shell_shortcuts.dart';
 import 'package:serenity_viewer/src/workspace/shell/workspace_shell_tracking.dart';
+import 'package:serenity_viewer/src/workspace/shell/workspace_shell_management_mutations.dart';
 import 'package:serenity_viewer/src/workspace/session/workspace_view_tracking_state.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 
@@ -79,7 +80,32 @@ class WorkspaceShellController {
         refreshActiveWorkspaceThumbnail: refreshActiveWorkspaceThumbnail,
       ),
     );
-    management = WorkspaceShellManagementApi(this);
+    final managementMutations = WorkspaceShellManagementMutations(
+      WorkspaceShellManagementMutationDependencies(
+        persistenceState: persistenceState,
+        chromeState: chromeState,
+        workspaceController: workspaceController,
+        workspaces: workspaces,
+        updateEnvironment: updateEnvironment,
+        replaceWorkspace: replaceWorkspace,
+        showWorkspaceScreen: showWorkspaceScreen,
+        newId: newId,
+        queueWorkspaceRefresh: queueWorkspaceRefresh,
+      ),
+    );
+    management = WorkspaceShellManagementApi(
+      WorkspaceShellManagementDependencies(
+        persistenceState: persistenceState,
+        workspaceController: workspaceController,
+        context: context,
+        mounted: mounted,
+        workspaces: workspaces,
+        activeWorkspace: activeWorkspace,
+        showMessage: showMessage,
+        navigation: navigation,
+        mutations: managementMutations,
+      ),
+    );
     shortcuts = WorkspaceShellShortcutsApi(
       WorkspaceShellShortcutsDependencies(
         chromeState: chromeState,

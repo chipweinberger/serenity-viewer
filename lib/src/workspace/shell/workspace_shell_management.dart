@@ -1,13 +1,42 @@
-import 'package:serenity_viewer/src/workspace/shell/workspace_shell_controller.dart';
+import 'package:flutter/material.dart';
+
+import 'package:serenity_viewer/src/app/environment/app_environment_state.dart';
+import 'package:serenity_viewer/src/environment/workspace.dart';
+import 'package:serenity_viewer/src/workspace/controller/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/shell/workspace_shell_management_dialogs.dart';
 import 'package:serenity_viewer/src/workspace/shell/workspace_shell_management_mutations.dart';
+import 'package:serenity_viewer/src/workspace/shell/workspace_shell_navigation.dart';
+
+class WorkspaceShellManagementDependencies {
+  const WorkspaceShellManagementDependencies({
+    required this.persistenceState,
+    required this.workspaceController,
+    required this.context,
+    required this.mounted,
+    required this.workspaces,
+    required this.activeWorkspace,
+    required this.showMessage,
+    required this.navigation,
+    required this.mutations,
+  });
+
+  final AppEnvironmentState persistenceState;
+  final WorkspaceController workspaceController;
+  final BuildContext Function() context;
+  final bool Function() mounted;
+  final List<Workspace> Function() workspaces;
+  final Workspace? Function() activeWorkspace;
+  final ValueChanged<String> showMessage;
+  final WorkspaceShellNavigationApi navigation;
+  final WorkspaceShellManagementMutations mutations;
+}
 
 class WorkspaceShellManagementApi {
-  WorkspaceShellManagementApi(this._controller)
-    : dialogs = WorkspaceShellManagementDialogs(context: _controller.context, mounted: _controller.mounted),
-      _mutations = WorkspaceShellManagementMutations(_controller);
+  WorkspaceShellManagementApi(this._dependencies)
+    : dialogs = WorkspaceShellManagementDialogs(context: _dependencies.context, mounted: _dependencies.mounted),
+      _mutations = _dependencies.mutations;
 
-  final WorkspaceShellController _controller;
+  final WorkspaceShellManagementDependencies _dependencies;
   final WorkspaceShellManagementDialogs dialogs;
   final WorkspaceShellManagementMutations _mutations;
 
@@ -24,7 +53,7 @@ class WorkspaceShellManagementApi {
   }
 
   Future<void> renameWorkspace(String workspaceId) async {
-    final workspaceMatches = _controller.workspaces().where((entry) => entry.id == workspaceId);
+    final workspaceMatches = _dependencies.workspaces().where((entry) => entry.id == workspaceId);
     if (workspaceMatches.isEmpty) {
       return;
     }
@@ -39,7 +68,7 @@ class WorkspaceShellManagementApi {
   }
 
   Future<void> confirmDeleteWorkspace(String workspaceId) async {
-    final environment = _controller.persistenceState.environment;
+    final environment = _dependencies.persistenceState.environment;
     if (environment == null) {
       return;
     }
@@ -57,16 +86,16 @@ class WorkspaceShellManagementApi {
   }
 
   Future<void> moveSelectedExposeWindowsToWorkspace(String destinationWorkspaceId) async {
-    final environment = _controller.persistenceState.environment;
-    final sourceWorkspace = _controller.activeWorkspace();
-    if (!_controller.workspaceController.environment.windowTransfer.canMoveSelectedToWorkspace(
+    final environment = _dependencies.persistenceState.environment;
+    final sourceWorkspace = _dependencies.activeWorkspace();
+    if (!_dependencies.workspaceController.environment.windowTransfer.canMoveSelectedToWorkspace(
       environment: environment,
       sourceWorkspace: sourceWorkspace,
       destinationWorkspaceId: destinationWorkspaceId,
-      hasSelectedWindowIds: _controller.workspaceController.expose.hasSelection(),
+      hasSelectedWindowIds: _dependencies.workspaceController.expose.hasSelection(),
     )) {
       if (sourceWorkspace != null && destinationWorkspaceId == sourceWorkspace.id) {
-        _controller.showMessage('Choose a different tab to move those windows.');
+        _dependencies.showMessage('Choose a different tab to move those windows.');
       }
       return;
     }
@@ -76,7 +105,7 @@ class WorkspaceShellManagementApi {
     }
 
     if (destinationWorkspaceId == sourceWorkspace.id) {
-      _controller.showMessage('Choose a different tab to move those windows.');
+      _dependencies.showMessage('Choose a different tab to move those windows.');
       return;
     }
 
@@ -86,9 +115,9 @@ class WorkspaceShellManagementApi {
     }
 
     final destinationWorkspace = destinationMatches.first;
-    final selectedWindowCount = _controller.workspaceController.expose.countIn(sourceWorkspace);
+    final selectedWindowCount = _dependencies.workspaceController.expose.countIn(sourceWorkspace);
     if (selectedWindowCount == 0) {
-      _controller.navigation.clearExposeSelection();
+      _dependencies.navigation.clearExposeSelection();
       return;
     }
 
@@ -105,7 +134,7 @@ class WorkspaceShellManagementApi {
   }
 
   Future<void> confirmCloseTab(String workspaceId) async {
-    final workspaceMatches = _controller.workspaces().where((entry) => entry.id == workspaceId);
+    final workspaceMatches = _dependencies.workspaces().where((entry) => entry.id == workspaceId);
     if (workspaceMatches.isEmpty) {
       return;
     }
