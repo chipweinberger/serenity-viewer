@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:provider/single_child_widget.dart';
 
 import 'package:serenity_viewer/src/app/controllers/app_feedback_controller.dart';
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
@@ -64,10 +65,8 @@ class _AppRootState extends State<AppRoot> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), behavior: SnackBarBehavior.floating));
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _runtime = AppRuntime.create(
+  AppRuntime _createRuntime() {
+    return AppRuntime.create(
       isRunningInWidgetTest: _isRunningInWidgetTest,
       environmentStoreState: _environmentStoreState,
       appUiState: _appUiState,
@@ -125,7 +124,10 @@ class _AppRootState extends State<AppRoot> {
       toggleExpose: () => _runtime.appUiController.toggleExpose(),
       toggleVideoPlayback: (windowId) => _runtime.workspaceWindowController.toggleVideoPlayback(windowId),
     );
-    _documentPersistence = DocumentPersistenceController(
+  }
+
+  DocumentPersistenceController _createDocumentPersistenceController() {
+    return DocumentPersistenceController(
       environmentStoreState: _environmentStoreState,
       environmentStore: _runtime.environmentStore,
       platformBridge: _runtime.platformBridge,
@@ -135,6 +137,54 @@ class _AppRootState extends State<AppRoot> {
       seedEnvironment: buildSeedEnvironment,
       isRunningInWidgetTest: _isRunningInWidgetTest,
     );
+  }
+
+  List<SingleChildWidget> _buildProviders() {
+    return [
+      Provider<AppUiHandles>.value(value: _uiHandles),
+      Provider<AppFeedbackController>(create: (context) => AppFeedbackController(context: () => context)),
+      Provider<AppSettingsController>(
+        create: (context) => AppSettingsController(
+          context: () => context,
+          environmentStoreState: _environmentStoreState,
+          updateEnvironment: _runtime.environmentStore.updateEnvironment,
+        ),
+      ),
+      ChangeNotifierProvider.value(value: _appUiState),
+      ChangeNotifierProvider.value(value: _environmentStoreState),
+      ChangeNotifierProvider.value(value: _windowInteractionState),
+      ChangeNotifierProvider.value(value: _workspaceViewportState),
+      ChangeNotifierProvider.value(value: _thumbnailRefreshState),
+      ChangeNotifierProvider.value(value: _workspaceWindowHistoryState),
+      ChangeNotifierProvider.value(value: _workspaceViewTrackingState),
+      Provider<AppUiController>.value(value: _runtime.appUiController),
+      Provider<SharedVideoControllerPool>.value(value: _runtime.sharedVideoControllerPool),
+      Provider<PlatformBridge>.value(value: _runtime.platformBridge),
+      Provider<EnvironmentStore>.value(value: _runtime.environmentStore),
+      Provider<DocumentCoordinator>.value(value: _runtime.documentCoordinator),
+      Provider<WorkspaceController>.value(value: _runtime.workspaceController),
+      Provider<EnvironmentController>.value(value: _runtime.environmentController),
+      Provider<WorkspaceExposeLayoutController>.value(value: _runtime.workspaceExposeLayoutController),
+      Provider<WorkspaceLinksController>.value(value: _runtime.workspaceLinksController),
+      Provider<WorkspaceLinksLauncher>.value(value: _runtime.workspaceLinksLauncher),
+      Provider<WorkspaceLinksPrompts>.value(value: _runtime.workspaceLinksPrompts),
+      Provider<ThumbnailController>.value(value: _runtime.thumbnailController),
+      Provider<WorkspaceWindowHistoryController>.value(value: _runtime.workspaceWindowHistoryController),
+      Provider<WorkspaceMediaImportController>.value(value: _runtime.workspaceMediaImportController),
+      Provider<WorkspaceWindowController>.value(value: _runtime.workspaceWindowController),
+      Provider<WorkspaceViewportSessionController>.value(value: _runtime.workspaceViewportSessionController),
+      Provider<WorkspaceCollateController>.value(value: _runtime.workspaceCollateController),
+      Provider<WorkspaceVideoConversionController>.value(value: _runtime.workspaceVideoConversionController),
+      Provider<WorkspaceAssetPickerController>.value(value: _runtime.workspaceAssetPickerController),
+      Provider<WorkspaceShortcutController>.value(value: _runtime.workspaceShortcutController),
+    ];
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _runtime = _createRuntime();
+    _documentPersistence = _createDocumentPersistenceController();
     _documentPersistence.restoreEnvironment();
   }
 
@@ -160,44 +210,7 @@ class _AppRootState extends State<AppRoot> {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [
-        Provider<AppUiHandles>.value(value: _uiHandles),
-        Provider<AppFeedbackController>(create: (context) => AppFeedbackController(context: () => context)),
-        Provider<AppSettingsController>(
-          create: (context) => AppSettingsController(
-            context: () => context,
-            environmentStoreState: _environmentStoreState,
-            updateEnvironment: _runtime.environmentStore.updateEnvironment,
-          ),
-        ),
-        ChangeNotifierProvider.value(value: _appUiState),
-        ChangeNotifierProvider.value(value: _environmentStoreState),
-        ChangeNotifierProvider.value(value: _windowInteractionState),
-        ChangeNotifierProvider.value(value: _workspaceViewportState),
-        ChangeNotifierProvider.value(value: _thumbnailRefreshState),
-        ChangeNotifierProvider.value(value: _workspaceWindowHistoryState),
-        ChangeNotifierProvider.value(value: _workspaceViewTrackingState),
-        Provider<AppUiController>.value(value: _runtime.appUiController),
-        Provider<SharedVideoControllerPool>.value(value: _runtime.sharedVideoControllerPool),
-        Provider<PlatformBridge>.value(value: _runtime.platformBridge),
-        Provider<EnvironmentStore>.value(value: _runtime.environmentStore),
-        Provider<DocumentCoordinator>.value(value: _runtime.documentCoordinator),
-        Provider<WorkspaceController>.value(value: _runtime.workspaceController),
-        Provider<EnvironmentController>.value(value: _runtime.environmentController),
-        Provider<WorkspaceExposeLayoutController>.value(value: _runtime.workspaceExposeLayoutController),
-        Provider<WorkspaceLinksController>.value(value: _runtime.workspaceLinksController),
-        Provider<WorkspaceLinksLauncher>.value(value: _runtime.workspaceLinksLauncher),
-        Provider<WorkspaceLinksPrompts>.value(value: _runtime.workspaceLinksPrompts),
-        Provider<ThumbnailController>.value(value: _runtime.thumbnailController),
-        Provider<WorkspaceWindowHistoryController>.value(value: _runtime.workspaceWindowHistoryController),
-        Provider<WorkspaceMediaImportController>.value(value: _runtime.workspaceMediaImportController),
-        Provider<WorkspaceWindowController>.value(value: _runtime.workspaceWindowController),
-        Provider<WorkspaceViewportSessionController>.value(value: _runtime.workspaceViewportSessionController),
-        Provider<WorkspaceCollateController>.value(value: _runtime.workspaceCollateController),
-        Provider<WorkspaceVideoConversionController>.value(value: _runtime.workspaceVideoConversionController),
-        Provider<WorkspaceAssetPickerController>.value(value: _runtime.workspaceAssetPickerController),
-        Provider<WorkspaceShortcutController>.value(value: _runtime.workspaceShortcutController),
-      ],
+      providers: _buildProviders(),
       child: const AppShell(),
     );
   }
