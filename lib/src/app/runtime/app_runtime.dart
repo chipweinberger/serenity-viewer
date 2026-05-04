@@ -3,7 +3,9 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/app/runtime/app_runtime_factories.dart';
+import 'package:serenity_viewer/src/app/runtime/factories/app_document_factory.dart';
+import 'package:serenity_viewer/src/app/runtime/factories/app_foundation_factory.dart';
+import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory.dart';
 import 'package:serenity_viewer/src/app/runtime/app_runtime_groups.dart';
 import 'package:serenity_viewer/src/app/runtime/app_runtime_inputs.dart';
 import 'package:serenity_viewer/src/app/state/app_state_store.dart';

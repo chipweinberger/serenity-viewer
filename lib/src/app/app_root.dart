@@ -9,7 +9,7 @@ import 'package:serenity_viewer/src/app/state/app_state_store.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
 import 'package:serenity_viewer/src/app/controllers/app_feedback_controller.dart';
 import 'package:serenity_viewer/src/app/seed_environment.dart';
-import 'package:serenity_viewer/src/app/app_menu.dart';
+import 'package:serenity_viewer/src/app/menu/app_menu.dart';
 import 'package:serenity_viewer/src/app/views/app_main_view.dart';
 import 'package:serenity_viewer/src/environment/document/document_persistence_controller.dart';
 import 'package:serenity_viewer/src/settings/behavior/app_settings_controller.dart';
@@ -77,70 +77,17 @@ class _AppRootState extends State<AppRoot> {
     }
   }
 
-  ({AppMainViewModel model, AppMainViewServices services, AppMainViewActions actions}) _buildAppMainViewBindings() {
-    return (
-      model: AppMainViewModel(
-        uiState: _state.appUiState,
-        environment: _state.environmentStoreState.environment!,
-        windowTitle: _derivedState.windowTitle,
-        workspaces: _derivedState.workspaces,
-        openWorkspaces: _derivedState.openWorkspaces,
-        activeWorkspace: _derivedState.activeWorkspace,
-        activeWorkspaceOrNull: _derivedState.activeWorkspaceOrNull,
-        selectedExposeWindowCount: _workspaceRuntime.workspaceController.expose.count(),
-        windowInteractionState: _state.windowInteractionState,
-        workspaceViewportState: _state.workspaceViewportState,
-      ),
-      services: AppMainViewServices(
-        appUiController: _foundation.appUiController,
-        sharedVideoControllerPool: _foundation.sharedVideoControllerPool,
-        environmentController: _workspaceRuntime.environmentController,
-        workspaceExposeLayoutController: _workspaceRuntime.workspaceExposeLayoutController,
-        workspaceLinksController: _workspaceRuntime.workspaceLinksController,
-        workspaceLinksLauncher: _workspaceRuntime.workspaceLinksLauncher,
-        workspaceLinksPrompts: _workspaceRuntime.workspaceLinksPrompts,
-        thumbnailController: _workspaceRuntime.thumbnailController,
-        windowHistoryController: _workspaceRuntime.workspaceWindowHistoryController,
-        searchController: _uiHandles.searchController,
-        tabScrollController: _uiHandles.tabScrollController,
-      ),
-      actions: AppMainViewActions(
-        app: AppMainViewAppActions(
-          commitStateChange: setState,
-          importFiles: _workspaceRuntime.workspaceMediaImportController.importFiles,
-          revealAssetInFinder: _foundation.platformBridge.revealAssetInFinder,
-        ),
-        window: AppMainViewWindowActions(
-          handleOptionGestureHover: _workspaceRuntime.workspaceWindowController.handleOptionGestureHover,
-          focusWindow: _workspaceRuntime.workspaceWindowController.focusWindow,
-          restorePreviousWindowZOrder: _workspaceRuntime.workspaceWindowController.restorePreviousWindowZOrder,
-          moveWindow: _workspaceRuntime.workspaceWindowController.moveWindow,
-          resizeWindow: _workspaceRuntime.workspaceWindowController.resizeWindow,
-          transformWindowFromTrackpad: _workspaceRuntime.workspaceWindowController.transformWindowFromTrackpad,
-          fitWindowToContent: _workspaceRuntime.workspaceWindowController.fitWindowToContent,
-          setWindowZoom: _workspaceRuntime.workspaceWindowController.setWindowZoom,
-          setVideoPosition: _workspaceRuntime.workspaceWindowController.setVideoPosition,
-          cycleVideoPlaybackSpeed: _workspaceRuntime.workspaceWindowController.cycleVideoPlaybackSpeed,
-          setWindowIntrinsicSize: _workspaceRuntime.workspaceWindowController.setWindowIntrinsicSize,
-          isVideoWindowPaused: _workspaceRuntime.workspaceWindowController.isVideoWindowPaused,
-          toggleVideoPlayback: _workspaceRuntime.workspaceWindowController.toggleVideoPlayback,
-          setPinnedHoverWindow: _workspaceRuntime.workspaceWindowController.setPinnedHoverWindow,
-          clearPinnedHoverWindow: _workspaceRuntime.workspaceWindowController.clearPinnedHoverWindow,
-          flashWindow: (windowId) =>
-              _workspaceRuntime.workspaceWindowController.flashWindow(windowId, mounted: mounted),
-          setActiveGestureWindow: _workspaceRuntime.workspaceWindowController.setActiveGestureWindow,
-        ),
-        workspace: AppMainViewWorkspaceActions(
-          handleWorkspacePanZoomStart: _workspaceRuntime.workspaceWindowController.handleWorkspacePanZoomStart,
-          handleWorkspacePanZoomUpdate: _workspaceRuntime.workspaceWindowController.handleWorkspacePanZoomUpdate,
-          handleWorkspacePanZoomEnd: _workspaceRuntime.workspaceWindowController.handleWorkspacePanZoomEnd,
-          toggleExpose: _foundation.appUiController.toggleExpose,
-          fitWorkspaceViewportToContent: _workspaceRuntime.workspaceWindowController.fitWorkspaceViewportToContent,
-          confirmCollateWorkspaceWindows: _confirmCollateWorkspaceWindows,
-          setWorkspaceViewport: _workspaceRuntime.workspaceViewportSessionController.setWorkspaceViewport,
-        ),
-      ),
-    );
+  AppMainViewBindings _buildAppMainViewBindings() {
+    return AppMainViewBindingBuilder(
+      state: _state,
+      derivedState: _derivedState,
+      foundation: _foundation,
+      workspace: _workspaceRuntime,
+      uiHandles: _uiHandles,
+      commitStateChange: setState,
+      mounted: () => mounted,
+      confirmCollateWorkspaceWindows: _confirmCollateWorkspaceWindows,
+    ).build();
   }
 
   Widget _buildContent(BuildContext context) {
