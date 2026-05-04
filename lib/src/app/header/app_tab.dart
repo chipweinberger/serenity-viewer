@@ -15,7 +15,7 @@ class AppTab extends StatelessWidget {
     required this.shouldMoveSelectedWindows,
     required this.draggingTabWorkspaceId,
     required this.isDropTarget,
-    required this.showMoveHereTooltip,
+    required this.showMoveTooltip,
     required this.onMoveSelectedExposeWindowsToWorkspace,
     required this.onSetActiveWorkspace,
     required this.onConfirmCloseTab,
@@ -27,7 +27,7 @@ class AppTab extends StatelessWidget {
   final bool shouldMoveSelectedWindows;
   final String? draggingTabWorkspaceId;
   final bool isDropTarget;
-  final bool showMoveHereTooltip;
+  final bool showMoveTooltip;
   final Future<void> Function(String workspaceId) onMoveSelectedExposeWindowsToWorkspace;
   final Future<void> Function(String workspaceId) onSetActiveWorkspace;
   final Future<void> Function(String workspaceId) onConfirmCloseTab;
@@ -79,7 +79,7 @@ class AppTab extends StatelessWidget {
       ),
     );
 
-    if (!showMoveHereTooltip) {
+    if (!showMoveTooltip) {
       return tab;
     }
 

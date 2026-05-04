@@ -70,7 +70,7 @@ class _AppTabBarState extends State<AppTabBar> {
         final canMoveDraggedWindowHere = widget.windowDragTargetWorkspaceId == workspace.id;
         final isDropTarget =
             candidateData.isNotEmpty || canMoveDraggedWindowHere || _isSelectionHoverTarget(workspace.id);
-        final showMoveHereTooltip = canMoveDraggedWindowHere || _isSelectionHoverTarget(workspace.id);
+        final showMoveTooltip = canMoveDraggedWindowHere || _isSelectionHoverTarget(workspace.id);
         return MouseRegion(
           onEnter: (_) {
             if (widget.shouldMoveSelectedWindows) {
@@ -101,7 +101,7 @@ class _AppTabBarState extends State<AppTabBar> {
                   shouldMoveSelectedWindows: widget.shouldMoveSelectedWindows,
                   draggingTabWorkspaceId: widget.draggingTabWorkspaceId,
                   isDropTarget: false,
-                  showMoveHereTooltip: false,
+                  showMoveTooltip: false,
                   onMoveSelectedExposeWindowsToWorkspace: widget.onMoveSelectedExposeWindowsToWorkspace,
                   onSetActiveWorkspace: widget.onSetActiveWorkspace,
                   onConfirmCloseTab: widget.onConfirmCloseTab,
@@ -116,7 +116,7 @@ class _AppTabBarState extends State<AppTabBar> {
                   shouldMoveSelectedWindows: widget.shouldMoveSelectedWindows,
                   draggingTabWorkspaceId: widget.draggingTabWorkspaceId,
                   isDropTarget: isDropTarget,
-                  showMoveHereTooltip: showMoveHereTooltip && canMoveSelectionHere,
+                  showMoveTooltip: showMoveTooltip && canMoveSelectionHere,
                   onMoveSelectedExposeWindowsToWorkspace: widget.onMoveSelectedExposeWindowsToWorkspace,
                   onSetActiveWorkspace: widget.onSetActiveWorkspace,
                   onConfirmCloseTab: widget.onConfirmCloseTab,
@@ -129,7 +129,7 @@ class _AppTabBarState extends State<AppTabBar> {
                 shouldMoveSelectedWindows: widget.shouldMoveSelectedWindows,
                 draggingTabWorkspaceId: widget.draggingTabWorkspaceId,
                 isDropTarget: isDropTarget,
-                showMoveHereTooltip: showMoveHereTooltip,
+                showMoveTooltip: showMoveTooltip,
                 onMoveSelectedExposeWindowsToWorkspace: widget.onMoveSelectedExposeWindowsToWorkspace,
                 onSetActiveWorkspace: widget.onSetActiveWorkspace,
                 onConfirmCloseTab: widget.onConfirmCloseTab,
