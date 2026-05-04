@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 
 class WorkspaceViewportState extends ChangeNotifier {
   Size _viewportSize = Size.zero;
+  Size? _pendingViewportSize;
+  bool _isViewportNotificationScheduled = false;
   bool _isGestureActive = false;
   Offset _gestureStartCenter = defaultWorkspaceCenter;
   double _gestureStartZoom = 1;
@@ -18,12 +21,40 @@ class WorkspaceViewportState extends ChangeNotifier {
   Offset get gestureAccumulatedPan => _gestureAccumulatedPan;
 
   void setViewportSize(Size value) {
-    if (_viewportSize == value) {
+    if (_viewportSize == value || _pendingViewportSize == value) {
       return;
     }
 
-    _viewportSize = value;
-    notifyListeners();
+    switch (SchedulerBinding.instance.schedulerPhase) {
+      case SchedulerPhase.idle:
+      case SchedulerPhase.postFrameCallbacks:
+        _viewportSize = value;
+        notifyListeners();
+      case SchedulerPhase.transientCallbacks:
+      case SchedulerPhase.midFrameMicrotasks:
+      case SchedulerPhase.persistentCallbacks:
+        _pendingViewportSize = value;
+        _scheduleViewportSizeNotification();
+    }
+  }
+
+  void _scheduleViewportSizeNotification() {
+    if (_isViewportNotificationScheduled) {
+      return;
+    }
+
+    _isViewportNotificationScheduled = true;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _isViewportNotificationScheduled = false;
+      final pendingViewportSize = _pendingViewportSize;
+      _pendingViewportSize = null;
+      if (pendingViewportSize == null || _viewportSize == pendingViewportSize) {
+        return;
+      }
+
+      _viewportSize = pendingViewportSize;
+      notifyListeners();
+    });
   }
 
   void setGestureInactive() {
@@ -35,11 +66,7 @@ class WorkspaceViewportState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void startGesture({
-    required Offset center,
-    required double zoom,
-    required Offset localFocalPoint,
-  }) {
+  void startGesture({required Offset center, required double zoom, required Offset localFocalPoint}) {
     _isGestureActive = true;
     _gestureStartCenter = center;
     _gestureStartZoom = zoom;

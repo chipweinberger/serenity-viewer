@@ -21,7 +21,7 @@ import 'package:serenity_viewer/src/environment/controller/environment_controlle
 import 'package:serenity_viewer/src/environment/store/environment_store.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
-import 'package:serenity_viewer/src/settings/behavior/app_settings_controller.dart';
+import 'package:serenity_viewer/src/settings/app_settings_controller.dart';
 import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresh_state.dart';

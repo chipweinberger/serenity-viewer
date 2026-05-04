@@ -16,7 +16,7 @@ import 'package:serenity_viewer/src/environment/history/environment_window_histo
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/settings/behavior/app_settings_controller.dart';
+import 'package:serenity_viewer/src/settings/app_settings_controller.dart';
 import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 

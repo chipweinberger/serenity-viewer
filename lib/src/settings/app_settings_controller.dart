@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
-import 'package:serenity_viewer/src/settings/behavior/settings_dialog.dart';
-import 'package:serenity_viewer/src/settings/behavior/settings_result.dart';
+import 'package:serenity_viewer/src/settings/settings_dialog.dart';
+import 'package:serenity_viewer/src/settings/settings_result.dart';
 
 class AppSettingsController {
   const AppSettingsController({
