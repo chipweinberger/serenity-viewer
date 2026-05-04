@@ -1,10 +1,21 @@
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
-import 'package:serenity_viewer/src/app/runtime/app_runtime_groups.dart';
 import 'package:serenity_viewer/src/app/state/app_derived_state.dart';
 import 'package:serenity_viewer/src/app/state/app_state_store.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
 import 'package:serenity_viewer/src/environment/asset.dart';
+import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
 import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
+import 'package:serenity_viewer/src/media/import/workspace_media_import_controller.dart';
+import 'package:serenity_viewer/src/workspace/actions/workspace_collate_controller.dart';
+import 'package:serenity_viewer/src/workspace/actions/workspace_expose_layout_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_viewport_session_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
+import 'package:serenity_viewer/src/workspace/history/workspace_window_history_controller.dart';
+import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.dart';
+import 'package:serenity_viewer/src/workspace/links/workspace_links_launcher.dart';
+import 'package:serenity_viewer/src/workspace/links/workspace_links_prompts.dart';
+import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
 
 import 'package:serenity_viewer/src/app/views/app_main_view_contract.dart';
 
@@ -37,19 +48,25 @@ AppMainViewModel _buildAppMainViewModel({
 AppMainViewServices _buildAppMainViewServices({
   required AppUiController appUiController,
   required SharedVideoControllerPool sharedVideoControllerPool,
-  required AppWorkspaceServices workspace,
+  required EnvironmentController environmentController,
+  required WorkspaceExposeLayoutController workspaceExposeLayoutController,
+  required WorkspaceLinksController workspaceLinksController,
+  required WorkspaceLinksLauncher workspaceLinksLauncher,
+  required WorkspaceLinksPrompts workspaceLinksPrompts,
+  required ThumbnailController thumbnailController,
+  required WorkspaceWindowHistoryController windowHistoryController,
   required AppUiHandles uiHandles,
 }) {
   return AppMainViewServices(
     appUiController: appUiController,
     sharedVideoControllerPool: sharedVideoControllerPool,
-    environmentController: workspace.environmentController,
-    workspaceExposeLayoutController: workspace.workspaceExposeLayoutController,
-    workspaceLinksController: workspace.workspaceLinksController,
-    workspaceLinksLauncher: workspace.workspaceLinksLauncher,
-    workspaceLinksPrompts: workspace.workspaceLinksPrompts,
-    thumbnailController: workspace.thumbnailController,
-    windowHistoryController: workspace.workspaceWindowHistoryController,
+    environmentController: environmentController,
+    workspaceExposeLayoutController: workspaceExposeLayoutController,
+    workspaceLinksController: workspaceLinksController,
+    workspaceLinksLauncher: workspaceLinksLauncher,
+    workspaceLinksPrompts: workspaceLinksPrompts,
+    thumbnailController: thumbnailController,
+    windowHistoryController: windowHistoryController,
     searchController: uiHandles.searchController,
     tabScrollController: uiHandles.tabScrollController,
   );
@@ -58,51 +75,52 @@ AppMainViewServices _buildAppMainViewServices({
 AppMainViewActions _buildAppMainViewActions({
   required AppUiController appUiController,
   required Future<void> Function(Asset asset) revealAssetInFinder,
-  required AppWorkspaceServices workspace,
+  required WorkspaceMediaImportController workspaceMediaImportController,
+  required WorkspaceWindowController workspaceWindowController,
+  required WorkspaceViewportSessionController workspaceViewportSessionController,
+  required WorkspaceCollateController workspaceCollateController,
   required bool Function() mounted,
 }) {
-  final windowController = workspace.workspaceWindowController;
-
   return AppMainViewActions(
     app: AppActions(
-      files: AppFileActions(importFiles: workspace.workspaceMediaImportController.importFiles),
+      files: AppFileActions(importFiles: workspaceMediaImportController.importFiles),
       platform: AppPlatformActions(revealAssetInFinder: revealAssetInFinder),
     ),
     window: WindowActions(
       interaction: WindowInteractionActions(
-        handleOptionGestureHover: windowController.handleOptionGestureHover,
-        focusWindow: windowController.focusWindow,
-        setPinnedHoverWindow: windowController.setPinnedHoverWindow,
-        clearPinnedHoverWindow: windowController.clearPinnedHoverWindow,
-        flashWindow: (windowId) => windowController.flashWindow(windowId, mounted: mounted()),
-        setActiveGestureWindow: windowController.setActiveGestureWindow,
+        handleOptionGestureHover: workspaceWindowController.handleOptionGestureHover,
+        focusWindow: workspaceWindowController.focusWindow,
+        setPinnedHoverWindow: workspaceWindowController.setPinnedHoverWindow,
+        clearPinnedHoverWindow: workspaceWindowController.clearPinnedHoverWindow,
+        flashWindow: (windowId) => workspaceWindowController.flashWindow(windowId, mounted: mounted()),
+        setActiveGestureWindow: workspaceWindowController.setActiveGestureWindow,
       ),
       layout: WindowLayoutActions(
-        restorePreviousWindowZOrder: windowController.restorePreviousWindowZOrder,
-        moveWindow: windowController.moveWindow,
-        resizeWindow: windowController.resizeWindow,
-        transformWindowFromTrackpad: windowController.transformWindowFromTrackpad,
-        fitWindowToContent: windowController.fitWindowToContent,
-        setWindowZoom: windowController.setWindowZoom,
-        setWindowIntrinsicSize: windowController.setWindowIntrinsicSize,
+        restorePreviousWindowZOrder: workspaceWindowController.restorePreviousWindowZOrder,
+        moveWindow: workspaceWindowController.moveWindow,
+        resizeWindow: workspaceWindowController.resizeWindow,
+        transformWindowFromTrackpad: workspaceWindowController.transformWindowFromTrackpad,
+        fitWindowToContent: workspaceWindowController.fitWindowToContent,
+        setWindowZoom: workspaceWindowController.setWindowZoom,
+        setWindowIntrinsicSize: workspaceWindowController.setWindowIntrinsicSize,
       ),
       playback: WindowPlaybackActions(
-        setVideoPosition: windowController.setVideoPosition,
-        cycleVideoPlaybackSpeed: windowController.cycleVideoPlaybackSpeed,
-        isVideoWindowPaused: windowController.isVideoWindowPaused,
-        toggleVideoPlayback: windowController.toggleVideoPlayback,
+        setVideoPosition: workspaceWindowController.setVideoPosition,
+        cycleVideoPlaybackSpeed: workspaceWindowController.cycleVideoPlaybackSpeed,
+        isVideoWindowPaused: workspaceWindowController.isVideoWindowPaused,
+        toggleVideoPlayback: workspaceWindowController.toggleVideoPlayback,
       ),
     ),
     workspace: WorkspaceActions(
       viewport: WorkspaceViewportActions(
-        handleWorkspacePanZoomStart: windowController.handleWorkspacePanZoomStart,
-        handleWorkspacePanZoomUpdate: windowController.handleWorkspacePanZoomUpdate,
-        handleWorkspacePanZoomEnd: windowController.handleWorkspacePanZoomEnd,
-        fitWorkspaceViewportToContent: windowController.fitWorkspaceViewportToContent,
-        setWorkspaceViewport: workspace.workspaceViewportSessionController.setWorkspaceViewport,
+        handleWorkspacePanZoomStart: workspaceWindowController.handleWorkspacePanZoomStart,
+        handleWorkspacePanZoomUpdate: workspaceWindowController.handleWorkspacePanZoomUpdate,
+        handleWorkspacePanZoomEnd: workspaceWindowController.handleWorkspacePanZoomEnd,
+        fitWorkspaceViewportToContent: workspaceWindowController.fitWorkspaceViewportToContent,
+        setWorkspaceViewport: workspaceViewportSessionController.setWorkspaceViewport,
       ),
       layout: WorkspaceLayoutActions(
-        confirmCollateWorkspaceWindows: workspace.workspaceCollateController.confirmCollateWorkspaceWindows,
+        confirmCollateWorkspaceWindows: workspaceCollateController.confirmCollateWorkspaceWindows,
       ),
       mode: WorkspaceModeActions(toggleExpose: appUiController.toggleExpose),
     ),
@@ -114,25 +132,45 @@ AppMainViewBindings buildAppMainViewBindings({
   required AppUiController appUiController,
   required SharedVideoControllerPool sharedVideoControllerPool,
   required Future<void> Function(Asset asset) revealAssetInFinder,
-  required AppWorkspaceServices workspace,
+  required WorkspaceController workspaceController,
+  required EnvironmentController environmentController,
+  required WorkspaceExposeLayoutController workspaceExposeLayoutController,
+  required WorkspaceLinksController workspaceLinksController,
+  required WorkspaceLinksLauncher workspaceLinksLauncher,
+  required WorkspaceLinksPrompts workspaceLinksPrompts,
+  required ThumbnailController thumbnailController,
+  required WorkspaceWindowHistoryController windowHistoryController,
+  required WorkspaceMediaImportController workspaceMediaImportController,
+  required WorkspaceWindowController workspaceWindowController,
+  required WorkspaceViewportSessionController workspaceViewportSessionController,
+  required WorkspaceCollateController workspaceCollateController,
   required AppUiHandles uiHandles,
   required bool Function() mounted,
 }) {
   return AppMainViewBindings(
     model: _buildAppMainViewModel(
       state: state,
-      selectedExposeWindowCount: workspace.workspaceController.expose.count(),
+      selectedExposeWindowCount: workspaceController.expose.count(),
     ),
     services: _buildAppMainViewServices(
       appUiController: appUiController,
       sharedVideoControllerPool: sharedVideoControllerPool,
-      workspace: workspace,
+      environmentController: environmentController,
+      workspaceExposeLayoutController: workspaceExposeLayoutController,
+      workspaceLinksController: workspaceLinksController,
+      workspaceLinksLauncher: workspaceLinksLauncher,
+      workspaceLinksPrompts: workspaceLinksPrompts,
+      thumbnailController: thumbnailController,
+      windowHistoryController: windowHistoryController,
       uiHandles: uiHandles,
     ),
     actions: _buildAppMainViewActions(
       appUiController: appUiController,
       revealAssetInFinder: revealAssetInFinder,
-      workspace: workspace,
+      workspaceMediaImportController: workspaceMediaImportController,
+      workspaceWindowController: workspaceWindowController,
+      workspaceViewportSessionController: workspaceViewportSessionController,
+      workspaceCollateController: workspaceCollateController,
       mounted: mounted,
     ),
   );
