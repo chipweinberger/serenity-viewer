@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/app/builders/app_screen_host_scope.dart';
+import 'package:serenity_viewer/src/app/app_main_view_data.dart';
 import 'package:serenity_viewer/src/library/library_screen.dart';
 import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
 
-class LibraryContentBuilder {
-  const LibraryContentBuilder({required this.state, required this.actions});
+class LibraryView extends StatelessWidget {
+  const LibraryView({super.key, required this.state, required this.actions, required this.workspaceLoadPlan});
 
-  final AppScreenHostState state;
-  final AppScreenHostActions actions;
+  final AppMainViewState state;
+  final AppMainViewActions actions;
+  final MediaLoadPlan workspaceLoadPlan;
 
-  Widget build(MediaLoadPlan workspaceLoadPlan) {
+  @override
+  Widget build(BuildContext context) {
     return LibraryScreen(
       allWorkspaces: state.workspaces,
       openWorkspaces: state.openWorkspaces,

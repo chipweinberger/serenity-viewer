@@ -20,8 +20,8 @@ import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.
 import 'package:serenity_viewer/src/workspace/history/workspace_window_history_controller.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_expose_layout_controller.dart';
 
-class AppScreenHostState {
-  const AppScreenHostState({
+class AppMainViewState {
+  const AppMainViewState({
     required this.context,
     required this.uiState,
     required this.environment,
@@ -70,16 +70,16 @@ class AppScreenHostState {
   final ScrollController tabScrollController;
 }
 
-class AppScreenHostActions {
-  const AppScreenHostActions({required this.app, required this.window, required this.workspace});
+class AppMainViewActions {
+  const AppMainViewActions({required this.app, required this.window, required this.workspace});
 
-  final AppScreenHostAppActions app;
-  final AppScreenHostWindowActions window;
-  final AppScreenHostWorkspaceActions workspace;
+  final AppMainViewAppActions app;
+  final AppMainViewWindowActions window;
+  final AppMainViewWorkspaceActions workspace;
 }
 
-class AppScreenHostAppActions {
-  const AppScreenHostAppActions({
+class AppMainViewAppActions {
+  const AppMainViewAppActions({
     required this.commitStateChange,
     required this.importFiles,
     required this.revealAssetInFinder,
@@ -90,8 +90,8 @@ class AppScreenHostAppActions {
   final Future<void> Function(Asset asset) revealAssetInFinder;
 }
 
-class AppScreenHostWindowActions {
-  const AppScreenHostWindowActions({
+class AppMainViewWindowActions {
+  const AppMainViewWindowActions({
     required this.handleOptionGestureHover,
     required this.focusWindow,
     required this.restorePreviousWindowZOrder,
@@ -130,8 +130,8 @@ class AppScreenHostWindowActions {
   final ValueChanged<String?> setActiveGestureWindow;
 }
 
-class AppScreenHostWorkspaceActions {
-  const AppScreenHostWorkspaceActions({
+class AppMainViewWorkspaceActions {
+  const AppMainViewWorkspaceActions({
     required this.handleWorkspacePanZoomStart,
     required this.handleWorkspacePanZoomUpdate,
     required this.handleWorkspacePanZoomEnd,

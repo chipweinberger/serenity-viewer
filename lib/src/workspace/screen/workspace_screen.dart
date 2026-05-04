@@ -107,8 +107,8 @@ class WorkspaceScreenHostActions {
   final Future<void> Function(Asset asset) revealAssetInFinder;
 }
 
-class WorkspaceScreenHost extends StatelessWidget {
-  const WorkspaceScreenHost({
+class WorkspaceScreen extends StatelessWidget {
+  const WorkspaceScreen({
     super.key,
     required this.environment,
     required this.openWorkspaces,

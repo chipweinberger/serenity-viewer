@@ -9,8 +9,13 @@ import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/workspace/history/workspace_window_history_entry.dart';
 
-class AppMenuBuilder {
-  AppMenuBuilder({
+class AppMenu extends StatelessWidget {
+  const AppMenu({
+    super.key,
+    required this.activeWorkspaceId,
+    required this.focusedWindow,
+    required this.focusedWindowIsSelected,
+    required this.recentlyClosedWindows,
     required this.showAboutSerenity,
     required this.openSettings,
     required this.createEnvironment,
@@ -37,8 +42,13 @@ class AppMenuBuilder {
     required this.showNoWorkspaceToDeleteMessage,
     required this.confirmDeleteWorkspace,
     required this.restoreRecentlyClosedWindow,
+    required this.child,
   });
 
+  final String? activeWorkspaceId;
+  final Window? focusedWindow;
+  final bool focusedWindowIsSelected;
+  final List<WorkspaceWindowHistoryEntry> recentlyClosedWindows;
   final VoidCallback showAboutSerenity;
   final Future<void> Function() openSettings;
   final Future<void> Function() createEnvironment;
@@ -65,17 +75,13 @@ class AppMenuBuilder {
   final VoidCallback showNoWorkspaceToDeleteMessage;
   final Future<void> Function(String workspaceId) confirmDeleteWorkspace;
   final void Function([WorkspaceWindowHistoryEntry? entry]) restoreRecentlyClosedWindow;
+  final Widget child;
 
-  List<PlatformMenuItem> build({
-    required String? activeWorkspaceId,
-    required Window? focusedWindow,
-    required bool focusedWindowIsSelected,
-    required List<WorkspaceWindowHistoryEntry> recentlyClosedWindows,
-  }) {
+  List<PlatformMenuItem> _buildMenus() {
     final focusedVideoWindow = focusedWindow?.asset.type == AssetType.video ? focusedWindow : null;
     final focusedWindowLabel = focusedWindow == null
         ? 'No Asset Selected'
-        : _middleTruncatedLabel(focusedWindow.asset.filename);
+        : _middleTruncatedLabel(focusedWindow!.asset.filename);
     final recentlyClosedItems = recentlyClosedWindows.take(8).map((entry) {
       return PlatformMenuItem(
         label: 'Restore ${entry.window.asset.filename}',
@@ -138,22 +144,22 @@ class AppMenuBuilder {
             members: [
               PlatformMenuItem(
                 label: 'Reveal in Finder',
-                onSelected: focusedWindow == null ? null : () => unawaited(revealAssetInFinder(focusedWindow.asset)),
+                onSelected: focusedWindow == null ? null : () => unawaited(revealAssetInFinder(focusedWindow!.asset)),
                 shortcut: const SingleActivator(LogicalKeyboardKey.keyR, meta: true, shift: true),
               ),
               PlatformMenuItem(
                 label: focusedWindowIsSelected ? 'Deselect' : 'Select',
-                onSelected: focusedWindow == null ? null : () => toggleWindowSelected(focusedWindow.asset.id),
+                onSelected: focusedWindow == null ? null : () => toggleWindowSelected(focusedWindow!.asset.id),
                 shortcut: const SingleActivator(LogicalKeyboardKey.keyE, meta: true),
               ),
               PlatformMenuItem(
                 label: 'Fit to Content',
-                onSelected: focusedWindow == null ? null : () => fitWindowToContent(focusedWindow.asset.id),
+                onSelected: focusedWindow == null ? null : () => fitWindowToContent(focusedWindow!.asset.id),
                 shortcut: const SingleActivator(LogicalKeyboardKey.digit2, meta: true),
               ),
               PlatformMenuItem(
                 label: 'Send Back',
-                onSelected: focusedWindow == null ? null : () => restorePreviousWindowZOrder(focusedWindow.asset.id),
+                onSelected: focusedWindow == null ? null : () => restorePreviousWindowZOrder(focusedWindow!.asset.id),
                 shortcut: const SingleActivator(LogicalKeyboardKey.keyB, meta: true, shift: true),
               ),
               PlatformMenuItem(
@@ -167,7 +173,7 @@ class AppMenuBuilder {
                 label: 'Close',
                 onSelected: focusedWindow == null || activeWorkspaceId == null
                     ? null
-                    : () => closeWindow(activeWorkspaceId, focusedWindow.asset.id),
+                    : () => closeWindow(activeWorkspaceId!, focusedWindow!.asset.id),
                 shortcut: const SingleActivator(LogicalKeyboardKey.backspace, meta: true),
               ),
             ],
@@ -226,13 +232,13 @@ class AppMenuBuilder {
             label: 'Rename…',
             onSelected: activeWorkspaceId == null
                 ? showNoWorkspaceToRenameMessage
-                : () => unawaited(renameWorkspace(activeWorkspaceId)),
+                : () => unawaited(renameWorkspace(activeWorkspaceId!)),
           ),
           PlatformMenuItem(
             label: 'Delete…',
             onSelected: activeWorkspaceId == null
                 ? showNoWorkspaceToDeleteMessage
-                : () => unawaited(confirmDeleteWorkspace(activeWorkspaceId)),
+                : () => unawaited(confirmDeleteWorkspace(activeWorkspaceId!)),
           ),
         ],
       ),
@@ -263,5 +269,10 @@ class AppMenuBuilder {
 
   static void _quitApplication() {
     unawaited(ServicesBinding.instance.exitApplication(ui.AppExitType.cancelable));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PlatformMenuBar(menus: _buildMenus(), child: child);
   }
 }

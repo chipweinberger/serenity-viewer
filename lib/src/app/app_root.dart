@@ -5,13 +5,13 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/assembly/app_runtime.dart';
 import 'package:serenity_viewer/src/app/assembly/app_runtime_config_builder.dart';
+import 'package:serenity_viewer/src/app/app_main_view_data.dart';
 import 'package:serenity_viewer/src/app/app_owned_state.dart';
 import 'package:serenity_viewer/src/app/app_view_state.dart';
-import 'package:serenity_viewer/src/app/builders/app_menu_builder.dart';
-import 'package:serenity_viewer/src/app/builders/app_screen_host_builder.dart';
-import 'package:serenity_viewer/src/app/builders/app_screen_host_scope.dart';
 import 'package:serenity_viewer/src/app/controllers/app_feedback_controller.dart';
 import 'package:serenity_viewer/src/app/seed_environment.dart';
+import 'package:serenity_viewer/src/app/app_menu.dart';
+import 'package:serenity_viewer/src/app/views/app_main_view.dart';
 import 'package:serenity_viewer/src/environment/document/document_persistence_controller.dart';
 import 'package:serenity_viewer/src/settings/behavior/app_settings_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_windows_controller.dart';
@@ -77,54 +77,13 @@ class _AppRootState extends State<AppRoot> {
     }
   }
 
-  List<PlatformMenuItem> _buildMenus() {
-    final focusedWindow = _workspaceRuntime.workspaceWindowController.focusedWindowOrNull();
-    final focusedWindowIsSelected =
-        focusedWindow != null && _workspaceRuntime.workspaceController.expose.contains(focusedWindow.asset.id);
-
-    return AppMenuBuilder(
-      showAboutSerenity: _feedback.showAboutSerenity,
-      openSettings: _settings.openSettings,
-      createEnvironment: _documents.documentCoordinator.createDocument,
-      openEnvironment: _documents.documentCoordinator.openDocument,
-      openAssets: _pickAndImportAssets,
-      saveEnvironment: _documents.documentCoordinator.saveDocument,
-      saveEnvironmentAs: _documents.documentCoordinator.saveDocumentAs,
-      revealAssetInFinder: _foundation.platformBridge.revealAssetInFinder,
-      toggleWindowSelected: _workspaceRuntime.environmentController.navigation.toggleSelectedWindow,
-      fitWindowToContent: _workspaceRuntime.workspaceWindowController.fitWindowToContent,
-      restorePreviousWindowZOrder: _workspaceRuntime.workspaceWindowController.restorePreviousWindowZOrder,
-      convertVideoWindowToJpeg: (windowId) =>
-          _workspaceRuntime.workspaceVideoConversionController.convertVideoWindowToJpeg(windowId),
-      closeWindow: _workspaceRuntime.workspaceWindowHistoryController.removeWindow,
-      toggleExpose: _foundation.appUiController.toggleExpose,
-      toggleWorkspaceOverview: _workspaceRuntime.environmentController.navigation.toggleOverview,
-      createWorkspace: _workspaceRuntime.environmentController.management.create,
-      switchToPreviousWorkspace: () => _workspaceRuntime.environmentController.navigation.switchWorkspace(-1),
-      switchToNextWorkspace: () => _workspaceRuntime.environmentController.navigation.switchWorkspace(1),
-      fitWorkspaceViewportToContent: _workspaceRuntime.workspaceWindowController.fitWorkspaceViewportToContent,
-      confirmCollateWorkspaceWindows: _confirmCollateWorkspaceWindows,
-      pauseAllVideos: _workspaceRuntime.workspaceWindowController.pauseAllVideos,
-      showNoWorkspaceToRenameMessage: () => _feedback.showMessage('There is no workspace to rename.'),
-      renameWorkspace: _workspaceRuntime.environmentController.management.renameWorkspace,
-      showNoWorkspaceToDeleteMessage: () => _feedback.showMessage('There is no workspace to delete.'),
-      confirmDeleteWorkspace: _workspaceRuntime.environmentController.management.confirmDeleteWorkspace,
-      restoreRecentlyClosedWindow: _workspaceRuntime.workspaceWindowHistoryController.restoreRecentlyClosedWindow,
-    ).build(
-      activeWorkspaceId: _state.environmentStoreState.environment?.activeWorkspaceId,
-      focusedWindow: focusedWindow,
-      focusedWindowIsSelected: focusedWindowIsSelected,
-      recentlyClosedWindows: _state.workspaceWindowHistoryState.entries,
-    );
-  }
-
   Widget _buildContent(BuildContext context) {
     if (_state.environmentStoreState.isLoading || _state.environmentStoreState.environment == null) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return AppScreenHostBuilder(
-      state: AppScreenHostState(
+    return AppMainView(
+      state: AppMainViewState(
         context: context,
         uiState: _state.appUiState,
         environment: _state.environmentStoreState.environment!,
@@ -148,13 +107,13 @@ class _AppRootState extends State<AppRoot> {
         searchController: _state.uiHandles.searchController,
         tabScrollController: _state.uiHandles.tabScrollController,
       ),
-      actions: AppScreenHostActions(
-        app: AppScreenHostAppActions(
+      actions: AppMainViewActions(
+        app: AppMainViewAppActions(
           commitStateChange: setState,
           importFiles: _workspaceRuntime.workspaceMediaImportController.importFiles,
           revealAssetInFinder: _foundation.platformBridge.revealAssetInFinder,
         ),
-        window: AppScreenHostWindowActions(
+        window: AppMainViewWindowActions(
           handleOptionGestureHover: _workspaceRuntime.workspaceWindowController.handleOptionGestureHover,
           focusWindow: _workspaceRuntime.workspaceWindowController.focusWindow,
           restorePreviousWindowZOrder: _workspaceRuntime.workspaceWindowController.restorePreviousWindowZOrder,
@@ -174,7 +133,7 @@ class _AppRootState extends State<AppRoot> {
               _workspaceRuntime.workspaceWindowController.flashWindow(windowId, mounted: mounted),
           setActiveGestureWindow: _workspaceRuntime.workspaceWindowController.setActiveGestureWindow,
         ),
-        workspace: AppScreenHostWorkspaceActions(
+        workspace: AppMainViewWorkspaceActions(
           handleWorkspacePanZoomStart: _workspaceRuntime.workspaceWindowController.handleWorkspacePanZoomStart,
           handleWorkspacePanZoomUpdate: _workspaceRuntime.workspaceWindowController.handleWorkspacePanZoomUpdate,
           handleWorkspacePanZoomEnd: _workspaceRuntime.workspaceWindowController.handleWorkspacePanZoomEnd,
@@ -184,7 +143,7 @@ class _AppRootState extends State<AppRoot> {
           setWorkspaceViewport: _workspaceRuntime.workspaceViewportSessionController.setWorkspaceViewport,
         ),
       ),
-    ).build();
+    );
   }
 
   @override
@@ -236,8 +195,41 @@ class _AppRootState extends State<AppRoot> {
 
   @override
   Widget build(BuildContext context) {
-    return PlatformMenuBar(
-      menus: _buildMenus(),
+    final focusedWindow = _workspaceRuntime.workspaceWindowController.focusedWindowOrNull();
+    final focusedWindowIsSelected =
+        focusedWindow != null && _workspaceRuntime.workspaceController.expose.contains(focusedWindow.asset.id);
+
+    return AppMenu(
+      activeWorkspaceId: _state.environmentStoreState.environment?.activeWorkspaceId,
+      focusedWindow: focusedWindow,
+      focusedWindowIsSelected: focusedWindowIsSelected,
+      recentlyClosedWindows: _state.workspaceWindowHistoryState.entries,
+      showAboutSerenity: _feedback.showAboutSerenity,
+      openSettings: _settings.openSettings,
+      createEnvironment: _documents.documentCoordinator.createDocument,
+      openEnvironment: _documents.documentCoordinator.openDocument,
+      openAssets: _pickAndImportAssets,
+      saveEnvironment: _documents.documentCoordinator.saveDocument,
+      saveEnvironmentAs: _documents.documentCoordinator.saveDocumentAs,
+      revealAssetInFinder: _foundation.platformBridge.revealAssetInFinder,
+      toggleWindowSelected: _workspaceRuntime.environmentController.navigation.toggleSelectedWindow,
+      fitWindowToContent: _workspaceRuntime.workspaceWindowController.fitWindowToContent,
+      restorePreviousWindowZOrder: _workspaceRuntime.workspaceWindowController.restorePreviousWindowZOrder,
+      convertVideoWindowToJpeg: _workspaceRuntime.workspaceVideoConversionController.convertVideoWindowToJpeg,
+      closeWindow: _workspaceRuntime.workspaceWindowHistoryController.removeWindow,
+      toggleExpose: _foundation.appUiController.toggleExpose,
+      toggleWorkspaceOverview: _workspaceRuntime.environmentController.navigation.toggleOverview,
+      createWorkspace: _workspaceRuntime.environmentController.management.create,
+      switchToPreviousWorkspace: () => _workspaceRuntime.environmentController.navigation.switchWorkspace(-1),
+      switchToNextWorkspace: () => _workspaceRuntime.environmentController.navigation.switchWorkspace(1),
+      fitWorkspaceViewportToContent: _workspaceRuntime.workspaceWindowController.fitWorkspaceViewportToContent,
+      confirmCollateWorkspaceWindows: _confirmCollateWorkspaceWindows,
+      pauseAllVideos: _workspaceRuntime.workspaceWindowController.pauseAllVideos,
+      showNoWorkspaceToRenameMessage: () => _feedback.showMessage('There is no workspace to rename.'),
+      renameWorkspace: _workspaceRuntime.environmentController.management.renameWorkspace,
+      showNoWorkspaceToDeleteMessage: () => _feedback.showMessage('There is no workspace to delete.'),
+      confirmDeleteWorkspace: _workspaceRuntime.environmentController.management.confirmDeleteWorkspace,
+      restoreRecentlyClosedWindow: _workspaceRuntime.workspaceWindowHistoryController.restoreRecentlyClosedWindow,
       child: Focus(
         focusNode: _state.uiHandles.focusNode,
         autofocus: true,

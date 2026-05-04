@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/app/builders/app_screen_host_scope.dart';
+import 'package:serenity_viewer/src/app/app_main_view_data.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_dialog.dart';
 import 'package:serenity_viewer/src/workspace/screen/workspace_hud.dart';
-import 'package:serenity_viewer/src/workspace/screen/workspace_screen_host.dart';
+import 'package:serenity_viewer/src/workspace/screen/workspace_screen.dart';
 import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
 import 'package:serenity_viewer/src/media/loading/workspace_load_plan.dart';
 
-class WorkspaceContentBuilder {
-  const WorkspaceContentBuilder({required this.state, required this.actions});
+class WorkspaceView extends StatelessWidget {
+  const WorkspaceView({super.key, required this.state, required this.actions, required this.workspaceLoadPlan});
 
-  final AppScreenHostState state;
-  final AppScreenHostActions actions;
+  final AppMainViewState state;
+  final AppMainViewActions actions;
+  final MediaLoadPlan workspaceLoadPlan;
 
   WorkspaceHudViewModel _buildWorkspaceHudViewModel() {
     final mediaCounts = workspaceMediaCounts(state.activeWorkspace);
@@ -27,10 +28,11 @@ class WorkspaceContentBuilder {
     );
   }
 
-  Widget build(MediaLoadPlan workspaceLoadPlan) {
+  @override
+  Widget build(BuildContext context) {
     final workspaceHudViewModel = _buildWorkspaceHudViewModel();
 
-    return WorkspaceScreenHost(
+    return WorkspaceScreen(
       environment: state.environment,
       openWorkspaces: state.openWorkspaces,
       appUiState: state.uiState,
