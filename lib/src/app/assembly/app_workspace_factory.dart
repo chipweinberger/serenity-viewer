@@ -11,6 +11,12 @@ import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.d
 import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_viewport_session_controller.dart';
 import 'package:serenity_viewer/src/environment/session/environment_session.dart';
+import 'package:serenity_viewer/src/environment/session/environment_management_actions.dart';
+import 'package:serenity_viewer/src/environment/session/environment_management_controller.dart';
+import 'package:serenity_viewer/src/environment/session/environment_expose_controller.dart';
+import 'package:serenity_viewer/src/environment/session/environment_view_controller.dart';
+import 'package:serenity_viewer/src/environment/session/environment_shortcut_controller.dart';
+import 'package:serenity_viewer/src/environment/session/workspace_view_tracking_controller.dart';
 import 'package:serenity_viewer/src/media/video/video_frame_exporter.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_video_conversion_controller.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_video_conversion_prompts.dart';
@@ -29,8 +35,6 @@ class AppWorkspaceFactory {
     final workspaceViewTrackingState = ownedState.workspaceViewTrackingState;
     final workspaceViewportState = ownedState.workspaceViewportState;
     final thumbnailRefreshState = ownedState.thumbnailRefreshState;
-
-    late final EnvironmentSession environmentSession;
 
     final thumbnailController = ThumbnailController(
       state: thumbnailRefreshState,
@@ -98,32 +102,83 @@ class AppWorkspaceFactory {
       thumbnailController: thumbnailController,
       replaceWorkspace: foundation.environmentStore.replaceWorkspace,
     );
-    environmentSession = EnvironmentSession(
-      EnvironmentSessionDependencies(
+    final environmentNavigationController = EnvironmentViewController(
+      EnvironmentViewDependencies(
         environmentStoreState: environmentStoreState,
         appUiState: appUiState,
-        workspaceViewTrackingState: workspaceViewTrackingState,
-        workspaceViewportState: workspaceViewportState,
         workspaceController: workspaceController,
-        workspaceLinksController: workspaceLinksController,
+        openWorkspaces: config.workspace.openWorkspaces,
+        updateEnvironment: config.environment.updateEnvironment,
+        showWorkspaceScreen: config.workspace.showWorkspaceScreen,
+        showLibraryScreen: config.workspace.showLibraryScreen,
+        workspaceSwitchTarget: foundation.appUiController.workspaceSwitchTarget,
+        refreshActiveWorkspaceThumbnail: thumbnailController.refreshActiveWorkspaceIfNeeded,
+      ),
+    );
+    final environmentExposeController = EnvironmentExposeController(
+      EnvironmentExposeDependencies(
+        appUiState: appUiState,
+        workspaceViewportState: workspaceViewportState,
         context: config.shell.context,
         mounted: config.shell.mounted,
-        workspaces: config.workspace.workspaces,
-        openWorkspaces: config.workspace.openWorkspaces,
         activeWorkspace: config.workspace.activeWorkspace,
-        focusedWindowOrNull: config.workspace.focusedWindowOrNull,
+        replaceWorkspace: config.environment.replaceWorkspace,
+        showWorkspaceScreen: config.workspace.showWorkspaceScreen,
+      ),
+    );
+    final environmentManagementActions = EnvironmentManagementActions(
+      EnvironmentManagementActionDependencies(
+        environmentStoreState: environmentStoreState,
+        appUiState: appUiState,
+        workspaceController: workspaceController,
+        workspaces: config.workspace.workspaces,
         updateEnvironment: config.environment.updateEnvironment,
         replaceWorkspace: config.environment.replaceWorkspace,
         showWorkspaceScreen: config.workspace.showWorkspaceScreen,
-        showLibraryScreen: config.workspace.showLibraryScreen,
-        toggleExpose: config.workspace.toggleExpose,
-        showMessage: config.shell.showMessage,
         newId: config.workspace.newId,
-        workspaceSwitchTarget: foundation.appUiController.workspaceSwitchTarget,
-        refreshActiveWorkspaceThumbnail: thumbnailController.refreshActiveWorkspaceIfNeeded,
         queueWorkspaceRefresh: thumbnailController.queueWorkspaceRefresh,
-        toggleVideoPlayback: config.workspace.toggleVideoPlayback,
       ),
+    );
+    final environmentManagementController = EnvironmentManagementController(
+      EnvironmentManagementDependencies(
+        environmentStoreState: environmentStoreState,
+        workspaceController: workspaceController,
+        context: config.shell.context,
+        mounted: config.shell.mounted,
+        workspaces: config.workspace.workspaces,
+        activeWorkspace: config.workspace.activeWorkspace,
+        showMessage: config.shell.showMessage,
+        navigation: environmentNavigationController,
+        mutations: environmentManagementActions,
+      ),
+    );
+    final environmentShortcutController = EnvironmentShortcutController(
+      EnvironmentShortcutDependencies(
+        appUiState: appUiState,
+        workspaceLinksController: workspaceLinksController,
+        focusedWindowOrNull: config.workspace.focusedWindowOrNull,
+        showWorkspaceScreen: config.workspace.showWorkspaceScreen,
+        toggleExpose: config.workspace.toggleExpose,
+        toggleVideoPlayback: config.workspace.toggleVideoPlayback,
+        navigation: environmentNavigationController,
+      ),
+    );
+    final workspaceViewTrackingController = WorkspaceViewTrackingController(
+      WorkspaceViewTrackingDependencies(
+        environmentStoreState: environmentStoreState,
+        appUiState: appUiState,
+        workspaceViewTrackingState: workspaceViewTrackingState,
+        mounted: config.shell.mounted,
+        activeWorkspace: config.workspace.activeWorkspace,
+        updateEnvironment: config.environment.updateEnvironment,
+      ),
+    );
+    final environmentSession = EnvironmentSession(
+      navigation: environmentNavigationController,
+      expose: environmentExposeController,
+      management: environmentManagementController,
+      shortcuts: environmentShortcutController,
+      tracking: workspaceViewTrackingController,
     );
     final workspaceVideoConversionController = WorkspaceVideoConversionController(
       showMessage: config.shell.showMessage,

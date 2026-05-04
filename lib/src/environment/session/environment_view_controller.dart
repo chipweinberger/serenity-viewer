@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import 'package:serenity_viewer/src/environment/session/environment_session_types.dart';
 import 'package:serenity_viewer/src/environment/session/environment_store_state.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/app/app_ui_state.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
-import 'package:serenity_viewer/src/environment/session/environment_session.dart';
 
 class EnvironmentViewDependencies {
   const EnvironmentViewDependencies({
