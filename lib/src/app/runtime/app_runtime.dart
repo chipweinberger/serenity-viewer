@@ -117,7 +117,13 @@ class AppRuntime {
     }) workspace;
 
     foundation = createAppFoundation(
-      inputs: inputs,
+      isRunningInWidgetTest: inputs.isRunningInWidgetTest,
+      environmentStoreState: stateStore.environmentStoreState,
+      appUiState: stateStore.appUiState,
+      windowInteractionState: stateStore.windowInteractionState,
+      windowTitle: inputs.windowTitle,
+      showMessage: inputs.showMessage,
+      mounted: inputs.mounted,
       refreshWorkspaceTracking: () async => workspace.workspaceViewTrackingController.refresh(),
       markWorkspaceThumbnailDirty: (workspaceId) => workspace.thumbnailController.markWorkspaceDirty(workspaceId),
       syncWindowTitle: () async => foundation.platformBridge.syncWindowTitle(),
