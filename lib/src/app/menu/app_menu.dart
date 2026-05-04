@@ -3,16 +3,206 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
-import 'package:serenity_viewer/src/app/menu/app_menu_bindings.dart';
+import 'package:serenity_viewer/src/app/controllers/app_feedback_controller.dart';
+import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
+import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
+import 'package:serenity_viewer/src/app/state/app_state_store.dart';
+import 'package:serenity_viewer/src/environment/asset.dart';
+import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
+import 'package:serenity_viewer/src/environment/document/document_coordinator.dart';
+import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
+import 'package:serenity_viewer/src/settings/behavior/app_settings_controller.dart';
+import 'package:serenity_viewer/src/workspace/actions/workspace_asset_picker_controller.dart';
+import 'package:serenity_viewer/src/workspace/actions/workspace_collate_controller.dart';
+import 'package:serenity_viewer/src/workspace/actions/workspace_video_conversion_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
+import 'package:serenity_viewer/src/workspace/history/workspace_window_history_entry.dart';
+import 'package:serenity_viewer/src/workspace/history/workspace_window_history_controller.dart';
 
-export 'package:serenity_viewer/src/app/menu/app_menu_bindings.dart';
+class AppMenuState {
+  const AppMenuState({
+    required this.activeWorkspaceId,
+    required this.focusedWindow,
+    required this.focusedWindowIsSelected,
+    required this.recentlyClosedWindows,
+  });
+
+  final String? activeWorkspaceId;
+  final Window? focusedWindow;
+  final bool focusedWindowIsSelected;
+  final List<WorkspaceWindowHistoryEntry> recentlyClosedWindows;
+}
+
+class AppMenuAppActions {
+  const AppMenuAppActions({required this.showAboutSerenity, required this.openSettings});
+
+  final VoidCallback showAboutSerenity;
+  final Future<void> Function() openSettings;
+}
+
+class AppMenuFileActions {
+  const AppMenuFileActions({
+    required this.createEnvironment,
+    required this.openEnvironment,
+    required this.openAssets,
+    required this.saveEnvironment,
+    required this.saveEnvironmentAs,
+  });
+
+  final Future<void> Function() createEnvironment;
+  final Future<void> Function() openEnvironment;
+  final Future<void> Function() openAssets;
+  final Future<void> Function() saveEnvironment;
+  final Future<void> Function() saveEnvironmentAs;
+}
+
+class AppMenuAssetActions {
+  const AppMenuAssetActions({
+    required this.revealAssetInFinder,
+    required this.toggleWindowSelected,
+    required this.fitWindowToContent,
+    required this.restorePreviousWindowZOrder,
+    required this.convertVideoWindowToJpeg,
+    required this.closeWindow,
+  });
+
+  final Future<void> Function(Asset asset) revealAssetInFinder;
+  final ValueChanged<String> toggleWindowSelected;
+  final ValueChanged<String> fitWindowToContent;
+  final ValueChanged<String> restorePreviousWindowZOrder;
+  final Future<void> Function(String windowId) convertVideoWindowToJpeg;
+  final void Function(String workspaceId, String windowId) closeWindow;
+}
+
+class AppMenuWorkspaceActions {
+  const AppMenuWorkspaceActions({
+    required this.toggleExpose,
+    required this.toggleWorkspaceOverview,
+    required this.createWorkspace,
+    required this.switchToPreviousWorkspace,
+    required this.switchToNextWorkspace,
+    required this.fitWorkspaceViewportToContent,
+    required this.confirmCollateWorkspaceWindows,
+    required this.pauseAllVideos,
+    required this.showNoWorkspaceToRenameMessage,
+    required this.renameWorkspace,
+    required this.showNoWorkspaceToDeleteMessage,
+    required this.confirmDeleteWorkspace,
+  });
+
+  final VoidCallback toggleExpose;
+  final VoidCallback toggleWorkspaceOverview;
+  final VoidCallback createWorkspace;
+  final VoidCallback switchToPreviousWorkspace;
+  final VoidCallback switchToNextWorkspace;
+  final VoidCallback fitWorkspaceViewportToContent;
+  final Future<void> Function() confirmCollateWorkspaceWindows;
+  final VoidCallback pauseAllVideos;
+  final VoidCallback showNoWorkspaceToRenameMessage;
+  final Future<void> Function(String workspaceId) renameWorkspace;
+  final VoidCallback showNoWorkspaceToDeleteMessage;
+  final Future<void> Function(String workspaceId) confirmDeleteWorkspace;
+}
+
+class AppMenuWindowActions {
+  const AppMenuWindowActions({required this.restoreRecentlyClosedWindow});
+
+  final void Function([WorkspaceWindowHistoryEntry? entry]) restoreRecentlyClosedWindow;
+}
 
 class AppMenu extends StatelessWidget {
   const AppMenu({super.key, required this.child});
 
   final Widget child;
+
+  AppMenuState _buildState({
+    required AppStateStore state,
+    required WorkspaceWindowController workspaceWindowController,
+    required WorkspaceController workspaceController,
+  }) {
+    final focusedWindow = workspaceWindowController.focusedWindowOrNull();
+    final focusedWindowIsSelected =
+        focusedWindow != null && workspaceController.expose.contains(focusedWindow.asset.id);
+
+    return AppMenuState(
+      activeWorkspaceId: state.environmentStoreState.environment?.activeWorkspaceId,
+      focusedWindow: focusedWindow,
+      focusedWindowIsSelected: focusedWindowIsSelected,
+      recentlyClosedWindows: state.workspaceWindowHistoryState.entries,
+    );
+  }
+
+  AppMenuAppActions _buildAppActions({
+    required AppFeedbackController feedback,
+    required AppSettingsController settings,
+  }) {
+    return AppMenuAppActions(showAboutSerenity: feedback.showAboutSerenity, openSettings: settings.openSettings);
+  }
+
+  AppMenuFileActions _buildFileActions({
+    required DocumentCoordinator documentCoordinator,
+    required WorkspaceAssetPickerController workspaceAssetPickerController,
+  }) {
+    return AppMenuFileActions(
+      createEnvironment: documentCoordinator.createDocument,
+      openEnvironment: documentCoordinator.openDocument,
+      openAssets: workspaceAssetPickerController.pickAndImportAssets,
+      saveEnvironment: documentCoordinator.saveDocument,
+      saveEnvironmentAs: documentCoordinator.saveDocumentAs,
+    );
+  }
+
+  AppMenuAssetActions _buildAssetActions({
+    required PlatformBridge platformBridge,
+    required EnvironmentController environmentController,
+    required WorkspaceWindowController workspaceWindowController,
+    required WorkspaceVideoConversionController workspaceVideoConversionController,
+    required WorkspaceWindowHistoryController workspaceWindowHistoryController,
+  }) {
+    return AppMenuAssetActions(
+      revealAssetInFinder: platformBridge.revealAssetInFinder,
+      toggleWindowSelected: environmentController.navigation.toggleSelectedWindow,
+      fitWindowToContent: workspaceWindowController.fitWindowToContent,
+      restorePreviousWindowZOrder: workspaceWindowController.restorePreviousWindowZOrder,
+      convertVideoWindowToJpeg: workspaceVideoConversionController.convertVideoWindowToJpeg,
+      closeWindow: workspaceWindowHistoryController.removeWindow,
+    );
+  }
+
+  AppMenuWorkspaceActions _buildWorkspaceActions({
+    required AppUiController appUiController,
+    required EnvironmentController environmentController,
+    required WorkspaceWindowController workspaceWindowController,
+    required WorkspaceCollateController workspaceCollateController,
+    required AppFeedbackController feedback,
+  }) {
+    return AppMenuWorkspaceActions(
+      toggleExpose: appUiController.toggleExpose,
+      toggleWorkspaceOverview: environmentController.navigation.toggleOverview,
+      createWorkspace: environmentController.management.create,
+      switchToPreviousWorkspace: () => environmentController.navigation.switchWorkspace(-1),
+      switchToNextWorkspace: () => environmentController.navigation.switchWorkspace(1),
+      fitWorkspaceViewportToContent: workspaceWindowController.fitWorkspaceViewportToContent,
+      confirmCollateWorkspaceWindows: workspaceCollateController.confirmCollateWorkspaceWindows,
+      pauseAllVideos: workspaceWindowController.pauseAllVideos,
+      showNoWorkspaceToRenameMessage: () => feedback.showMessage('There is no workspace to rename.'),
+      renameWorkspace: environmentController.management.renameWorkspace,
+      showNoWorkspaceToDeleteMessage: () => feedback.showMessage('There is no workspace to delete.'),
+      confirmDeleteWorkspace: environmentController.management.confirmDeleteWorkspace,
+    );
+  }
+
+  AppMenuWindowActions _buildWindowActions({
+    required WorkspaceWindowHistoryController workspaceWindowHistoryController,
+  }) {
+    return AppMenuWindowActions(
+      restoreRecentlyClosedWindow: workspaceWindowHistoryController.restoreRecentlyClosedWindow,
+    );
+  }
 
   List<PlatformMenuItem> _buildWindowMenuItems({
     required AppMenuState state,
@@ -236,15 +426,54 @@ class AppMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bindings = buildAppMenuBindings(context);
+    final stateStore = context.read<AppStateStore>();
+    final appUiController = context.read<AppUiController>();
+    final platformBridge = context.read<PlatformBridge>();
+    final documentCoordinator = context.read<DocumentCoordinator>();
+    final workspaceWindowController = context.read<WorkspaceWindowController>();
+    final workspaceController = context.read<WorkspaceController>();
+    final environmentController = context.read<EnvironmentController>();
+    final workspaceVideoConversionController = context.read<WorkspaceVideoConversionController>();
+    final workspaceWindowHistoryController = context.read<WorkspaceWindowHistoryController>();
+    final workspaceCollateController = context.read<WorkspaceCollateController>();
+    final workspaceAssetPickerController = context.read<WorkspaceAssetPickerController>();
+    final feedback = context.read<AppFeedbackController>();
+    final settings = context.read<AppSettingsController>();
+
+    final state = _buildState(
+      state: stateStore,
+      workspaceWindowController: workspaceWindowController,
+      workspaceController: workspaceController,
+    );
+    final app = _buildAppActions(feedback: feedback, settings: settings);
+    final file = _buildFileActions(
+      documentCoordinator: documentCoordinator,
+      workspaceAssetPickerController: workspaceAssetPickerController,
+    );
+    final asset = _buildAssetActions(
+      platformBridge: platformBridge,
+      environmentController: environmentController,
+      workspaceWindowController: workspaceWindowController,
+      workspaceVideoConversionController: workspaceVideoConversionController,
+      workspaceWindowHistoryController: workspaceWindowHistoryController,
+    );
+    final workspace = _buildWorkspaceActions(
+      appUiController: appUiController,
+      environmentController: environmentController,
+      workspaceWindowController: workspaceWindowController,
+      workspaceCollateController: workspaceCollateController,
+      feedback: feedback,
+    );
+    final window = _buildWindowActions(workspaceWindowHistoryController: workspaceWindowHistoryController);
+
     return PlatformMenuBar(
       menus: _buildMenus(
-        state: bindings.state,
-        app: bindings.app,
-        file: bindings.file,
-        asset: bindings.asset,
-        workspace: bindings.workspace,
-        window: bindings.window,
+        state: state,
+        app: app,
+        file: file,
+        asset: asset,
+        workspace: workspace,
+        window: window,
       ),
       child: child,
     );

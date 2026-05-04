@@ -1,20 +1,137 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:serenity_viewer/src/app/header/app_header.dart';
 import 'package:serenity_viewer/src/app/header/app_tab_bar_actions.dart';
-import 'package:serenity_viewer/src/app/views/app_main_view_binding_builder.dart';
+import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
+import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
+import 'package:serenity_viewer/src/app/state/app_derived_state.dart';
+import 'package:serenity_viewer/src/app/state/app_state_store.dart';
+import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
 import 'package:serenity_viewer/src/app/views/app_main_view_contract.dart';
 import 'package:serenity_viewer/src/app/views/library_view.dart';
 import 'package:serenity_viewer/src/app/views/workspace_view.dart';
+import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
+import 'package:serenity_viewer/src/media/import/workspace_media_import_controller.dart';
 import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
 import 'package:serenity_viewer/src/media/loading/workspace_load_plan.dart';
+import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
+import 'package:serenity_viewer/src/workspace/actions/workspace_collate_controller.dart';
+import 'package:serenity_viewer/src/workspace/actions/workspace_expose_layout_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_viewport_session_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
+import 'package:serenity_viewer/src/workspace/history/workspace_window_history_controller.dart';
+import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.dart';
+import 'package:serenity_viewer/src/workspace/links/workspace_links_launcher.dart';
+import 'package:serenity_viewer/src/workspace/links/workspace_links_prompts.dart';
+import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
 
-export 'package:serenity_viewer/src/app/views/app_main_view_binding_builder.dart';
 export 'package:serenity_viewer/src/app/views/app_main_view_contract.dart';
 
 class AppMainView extends StatelessWidget {
   const AppMainView({super.key});
+
+  AppMainViewModel _buildModel({
+    required AppStateStore state,
+    required WorkspaceController workspaceController,
+  }) {
+    return AppMainViewModel(
+      uiState: state.appUiState,
+      environment: state.environmentStoreState.environment!,
+      windowTitle: deriveWindowTitle(state),
+      workspaces: deriveWorkspaces(state),
+      openWorkspaces: deriveOpenWorkspaces(state),
+      activeWorkspace: deriveActiveWorkspace(state),
+      activeWorkspaceOrNull: deriveActiveWorkspaceOrNull(state),
+      selectedExposeWindowCount: workspaceController.expose.count(),
+      windowInteractionState: state.windowInteractionState,
+      workspaceViewportState: state.workspaceViewportState,
+    );
+  }
+
+  AppMainViewServices _buildServices({
+    required AppUiController appUiController,
+    required SharedVideoControllerPool sharedVideoControllerPool,
+    required EnvironmentController environmentController,
+    required WorkspaceExposeLayoutController workspaceExposeLayoutController,
+    required WorkspaceLinksController workspaceLinksController,
+    required WorkspaceLinksLauncher workspaceLinksLauncher,
+    required WorkspaceLinksPrompts workspaceLinksPrompts,
+    required ThumbnailController thumbnailController,
+    required WorkspaceWindowHistoryController windowHistoryController,
+    required AppUiHandles uiHandles,
+  }) {
+    return AppMainViewServices(
+      appUiController: appUiController,
+      sharedVideoControllerPool: sharedVideoControllerPool,
+      environmentController: environmentController,
+      workspaceExposeLayoutController: workspaceExposeLayoutController,
+      workspaceLinksController: workspaceLinksController,
+      workspaceLinksLauncher: workspaceLinksLauncher,
+      workspaceLinksPrompts: workspaceLinksPrompts,
+      thumbnailController: thumbnailController,
+      windowHistoryController: windowHistoryController,
+      searchController: uiHandles.searchController,
+      tabScrollController: uiHandles.tabScrollController,
+    );
+  }
+
+  AppMainViewActions _buildActions({
+    required AppUiController appUiController,
+    required PlatformBridge platformBridge,
+    required WorkspaceMediaImportController workspaceMediaImportController,
+    required WorkspaceWindowController workspaceWindowController,
+    required WorkspaceViewportSessionController workspaceViewportSessionController,
+    required WorkspaceCollateController workspaceCollateController,
+    required bool Function() mounted,
+  }) {
+    return AppMainViewActions(
+      app: AppActions(
+        files: AppFileActions(importFiles: workspaceMediaImportController.importFiles),
+        platform: AppPlatformActions(revealAssetInFinder: platformBridge.revealAssetInFinder),
+      ),
+      window: WindowActions(
+        interaction: WindowInteractionActions(
+          handleOptionGestureHover: workspaceWindowController.handleOptionGestureHover,
+          focusWindow: workspaceWindowController.focusWindow,
+          setPinnedHoverWindow: workspaceWindowController.setPinnedHoverWindow,
+          clearPinnedHoverWindow: workspaceWindowController.clearPinnedHoverWindow,
+          flashWindow: (windowId) => workspaceWindowController.flashWindow(windowId, mounted: mounted()),
+          setActiveGestureWindow: workspaceWindowController.setActiveGestureWindow,
+        ),
+        layout: WindowLayoutActions(
+          restorePreviousWindowZOrder: workspaceWindowController.restorePreviousWindowZOrder,
+          moveWindow: workspaceWindowController.moveWindow,
+          resizeWindow: workspaceWindowController.resizeWindow,
+          transformWindowFromTrackpad: workspaceWindowController.transformWindowFromTrackpad,
+          fitWindowToContent: workspaceWindowController.fitWindowToContent,
+          setWindowZoom: workspaceWindowController.setWindowZoom,
+          setWindowIntrinsicSize: workspaceWindowController.setWindowIntrinsicSize,
+        ),
+        playback: WindowPlaybackActions(
+          setVideoPosition: workspaceWindowController.setVideoPosition,
+          cycleVideoPlaybackSpeed: workspaceWindowController.cycleVideoPlaybackSpeed,
+          isVideoWindowPaused: workspaceWindowController.isVideoWindowPaused,
+          toggleVideoPlayback: workspaceWindowController.toggleVideoPlayback,
+        ),
+      ),
+      workspace: WorkspaceActions(
+        viewport: WorkspaceViewportActions(
+          handleWorkspacePanZoomStart: workspaceWindowController.handleWorkspacePanZoomStart,
+          handleWorkspacePanZoomUpdate: workspaceWindowController.handleWorkspacePanZoomUpdate,
+          handleWorkspacePanZoomEnd: workspaceWindowController.handleWorkspacePanZoomEnd,
+          fitWorkspaceViewportToContent: workspaceWindowController.fitWorkspaceViewportToContent,
+          setWorkspaceViewport: workspaceViewportSessionController.setWorkspaceViewport,
+        ),
+        layout: WorkspaceLayoutActions(
+          confirmCollateWorkspaceWindows: workspaceCollateController.confirmCollateWorkspaceWindows,
+        ),
+        mode: WorkspaceModeActions(toggleExpose: appUiController.toggleExpose),
+      ),
+    );
+  }
 
   int _activeScreenIndex(AppMainViewModel model) {
     return switch (model.uiState.screen) {
@@ -68,10 +185,47 @@ class AppMainView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bindings = buildAppMainViewBindings(context);
-    final model = bindings.model;
-    final services = bindings.services;
-    final actions = bindings.actions;
+    final state = context.read<AppStateStore>();
+    final uiHandles = context.read<AppUiHandles>();
+    final mounted = context.read<ValueGetter<bool>>();
+    final appUiController = context.read<AppUiController>();
+    final sharedVideoControllerPool = context.read<SharedVideoControllerPool>();
+    final platformBridge = context.read<PlatformBridge>();
+    final environmentController = context.read<EnvironmentController>();
+    final workspaceExposeLayoutController = context.read<WorkspaceExposeLayoutController>();
+    final workspaceLinksController = context.read<WorkspaceLinksController>();
+    final workspaceLinksLauncher = context.read<WorkspaceLinksLauncher>();
+    final workspaceLinksPrompts = context.read<WorkspaceLinksPrompts>();
+    final thumbnailController = context.read<ThumbnailController>();
+    final windowHistoryController = context.read<WorkspaceWindowHistoryController>();
+    final workspaceMediaImportController = context.read<WorkspaceMediaImportController>();
+    final workspaceWindowController = context.read<WorkspaceWindowController>();
+    final workspaceViewportSessionController = context.read<WorkspaceViewportSessionController>();
+    final workspaceCollateController = context.read<WorkspaceCollateController>();
+    final workspaceController = context.read<WorkspaceController>();
+
+    final model = _buildModel(state: state, workspaceController: workspaceController);
+    final services = _buildServices(
+      appUiController: appUiController,
+      sharedVideoControllerPool: sharedVideoControllerPool,
+      environmentController: environmentController,
+      workspaceExposeLayoutController: workspaceExposeLayoutController,
+      workspaceLinksController: workspaceLinksController,
+      workspaceLinksLauncher: workspaceLinksLauncher,
+      workspaceLinksPrompts: workspaceLinksPrompts,
+      thumbnailController: thumbnailController,
+      windowHistoryController: windowHistoryController,
+      uiHandles: uiHandles,
+    );
+    final actions = _buildActions(
+      appUiController: appUiController,
+      platformBridge: platformBridge,
+      workspaceMediaImportController: workspaceMediaImportController,
+      workspaceWindowController: workspaceWindowController,
+      workspaceViewportSessionController: workspaceViewportSessionController,
+      workspaceCollateController: workspaceCollateController,
+      mounted: mounted,
+    );
     final workspaceLoadPlan = buildWorkspaceLoadPlan(
       environment: model.environment,
       activeWorkspace: model.activeWorkspaceOrNull,
