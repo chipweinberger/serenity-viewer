@@ -205,15 +205,6 @@ class AppMainView extends StatelessWidget {
     return WorkspaceView(model: model, services: services, actions: actions, workspaceLoadPlan: workspaceLoadPlan);
   }
 
-  Widget _buildLibraryScreen(
-    MediaLoadPlan workspaceLoadPlan, {
-    required AppMainViewModel model,
-    required AppMainViewServices services,
-    required AppMainViewActions actions,
-  }) {
-    return LibraryView(model: model, services: services, actions: actions, workspaceLoadPlan: workspaceLoadPlan);
-  }
-
   Widget _buildWorkspaceUiOverlay({required AppMainViewModel model, required AppMainViewServices services}) {
     return AppHeader(
       windowTitle: model.windowTitle,
@@ -284,7 +275,7 @@ class AppMainView extends StatelessWidget {
             index: _activeScreenIndex(model),
             children: [
               _buildWorkspaceScreen(workspaceLoadPlan, model: model, services: services, actions: actions),
-              _buildLibraryScreen(workspaceLoadPlan, model: model, services: services, actions: actions),
+              const LibraryView(),
             ],
           ),
         ),
