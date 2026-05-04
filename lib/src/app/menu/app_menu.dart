@@ -178,7 +178,11 @@ class AppMenu extends StatelessWidget {
     required WorkspaceController workspaceController,
   }) {
     final focusedWindow = state.focusedWindow;
-    final focusedVideoWindow = focusedWindow?.asset.type == AssetType.video ? focusedWindow : null;
+    final focusedConvertibleWindow = switch (focusedWindow?.asset.type) {
+      AssetType.video => focusedWindow,
+      AssetType.image when focusedWindow?.asset.filePath?.toLowerCase().endsWith('.png') ?? false => focusedWindow,
+      _ => null,
+    };
     final focusedWindowLabel = focusedWindow == null
         ? 'No Asset Selected'
         : _middleTruncatedLabel(focusedWindow.asset.filename);
@@ -196,9 +200,9 @@ class AppMenu extends StatelessWidget {
           ),
           PlatformMenuItem(
             label: 'Convert to JPEG',
-            onSelected: focusedVideoWindow == null
+            onSelected: focusedConvertibleWindow == null
                 ? null
-                : () => unawaited(workspaceController.media.convertVideoWindowToJpeg(focusedVideoWindow.asset.id)),
+                : () => unawaited(workspaceController.media.convertWindowToJpeg(focusedConvertibleWindow.asset.id)),
             shortcut: const SingleActivator(LogicalKeyboardKey.keyJ, meta: true, shift: true),
           ),
         ],

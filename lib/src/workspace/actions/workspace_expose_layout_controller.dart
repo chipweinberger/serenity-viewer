@@ -5,7 +5,6 @@ import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
 import 'package:serenity_viewer/src/workspace/layout/workspace_expose_layout.dart';
-import 'package:serenity_viewer/src/workspace/controllers/workspace_windows_controller.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 
 class WorkspaceExposeLayoutDependencies {
@@ -112,9 +111,8 @@ class WorkspaceExposeLayoutController {
         return AlertDialog(
           title: const Text('Collate Windows?'),
           content: Text(
-            'Center and resize $collatableWindowCount image/video window'
-            '${collatableWindowCount == 1 ? '' : 's'} into a fixed ${workspaceCollateTargetBox.width.toInt()} × '
-            '${workspaceCollateTargetBox.height.toInt()} box?',
+            'Gather $collatableWindowCount image/video window'
+            '${collatableWindowCount == 1 ? '' : 's'} into the center and make them a consistent size?',
           ),
           actions: [
             TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),

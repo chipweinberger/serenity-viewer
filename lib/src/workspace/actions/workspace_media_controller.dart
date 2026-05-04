@@ -28,7 +28,7 @@ class WorkspaceMediaController {
     await importFiles([XFile(directoryPath)]);
   }
 
-  Future<void> convertVideoWindowToJpeg(String windowId) {
-    return videoConversionController.convertVideoWindowToJpeg(windowId);
+  Future<void> convertWindowToJpeg(String windowId) {
+    return videoConversionController.convertWindowToJpeg(windowId);
   }
 }
