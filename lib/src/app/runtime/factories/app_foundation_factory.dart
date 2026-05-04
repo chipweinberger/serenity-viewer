@@ -27,9 +27,9 @@ AppFoundation createAppFoundation({
   final platformBridge = PlatformBridge(
     environmentStoreState: environmentStoreState,
     isRunningInWidgetTest: inputs.isRunningInWidgetTest,
-    windowTitle: inputs.app.windowTitle,
-    showMessage: inputs.app.showMessage,
-    isMounted: inputs.app.mounted,
+    windowTitle: inputs.windowTitle,
+    showMessage: inputs.showMessage,
+    isMounted: inputs.mounted,
   );
   final environmentStore = EnvironmentStore(
     environmentStoreState: environmentStoreState,

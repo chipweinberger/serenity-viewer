@@ -12,7 +12,7 @@ WorkspaceVideoConversionController createWorkspaceVideoConversionController({
   required WorkspaceVideoConversionPrompts workspaceVideoConversionPrompts,
 }) {
   return WorkspaceVideoConversionController(
-    showMessage: scope.app.showMessage,
+    showMessage: scope.inputs.showMessage,
     mediaInspector: scope.media,
     videoFrameExporter: videoFrameExporter,
     videoConversionPrompts: workspaceVideoConversionPrompts.confirmOverwriteJpeg,
@@ -41,6 +41,6 @@ WorkspaceMediaImportController createWorkspaceMediaImportController({
     mediaInspector: scope.media,
     updateEnvironment: scope.store.updateEnvironment,
     thumbnailController: thumbnailController,
-    showMessage: scope.app.showMessage,
+    showMessage: scope.inputs.showMessage,
   );
 }

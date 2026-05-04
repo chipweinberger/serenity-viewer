@@ -10,10 +10,10 @@ DocumentCoordinator createAppDocumentCoordinator({
   return DocumentCoordinator(
     environmentStoreState: inputs.stateStore.environmentStoreState,
     environmentStore: foundation.environmentStore,
-    context: inputs.app.context,
-    mounted: inputs.app.mounted,
+    context: inputs.context,
+    mounted: inputs.mounted,
     seedEnvironment: inputs.environment.seedEnvironment,
-    showMessage: inputs.app.showMessage,
+    showMessage: inputs.showMessage,
     refreshActiveWorkspaceThumbnailIfNeeded: workspace.thumbnailController.refreshActiveWorkspaceIfNeeded,
     storeLastEnvironmentPath: foundation.platformBridge.storeLastEnvironmentPath,
     syncWindowTitle: foundation.platformBridge.syncWindowTitle,

@@ -18,7 +18,10 @@ class AppRuntimeInputs {
     required this.isRunningInWidgetTest,
     required this.stateStore,
     required this.uiHandles,
-    required this.app,
+    required this.windowTitle,
+    required this.context,
+    required this.mounted,
+    required this.showMessage,
     required this.environment,
     required this.workspace,
   });
@@ -26,23 +29,12 @@ class AppRuntimeInputs {
   final bool isRunningInWidgetTest;
   final AppStateStore stateStore;
   final AppUiHandles uiHandles;
-  final AppRuntimeAppInputs app;
-  final AppRuntimeEnvironmentInputs environment;
-  final AppRuntimeWorkspaceInputs workspace;
-}
-
-class AppRuntimeAppInputs {
-  const AppRuntimeAppInputs({
-    required this.windowTitle,
-    required this.context,
-    required this.mounted,
-    required this.showMessage,
-  });
-
   final String Function() windowTitle;
   final BuildContext Function() context;
   final bool Function() mounted;
   final ValueChanged<String> showMessage;
+  final AppRuntimeEnvironmentInputs environment;
+  final AppRuntimeWorkspaceInputs workspace;
 }
 
 class AppRuntimeEnvironmentInputs {
@@ -88,18 +80,10 @@ class AppRuntimeWorkspaceInputs {
   final ValueChanged<String> toggleVideoPlayback;
 }
 
-AppRuntimeAppInputs _buildAppRuntimeAppInputs({
+String Function() _buildRuntimeWindowTitle({
   required AppStateStore stateStore,
-  required BuildContext Function() context,
-  required bool Function() mounted,
-  required ValueChanged<String> showMessage,
 }) {
-  return AppRuntimeAppInputs(
-    windowTitle: () => deriveWindowTitle(stateStore),
-    context: context,
-    mounted: mounted,
-    showMessage: showMessage,
-  );
+  return () => deriveWindowTitle(stateStore);
 }
 
 AppRuntimeEnvironmentInputs _buildAppRuntimeEnvironmentInputs({
@@ -174,12 +158,10 @@ AppRuntimeInputs buildAppRuntimeInputs({
     isRunningInWidgetTest: isRunningInWidgetTest,
     stateStore: stateStore,
     uiHandles: uiHandles,
-    app: _buildAppRuntimeAppInputs(
-      stateStore: stateStore,
-      context: context,
-      mounted: mounted,
-      showMessage: showMessage,
-    ),
+    windowTitle: _buildRuntimeWindowTitle(stateStore: stateStore),
+    context: context,
+    mounted: mounted,
+    showMessage: showMessage,
     environment: _buildAppRuntimeEnvironmentInputs(
       foundation: foundation,
       documentPersistence: documentPersistence,

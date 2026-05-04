@@ -53,7 +53,7 @@ AppWorkspaceServices createAppWorkspaceServices({required AppRuntimeInputs input
   );
   final workspaceViewTrackingController = createWorkspaceViewTrackingController(scope: scope);
   final videoFrameExporter = VideoFrameExporter(mediaInspector: scope.media);
-  final workspaceVideoConversionPrompts = WorkspaceVideoConversionPrompts(context: scope.app.context);
+  final workspaceVideoConversionPrompts = WorkspaceVideoConversionPrompts(context: scope.inputs.context);
   final workspaceVideoConversionController = createWorkspaceVideoConversionController(
     scope: scope,
     videoFrameExporter: videoFrameExporter,

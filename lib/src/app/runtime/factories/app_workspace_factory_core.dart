@@ -29,8 +29,8 @@ WorkspaceCollateController createWorkspaceCollateController({
   required WorkspaceWindowController workspaceWindowController,
 }) {
   return WorkspaceCollateController(
-    context: scope.app.context,
-    showMessage: scope.app.showMessage,
+    context: scope.inputs.context,
+    showMessage: scope.inputs.showMessage,
     windowController: workspaceWindowController,
   );
 }
@@ -58,16 +58,16 @@ WorkspaceLinksController createWorkspaceLinksController({required WorkspaceFacto
     workspaces: scope.ws.workspaces,
     replaceWorkspace: scope.env.replaceWorkspace,
     newId: scope.ws.newId,
-    showMessage: scope.app.showMessage,
+    showMessage: scope.inputs.showMessage,
   );
 }
 
 WorkspaceLinksLauncher createWorkspaceLinksLauncher({required WorkspaceFactoryScope scope}) {
-  return WorkspaceLinksLauncher(showMessage: scope.app.showMessage, mounted: scope.app.mounted);
+  return WorkspaceLinksLauncher(showMessage: scope.inputs.showMessage, mounted: scope.inputs.mounted);
 }
 
 WorkspaceLinksPrompts createWorkspaceLinksPrompts({required WorkspaceFactoryScope scope}) {
-  return WorkspaceLinksPrompts(context: scope.app.context);
+  return WorkspaceLinksPrompts(context: scope.inputs.context);
 }
 
 WorkspaceController createWorkspaceController({
@@ -109,7 +109,7 @@ WorkspaceWindowHistoryController createWorkspaceWindowHistoryController({
     workspaceController: workspaceController,
     updateEnvironment: scope.store.updateEnvironment,
     replaceWorkspace: scope.store.replaceWorkspace,
-    showMessage: scope.app.showMessage,
+    showMessage: scope.inputs.showMessage,
     showWorkspaceScreen: scope.ws.showWorkspaceScreen,
     screen: () => scope.uiState.screen,
     maxRecentlyClosedWindows: 12,
