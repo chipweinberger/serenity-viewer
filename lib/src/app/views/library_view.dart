@@ -7,6 +7,7 @@ import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
+import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/library/library_screen.dart';
 import 'package:serenity_viewer/src/media/loading/workspace_load_plan.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
@@ -14,8 +15,11 @@ import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.da
 class LibraryView extends StatelessWidget {
   const LibraryView({super.key});
 
-  ({AppUiState appUiState, EnvironmentStoreState environmentStoreState}) _watchState(BuildContext context) {
-    return (appUiState: context.watch<AppUiState>(), environmentStoreState: context.watch<EnvironmentStoreState>());
+  ({EnvironmentStoreState environmentStoreState, WorkspaceSort workspaceSort}) _watchState(BuildContext context) {
+    return (
+      environmentStoreState: context.watch<EnvironmentStoreState>(),
+      workspaceSort: context.select((AppUiState state) => state.workspaceSort),
+    );
   }
 
   ({
@@ -45,7 +49,7 @@ class LibraryView extends StatelessWidget {
       openWorkspaces: deriveOpenWorkspaces(state.environmentStoreState),
       loadPlan: buildWorkspaceLoadPlan(environment: environment, activeWorkspace: activeWorkspace),
       searchController: dependencies.uiHandles.searchController,
-      workspaceSort: state.appUiState.workspaceSort,
+      workspaceSort: state.workspaceSort,
       refreshingWorkspaceIds: dependencies.thumbnailController.refreshingWorkspaceIds,
       actions: LibraryScreenActions(
         onWorkspaceSortChanged: dependencies.appUiController.setWorkspaceSort,

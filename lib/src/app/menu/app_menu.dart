@@ -43,15 +43,19 @@ class AppMenu extends StatelessWidget {
   final Widget child;
 
   ({
-    EnvironmentStoreState environmentStoreState,
-    WindowInteractionState windowInteractionState,
-    WorkspaceWindowHistoryState workspaceWindowHistoryState,
+    String? activeWorkspaceId,
+    List<WorkspaceWindowHistoryEntry> recentlyClosedWindows,
+    Set<String> selectedExposeWindowIds,
   })
   _watchState(BuildContext context) {
     return (
-      environmentStoreState: context.watch<EnvironmentStoreState>(),
-      windowInteractionState: context.watch<WindowInteractionState>(),
-      workspaceWindowHistoryState: context.watch<WorkspaceWindowHistoryState>(),
+      activeWorkspaceId: context.select((EnvironmentStoreState state) => state.environment?.activeWorkspaceId),
+      selectedExposeWindowIds: context.select(
+        (WindowInteractionState state) => Set<String>.of(state.selectedExposeWindowIds),
+      ),
+      recentlyClosedWindows: context.select(
+        (WorkspaceWindowHistoryState state) => List<WorkspaceWindowHistoryEntry>.of(state.entries),
+      ),
     );
   }
 
@@ -85,20 +89,19 @@ class AppMenu extends StatelessWidget {
   }
 
   _MenuState _buildState({
-    required EnvironmentStoreState environmentStoreState,
-    required WindowInteractionState windowInteractionState,
-    required WorkspaceWindowHistoryState workspaceWindowHistoryState,
+    required String? activeWorkspaceId,
+    required Set<String> selectedExposeWindowIds,
+    required List<WorkspaceWindowHistoryEntry> recentlyClosedWindows,
     required WorkspaceWindowController workspaceWindowController,
   }) {
     final focusedWindow = workspaceWindowController.focusedWindowOrNull();
-    final focusedWindowIsSelected =
-        focusedWindow != null && windowInteractionState.selectedExposeWindowIds.contains(focusedWindow.asset.id);
+    final focusedWindowIsSelected = focusedWindow != null && selectedExposeWindowIds.contains(focusedWindow.asset.id);
 
     return _MenuState(
-      activeWorkspaceId: environmentStoreState.environment?.activeWorkspaceId,
+      activeWorkspaceId: activeWorkspaceId,
       focusedWindow: focusedWindow,
       focusedWindowIsSelected: focusedWindowIsSelected,
-      recentlyClosedWindows: workspaceWindowHistoryState.entries,
+      recentlyClosedWindows: recentlyClosedWindows,
     );
   }
 
@@ -424,9 +427,9 @@ class AppMenu extends StatelessWidget {
     final dependencies = _readDependencies(context);
 
     final menuState = _buildState(
-      environmentStoreState: state.environmentStoreState,
-      windowInteractionState: state.windowInteractionState,
-      workspaceWindowHistoryState: state.workspaceWindowHistoryState,
+      activeWorkspaceId: state.activeWorkspaceId,
+      selectedExposeWindowIds: state.selectedExposeWindowIds,
+      recentlyClosedWindows: state.recentlyClosedWindows,
       workspaceWindowController: dependencies.workspaceWindowController,
     );
 

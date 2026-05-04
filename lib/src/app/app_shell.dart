@@ -14,23 +14,27 @@ import 'package:serenity_viewer/src/workspace/input/workspace_shortcut_controlle
 class AppShell extends StatelessWidget {
   const AppShell({super.key});
 
-  AppUiState _watchUiState(BuildContext context) {
-    return context.watch<AppUiState>();
+  ({bool hasEnvironment, bool isLoading, SerenityScreen screen}) _watchState(BuildContext context) {
+    return (
+      screen: context.select((AppUiState state) => state.screen),
+      isLoading: context.select((EnvironmentStoreState state) => state.isLoading),
+      hasEnvironment: context.select((EnvironmentStoreState state) => state.environment != null),
+    );
   }
 
-  int _activeScreenIndex(AppUiState appUiState) {
-    return switch (appUiState.screen) {
+  int _activeScreenIndex(SerenityScreen screen) {
+    return switch (screen) {
       SerenityScreen.workspace => 0,
       SerenityScreen.library => 1,
     };
   }
 
-  Widget _buildMainView(AppUiState appUiState) {
+  Widget _buildMainView(SerenityScreen screen) {
     return Stack(
       children: [
         Positioned.fill(
           child: IndexedStack(
-            index: _activeScreenIndex(appUiState),
+            index: _activeScreenIndex(screen),
             children: [const WorkspaceView(), const LibraryView()],
           ),
         ),
@@ -39,27 +43,35 @@ class AppShell extends StatelessWidget {
     );
   }
 
-  Widget _buildContent(EnvironmentStoreState environmentStoreState, AppUiState appUiState) {
-    if (environmentStoreState.isLoading || environmentStoreState.environment == null) {
+  Widget _buildContent({required bool isLoading, required bool hasEnvironment, required SerenityScreen screen}) {
+    if (isLoading || !hasEnvironment) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return _buildMainView(appUiState);
+    return _buildMainView(screen);
   }
 
   @override
   Widget build(BuildContext context) {
-    final appUiState = _watchUiState(context);
+    final state = _watchState(context);
     final uiHandles = context.read<AppUiHandles>();
     final workspaceShortcutController = context.read<WorkspaceShortcutController>();
-    final environmentStoreState = context.watch<EnvironmentStoreState>();
 
     return AppMenu(
       child: Focus(
         focusNode: uiHandles.focusNode,
         autofocus: true,
         onKeyEvent: (_, event) => workspaceShortcutController.onKeyEvent(event),
-        child: Scaffold(body: SafeArea(top: false, child: _buildContent(environmentStoreState, appUiState))),
+        child: Scaffold(
+          body: SafeArea(
+            top: false,
+            child: _buildContent(
+              isLoading: state.isLoading,
+              hasEnvironment: state.hasEnvironment,
+              screen: state.screen,
+            ),
+          ),
+        ),
       ),
     );
   }
