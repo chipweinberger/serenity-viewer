@@ -3,15 +3,24 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 
+import 'package:serenity_viewer/src/environment/asset.dart';
 import 'package:serenity_viewer/src/environment/session/environment_store_state.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 
 class PlatformBridge {
-  PlatformBridge({required this.environmentStoreState, required this.isRunningInWidgetTest, required this.windowTitle});
+  PlatformBridge({
+    required this.environmentStoreState,
+    required this.isRunningInWidgetTest,
+    required this.windowTitle,
+    required this.showMessage,
+    required this.isMounted,
+  });
 
   final EnvironmentStoreState environmentStoreState;
   final bool isRunningInWidgetTest;
   final String Function() windowTitle;
+  final void Function(String message) showMessage;
+  final bool Function() isMounted;
 
   Future<Directory> thumbnailDirectory() async {
     final environmentPath = environmentStoreState.currentEnvironmentPath ?? 'startup';
@@ -83,5 +92,38 @@ class PlatformBridge {
     } catch (_) {
       // Ignore preferences persistence failures.
     }
+  }
+
+  Future<void> revealAssetInFinder(Asset asset) async {
+    final path = asset.filePath;
+    if (path == null || path.isEmpty) {
+      _showMessageIfMounted('That asset does not have a source file.');
+      return;
+    }
+
+    if (!await File(path).exists()) {
+      _showMessageIfMounted('That asset is missing its source file.');
+      return;
+    }
+
+    if (isRunningInWidgetTest || !Platform.isMacOS) {
+      return;
+    }
+
+    try {
+      final revealed = await fileActionsChannel.invokeMethod<bool>('revealInFinder', {'path': path});
+      if (revealed == false) {
+        _showMessageIfMounted('Serenity could not reveal that file in Finder.');
+      }
+    } catch (_) {
+      _showMessageIfMounted('Serenity could not reveal that file in Finder.');
+    }
+  }
+
+  void _showMessageIfMounted(String message) {
+    if (!isMounted()) {
+      return;
+    }
+    showMessage(message);
   }
 }

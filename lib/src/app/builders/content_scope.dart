@@ -2,6 +2,7 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+import 'package:serenity_viewer/src/environment/asset.dart';
 import 'package:serenity_viewer/src/workspace/window/frame/window_resize_helpers.dart';
 import 'package:serenity_viewer/src/workspace/window/interaction/window_interaction_state.dart';
 import 'package:serenity_viewer/src/workspace/window/interaction/window_zoom_update.dart';
@@ -88,6 +89,7 @@ class ContentActions {
     required this.fitWorkspaceViewportToContent,
     required this.confirmCollateWorkspaceWindows,
     required this.setWorkspaceViewport,
+    required this.revealAssetInFinder,
   });
 
   final void Function(VoidCallback fn) commitStateChange;
@@ -118,4 +120,5 @@ class ContentActions {
   final Future<void> Function() confirmCollateWorkspaceWindows;
   final void Function({required String workspaceId, Offset? center, double? zoom, bool queueThumbnail})
   setWorkspaceViewport;
+  final Future<void> Function(Asset asset) revealAssetInFinder;
 }

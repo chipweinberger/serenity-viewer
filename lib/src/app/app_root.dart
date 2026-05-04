@@ -88,7 +88,7 @@ class _AppRootState extends State<AppRoot> {
       openAssets: _pickAndImportAssets,
       saveEnvironment: _documents.documentCoordinator.saveDocument,
       saveEnvironmentAs: _documents.documentCoordinator.saveDocumentAs,
-      revealAssetInFinder: _foundation.mediaBridge.revealAssetInFinder,
+      revealAssetInFinder: _foundation.platformBridge.revealAssetInFinder,
       toggleWindowSelected: _workspaceRuntime.environmentSession.navigation.toggleSelectedWindow,
       fitWindowToContent: _workspaceRuntime.workspaceWindowController.fitWindowToContent,
       restorePreviousWindowZOrder: _workspaceRuntime.workspaceWindowController.restorePreviousWindowZOrder,
@@ -170,6 +170,7 @@ class _AppRootState extends State<AppRoot> {
         fitWorkspaceViewportToContent: _workspaceRuntime.workspaceWindowController.fitWorkspaceViewportToContent,
         confirmCollateWorkspaceWindows: _confirmCollateWorkspaceWindows,
         setWorkspaceViewport: _workspaceRuntime.workspaceViewportSessionController.setWorkspaceViewport,
+        revealAssetInFinder: _foundation.platformBridge.revealAssetInFinder,
       ),
     ).build();
   }

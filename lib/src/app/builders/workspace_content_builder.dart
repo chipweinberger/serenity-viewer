@@ -65,7 +65,7 @@ class WorkspaceContentBuilder {
         toggleSelectedWindow: state.environmentSession.navigation.toggleSelectedWindow,
         removeWindow: state.windowHistoryController.removeWindow,
         setActiveGestureWindow: actions.setActiveGestureWindow,
-        revealAssetInFinder: state.mediaBridge.revealAssetInFinder,
+        revealAssetInFinder: actions.revealAssetInFinder,
       ),
       workspaceHud: WorkspaceHud(
         viewModel: workspaceHudViewModel,

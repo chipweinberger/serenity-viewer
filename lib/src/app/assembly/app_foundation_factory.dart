@@ -26,15 +26,13 @@ class AppFoundationFactory {
       commitStateChange: config.shell.commitStateChange,
       refreshWorkspaceTracking: refreshWorkspaceTracking,
     );
-    final mediaBridge = MediaBridge(
-      isRunningInWidgetTest: config.isRunningInWidgetTest,
-      showMessage: config.shell.showMessage,
-      isMounted: config.shell.mounted,
-    );
+    final mediaBridge = MediaBridge(isRunningInWidgetTest: config.isRunningInWidgetTest);
     final platformBridge = PlatformBridge(
       environmentStoreState: environmentStoreState,
       isRunningInWidgetTest: config.isRunningInWidgetTest,
       windowTitle: config.shell.windowTitle,
+      showMessage: config.shell.showMessage,
+      isMounted: config.shell.mounted,
     );
     final environmentStore = EnvironmentStore(
       environmentStoreState: environmentStoreState,

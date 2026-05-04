@@ -10,7 +10,6 @@ import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
-import 'package:serenity_viewer/src/environment/asset.dart';
 import 'package:serenity_viewer/src/media/video/video_models.dart';
 
 @immutable
@@ -22,11 +21,9 @@ class SharedVideoState {
 }
 
 class MediaBridge {
-  MediaBridge({required this.isRunningInWidgetTest, required this.showMessage, required this.isMounted});
+  MediaBridge({required this.isRunningInWidgetTest});
 
   final bool isRunningInWidgetTest;
-  final ValueChanged<String> showMessage;
-  final ValueGetter<bool> isMounted;
   final Map<String, _SharedVideoControllerEntry> _sharedVideoControllers = {};
 
   SharedVideoState? sharedVideoForWindow(Window window, {required bool isLoaded}) {
@@ -135,44 +132,11 @@ class MediaBridge {
     }
   }
 
-  Future<void> revealAssetInFinder(Asset asset) async {
-    final path = asset.filePath;
-    if (path == null || path.isEmpty) {
-      _showMessageIfMounted('That asset does not have a source file.');
-      return;
-    }
-
-    if (!await File(path).exists()) {
-      _showMessageIfMounted('That asset is missing its source file.');
-      return;
-    }
-
-    if (isRunningInWidgetTest || !Platform.isMacOS) {
-      return;
-    }
-
-    try {
-      final revealed = await fileActionsChannel.invokeMethod<bool>('revealInFinder', {'path': path});
-      if (revealed == false) {
-        _showMessageIfMounted('Serenity could not reveal that file in Finder.');
-      }
-    } catch (_) {
-      _showMessageIfMounted('Serenity could not reveal that file in Finder.');
-    }
-  }
-
   void dispose() {
     for (final entry in _sharedVideoControllers.values) {
       unawaited(entry.controller.dispose());
     }
     _sharedVideoControllers.clear();
-  }
-
-  void _showMessageIfMounted(String message) {
-    if (!isMounted()) {
-      return;
-    }
-    showMessage(message);
   }
 }
 
