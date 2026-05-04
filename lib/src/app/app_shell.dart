@@ -9,7 +9,7 @@ import 'package:serenity_viewer/src/app/views/library_view.dart';
 import 'package:serenity_viewer/src/app/views/workspace_view.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/workspace/input/workspace_shortcut_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 
 class AppShell extends StatelessWidget {
   const AppShell({super.key});
@@ -55,13 +55,13 @@ class AppShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = _watchState(context);
     final uiHandles = context.read<AppUiHandles>();
-    final workspaceShortcutController = context.read<WorkspaceShortcutController>();
+    final workspaceController = context.read<WorkspaceController>();
 
     return AppMenu(
       child: Focus(
         focusNode: uiHandles.focusNode,
         autofocus: true,
-        onKeyEvent: (_, event) => workspaceShortcutController.onKeyEvent(event),
+        onKeyEvent: (_, event) => workspaceController.shortcuts.onKeyEvent(event),
         child: Scaffold(
           body: SafeArea(
             top: false,

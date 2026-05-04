@@ -10,7 +10,7 @@ import 'package:serenity_viewer/src/environment/store/environment_store_state.da
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/library/library_screen.dart';
 import 'package:serenity_viewer/src/media/loading/workspace_load_plan.dart';
-import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 
 class LibraryView extends StatelessWidget {
   const LibraryView({super.key});
@@ -26,14 +26,14 @@ class LibraryView extends StatelessWidget {
     AppUiHandles uiHandles,
     AppUiController appUiController,
     EnvironmentController environmentController,
-    ThumbnailController thumbnailController,
+    WorkspaceController workspaceController,
   })
   _readDependencies(BuildContext context) {
     return (
       uiHandles: context.read<AppUiHandles>(),
       appUiController: context.read<AppUiController>(),
       environmentController: context.read<EnvironmentController>(),
-      thumbnailController: context.read<ThumbnailController>(),
+      workspaceController: context.read<WorkspaceController>(),
     );
   }
 
@@ -50,7 +50,7 @@ class LibraryView extends StatelessWidget {
       loadPlan: buildWorkspaceLoadPlan(environment: environment, activeWorkspace: activeWorkspace),
       searchController: dependencies.uiHandles.searchController,
       workspaceSort: state.workspaceSort,
-      refreshingWorkspaceIds: dependencies.thumbnailController.refreshingWorkspaceIds,
+      refreshingWorkspaceIds: dependencies.workspaceController.thumbnails.refreshingWorkspaceIds,
       actions: LibraryScreenActions(
         onWorkspaceSortChanged: dependencies.appUiController.setWorkspaceSort,
         onToggleWorkspaceOpen: dependencies.environmentController.management.toggleOpen,

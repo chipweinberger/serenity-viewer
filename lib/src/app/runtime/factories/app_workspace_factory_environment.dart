@@ -3,6 +3,7 @@ import 'package:serenity_viewer/src/environment/controller/environment_managemen
 import 'package:serenity_viewer/src/environment/controller/environment_navigation_controller.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_expose_layout_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
 import 'package:serenity_viewer/src/workspace/input/workspace_shortcut_controller.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
@@ -30,16 +31,21 @@ EnvironmentNavigationController createEnvironmentNavigationController({
   );
 }
 
-WorkspaceExposeLayoutController createWorkspaceExposeLayoutController({required WorkspaceFactoryScope scope}) {
+WorkspaceExposeLayoutController createWorkspaceExposeLayoutController({
+  required WorkspaceFactoryScope scope,
+  required WorkspaceWindowController workspaceWindowController,
+}) {
   return WorkspaceExposeLayoutController(
-      WorkspaceExposeLayoutDependencies(
+    WorkspaceExposeLayoutDependencies(
       appUiState: scope.uiState,
       workspaceViewportState: scope.viewportState,
       context: scope.context,
       mounted: scope.mounted,
       activeWorkspace: scope.activeWorkspace,
       replaceWorkspace: scope.replaceWorkspace,
+      showMessage: scope.showMessage,
       showWorkspaceScreen: scope.showWorkspaceScreen,
+      windowController: workspaceWindowController,
     ),
   );
 }

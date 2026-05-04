@@ -13,7 +13,6 @@ import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/app/seed_environment.dart';
 import 'package:serenity_viewer/src/app/state/app_derived_state.dart';
-import 'package:serenity_viewer/src/environment/history/environment_window_history_controller.dart';
 import 'package:serenity_viewer/src/environment/history/environment_window_history_state.dart';
 import 'package:serenity_viewer/src/environment/document/document_persistence_controller.dart';
 import 'package:serenity_viewer/src/environment/document/document_coordinator.dart';
@@ -22,25 +21,13 @@ import 'package:serenity_viewer/src/environment/store/environment_store.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/foundation/serenity_identity.dart';
-import 'package:serenity_viewer/src/media/import/workspace_media_import_controller.dart';
 import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
 import 'package:serenity_viewer/src/settings/behavior/app_settings_controller.dart';
 import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
-import 'package:serenity_viewer/src/workspace/actions/workspace_asset_picker_controller.dart';
-import 'package:serenity_viewer/src/workspace/actions/workspace_collate_controller.dart';
-import 'package:serenity_viewer/src/workspace/actions/workspace_expose_layout_controller.dart';
-import 'package:serenity_viewer/src/workspace/actions/workspace_video_conversion_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
-import 'package:serenity_viewer/src/workspace/input/workspace_shortcut_controller.dart';
-import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.dart';
-import 'package:serenity_viewer/src/workspace/links/workspace_links_launcher.dart';
-import 'package:serenity_viewer/src/workspace/links/workspace_links_prompts.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresh_state.dart';
-import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
 import 'package:serenity_viewer/src/workspace/tracking/workspace_view_tracking_state.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
-import 'package:serenity_viewer/src/workspace/controllers/workspace_viewport_session_controller.dart';
-import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
 
 class AppRoot extends StatefulWidget {
   const AppRoot({super.key});
@@ -90,9 +77,9 @@ class _AppRootState extends State<AppRoot> {
       activeWorkspace: () => deriveActiveWorkspaceOrNull(_environmentStoreState),
       workspaces: () => deriveWorkspaces(_environmentStoreState),
       openWorkspaces: () => deriveOpenWorkspaces(_environmentStoreState),
-      focusedWindowOrNull: () => _runtime.workspaceWindowController.focusedWindowOrNull(),
+      focusedWindowOrNull: () => _runtime.workspaceController.window.focusedWindowOrNull(),
       setWorkspaceViewport: ({required workspaceId, center, zoom, queueThumbnail = true}) {
-        _runtime.workspaceViewportSessionController.setWorkspaceViewport(
+        _runtime.workspaceController.viewport.setWorkspaceViewport(
           workspaceId: workspaceId,
           center: center,
           zoom: zoom,
@@ -119,7 +106,7 @@ class _AppRootState extends State<AppRoot> {
                 refreshWorkspaceTrackingEnabled: refreshWorkspaceTracking,
               ),
       toggleExpose: () => _runtime.appUiController.toggleExpose(),
-      toggleVideoPlayback: (windowId) => _runtime.workspaceWindowController.toggleVideoPlayback(windowId),
+      toggleVideoPlayback: (windowId) => _runtime.workspaceController.window.toggleVideoPlayback(windowId),
     );
   }
 
@@ -161,19 +148,6 @@ class _AppRootState extends State<AppRoot> {
       Provider<DocumentCoordinator>.value(value: _runtime.documentCoordinator),
       Provider<WorkspaceController>.value(value: _runtime.workspaceController),
       Provider<EnvironmentController>.value(value: _runtime.environmentController),
-      Provider<WorkspaceExposeLayoutController>.value(value: _runtime.workspaceExposeLayoutController),
-      Provider<WorkspaceLinksController>.value(value: _runtime.workspaceLinksController),
-      Provider<WorkspaceLinksLauncher>.value(value: _runtime.workspaceLinksLauncher),
-      Provider<WorkspaceLinksPrompts>.value(value: _runtime.workspaceLinksPrompts),
-      Provider<ThumbnailController>.value(value: _runtime.thumbnailController),
-      Provider<EnvironmentWindowHistoryController>.value(value: _runtime.environmentWindowHistoryController),
-      Provider<WorkspaceMediaImportController>.value(value: _runtime.workspaceMediaImportController),
-      Provider<WorkspaceWindowController>.value(value: _runtime.workspaceWindowController),
-      Provider<WorkspaceViewportSessionController>.value(value: _runtime.workspaceViewportSessionController),
-      Provider<WorkspaceCollateController>.value(value: _runtime.workspaceCollateController),
-      Provider<WorkspaceVideoConversionController>.value(value: _runtime.workspaceVideoConversionController),
-      Provider<WorkspaceAssetPickerController>.value(value: _runtime.workspaceAssetPickerController),
-      Provider<WorkspaceShortcutController>.value(value: _runtime.workspaceShortcutController),
     ];
   }
 

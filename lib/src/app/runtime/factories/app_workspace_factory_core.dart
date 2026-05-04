@@ -1,8 +1,6 @@
 import 'package:serenity_viewer/src/workspace/actions/workspace_asset_picker_controller.dart';
-import 'package:serenity_viewer/src/workspace/actions/workspace_collate_controller.dart';
 import 'package:serenity_viewer/src/media/import/workspace_media_import_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
-import 'package:serenity_viewer/src/workspace/controllers/workspace_viewport_session_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_launcher.dart';
@@ -20,17 +18,6 @@ WorkspaceAssetPickerController createWorkspaceAssetPickerController({
   return WorkspaceAssetPickerController(
     acceptedTypeGroups: () => workspaceMediaImportController.acceptedTypeGroups,
     importFiles: workspaceMediaImportController.importFiles,
-  );
-}
-
-WorkspaceCollateController createWorkspaceCollateController({
-  required WorkspaceFactoryScope scope,
-  required WorkspaceWindowController workspaceWindowController,
-}) {
-  return WorkspaceCollateController(
-    context: scope.context,
-    showMessage: scope.showMessage,
-    windowController: workspaceWindowController,
   );
 }
 
@@ -74,9 +61,11 @@ WorkspaceController createWorkspaceController({
   required ThumbnailController thumbnailController,
 }) {
   return WorkspaceController(
+    environmentStoreState: scope.envState,
     appUiState: scope.uiState,
     windowInteractionState: scope.interactionState,
     workspaceViewportState: scope.viewportState,
+    thumbnailController: thumbnailController,
     replaceWorkspace: scope.replaceWorkspace,
     setWorkspaceViewport: scope.setWorkspaceViewport,
     refreshActiveWorkspaceThumbnail: thumbnailController.refreshActiveWorkspaceIfNeeded,
@@ -93,17 +82,5 @@ WorkspaceWindowController createWorkspaceWindowController({
     activeWorkspace: () => scope.activeWorkspace()!,
     activeWorkspaceOrNull: scope.activeWorkspace,
     workspaceController: workspaceController,
-  );
-}
-
-WorkspaceViewportSessionController createWorkspaceViewportSessionController({
-  required WorkspaceFactoryScope scope,
-  required ThumbnailController thumbnailController,
-}) {
-  return WorkspaceViewportSessionController(
-    environmentStoreState: scope.envState,
-    workspaceViewportState: scope.viewportState,
-    thumbnailController: thumbnailController,
-    replaceWorkspace: scope.store.replaceWorkspace,
   );
 }

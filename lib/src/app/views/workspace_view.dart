@@ -6,20 +6,11 @@ import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
 import 'package:serenity_viewer/src/app/state/app_derived_state.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
-import 'package:serenity_viewer/src/environment/history/environment_window_history_controller.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
-import 'package:serenity_viewer/src/media/import/workspace_media_import_controller.dart';
 import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
 import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
-import 'package:serenity_viewer/src/workspace/actions/workspace_collate_controller.dart';
-import 'package:serenity_viewer/src/workspace/actions/workspace_expose_layout_controller.dart';
-import 'package:serenity_viewer/src/workspace/controllers/workspace_viewport_session_controller.dart';
-import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
-import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.dart';
-import 'package:serenity_viewer/src/workspace/links/workspace_links_launcher.dart';
-import 'package:serenity_viewer/src/workspace/links/workspace_links_prompts.dart';
-import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_dialog.dart';
 import 'package:serenity_viewer/src/workspace/screen/workspace_hud.dart';
@@ -48,16 +39,7 @@ class WorkspaceView extends StatelessWidget {
     AppUiController appUiController,
     PlatformBridge platformBridge,
     EnvironmentController environmentController,
-    WorkspaceExposeLayoutController workspaceExposeLayoutController,
-    WorkspaceLinksController workspaceLinksController,
-    WorkspaceLinksLauncher workspaceLinksLauncher,
-    WorkspaceLinksPrompts workspaceLinksPrompts,
-    ThumbnailController thumbnailController,
-    EnvironmentWindowHistoryController environmentWindowHistoryController,
-    WorkspaceMediaImportController workspaceMediaImportController,
-    WorkspaceWindowController workspaceWindowController,
-    WorkspaceViewportSessionController workspaceViewportSessionController,
-    WorkspaceCollateController workspaceCollateController,
+    WorkspaceController workspaceController,
     SharedVideoControllerPool sharedVideoControllerPool,
   })
   _readDependencies(BuildContext context) {
@@ -65,16 +47,7 @@ class WorkspaceView extends StatelessWidget {
       appUiController: context.read<AppUiController>(),
       platformBridge: context.read<PlatformBridge>(),
       environmentController: context.read<EnvironmentController>(),
-      workspaceExposeLayoutController: context.read<WorkspaceExposeLayoutController>(),
-      workspaceLinksController: context.read<WorkspaceLinksController>(),
-      workspaceLinksLauncher: context.read<WorkspaceLinksLauncher>(),
-      workspaceLinksPrompts: context.read<WorkspaceLinksPrompts>(),
-      thumbnailController: context.read<ThumbnailController>(),
-      environmentWindowHistoryController: context.read<EnvironmentWindowHistoryController>(),
-      workspaceMediaImportController: context.read<WorkspaceMediaImportController>(),
-      workspaceWindowController: context.read<WorkspaceWindowController>(),
-      workspaceViewportSessionController: context.read<WorkspaceViewportSessionController>(),
-      workspaceCollateController: context.read<WorkspaceCollateController>(),
+      workspaceController: context.read<WorkspaceController>(),
       sharedVideoControllerPool: context.read<SharedVideoControllerPool>(),
     );
   }
@@ -126,36 +99,36 @@ class WorkspaceView extends StatelessWidget {
       actions: WorkspaceScreenActions(
         drop: WorkspaceScreenDropActions(
           setDropTargetActive: state.appUiState.setDropTargetActive,
-          importFiles: dependencies.workspaceMediaImportController.importFiles,
+          importFiles: dependencies.workspaceController.media.importFiles,
         ),
         viewport: WorkspaceScreenViewportActions(
           trackViewportSize: state.workspaceViewportState.setViewportSize,
-          handleOptionGestureHover: dependencies.workspaceWindowController.handleOptionGestureHover,
-          handleWorkspacePanZoomStart: dependencies.workspaceWindowController.handleWorkspacePanZoomStart,
-          handleWorkspacePanZoomUpdate: dependencies.workspaceWindowController.handleWorkspacePanZoomUpdate,
-          handleWorkspacePanZoomEnd: dependencies.workspaceWindowController.handleWorkspacePanZoomEnd,
+          handleOptionGestureHover: dependencies.workspaceController.window.handleOptionGestureHover,
+          handleWorkspacePanZoomStart: dependencies.workspaceController.window.handleWorkspacePanZoomStart,
+          handleWorkspacePanZoomUpdate: dependencies.workspaceController.window.handleWorkspacePanZoomUpdate,
+          handleWorkspacePanZoomEnd: dependencies.workspaceController.window.handleWorkspacePanZoomEnd,
         ),
         window: WorkspaceScreenWindowActions(
-          focusWindow: dependencies.workspaceWindowController.focusWindow,
-          restorePreviousWindowZOrder: dependencies.workspaceWindowController.restorePreviousWindowZOrder,
-          moveWindow: dependencies.workspaceWindowController.moveWindow,
-          resizeWindow: dependencies.workspaceWindowController.resizeWindow,
-          transformWindowFromTrackpad: dependencies.workspaceWindowController.transformWindowFromTrackpad,
-          fitWindowToContent: dependencies.workspaceWindowController.fitWindowToContent,
-          setWindowZoom: dependencies.workspaceWindowController.setWindowZoom,
-          setVideoPosition: dependencies.workspaceWindowController.setVideoPosition,
-          cycleVideoPlaybackSpeed: dependencies.workspaceWindowController.cycleVideoPlaybackSpeed,
-          setWindowIntrinsicSize: dependencies.workspaceWindowController.setWindowIntrinsicSize,
-          isVideoWindowPaused: dependencies.workspaceWindowController.isVideoWindowPaused,
-          toggleVideoPlayback: dependencies.workspaceWindowController.toggleVideoPlayback,
+          focusWindow: dependencies.workspaceController.window.focusWindow,
+          restorePreviousWindowZOrder: dependencies.workspaceController.window.restorePreviousWindowZOrder,
+          moveWindow: dependencies.workspaceController.window.moveWindow,
+          resizeWindow: dependencies.workspaceController.window.resizeWindow,
+          transformWindowFromTrackpad: dependencies.workspaceController.window.transformWindowFromTrackpad,
+          fitWindowToContent: dependencies.workspaceController.window.fitWindowToContent,
+          setWindowZoom: dependencies.workspaceController.window.setWindowZoom,
+          setVideoPosition: dependencies.workspaceController.window.setVideoPosition,
+          cycleVideoPlaybackSpeed: dependencies.workspaceController.window.cycleVideoPlaybackSpeed,
+          setWindowIntrinsicSize: dependencies.workspaceController.window.setWindowIntrinsicSize,
+          isVideoWindowPaused: dependencies.workspaceController.window.isVideoWindowPaused,
+          toggleVideoPlayback: dependencies.workspaceController.window.toggleVideoPlayback,
           toggleExpose: dependencies.appUiController.toggleExpose,
-          setPinnedHoverWindow: dependencies.workspaceWindowController.setPinnedHoverWindow,
-          clearPinnedHoverWindow: dependencies.workspaceWindowController.clearPinnedHoverWindow,
+          setPinnedHoverWindow: dependencies.workspaceController.window.setPinnedHoverWindow,
+          clearPinnedHoverWindow: dependencies.workspaceController.window.clearPinnedHoverWindow,
           flashWindow: (windowId) =>
-              dependencies.workspaceWindowController.flashWindow(windowId, mounted: context.mounted),
+              dependencies.workspaceController.window.flashWindow(windowId, mounted: context.mounted),
           toggleSelectedWindow: dependencies.environmentController.navigation.toggleSelectedWindow,
-          removeWindow: dependencies.environmentWindowHistoryController.removeWindow,
-          setActiveGestureWindow: dependencies.workspaceWindowController.setActiveGestureWindow,
+          removeWindow: dependencies.workspaceController.history.removeWindow,
+          setActiveGestureWindow: dependencies.workspaceController.window.setActiveGestureWindow,
           revealAssetInFinder: dependencies.platformBridge.revealAssetInFinder,
         ),
       ),
@@ -163,21 +136,24 @@ class WorkspaceView extends StatelessWidget {
         viewModel: workspaceHudViewModel,
         actions: WorkspaceHudActions(
           onToggleExpose: dependencies.appUiController.toggleExpose,
-          onFitWorkspaceViewportToContent: dependencies.workspaceWindowController.fitWorkspaceViewportToContent,
-          onConfirmCollateWorkspaceWindows: dependencies.workspaceCollateController.confirmCollateWorkspaceWindows,
+          onFitWorkspaceViewportToContent: dependencies.workspaceController.window.fitWorkspaceViewportToContent,
+          onConfirmCollateWorkspaceWindows: dependencies.workspaceController.layout.confirmCollateWorkspaceWindows,
           onConfirmApplyExposeGridToWorkspace:
-              dependencies.workspaceExposeLayoutController.confirmApplyExposeGridToWorkspace,
+              dependencies.workspaceController.layout.confirmApplyExposeGridToWorkspace,
           onOpenLinks: () => showWorkspaceLinksDialog(
             context: context,
             initialWorkspace: activeWorkspace,
-            controller: dependencies.workspaceLinksController,
-            launcher: dependencies.workspaceLinksLauncher,
-            prompts: dependencies.workspaceLinksPrompts,
+            controller: dependencies.workspaceController.links,
+            launcher: dependencies.workspaceController.linksLauncher,
+            prompts: dependencies.workspaceController.linksPrompts,
           ),
           onClearExposeSelection: dependencies.environmentController.navigation.clearExposeSelection,
-          onSetWorkspaceZoom: (workspaceId, zoom) => dependencies.workspaceViewportSessionController
-              .setWorkspaceViewport(workspaceId: workspaceId, zoom: zoom, queueThumbnail: false),
-          onRefreshActiveWorkspaceThumbnail: dependencies.thumbnailController.refreshActiveWorkspaceIfNeeded,
+          onSetWorkspaceZoom: (workspaceId, zoom) => dependencies.workspaceController.viewport.setWorkspaceViewport(
+            workspaceId: workspaceId,
+            zoom: zoom,
+            queueThumbnail: false,
+          ),
+          onRefreshActiveWorkspaceThumbnail: dependencies.workspaceController.thumbnails.refreshActiveWorkspaceIfNeeded,
         ),
       ),
     );

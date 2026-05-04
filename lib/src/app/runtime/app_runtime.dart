@@ -20,23 +20,10 @@ import 'package:serenity_viewer/src/environment/document/document_coordinator.da
 import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
 import 'package:serenity_viewer/src/environment/store/environment_bookmark_synchronizer.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store.dart';
-import 'package:serenity_viewer/src/media/import/workspace_media_import_controller.dart';
 import 'package:serenity_viewer/src/media/video/media_inspector.dart';
 import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
-import 'package:serenity_viewer/src/workspace/actions/workspace_asset_picker_controller.dart';
-import 'package:serenity_viewer/src/workspace/actions/workspace_collate_controller.dart';
-import 'package:serenity_viewer/src/workspace/actions/workspace_expose_layout_controller.dart';
-import 'package:serenity_viewer/src/workspace/actions/workspace_video_conversion_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
-import 'package:serenity_viewer/src/workspace/controllers/workspace_viewport_session_controller.dart';
-import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
-import 'package:serenity_viewer/src/workspace/input/workspace_shortcut_controller.dart';
-import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.dart';
-import 'package:serenity_viewer/src/workspace/links/workspace_links_launcher.dart';
-import 'package:serenity_viewer/src/workspace/links/workspace_links_prompts.dart';
-import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresh_state.dart';
-import 'package:serenity_viewer/src/workspace/tracking/workspace_view_tracking_controller.dart';
 import 'package:serenity_viewer/src/workspace/tracking/workspace_view_tracking_state.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
@@ -49,22 +36,8 @@ class AppRuntime {
     required this.environmentStore,
     required this.environmentBookmarkSynchronizer,
     required this.documentCoordinator,
-    required this.thumbnailController,
-    required this.workspaceAssetPickerController,
-    required this.workspaceCollateController,
-    required this.workspaceVideoConversionController,
-    required this.workspaceMediaImportController,
-    required this.workspaceLinksController,
-    required this.workspaceLinksLauncher,
-    required this.workspaceLinksPrompts,
     required this.workspaceController,
-    required this.workspaceWindowController,
-    required this.environmentWindowHistoryController,
-    required this.workspaceViewportSessionController,
     required this.environmentController,
-    required this.workspaceExposeLayoutController,
-    required this.workspaceShortcutController,
-    required this.workspaceViewTrackingController,
     required this.autosaveTimer,
     required this.appLifecycleListener,
   });
@@ -75,30 +48,16 @@ class AppRuntime {
   final EnvironmentStore environmentStore;
   final EnvironmentBookmarkSynchronizer environmentBookmarkSynchronizer;
   final DocumentCoordinator documentCoordinator;
-  final ThumbnailController thumbnailController;
-  final WorkspaceAssetPickerController workspaceAssetPickerController;
-  final WorkspaceCollateController workspaceCollateController;
-  final WorkspaceVideoConversionController workspaceVideoConversionController;
-  final WorkspaceMediaImportController workspaceMediaImportController;
-  final WorkspaceLinksController workspaceLinksController;
-  final WorkspaceLinksLauncher workspaceLinksLauncher;
-  final WorkspaceLinksPrompts workspaceLinksPrompts;
   final WorkspaceController workspaceController;
-  final WorkspaceWindowController workspaceWindowController;
-  final EnvironmentWindowHistoryController environmentWindowHistoryController;
-  final WorkspaceViewportSessionController workspaceViewportSessionController;
   final EnvironmentController environmentController;
-  final WorkspaceExposeLayoutController workspaceExposeLayoutController;
-  final WorkspaceShortcutController workspaceShortcutController;
-  final WorkspaceViewTrackingController workspaceViewTrackingController;
   final Timer autosaveTimer;
   final AppLifecycleListener appLifecycleListener;
 
   void dispose() {
     autosaveTimer.cancel();
     appLifecycleListener.dispose();
-    workspaceViewTrackingController.cancel();
-    thumbnailController.dispose();
+    workspaceController.tracking.cancel();
+    workspaceController.thumbnails.dispose();
     sharedVideoControllerPool.dispose();
   }
 }
@@ -142,24 +101,7 @@ AppRuntime createAppRuntime({
     EnvironmentStore environmentStore,
   })
   foundation;
-  late final ({
-    ThumbnailController thumbnailController,
-    WorkspaceAssetPickerController workspaceAssetPickerController,
-    WorkspaceCollateController workspaceCollateController,
-    WorkspaceVideoConversionController workspaceVideoConversionController,
-    WorkspaceMediaImportController workspaceMediaImportController,
-    WorkspaceLinksController workspaceLinksController,
-    WorkspaceLinksLauncher workspaceLinksLauncher,
-    WorkspaceLinksPrompts workspaceLinksPrompts,
-    WorkspaceController workspaceController,
-    WorkspaceWindowController workspaceWindowController,
-    WorkspaceViewportSessionController workspaceViewportSessionController,
-    EnvironmentController environmentController,
-    WorkspaceExposeLayoutController workspaceExposeLayoutController,
-    WorkspaceShortcutController workspaceShortcutController,
-    WorkspaceViewTrackingController workspaceViewTrackingController,
-  })
-  workspace;
+  late final ({WorkspaceController workspaceController, EnvironmentController environmentController}) workspace;
 
   foundation = createAppFoundation(
     isRunningInWidgetTest: isRunningInWidgetTest,
@@ -169,8 +111,9 @@ AppRuntime createAppRuntime({
     windowTitle: windowTitle,
     showMessage: showMessage,
     mounted: mounted,
-    refreshWorkspaceTracking: () async => workspace.workspaceViewTrackingController.refresh(),
-    markWorkspaceThumbnailDirty: (workspaceId) => workspace.thumbnailController.markWorkspaceDirty(workspaceId),
+    refreshWorkspaceTracking: () async => workspace.workspaceController.tracking.refresh(),
+    markWorkspaceThumbnailDirty: (workspaceId) =>
+        workspace.workspaceController.thumbnails.markWorkspaceDirty(workspaceId),
     syncWindowTitle: () async => foundation.platformBridge.syncWindowTitle(),
   );
   workspace = createAppWorkspaceServices(
@@ -215,6 +158,7 @@ AppRuntime createAppRuntime({
     screen: () => appUiState.screen,
     maxRecentlyClosedWindows: 12,
   );
+  workspace.workspaceController.attachEnvironmentHistoryController(environmentWindowHistoryController);
   final documentCoordinator = createAppDocumentCoordinator(
     environmentStoreState: environmentStoreState,
     environmentStore: foundation.environmentStore,
@@ -222,7 +166,8 @@ AppRuntime createAppRuntime({
     mounted: mounted,
     seedEnvironment: seedEnvironment,
     showMessage: showMessage,
-    refreshActiveWorkspaceThumbnailIfNeeded: () async => workspace.thumbnailController.refreshActiveWorkspaceIfNeeded(),
+    refreshActiveWorkspaceThumbnailIfNeeded: () async =>
+        workspace.workspaceController.thumbnails.refreshActiveWorkspaceIfNeeded(),
     storeLastEnvironmentPath: foundation.platformBridge.storeLastEnvironmentPath,
     syncWindowTitle: foundation.platformBridge.syncWindowTitle,
     resolveFileBookmark: foundation.platformBridge.resolveFileBookmark,
@@ -237,7 +182,7 @@ AppRuntime createAppRuntime({
     }
   });
   final appLifecycleListener = AppLifecycleListener(
-    onStateChange: workspace.workspaceViewTrackingController.handleAppLifecycleStateChanged,
+    onStateChange: workspace.workspaceController.tracking.handleAppLifecycleStateChanged,
     onExitRequested: () async {
       await saveEnvironment();
       return ui.AppExitResponse.exit;
@@ -251,22 +196,8 @@ AppRuntime createAppRuntime({
     environmentStore: foundation.environmentStore,
     environmentBookmarkSynchronizer: foundation.environmentBookmarkSynchronizer,
     documentCoordinator: documentCoordinator,
-    thumbnailController: workspace.thumbnailController,
-    workspaceAssetPickerController: workspace.workspaceAssetPickerController,
-    workspaceCollateController: workspace.workspaceCollateController,
-    workspaceVideoConversionController: workspace.workspaceVideoConversionController,
-    workspaceMediaImportController: workspace.workspaceMediaImportController,
-    workspaceLinksController: workspace.workspaceLinksController,
-    workspaceLinksLauncher: workspace.workspaceLinksLauncher,
-    workspaceLinksPrompts: workspace.workspaceLinksPrompts,
     workspaceController: workspace.workspaceController,
-    workspaceWindowController: workspace.workspaceWindowController,
-    environmentWindowHistoryController: environmentWindowHistoryController,
-    workspaceViewportSessionController: workspace.workspaceViewportSessionController,
     environmentController: workspace.environmentController,
-    workspaceExposeLayoutController: workspace.workspaceExposeLayoutController,
-    workspaceShortcutController: workspace.workspaceShortcutController,
-    workspaceViewTrackingController: workspace.workspaceViewTrackingController,
     autosaveTimer: autosaveTimer,
     appLifecycleListener: appLifecycleListener,
   );
