@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/environment/link.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
+import 'package:serenity_viewer/src/workspace/links/workspace_link_parser.dart';
 
 class WorkspaceLinksController {
   WorkspaceLinksController({
@@ -18,8 +19,6 @@ class WorkspaceLinksController {
     required this.context,
     required this.mounted,
   });
-
-  static final RegExp _urlPattern = RegExp(r"""((?:https?:\/\/)|(?:www\.))[^\s<>"']+""", caseSensitive: false);
 
   final SerenityScreen Function() screen;
   final bool Function() hasSession;
@@ -64,7 +63,7 @@ class WorkspaceLinksController {
   }
 
   int addLinksFromText(String workspaceId, String text) {
-    final matches = _extractUrlsFromText(text);
+    final matches = WorkspaceLinkParser.extractUrls(text);
     if (matches.isEmpty) {
       return 0;
     }
@@ -249,52 +248,5 @@ class WorkspaceLinksController {
     }
     return focusedContext.widget is EditableText ||
         focusedContext.findAncestorWidgetOfExactType<EditableText>() != null;
-  }
-
-  List<String> _extractUrlsFromText(String text) {
-    final uniqueUrls = <String>{};
-    final urls = <String>[];
-    for (final match in _urlPattern.allMatches(text)) {
-      final normalized = _normalizeWorkspaceUrl(match.group(0));
-      if (normalized == null || !uniqueUrls.add(normalized)) {
-        continue;
-      }
-      urls.add(normalized);
-    }
-    return urls;
-  }
-
-  String? _normalizeWorkspaceUrl(String? rawValue) {
-    if (rawValue == null) {
-      return null;
-    }
-
-    var value = rawValue.trim();
-    if (value.isEmpty) {
-      return null;
-    }
-
-    while (value.isNotEmpty && '.,!?;:\'"'.contains(value[value.length - 1])) {
-      value = value.substring(0, value.length - 1);
-    }
-
-    while (value.isNotEmpty && '([{<'.contains(value[0])) {
-      value = value.substring(1);
-    }
-
-    while (value.isNotEmpty && ')]}>'.contains(value[value.length - 1])) {
-      value = value.substring(0, value.length - 1);
-    }
-
-    if (value.startsWith('www.')) {
-      value = 'https://$value';
-    }
-
-    final uri = Uri.tryParse(value);
-    if (uri == null || !(uri.hasScheme && (uri.scheme == 'http' || uri.scheme == 'https')) || uri.host.isEmpty) {
-      return null;
-    }
-
-    return uri.toString();
   }
 }
