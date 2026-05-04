@@ -1,45 +1,25 @@
 part of 'app_workspace_factory.dart';
 
-class _WorkspaceFactoryState {
-  const _WorkspaceFactoryState({
-    required this.stateStore,
-    required this.environmentStoreState,
-    required this.appUiState,
-    required this.windowInteractionState,
-    required this.workspaceViewTrackingState,
-    required this.workspaceViewportState,
-    required this.thumbnailRefreshState,
-  });
-
-  final AppStateStore stateStore;
-  final EnvironmentStoreState environmentStoreState;
-  final AppUiState appUiState;
-  final WindowInteractionState windowInteractionState;
-  final WorkspaceViewTrackingState workspaceViewTrackingState;
-  final WorkspaceViewportState workspaceViewportState;
-  final ThumbnailRefreshState thumbnailRefreshState;
-}
-
 class _WorkspaceFactoryScope {
-  const _WorkspaceFactoryScope({required this.inputs, required this.foundation, required this.state});
+  const _WorkspaceFactoryScope({required this.inputs, required this.foundation});
 
   final AppRuntimeInputs inputs;
   final AppFoundation foundation;
-  final _WorkspaceFactoryState state;
 
   AppRuntimeAppInputs get app => inputs.app;
   AppRuntimeEnvironmentInputs get env => inputs.environment;
   AppRuntimeWorkspaceInputs get ws => inputs.workspace;
+  AppStateStore get stateStore => inputs.stateStore;
   PlatformBridge get platform => foundation.platformBridge;
   EnvironmentStore get store => foundation.environmentStore;
   MediaInspector get media => foundation.mediaInspector;
   AppUiController get ui => foundation.appUiController;
-  EnvironmentStoreState get envState => state.environmentStoreState;
-  AppUiState get uiState => state.appUiState;
-  WindowInteractionState get interactionState => state.windowInteractionState;
-  WorkspaceViewTrackingState get trackingState => state.workspaceViewTrackingState;
-  WorkspaceViewportState get viewportState => state.workspaceViewportState;
-  ThumbnailRefreshState get thumbState => state.thumbnailRefreshState;
+  EnvironmentStoreState get envState => stateStore.environmentStoreState;
+  AppUiState get uiState => stateStore.appUiState;
+  WindowInteractionState get interactionState => stateStore.windowInteractionState;
+  WorkspaceViewTrackingState get trackingState => stateStore.workspaceViewTrackingState;
+  WorkspaceViewportState get viewportState => stateStore.workspaceViewportState;
+  ThumbnailRefreshState get thumbState => stateStore.thumbnailRefreshState;
 }
 
 class _WorkspaceLinkServices {

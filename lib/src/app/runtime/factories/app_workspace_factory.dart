@@ -45,15 +45,6 @@ AppWorkspaceServices createAppWorkspaceServices({required AppRuntimeInputs input
   final scope = _WorkspaceFactoryScope(
     inputs: inputs,
     foundation: foundation,
-    state: _WorkspaceFactoryState(
-      stateStore: inputs.stateStore,
-      environmentStoreState: inputs.stateStore.environmentStoreState,
-      appUiState: inputs.stateStore.appUiState,
-      windowInteractionState: inputs.stateStore.windowInteractionState,
-      workspaceViewTrackingState: inputs.stateStore.workspaceViewTrackingState,
-      workspaceViewportState: inputs.stateStore.workspaceViewportState,
-      thumbnailRefreshState: inputs.stateStore.thumbnailRefreshState,
-    ),
   );
 
   final thumbnailController = _createThumbnailController(scope: scope);

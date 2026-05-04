@@ -74,7 +74,7 @@ _WorkspaceControllers _createWorkspaceControllers({
     environment: () => scope.envState.environment,
     workspaces: scope.ws.workspaces,
     activeWorkspace: scope.ws.activeWorkspace,
-    workspaceWindowHistoryState: scope.state.stateStore.workspaceWindowHistoryState,
+    workspaceWindowHistoryState: scope.stateStore.workspaceWindowHistoryState,
     workspaceController: workspaceController,
     updateEnvironment: scope.store.updateEnvironment,
     replaceWorkspace: scope.store.replaceWorkspace,
