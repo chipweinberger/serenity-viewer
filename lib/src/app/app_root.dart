@@ -72,8 +72,12 @@ class _AppRootState extends State<AppRoot> {
     _runtime.environmentStore.updateEnvironment(environment);
   }
 
-  ({AppMainViewModel model, AppMainViewServices services, AppMainViewActions actions}) _buildAppMainViewBindings() {
-    return buildAppMainViewBindings(
+  Widget _buildContent(BuildContext context) {
+    if (_state.environmentStoreState.isLoading || _state.environmentStoreState.environment == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final bindings = buildAppMainViewBindings(
       state: _state,
       appUiController: _runtime.appUiController,
       sharedVideoControllerPool: _runtime.sharedVideoControllerPool,
@@ -93,14 +97,6 @@ class _AppRootState extends State<AppRoot> {
       uiHandles: _uiHandles,
       mounted: () => mounted,
     );
-  }
-
-  Widget _buildContent(BuildContext context) {
-    if (_state.environmentStoreState.isLoading || _state.environmentStoreState.environment == null) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    final bindings = _buildAppMainViewBindings();
     return AppMainView(model: bindings.model, services: bindings.services, actions: bindings.actions);
   }
 
@@ -188,37 +184,26 @@ class _AppRootState extends State<AppRoot> {
         WidgetsBinding.instance.runtimeType.toString().contains('Test');
   }
 
-  ({
-    AppMenuState state,
-    AppMenuAppActions app,
-    AppMenuFileActions file,
-    AppMenuAssetActions asset,
-    AppMenuWorkspaceActions workspace,
-    AppMenuWindowActions window,
-  }) _buildAppMenuBindings() {
-    return buildAppMenuBindings(
-      state: _state,
-      appUiController: _runtime.appUiController,
-      revealAssetInFinder: _runtime.platformBridge.revealAssetInFinder,
-      documentCoordinator: _runtime.documentCoordinator,
-      workspaceWindowController: _runtime.workspaceWindowController,
-      workspaceController: _runtime.workspaceController,
-      environmentController: _runtime.environmentController,
-      workspaceVideoConversionController: _runtime.workspaceVideoConversionController,
-      workspaceWindowHistoryController: _runtime.workspaceWindowHistoryController,
-      workspaceCollateController: _runtime.workspaceCollateController,
-      feedback: _feedback,
-      settings: _settings,
-      openAssets: _runtime.workspaceAssetPickerController.pickAndImportAssets,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
       listenable: _stateStore.shellListenable,
       builder: (context, _) {
-        final menu = _buildAppMenuBindings();
+        final menu = buildAppMenuBindings(
+          state: _state,
+          appUiController: _runtime.appUiController,
+          revealAssetInFinder: _runtime.platformBridge.revealAssetInFinder,
+          documentCoordinator: _runtime.documentCoordinator,
+          workspaceWindowController: _runtime.workspaceWindowController,
+          workspaceController: _runtime.workspaceController,
+          environmentController: _runtime.environmentController,
+          workspaceVideoConversionController: _runtime.workspaceVideoConversionController,
+          workspaceWindowHistoryController: _runtime.workspaceWindowHistoryController,
+          workspaceCollateController: _runtime.workspaceCollateController,
+          feedback: _feedback,
+          settings: _settings,
+          openAssets: _runtime.workspaceAssetPickerController.pickAndImportAssets,
+        );
         return AppMenu(
           state: menu.state,
           app: menu.app,
