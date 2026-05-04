@@ -22,6 +22,7 @@ import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.d
 import 'package:serenity_viewer/src/settings/behavior/app_ui_state.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresh_state.dart';
+import 'package:serenity_viewer/src/media/import/workspace_media_import_controller.dart';
 import 'package:serenity_viewer/src/media/video/media_bridge.dart';
 import 'package:serenity_viewer/src/media/video/video_conversion_coordinator.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
@@ -159,6 +160,7 @@ class AppWorkspaceServices {
   const AppWorkspaceServices({
     required this.thumbnailController,
     required this.videoConversionCoordinator,
+    required this.workspaceMediaImportController,
     required this.workspaceLinksController,
     required this.workspaceController,
     required this.workspaceWindowController,
@@ -169,6 +171,7 @@ class AppWorkspaceServices {
 
   final ThumbnailController thumbnailController;
   final VideoConversionCoordinator videoConversionCoordinator;
+  final WorkspaceMediaImportController workspaceMediaImportController;
   final LinksController workspaceLinksController;
   final WorkspaceController workspaceController;
   final WorkspaceWindowController workspaceWindowController;

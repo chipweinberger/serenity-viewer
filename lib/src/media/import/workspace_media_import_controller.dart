@@ -3,16 +3,17 @@
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/environment/session/environment_store_state.dart';
-import 'package:serenity_viewer/src/media/import/import_coordinator.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
+import 'package:serenity_viewer/src/environment/session/environment_store_state.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
-import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
+import 'package:serenity_viewer/src/foundation/serenity_identity.dart';
+import 'package:serenity_viewer/src/media/import/import_coordinator.dart';
 import 'package:serenity_viewer/src/media/video/media_bridge.dart';
 import 'package:serenity_viewer/src/media/video/video_conversion_coordinator.dart';
+import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
 
-class MediaImportController {
-  const MediaImportController({
+class WorkspaceMediaImportController {
+  const WorkspaceMediaImportController({
     required this.imageExtensions,
     required this.videoExtensions,
     required this.environmentStoreState,
@@ -20,8 +21,6 @@ class MediaImportController {
     required this.videoConversionCoordinator,
     required this.createFileBookmark,
     required this.mediaBridge,
-    required this.newId,
-    required this.colorFromDigest,
     required this.updateEnvironment,
     required this.thumbnailController,
     required this.showMessage,
@@ -34,20 +33,14 @@ class MediaImportController {
   final VideoConversionCoordinator videoConversionCoordinator;
   final Future<String?> Function(String path) createFileBookmark;
   final MediaBridge mediaBridge;
-  final String Function(String prefix) newId;
-  final int Function(String value) colorFromDigest;
   final ValueChanged<Environment> updateEnvironment;
   final ThumbnailController thumbnailController;
   final ValueChanged<String> showMessage;
 
-  Future<void> pickAndImportAssets() async {
-    final files = await openFiles(
-      acceptedTypeGroups: [
-        XTypeGroup(label: 'Media', extensions: [...imageExtensions, ...videoExtensions]),
-      ],
-    );
-
-    await importFiles(files);
+  List<XTypeGroup> get acceptedTypeGroups {
+    return [
+      XTypeGroup(label: 'Media', extensions: [...imageExtensions, ...videoExtensions]),
+    ];
   }
 
   Future<void> importFiles(List<XFile> files) async {
@@ -97,8 +90,8 @@ class MediaImportController {
       imageDimensionsForFile: mediaBridge.imageDimensionsForFile,
       videoDurationMsForFile: mediaBridge.videoDurationMsForFile,
       probeVideoFile: mediaBridge.probeVideoFile,
-      newId: newId,
-      colorFromDigest: colorFromDigest,
+      newId: newSerenityId,
+      colorFromDigest: assetColorValueFromDigest,
     );
   }
 }

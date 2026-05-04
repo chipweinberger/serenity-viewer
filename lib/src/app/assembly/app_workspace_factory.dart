@@ -4,6 +4,7 @@ import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.da
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresher.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_renderer.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_store.dart';
+import 'package:serenity_viewer/src/media/import/workspace_media_import_controller.dart';
 import 'package:serenity_viewer/src/media/video/video_conversion_coordinator.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
@@ -128,9 +129,22 @@ class AppWorkspaceFactory {
         });
       },
     );
+    final workspaceMediaImportController = WorkspaceMediaImportController(
+      imageExtensions: const ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tif', 'tiff'],
+      videoExtensions: const ['mp4', 'mov', 'm4v', 'avi', 'mkv', 'webm'],
+      environmentStoreState: environmentStoreState,
+      activeWorkspace: () => config.workspace.activeWorkspace()!,
+      videoConversionCoordinator: videoConversionCoordinator,
+      createFileBookmark: foundation.platformBridge.createFileBookmark,
+      mediaBridge: foundation.mediaBridge,
+      updateEnvironment: foundation.environmentStore.updateEnvironment,
+      thumbnailController: thumbnailController,
+      showMessage: config.shell.showMessage,
+    );
 
     return AppWorkspaceServices(
       thumbnailController: thumbnailController,
+      workspaceMediaImportController: workspaceMediaImportController,
       workspaceLinksController: workspaceLinksController,
       workspaceController: workspaceController,
       workspaceWindowController: workspaceWindowController,

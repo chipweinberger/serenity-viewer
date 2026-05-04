@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/assembly/app_runtime.dart';
@@ -22,9 +23,6 @@ class AppRoot extends StatefulWidget {
 }
 
 class _AppRootState extends State<AppRoot> {
-  static const List<String> _imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tif', 'tiff'];
-  static const List<String> _videoExtensions = ['mp4', 'mov', 'm4v', 'avi', 'mkv', 'webm'];
-
   final _dependencies = AppDependencies();
   late final AppRuntime _runtime;
   late final AppActions _controller;
@@ -38,6 +36,13 @@ class _AppRootState extends State<AppRoot> {
 
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), behavior: SnackBarBehavior.floating));
+  }
+
+  Future<void> _pickAndImportAssets() async {
+    final files = await openFiles(
+      acceptedTypeGroups: _workspaceRuntime.workspaceMediaImportController.acceptedTypeGroups,
+    );
+    await _workspaceRuntime.workspaceMediaImportController.importFiles(files);
   }
 
   Future<void> _confirmCollateWorkspaceWindows() async {
@@ -80,7 +85,7 @@ class _AppRootState extends State<AppRoot> {
       openSettings: _controller.feedback.openSettings,
       createEnvironment: _documents.documentCoordinator.createDocument,
       openEnvironment: _documents.documentCoordinator.openDocument,
-      openAssets: _controller.mediaImport.pickAndImportAssets,
+      openAssets: _pickAndImportAssets,
       saveEnvironment: _documents.documentCoordinator.saveDocument,
       saveEnvironmentAs: _documents.documentCoordinator.saveDocumentAs,
       revealAssetInFinder: _foundation.mediaBridge.revealAssetInFinder,
@@ -140,7 +145,7 @@ class _AppRootState extends State<AppRoot> {
       ),
       actions: ContentActions(
         commitStateChange: setState,
-        importFiles: _controller.mediaImport.importFiles,
+        importFiles: _workspaceRuntime.workspaceMediaImportController.importFiles,
         handleOptionGestureHover: _workspaceRuntime.workspaceWindowController.handleOptionGestureHover,
         handleWorkspacePanZoomStart: _workspaceRuntime.workspaceWindowController.handleWorkspacePanZoomStart,
         handleWorkspacePanZoomUpdate: _workspaceRuntime.workspaceWindowController.handleWorkspacePanZoomUpdate,
@@ -175,12 +180,8 @@ class _AppRootState extends State<AppRoot> {
     _runtime = AppRuntime.create(_buildRuntimeConfig());
     _controller = AppActions(
       context: () => context,
-      imageExtensions: _AppRootState._imageExtensions,
-      videoExtensions: _AppRootState._videoExtensions,
       state: _state,
-      derived: _derived,
       foundation: _foundation,
-      documents: _documents,
       workspace: _workspaceRuntime,
     );
     _persistence = AppPersistenceController(
