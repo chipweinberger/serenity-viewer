@@ -160,6 +160,7 @@ class EnvironmentManagementMutations {
       updateEnvironment: _dependencies.updateEnvironment,
       queueThumbnailRefresh: _dependencies.queueWorkspaceRefresh,
       clearSelection: () => _dependencies.exposeController.remove(windowId),
+      recenterMovedWindows: true,
     );
   }
 

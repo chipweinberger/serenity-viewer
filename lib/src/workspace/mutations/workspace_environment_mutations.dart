@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
+
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/window/workspace_window_model_helpers.dart';
@@ -67,6 +69,7 @@ class WorkspaceEnvironmentMutations {
     required String sourceWorkspaceId,
     required String destinationWorkspaceId,
     required Set<String> windowIds,
+    bool recenterMovedWindows = false,
   }) {
     if (windowIds.isEmpty || sourceWorkspaceId == destinationWorkspaceId) {
       return environment;
@@ -86,7 +89,15 @@ class WorkspaceEnvironmentMutations {
     var nextZ = destinationWorkspace.windows.fold<int>(0, (value, window) => math.max(value, window.zIndex));
     final movedWindows = movedSourceWindows.map((window) {
       nextZ += 1;
-      return window.copyWith(zIndex: nextZ);
+      return window.copyWith(
+        position: recenterMovedWindows
+            ? Offset(
+                destinationWorkspace.viewportCenter.dx - (window.size.width / 2),
+                destinationWorkspace.viewportCenter.dy - (window.size.height / 2),
+              )
+            : null,
+        zIndex: nextZ,
+      );
     }).toList();
 
     final nextWorkspaces = environment.workspaces.map((workspace) {

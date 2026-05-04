@@ -163,7 +163,6 @@ class EnvironmentManagementController {
       destinationWorkspace: destinationMatches.first,
       windowId: windowId,
     );
-    await _dependencies.navigation.setActiveWorkspace(destinationWorkspaceId);
   }
 
   Future<void> confirmCloseTab(String workspaceId) async {

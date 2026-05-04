@@ -34,6 +34,10 @@ class AppTab extends StatelessWidget {
     return !isLibraryScreen && workspace.id == activeWorkspaceId;
   }
 
+  bool get _showsSelectedStyle {
+    return _isSelected || isDropTarget;
+  }
+
   void _handleTap() {
     if (shouldMoveSelectedWindows) {
       unawaited(onMoveSelectedExposeWindowsToWorkspace(workspace.id));
@@ -54,7 +58,7 @@ class AppTab extends StatelessWidget {
       child: Opacity(
         opacity: draggingTabWorkspaceId == workspace.id ? 0.7 : 1,
         child: GlassChip(
-          selected: _isSelected,
+          selected: _showsSelectedStyle,
           onTap: _handleTap,
           trailing: Material(
             color: Colors.transparent,
@@ -63,7 +67,11 @@ class AppTab extends StatelessWidget {
               borderRadius: BorderRadius.circular(999),
               child: Padding(
                 padding: const EdgeInsets.all(2),
-                child: Icon(Icons.close_rounded, size: 14, color: _isSelected ? Colors.white : AppTheme.textMuted),
+                child: Icon(
+                  Icons.close_rounded,
+                  size: 14,
+                  color: _showsSelectedStyle ? Colors.white : AppTheme.textMuted,
+                ),
               ),
             ),
           ),

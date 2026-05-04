@@ -296,31 +296,25 @@ class AppDelegate: FlutterAppDelegate {
       return fallback
     }
 
-    let imageSize = NSSize(width: 18, height: 18)
+    let imageSize = NSSize(width: 20, height: 20)
     guard let symbol = NSImage(systemSymbolName: systemSymbolName, accessibilityDescription: nil) else {
       return fallback
     }
 
-    let configured = symbol.withSymbolConfiguration(
-      NSImage.SymbolConfiguration(pointSize: 14, weight: .regular)
+    let outlineSymbol = symbol.withSymbolConfiguration(
+      NSImage.SymbolConfiguration(pointSize: 18, weight: .black)
+    ) ?? symbol
+    let foregroundSymbol = symbol.withSymbolConfiguration(
+      NSImage.SymbolConfiguration(pointSize: 13, weight: .black)
     ) ?? symbol
 
     let image = NSImage(size: imageSize)
     image.lockFocus()
     let drawRect = NSRect(origin: .zero, size: imageSize)
-    let glow = NSShadow()
-    glow.shadowColor = NSColor.white.withAlphaComponent(0.95)
-    glow.shadowBlurRadius = 2.6
-    glow.shadowOffset = .zero
-
-    NSGraphicsContext.saveGraphicsState()
-    glow.set()
+    NSColor.white.set()
+    outlineSymbol.draw(in: drawRect)
     NSColor.black.set()
-    configured.draw(in: drawRect)
-    NSGraphicsContext.restoreGraphicsState()
-
-    NSColor.black.set()
-    configured.draw(in: drawRect)
+    foregroundSymbol.draw(in: drawRect)
     image.unlockFocus()
     image.isTemplate = true
     return NSCursor(image: image, hotSpot: NSPoint(x: imageSize.width / 2, y: imageSize.height / 2))

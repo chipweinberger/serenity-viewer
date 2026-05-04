@@ -27,6 +27,7 @@ class WorkspaceEnvironmentWindowTransferController {
     required void Function(Environment) updateEnvironment,
     required void Function(String workspaceId, {Duration delay}) queueThumbnailRefresh,
     required VoidCallback clearSelection,
+    bool recenterMovedWindows = false,
   }) {
     updateEnvironment(
       WorkspaceEnvironmentMutations.moveWindowsToWorkspace(
@@ -34,6 +35,7 @@ class WorkspaceEnvironmentWindowTransferController {
         sourceWorkspaceId: sourceWorkspace.id,
         destinationWorkspaceId: destinationWorkspace.id,
         windowIds: windowIds,
+        recenterMovedWindows: recenterMovedWindows,
       ),
     );
     queueThumbnailRefresh(sourceWorkspace.id, delay: Duration.zero);
