@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/app/app_actions.dart';
 import 'package:serenity_viewer/src/app/assembly/app_runtime_config.dart';
 import 'package:serenity_viewer/src/app/assembly/app_runtime_services.dart';
 import 'package:serenity_viewer/src/app/app_view_state.dart';
@@ -20,7 +19,7 @@ class AppRuntimeConfigBuilder {
     required this.isRunningInWidgetTest,
     required this.viewState,
     required this.foundation,
-    required this.controller,
+    required this.workspace,
     required this.documentPersistence,
   });
 
@@ -32,7 +31,7 @@ class AppRuntimeConfigBuilder {
   final bool isRunningInWidgetTest;
   final AppViewState Function() viewState;
   final AppFoundation Function() foundation;
-  final AppActions Function() controller;
+  final AppWorkspaceServices Function() workspace;
   final DocumentPersistenceController Function() documentPersistence;
 
   AppRuntimeConfig build() {
@@ -59,10 +58,10 @@ class AppRuntimeConfigBuilder {
         activeWorkspace: () => viewState().activeWorkspaceOrNull,
         workspaces: () => viewState().workspaces,
         openWorkspaces: () => viewState().openWorkspaces,
-        focusedWindowOrNull: () => controller().workspace.workspaceWindowController.focusedWindowOrNull(),
+        focusedWindowOrNull: () => workspace().workspaceWindowController.focusedWindowOrNull(),
         setWorkspaceViewport:
             ({required String workspaceId, Offset? center, double? zoom, bool queueThumbnail = false}) =>
-                controller().workspace.workspaceViewportSessionController.setWorkspaceViewport(
+                workspace().workspaceViewportSessionController.setWorkspaceViewport(
                   workspaceId: workspaceId,
                   center: center,
                   zoom: zoom,
@@ -88,8 +87,7 @@ class AppRuntimeConfigBuilder {
                   refreshWorkspaceTrackingEnabled: refreshWorkspaceTracking,
                 ),
         toggleExpose: () => foundation().appUiController.toggleExpose(),
-        toggleVideoPlayback: (windowId) =>
-            controller().workspace.workspaceWindowController.toggleVideoPlayback(windowId),
+        toggleVideoPlayback: (windowId) => workspace().workspaceWindowController.toggleVideoPlayback(windowId),
       ),
     );
   }

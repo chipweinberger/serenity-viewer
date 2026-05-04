@@ -6,11 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:serenity_viewer/src/app/assembly/app_runtime.dart';
 import 'package:serenity_viewer/src/app/assembly/app_runtime_config_builder.dart';
 import 'package:serenity_viewer/src/app/app_dependencies.dart';
-import 'package:serenity_viewer/src/app/app_actions.dart';
 import 'package:serenity_viewer/src/app/app_view_state.dart';
 import 'package:serenity_viewer/src/app/builders/app_screen_host_builder.dart';
 import 'package:serenity_viewer/src/app/builders/app_screen_host_scope.dart';
 import 'package:serenity_viewer/src/app/builders/menu_builder.dart';
+import 'package:serenity_viewer/src/app/controllers/app_feedback_controller.dart';
 import 'package:serenity_viewer/src/app/seed_environment.dart';
 import 'package:serenity_viewer/src/environment/document/document_persistence_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_windows_controller.dart';
@@ -25,7 +25,7 @@ class AppRoot extends StatefulWidget {
 class _AppRootState extends State<AppRoot> {
   final _dependencies = AppDependencies();
   late final AppRuntime _runtime;
-  late final AppActions _controller;
+  late final AppFeedbackController _feedback;
   late final DocumentPersistenceController _documentPersistence;
 
   AppStateServices get _state => _runtime.state;
@@ -48,7 +48,7 @@ class _AppRootState extends State<AppRoot> {
   Future<void> _confirmCollateWorkspaceWindows() async {
     final collatableWindowCount = _workspaceRuntime.workspaceWindowController.collatableWindowCount();
     if (collatableWindowCount == 0) {
-      _controller.feedback.showMessage('There are no image or video windows to collate.');
+      _feedback.showMessage('There are no image or video windows to collate.');
       return;
     }
 
@@ -81,8 +81,8 @@ class _AppRootState extends State<AppRoot> {
         focusedWindow != null && _workspaceRuntime.workspaceController.expose.contains(focusedWindow.asset.id);
 
     return MenuBuilder(
-      showAboutSerenity: _controller.feedback.showAboutSerenity,
-      openSettings: _controller.feedback.openSettings,
+      showAboutSerenity: _feedback.showAboutSerenity,
+      openSettings: _feedback.openSettings,
       createEnvironment: _documents.documentCoordinator.createDocument,
       openEnvironment: _documents.documentCoordinator.openDocument,
       openAssets: _pickAndImportAssets,
@@ -95,7 +95,7 @@ class _AppRootState extends State<AppRoot> {
       convertVideoWindowToJpeg: (windowId) =>
           _workspaceRuntime.videoConversionCoordinator.convertVideoWindowToJpeg(windowId),
       closeWindow: _workspaceRuntime.workspaceWindowHistoryController.removeWindow,
-      toggleExpose: _controller.appUi.toggleExpose,
+      toggleExpose: _foundation.appUiController.toggleExpose,
       toggleWorkspaceOverview: _workspaceRuntime.environmentSession.navigation.toggleOverview,
       createWorkspace: _workspaceRuntime.environmentSession.management.create,
       switchToPreviousWorkspace: () => _workspaceRuntime.environmentSession.navigation.switchWorkspace(-1),
@@ -103,9 +103,9 @@ class _AppRootState extends State<AppRoot> {
       fitWorkspaceViewportToContent: _workspaceRuntime.workspaceWindowController.fitWorkspaceViewportToContent,
       confirmCollateWorkspaceWindows: _confirmCollateWorkspaceWindows,
       pauseAllVideos: _workspaceRuntime.workspaceWindowController.pauseAllVideos,
-      showNoWorkspaceToRenameMessage: () => _controller.feedback.showMessage('There is no workspace to rename.'),
+      showNoWorkspaceToRenameMessage: () => _feedback.showMessage('There is no workspace to rename.'),
       renameWorkspace: _workspaceRuntime.environmentSession.management.renameWorkspace,
-      showNoWorkspaceToDeleteMessage: () => _controller.feedback.showMessage('There is no workspace to delete.'),
+      showNoWorkspaceToDeleteMessage: () => _feedback.showMessage('There is no workspace to delete.'),
       confirmDeleteWorkspace: _workspaceRuntime.environmentSession.management.confirmDeleteWorkspace,
       restoreRecentlyClosedWindow: _workspaceRuntime.workspaceWindowHistoryController.restoreRecentlyClosedWindow,
     ).build(
@@ -162,7 +162,7 @@ class _AppRootState extends State<AppRoot> {
         setWindowIntrinsicSize: _workspaceRuntime.workspaceWindowController.setWindowIntrinsicSize,
         isVideoWindowPaused: _workspaceRuntime.workspaceWindowController.isVideoWindowPaused,
         toggleVideoPlayback: _workspaceRuntime.workspaceWindowController.toggleVideoPlayback,
-        toggleExpose: _controller.appUi.toggleExpose,
+        toggleExpose: _foundation.appUiController.toggleExpose,
         setPinnedHoverWindow: _workspaceRuntime.workspaceWindowController.setPinnedHoverWindow,
         clearPinnedHoverWindow: _workspaceRuntime.workspaceWindowController.clearPinnedHoverWindow,
         flashWindow: (windowId) => _workspaceRuntime.workspaceWindowController.flashWindow(windowId, mounted: mounted),
@@ -179,11 +179,10 @@ class _AppRootState extends State<AppRoot> {
   void initState() {
     super.initState();
     _runtime = AppRuntime.create(_buildRuntimeConfig());
-    _controller = AppActions(
+    _feedback = AppFeedbackController(
       context: () => context,
-      state: _state,
-      foundation: _foundation,
-      workspace: _workspaceRuntime,
+      environmentStoreState: _state.environmentStoreState,
+      updateEnvironment: _foundation.environmentStore.updateEnvironment,
     );
     _documentPersistence = DocumentPersistenceController(
       state: _state,
@@ -212,7 +211,7 @@ class _AppRootState extends State<AppRoot> {
       isRunningInWidgetTest: _isRunningInWidgetTest,
       viewState: () => _viewState,
       foundation: () => _foundation,
-      controller: () => _controller,
+      workspace: () => _workspaceRuntime,
       documentPersistence: () => _documentPersistence,
     ).build();
   }
