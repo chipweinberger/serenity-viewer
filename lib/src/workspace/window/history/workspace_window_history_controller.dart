@@ -6,8 +6,8 @@ import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
-import 'package:serenity_viewer/src/workspace/window/session/workspace_window_history_entry.dart';
-import 'package:serenity_viewer/src/workspace/window/session/workspace_window_history_state.dart';
+import 'package:serenity_viewer/src/workspace/window/history/workspace_window_history_entry.dart';
+import 'package:serenity_viewer/src/workspace/window/history/workspace_window_history_state.dart';
 
 class WorkspaceWindowHistoryController {
   WorkspaceWindowHistoryController({

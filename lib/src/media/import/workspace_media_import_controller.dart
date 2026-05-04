@@ -10,7 +10,7 @@ import 'package:serenity_viewer/src/foundation/serenity_identity.dart';
 import 'package:serenity_viewer/src/media/import/import_coordinator.dart';
 import 'package:serenity_viewer/src/media/video/media_inspector.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
-import 'package:serenity_viewer/src/workspace/window/session/workspace_video_conversion_controller.dart';
+import 'package:serenity_viewer/src/workspace/window/actions/workspace_video_conversion_controller.dart';
 
 class WorkspaceMediaImportController {
   const WorkspaceMediaImportController({
