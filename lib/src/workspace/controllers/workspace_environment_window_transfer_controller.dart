@@ -7,37 +7,37 @@ import 'package:serenity_viewer/src/workspace/mutations/workspace_environment_mu
 class WorkspaceEnvironmentWindowTransferController {
   const WorkspaceEnvironmentWindowTransferController();
 
-  bool canMoveSelectedToWorkspace({
+  bool canMoveToWorkspace({
     required Environment? environment,
     required Workspace? sourceWorkspace,
     required String destinationWorkspaceId,
-    required bool hasSelectedWindowIds,
+    required bool hasWindowIds,
   }) {
     return environment != null &&
         sourceWorkspace != null &&
-        hasSelectedWindowIds &&
+        hasWindowIds &&
         destinationWorkspaceId != sourceWorkspace.id;
   }
 
-  void moveSelectedToWorkspace({
+  void moveWindowsToWorkspace({
     required Environment environment,
     required Workspace sourceWorkspace,
     required Workspace destinationWorkspace,
-    required Set<String> selectedWindowIds,
+    required Set<String> windowIds,
     required void Function(Environment) updateEnvironment,
     required void Function(String workspaceId, {Duration delay}) queueThumbnailRefresh,
-    required VoidCallback clearExposeSelection,
+    required VoidCallback clearSelection,
   }) {
     updateEnvironment(
-      WorkspaceEnvironmentMutations.moveSelectedWindowsToWorkspace(
+      WorkspaceEnvironmentMutations.moveWindowsToWorkspace(
         environment,
         sourceWorkspaceId: sourceWorkspace.id,
         destinationWorkspaceId: destinationWorkspace.id,
-        selectedWindowIds: selectedWindowIds,
+        windowIds: windowIds,
       ),
     );
     queueThumbnailRefresh(sourceWorkspace.id, delay: Duration.zero);
     queueThumbnailRefresh(destinationWorkspace.id, delay: Duration.zero);
-    clearExposeSelection();
+    clearSelection();
   }
 }

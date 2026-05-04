@@ -1,5 +1,7 @@
 // ignore_for_file: invalid_use_of_protected_member
 
+import 'dart:io';
+
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 
@@ -51,11 +53,17 @@ class WorkspaceMediaImportController {
       return;
     }
 
+    final expandedFiles = await _expandImportFiles(files);
+    if (expandedFiles.isEmpty) {
+      showMessage('No supported image or video files were found in that selection.');
+      return;
+    }
+
     final workspace = activeWorkspace();
     final result = await _buildImportCoordinator().importFiles(
       environment: environment,
       workspace: workspace,
-      files: files,
+      files: expandedFiles,
     );
 
     if (!result.hadSupportedFiles) {
@@ -73,6 +81,41 @@ class WorkspaceMediaImportController {
         '${result.skippedDuplicateCount == 1 ? '' : 's'} already in this workspace.',
       );
     }
+  }
+
+  Future<List<XFile>> _expandImportFiles(List<XFile> files) async {
+    final expandedFiles = <XFile>[];
+    final seenPaths = <String>{};
+
+    Future<void> addFilePath(String path) async {
+      final absolutePath = File(path).absolute.path;
+      if (!seenPaths.add(absolutePath)) {
+        return;
+      }
+      expandedFiles.add(XFile(absolutePath));
+    }
+
+    for (final file in files) {
+      final path = file.path;
+      final entityType = await FileSystemEntity.type(path, followLinks: false);
+      switch (entityType) {
+        case FileSystemEntityType.file:
+          await addFilePath(path);
+        case FileSystemEntityType.directory:
+          await for (final entity in Directory(path).list(recursive: true, followLinks: false)) {
+            if (entity is File) {
+              await addFilePath(entity.path);
+            }
+          }
+        case FileSystemEntityType.link:
+        case FileSystemEntityType.notFound:
+        case FileSystemEntityType.pipe:
+        case FileSystemEntityType.unixDomainSock:
+          break;
+      }
+    }
+
+    return expandedFiles;
   }
 
   ImportCoordinator _buildImportCoordinator() {

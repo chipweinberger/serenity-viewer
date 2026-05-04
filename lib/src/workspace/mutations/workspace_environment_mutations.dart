@@ -62,13 +62,13 @@ class WorkspaceEnvironmentMutations {
     }).toList();
   }
 
-  static Environment moveSelectedWindowsToWorkspace(
+  static Environment moveWindowsToWorkspace(
     Environment environment, {
     required String sourceWorkspaceId,
     required String destinationWorkspaceId,
-    required Set<String> selectedWindowIds,
+    required Set<String> windowIds,
   }) {
-    if (selectedWindowIds.isEmpty || sourceWorkspaceId == destinationWorkspaceId) {
+    if (windowIds.isEmpty || sourceWorkspaceId == destinationWorkspaceId) {
       return environment;
     }
 
@@ -78,15 +78,13 @@ class WorkspaceEnvironmentMutations {
       return environment;
     }
 
-    final selectedWindows = sourceWorkspace.windows
-        .where((window) => selectedWindowIds.contains(window.asset.id))
-        .toList();
-    if (selectedWindows.isEmpty) {
+    final movedSourceWindows = sourceWorkspace.windows.where((window) => windowIds.contains(window.asset.id)).toList();
+    if (movedSourceWindows.isEmpty) {
       return environment;
     }
 
     var nextZ = destinationWorkspace.windows.fold<int>(0, (value, window) => math.max(value, window.zIndex));
-    final movedWindows = selectedWindows.map((window) {
+    final movedWindows = movedSourceWindows.map((window) {
       nextZ += 1;
       return window.copyWith(zIndex: nextZ);
     }).toList();
@@ -94,7 +92,7 @@ class WorkspaceEnvironmentMutations {
     final nextWorkspaces = environment.workspaces.map((workspace) {
       if (workspace.id == sourceWorkspaceId) {
         return workspace.copyWith(
-          windows: workspace.windows.where((window) => !selectedWindowIds.contains(window.asset.id)).toList(),
+          windows: workspace.windows.where((window) => !windowIds.contains(window.asset.id)).toList(),
         );
       }
       if (workspace.id == destinationWorkspaceId) {

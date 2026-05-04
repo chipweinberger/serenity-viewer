@@ -156,6 +156,10 @@ class AppMenu extends StatelessWidget {
         shortcut: const SingleActivator(LogicalKeyboardKey.keyO, meta: true),
       ),
       PlatformMenuItem(
+        label: 'Open Folder…',
+        onSelected: () => unawaited(workspaceController.media.pickAndImportFolder()),
+      ),
+      PlatformMenuItem(
         label: 'Save',
         onSelected: () => unawaited(documentCoordinator.saveDocument()),
         shortcut: const SingleActivator(LogicalKeyboardKey.keyS, meta: true),

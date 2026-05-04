@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
 import 'package:serenity_viewer/src/app/state/app_derived_state.dart';
+import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
@@ -36,6 +37,7 @@ class WorkspaceView extends StatelessWidget {
 
   ({
     AppUiController appUiController,
+    AppUiHandles appUiHandles,
     PlatformBridge platformBridge,
     EnvironmentController environmentController,
     WorkspaceController workspaceController,
@@ -44,6 +46,7 @@ class WorkspaceView extends StatelessWidget {
   _readDependencies(BuildContext context) {
     return (
       appUiController: context.read<AppUiController>(),
+      appUiHandles: context.read<AppUiHandles>(),
       platformBridge: context.read<PlatformBridge>(),
       environmentController: context.read<EnvironmentController>(),
       workspaceController: context.read<WorkspaceController>(),
@@ -97,6 +100,7 @@ class WorkspaceView extends StatelessWidget {
       workspaceController: dependencies.workspaceController,
       environmentController: dependencies.environmentController,
       appUiController: dependencies.appUiController,
+      appUiHandles: dependencies.appUiHandles,
       platformBridge: dependencies.platformBridge,
       mounted: () => context.mounted,
       workspaceHud: WorkspaceHud(

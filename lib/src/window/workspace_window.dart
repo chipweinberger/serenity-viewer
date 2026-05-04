@@ -25,6 +25,7 @@ class WorkspaceWindow extends StatefulWidget {
     required this.onPinnedHoverDismissed,
     required this.onToggleSelected,
     required this.onPanUpdate,
+    required this.onPanEnd,
     required this.onTrackpadWindowScale,
     required this.onResizeUpdate,
     required this.onZoomChanged,
@@ -45,7 +46,8 @@ class WorkspaceWindow extends StatefulWidget {
   final VoidCallback onPinnedHoverRequested;
   final VoidCallback onPinnedHoverDismissed;
   final VoidCallback onToggleSelected;
-  final ValueChanged<Offset> onPanUpdate;
+  final void Function(Offset delta, Offset globalPosition) onPanUpdate;
+  final ValueChanged<Offset> onPanEnd;
   final void Function(double scaleDelta, Offset localFocalPoint) onTrackpadWindowScale;
   final void Function(WindowResizeHandle handle, Offset delta) onResizeUpdate;
   final ValueChanged<WindowZoomUpdate> onZoomChanged;
@@ -133,8 +135,14 @@ class _WindowState extends State<WorkspaceWindow> with SingleTickerProviderState
       child: Listener(
         onPointerDown: _handlePointerDown,
         onPointerMove: _handlePointerMove,
-        onPointerUp: (_) => _clearResizeState(preserveHover: true),
-        onPointerCancel: (_) => _clearResizeState(preserveHover: false),
+        onPointerUp: (event) {
+          _finishWindowDrag(event.position);
+          _clearResizeState(preserveHover: true);
+        },
+        onPointerCancel: (_) {
+          _finishWindowDrag(Offset.zero);
+          _clearResizeState(preserveHover: false);
+        },
         onPointerPanZoomStart: _handlePanZoomStart,
         onPointerPanZoomUpdate: _handlePanZoomUpdate,
         onPointerPanZoomEnd: _handlePanZoomEnd,

@@ -91,11 +91,11 @@ class EnvironmentManagementController {
   Future<void> moveSelectedExposeWindowsToWorkspace(String destinationWorkspaceId) async {
     final environment = _dependencies.environmentStoreState.environment;
     final sourceWorkspace = _dependencies.activeWorkspace();
-    if (!_dependencies.windowTransferController.canMoveSelectedToWorkspace(
+    if (!_dependencies.windowTransferController.canMoveToWorkspace(
       environment: environment,
       sourceWorkspace: sourceWorkspace,
       destinationWorkspaceId: destinationWorkspaceId,
-      hasSelectedWindowIds: _dependencies.exposeController.hasSelection(),
+      hasWindowIds: _dependencies.exposeController.hasSelection(),
     )) {
       if (sourceWorkspace != null && destinationWorkspaceId == sourceWorkspace.id) {
         _dependencies.showMessage('Choose a different tab to move those windows.');
@@ -134,6 +134,36 @@ class EnvironmentManagementController {
       sourceWorkspace: sourceWorkspace,
       destinationWorkspace: destinationWorkspace,
     );
+  }
+
+  Future<void> moveWindowToWorkspace(String windowId, String destinationWorkspaceId) async {
+    final environment = _dependencies.environmentStoreState.environment;
+    final sourceWorkspace = _dependencies.activeWorkspace();
+    if (!_dependencies.windowTransferController.canMoveToWorkspace(
+      environment: environment,
+      sourceWorkspace: sourceWorkspace,
+      destinationWorkspaceId: destinationWorkspaceId,
+      hasWindowIds: true,
+    )) {
+      return;
+    }
+
+    if (environment == null || sourceWorkspace == null) {
+      return;
+    }
+
+    final destinationMatches = environment.workspaces.where((workspace) => workspace.id == destinationWorkspaceId);
+    if (destinationMatches.isEmpty) {
+      return;
+    }
+
+    _mutations.moveWindowToWorkspace(
+      environment: environment,
+      sourceWorkspace: sourceWorkspace,
+      destinationWorkspace: destinationMatches.first,
+      windowId: windowId,
+    );
+    await _dependencies.navigation.setActiveWorkspace(destinationWorkspaceId);
   }
 
   Future<void> confirmCloseTab(String workspaceId) async {

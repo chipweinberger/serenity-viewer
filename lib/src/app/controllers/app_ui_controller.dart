@@ -29,6 +29,10 @@ class AppUiController {
     return appUiState.draggingTabWorkspaceId == workspaceId;
   }
 
+  bool isWorkspaceWindowDropTarget(String workspaceId) {
+    return appUiState.windowDragTargetWorkspaceId == workspaceId;
+  }
+
   bool get shouldMoveSelectedWindowsToWorkspaceOnTap {
     return isWorkspaceScreen && hasSelectedExposeWindows;
   }
@@ -91,6 +95,10 @@ class AppUiController {
 
   void setDraggingTabWorkspaceId(String? workspaceId) {
     appUiState.setDraggingTabWorkspaceId(workspaceId);
+  }
+
+  void setWindowDragTargetWorkspaceId(String? workspaceId) {
+    appUiState.setWindowDragTargetWorkspaceId(workspaceId);
   }
 
   void setWorkspaceSort(WorkspaceSort sort) {

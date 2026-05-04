@@ -20,6 +20,14 @@ class WorkspaceMediaController {
     await importFiles(files);
   }
 
+  Future<void> pickAndImportFolder() async {
+    final directoryPath = await getDirectoryPath();
+    if (directoryPath == null) {
+      return;
+    }
+    await importFiles([XFile(directoryPath)]);
+  }
+
   Future<void> convertVideoWindowToJpeg(String windowId) {
     return videoConversionController.convertVideoWindowToJpeg(windowId);
   }

@@ -102,6 +102,7 @@ class _AssetContentState extends State<AssetContent> {
 
   Widget _buildMissingPlaceholder(BuildContext context) {
     return MissingMediaPlaceholder(
+      asset: widget.window.asset,
       filename: widget.window.asset.filename,
       windowSize: widget.window.size,
       compact: widget.compactMissingPlaceholder,

@@ -165,7 +165,8 @@ extension on _WindowState {
   }
 
   void _dragWindow(Offset delta) {
-    if (_isInteractingWithVideoControls) {
+    final hoverPosition = _hoverPosition;
+    if (_isInteractingWithVideoControls || hoverPosition == null) {
       return;
     }
 
@@ -173,7 +174,9 @@ extension on _WindowState {
       _isDraggingWindow = true;
       widget.onTap();
     }
-    widget.onPanUpdate(delta);
+    final renderBox = context.findRenderObject() as RenderBox?;
+    final globalPosition = renderBox?.localToGlobal(hoverPosition) ?? Offset.zero;
+    widget.onPanUpdate(delta, globalPosition);
   }
 
   void _handlePointerMove(PointerMoveEvent event) {
@@ -213,5 +216,14 @@ extension on _WindowState {
   void _handlePanZoomEnd(PointerPanZoomEndEvent event) {
     _isTrackpadWindowGestureActive = false;
     _lastTrackpadScale = 1.0;
+  }
+
+  void _finishWindowDrag(Offset globalPosition) {
+    if (!_isDraggingWindow) {
+      return;
+    }
+
+    _isDraggingWindow = false;
+    widget.onPanEnd(globalPosition);
   }
 }

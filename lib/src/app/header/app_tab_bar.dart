@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/header/app_tab.dart';
+import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/shared_widgets/glass_chip.dart';
 
@@ -12,7 +13,9 @@ class AppTabBar extends StatelessWidget {
     required this.isLibraryScreen,
     required this.shouldMoveSelectedWindows,
     required this.draggingTabWorkspaceId,
+    required this.windowDragTargetWorkspaceId,
     required this.tabScrollController,
+    required this.uiHandles,
     required this.onShowWorkspaceOverview,
     required this.onSetDraggingTabWorkspaceId,
     required this.onReorderOpenWorkspace,
@@ -27,7 +30,9 @@ class AppTabBar extends StatelessWidget {
   final bool isLibraryScreen;
   final bool shouldMoveSelectedWindows;
   final String? draggingTabWorkspaceId;
+  final String? windowDragTargetWorkspaceId;
   final ScrollController tabScrollController;
+  final AppUiHandles uiHandles;
   final VoidCallback onShowWorkspaceOverview;
   final ValueChanged<String?> onSetDraggingTabWorkspaceId;
   final void Function(String sourceWorkspaceId, String targetWorkspaceId) onReorderOpenWorkspace;
@@ -41,30 +46,45 @@ class AppTabBar extends StatelessWidget {
       onWillAcceptWithDetails: (details) => details.data != workspace.id,
       onAcceptWithDetails: (details) => onReorderOpenWorkspace(details.data, workspace.id),
       builder: (context, candidateData, rejectedData) {
-        final isDropTarget = candidateData.isNotEmpty;
-        return Draggable<String>(
-          data: workspace.id,
-          maxSimultaneousDrags: 1,
-          dragAnchorStrategy: pointerDragAnchorStrategy,
-          onDragStarted: () => onSetDraggingTabWorkspaceId(workspace.id),
-          onDragEnd: (_) => onSetDraggingTabWorkspaceId(null),
-          onDraggableCanceled: (_, __) => onSetDraggingTabWorkspaceId(null),
-          feedback: Material(
-            color: Colors.transparent,
-            child: AppTab(
-              workspace: workspace,
-              activeWorkspaceId: activeWorkspaceId,
-              isLibraryScreen: isLibraryScreen,
-              shouldMoveSelectedWindows: shouldMoveSelectedWindows,
-              draggingTabWorkspaceId: draggingTabWorkspaceId,
-              isDropTarget: false,
-              onMoveSelectedExposeWindowsToWorkspace: onMoveSelectedExposeWindowsToWorkspace,
-              onSetActiveWorkspace: onSetActiveWorkspace,
-              onConfirmCloseTab: onConfirmCloseTab,
+        final isDropTarget = candidateData.isNotEmpty || windowDragTargetWorkspaceId == workspace.id;
+        return _WorkspaceTabBoundsReporter(
+          workspaceId: workspace.id,
+          uiHandles: uiHandles,
+          child: Draggable<String>(
+            data: workspace.id,
+            maxSimultaneousDrags: 1,
+            dragAnchorStrategy: pointerDragAnchorStrategy,
+            onDragStarted: () => onSetDraggingTabWorkspaceId(workspace.id),
+            onDragEnd: (_) => onSetDraggingTabWorkspaceId(null),
+            onDraggableCanceled: (_, __) => onSetDraggingTabWorkspaceId(null),
+            feedback: Material(
+              color: Colors.transparent,
+              child: AppTab(
+                workspace: workspace,
+                activeWorkspaceId: activeWorkspaceId,
+                isLibraryScreen: isLibraryScreen,
+                shouldMoveSelectedWindows: shouldMoveSelectedWindows,
+                draggingTabWorkspaceId: draggingTabWorkspaceId,
+                isDropTarget: false,
+                onMoveSelectedExposeWindowsToWorkspace: onMoveSelectedExposeWindowsToWorkspace,
+                onSetActiveWorkspace: onSetActiveWorkspace,
+                onConfirmCloseTab: onConfirmCloseTab,
+              ),
             ),
-          ),
-          childWhenDragging: Opacity(
-            opacity: 0.35,
+            childWhenDragging: Opacity(
+              opacity: 0.35,
+              child: AppTab(
+                workspace: workspace,
+                activeWorkspaceId: activeWorkspaceId,
+                isLibraryScreen: isLibraryScreen,
+                shouldMoveSelectedWindows: shouldMoveSelectedWindows,
+                draggingTabWorkspaceId: draggingTabWorkspaceId,
+                isDropTarget: isDropTarget,
+                onMoveSelectedExposeWindowsToWorkspace: onMoveSelectedExposeWindowsToWorkspace,
+                onSetActiveWorkspace: onSetActiveWorkspace,
+                onConfirmCloseTab: onConfirmCloseTab,
+              ),
+            ),
             child: AppTab(
               workspace: workspace,
               activeWorkspaceId: activeWorkspaceId,
@@ -76,17 +96,6 @@ class AppTabBar extends StatelessWidget {
               onSetActiveWorkspace: onSetActiveWorkspace,
               onConfirmCloseTab: onConfirmCloseTab,
             ),
-          ),
-          child: AppTab(
-            workspace: workspace,
-            activeWorkspaceId: activeWorkspaceId,
-            isLibraryScreen: isLibraryScreen,
-            shouldMoveSelectedWindows: shouldMoveSelectedWindows,
-            draggingTabWorkspaceId: draggingTabWorkspaceId,
-            isDropTarget: isDropTarget,
-            onMoveSelectedExposeWindowsToWorkspace: onMoveSelectedExposeWindowsToWorkspace,
-            onSetActiveWorkspace: onSetActiveWorkspace,
-            onConfirmCloseTab: onConfirmCloseTab,
           ),
         );
       },
@@ -128,5 +137,57 @@ class AppTabBar extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _WorkspaceTabBoundsReporter extends StatefulWidget {
+  const _WorkspaceTabBoundsReporter({required this.workspaceId, required this.uiHandles, required this.child});
+
+  final String workspaceId;
+  final AppUiHandles uiHandles;
+  final Widget child;
+
+  @override
+  State<_WorkspaceTabBoundsReporter> createState() => _WorkspaceTabBoundsReporterState();
+}
+
+class _WorkspaceTabBoundsReporterState extends State<_WorkspaceTabBoundsReporter> {
+  final _key = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _reportBounds());
+  }
+
+  @override
+  void didUpdateWidget(covariant _WorkspaceTabBoundsReporter oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.workspaceId != widget.workspaceId) {
+      oldWidget.uiHandles.removeWorkspaceTabBounds(oldWidget.workspaceId);
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) => _reportBounds());
+  }
+
+  @override
+  void dispose() {
+    widget.uiHandles.removeWorkspaceTabBounds(widget.workspaceId);
+    super.dispose();
+  }
+
+  void _reportBounds() {
+    final box = _key.currentContext?.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize) {
+      return;
+    }
+
+    final topLeft = box.localToGlobal(Offset.zero);
+    widget.uiHandles.setWorkspaceTabBounds(widget.workspaceId, topLeft & box.size);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) => _reportBounds());
+    return KeyedSubtree(key: _key, child: widget.child);
   }
 }

@@ -18,6 +18,7 @@ import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
+import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/layout/workspace_expose_layout.dart';
@@ -57,6 +58,7 @@ class WorkspaceScreen extends StatelessWidget {
     required this.workspaceController,
     required this.environmentController,
     required this.appUiController,
+    required this.appUiHandles,
     required this.platformBridge,
     required this.mounted,
     required this.workspaceHud,
@@ -71,6 +73,7 @@ class WorkspaceScreen extends StatelessWidget {
   final WorkspaceController workspaceController;
   final EnvironmentController environmentController;
   final AppUiController appUiController;
+  final AppUiHandles appUiHandles;
   final PlatformBridge platformBridge;
   final bool Function() mounted;
   final Widget workspaceHud;
@@ -161,6 +164,21 @@ class WorkspaceScreen extends StatelessWidget {
         : null;
   }
 
+  void _updateWindowTabDropTarget(String sourceWorkspaceId, Offset globalPosition) {
+    final targetWorkspaceId = appUiHandles.workspaceTabAt(globalPosition, excludingWorkspaceId: sourceWorkspaceId);
+    appUiController.setWindowDragTargetWorkspaceId(targetWorkspaceId);
+  }
+
+  Future<void> _handleWindowDragEnd(Window window, String sourceWorkspaceId, Offset globalPosition) async {
+    final targetWorkspaceId = appUiHandles.workspaceTabAt(globalPosition, excludingWorkspaceId: sourceWorkspaceId);
+    appUiController.setWindowDragTargetWorkspaceId(null);
+    if (targetWorkspaceId == null) {
+      return;
+    }
+
+    await environmentController.management.moveWindowToWorkspace(window.asset.id, targetWorkspaceId);
+  }
+
   void _handleFreeformWindowTap(Window window) {
     if (windowInteractionState.pinnedHoverWindowId == window.asset.id) {
       workspaceController.window.clearPinnedHoverWindow();
@@ -223,8 +241,11 @@ class WorkspaceScreen extends StatelessWidget {
             onPinnedHoverRequested: () => workspaceController.window.setPinnedHoverWindow(window.asset.id),
             onPinnedHoverDismissed: workspaceController.window.clearPinnedHoverWindow,
             onToggleSelected: () => environmentController.navigation.toggleSelectedWindow(window.asset.id),
-            onPanUpdate: (delta) =>
-                workspaceController.window.moveWindow(window.asset.id, delta / workspace.viewportZoom),
+            onPanUpdate: (delta, globalPosition) {
+              workspaceController.window.moveWindow(window.asset.id, delta / workspace.viewportZoom);
+              _updateWindowTabDropTarget(workspace.id, globalPosition);
+            },
+            onPanEnd: (globalPosition) => _handleWindowDragEnd(window, workspace.id, globalPosition),
             onTrackpadWindowScale: (scaleDelta, localFocalPoint) => workspaceController.window
                 .transformWindowFromTrackpad(window.asset.id, scaleDelta, localFocalPoint / workspace.viewportZoom),
             onResizeUpdate: (handle, delta) =>

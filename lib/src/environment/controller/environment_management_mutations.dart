@@ -135,14 +135,31 @@ class EnvironmentManagementMutations {
     required Workspace sourceWorkspace,
     required Workspace destinationWorkspace,
   }) {
-    _dependencies.windowTransferController.moveSelectedToWorkspace(
+    _dependencies.windowTransferController.moveWindowsToWorkspace(
       environment: environment,
       sourceWorkspace: sourceWorkspace,
       destinationWorkspace: destinationWorkspace,
-      selectedWindowIds: _dependencies.exposeController.ids(),
+      windowIds: _dependencies.exposeController.ids(),
       updateEnvironment: _dependencies.updateEnvironment,
       queueThumbnailRefresh: _dependencies.queueWorkspaceRefresh,
-      clearExposeSelection: _dependencies.exposeController.clear,
+      clearSelection: _dependencies.exposeController.clear,
+    );
+  }
+
+  void moveWindowToWorkspace({
+    required Environment environment,
+    required Workspace sourceWorkspace,
+    required Workspace destinationWorkspace,
+    required String windowId,
+  }) {
+    _dependencies.windowTransferController.moveWindowsToWorkspace(
+      environment: environment,
+      sourceWorkspace: sourceWorkspace,
+      destinationWorkspace: destinationWorkspace,
+      windowIds: {windowId},
+      updateEnvironment: _dependencies.updateEnvironment,
+      queueThumbnailRefresh: _dependencies.queueWorkspaceRefresh,
+      clearSelection: () => _dependencies.exposeController.remove(windowId),
     );
   }
 

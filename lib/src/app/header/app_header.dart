@@ -20,6 +20,7 @@ class AppHeader extends StatelessWidget {
   ({
     String? currentEnvironmentPath,
     String? draggingTabWorkspaceId,
+    String? windowDragTargetWorkspaceId,
     Environment environment,
     bool hasSelectedExposeWindows,
     bool hasUnsavedChanges,
@@ -37,6 +38,7 @@ class AppHeader extends StatelessWidget {
       hasUnsavedChanges: context.select((EnvironmentStoreState state) => state.hasUnsavedChanges),
       screen: context.select((AppUiState state) => state.screen),
       draggingTabWorkspaceId: context.select((AppUiState state) => state.draggingTabWorkspaceId),
+      windowDragTargetWorkspaceId: context.select((AppUiState state) => state.windowDragTargetWorkspaceId),
       hasSelectedExposeWindows: context.select(
         (WindowInteractionState state) => state.selectedExposeWindowIds.isNotEmpty,
       ),
@@ -65,6 +67,7 @@ class AppHeader extends StatelessWidget {
   Widget _buildTabBarFromState({
     required Environment environment,
     required String? draggingTabWorkspaceId,
+    required String? windowDragTargetWorkspaceId,
     required bool hasSelectedExposeWindows,
     required SerenityScreen screen,
     required AppUiHandles uiHandles,
@@ -81,7 +84,9 @@ class AppHeader extends StatelessWidget {
         isLibraryScreen: screen == SerenityScreen.library,
         shouldMoveSelectedWindows: screen == SerenityScreen.workspace && hasSelectedExposeWindows,
         draggingTabWorkspaceId: draggingTabWorkspaceId,
+        windowDragTargetWorkspaceId: windowDragTargetWorkspaceId,
         tabScrollController: uiHandles.tabScrollController,
+        uiHandles: uiHandles,
         onShowWorkspaceOverview: environmentController.navigation.showOverview,
         onSetDraggingTabWorkspaceId: appUiController.setDraggingTabWorkspaceId,
         onReorderOpenWorkspace: environmentController.management.reorderOpen,
@@ -119,6 +124,7 @@ class AppHeader extends StatelessWidget {
         _buildTabBarFromState(
           environment: state.environment,
           draggingTabWorkspaceId: state.draggingTabWorkspaceId,
+          windowDragTargetWorkspaceId: state.windowDragTargetWorkspaceId,
           hasSelectedExposeWindows: state.hasSelectedExposeWindows,
           screen: state.screen,
           uiHandles: dependencies.uiHandles,
