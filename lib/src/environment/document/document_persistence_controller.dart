@@ -3,16 +3,16 @@ import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 
-import 'package:serenity_viewer/src/app/state/app_state_store.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/document/document_coordinator.dart';
 import 'package:serenity_viewer/src/environment/store/environment_bookmark_synchronizer.dart';
+import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store.dart';
 import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
 
 class DocumentPersistenceController {
   const DocumentPersistenceController({
-    required this.state,
+    required this.environmentStoreState,
     required this.environmentStore,
     required this.platformBridge,
     required this.environmentBookmarkSynchronizer,
@@ -22,7 +22,7 @@ class DocumentPersistenceController {
     required this.isRunningInWidgetTest,
   });
 
-  final AppStateStore state;
+  final EnvironmentStoreState environmentStoreState;
   final EnvironmentStore environmentStore;
   final PlatformBridge platformBridge;
   final EnvironmentBookmarkSynchronizer environmentBookmarkSynchronizer;
@@ -59,12 +59,12 @@ class DocumentPersistenceController {
   }
 
   Future<void> saveEnvironment({bool force = false}) async {
-    final environment = state.environmentStoreState.environment;
-    final environmentPath = state.environmentStoreState.currentEnvironmentPath;
+    final environment = environmentStoreState.environment;
+    final environmentPath = environmentStoreState.currentEnvironmentPath;
     if (environment == null || environmentPath == null || environmentPath.isEmpty) {
       return;
     }
-    if (!force && !state.environmentStoreState.hasUnsavedChanges) {
+    if (!force && !environmentStoreState.hasUnsavedChanges) {
       return;
     }
 

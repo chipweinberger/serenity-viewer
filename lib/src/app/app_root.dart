@@ -5,15 +5,21 @@ import 'package:flutter/material.dart';
 import 'package:serenity_viewer/src/app/app_providers.dart';
 import 'package:serenity_viewer/src/app/runtime/app_runtime.dart';
 import 'package:serenity_viewer/src/app/app_shell.dart';
-import 'package:serenity_viewer/src/app/state/app_state_store.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
+import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/app/state/app_derived_state.dart';
 import 'package:serenity_viewer/src/app/controllers/app_feedback_controller.dart';
 import 'package:serenity_viewer/src/app/seed_environment.dart';
 import 'package:serenity_viewer/src/environment/document/document_persistence_controller.dart';
+import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/settings/behavior/app_settings_controller.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/foundation/serenity_identity.dart';
+import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
+import 'package:serenity_viewer/src/workspace/history/workspace_window_history_state.dart';
+import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresh_state.dart';
+import 'package:serenity_viewer/src/workspace/tracking/workspace_view_tracking_state.dart';
+import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 
 class AppRoot extends StatefulWidget {
   const AppRoot({super.key});
@@ -23,7 +29,13 @@ class AppRoot extends StatefulWidget {
 }
 
 class _AppRootState extends State<AppRoot> {
-  final _stateStore = AppStateStore();
+  final _appUiState = AppUiState();
+  final _environmentStoreState = EnvironmentStoreState();
+  final _windowInteractionState = WindowInteractionState();
+  final _workspaceViewTrackingState = WorkspaceViewTrackingState();
+  final _workspaceViewportState = WorkspaceViewportState();
+  final _thumbnailRefreshState = ThumbnailRefreshState();
+  final _workspaceWindowHistoryState = WorkspaceWindowHistoryState();
   final _uiHandles = AppUiHandles();
   late final AppRuntime _runtime;
   late final AppFeedbackController _feedback;
@@ -39,14 +51,14 @@ class _AppRootState extends State<AppRoot> {
     super.initState();
     _runtime = AppRuntime.create(
       isRunningInWidgetTest: _isRunningInWidgetTest,
-      environmentStoreState: _stateStore.environmentStoreState,
-      appUiState: _stateStore.appUiState,
-      windowInteractionState: _stateStore.windowInteractionState,
-      workspaceViewTrackingState: _stateStore.workspaceViewTrackingState,
-      workspaceViewportState: _stateStore.workspaceViewportState,
-      thumbnailRefreshState: _stateStore.thumbnailRefreshState,
-      workspaceWindowHistoryState: _stateStore.workspaceWindowHistoryState,
-      windowTitle: () => deriveWindowTitle(_stateStore.environmentStoreState),
+      environmentStoreState: _environmentStoreState,
+      appUiState: _appUiState,
+      windowInteractionState: _windowInteractionState,
+      workspaceViewTrackingState: _workspaceViewTrackingState,
+      workspaceViewportState: _workspaceViewportState,
+      thumbnailRefreshState: _thumbnailRefreshState,
+      workspaceWindowHistoryState: _workspaceWindowHistoryState,
+      windowTitle: () => deriveWindowTitle(_environmentStoreState),
       context: () => context,
       mounted: () => mounted,
       showMessage: _showMessage,
@@ -58,9 +70,9 @@ class _AppRootState extends State<AppRoot> {
       saveEnvironment: () => _documentPersistence.saveEnvironment(),
       newId: newSerenityId,
       colorFromDigest: assetColorValueFromDigest,
-      activeWorkspace: () => deriveActiveWorkspaceOrNull(_stateStore.environmentStoreState),
-      workspaces: () => deriveWorkspaces(_stateStore.environmentStoreState),
-      openWorkspaces: () => deriveOpenWorkspaces(_stateStore.environmentStoreState),
+      activeWorkspace: () => deriveActiveWorkspaceOrNull(_environmentStoreState),
+      workspaces: () => deriveWorkspaces(_environmentStoreState),
+      openWorkspaces: () => deriveOpenWorkspaces(_environmentStoreState),
       focusedWindowOrNull: () => _runtime.workspaceWindowController.focusedWindowOrNull(),
       setWorkspaceViewport: ({required workspaceId, center, zoom, queueThumbnail = true}) {
         _runtime.workspaceViewportSessionController.setWorkspaceViewport(
@@ -98,11 +110,11 @@ class _AppRootState extends State<AppRoot> {
     _feedback = AppFeedbackController(context: () => context);
     _settings = AppSettingsController(
       context: () => context,
-      environmentStoreState: _stateStore.environmentStoreState,
+      environmentStoreState: _environmentStoreState,
       updateEnvironment: _runtime.environmentStore.updateEnvironment,
     );
     _documentPersistence = DocumentPersistenceController(
-      state: _stateStore,
+      environmentStoreState: _environmentStoreState,
       environmentStore: _runtime.environmentStore,
       platformBridge: _runtime.platformBridge,
       environmentBookmarkSynchronizer: _runtime.environmentBookmarkSynchronizer,
@@ -117,7 +129,13 @@ class _AppRootState extends State<AppRoot> {
   @override
   void dispose() {
     _runtime.dispose();
-    _stateStore.dispose();
+    _environmentStoreState.dispose();
+    _appUiState.dispose();
+    _windowInteractionState.dispose();
+    _workspaceViewTrackingState.dispose();
+    _workspaceViewportState.dispose();
+    _thumbnailRefreshState.dispose();
+    _workspaceWindowHistoryState.dispose();
     _uiHandles.dispose();
     super.dispose();
   }
@@ -130,7 +148,13 @@ class _AppRootState extends State<AppRoot> {
   @override
   Widget build(BuildContext context) {
     return AppProviders(
-      stateStore: _stateStore,
+      appUiState: _appUiState,
+      environmentStoreState: _environmentStoreState,
+      windowInteractionState: _windowInteractionState,
+      workspaceViewportState: _workspaceViewportState,
+      thumbnailRefreshState: _thumbnailRefreshState,
+      workspaceWindowHistoryState: _workspaceWindowHistoryState,
+      workspaceViewTrackingState: _workspaceViewTrackingState,
       uiHandles: _uiHandles,
       feedback: _feedback,
       settings: _settings,
