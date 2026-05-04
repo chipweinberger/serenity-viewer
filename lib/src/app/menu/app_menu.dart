@@ -10,26 +10,14 @@ import 'package:serenity_viewer/src/foundation/app_constants.dart';
 export 'package:serenity_viewer/src/app/menu/app_menu_bindings.dart';
 
 class AppMenu extends StatelessWidget {
-  const AppMenu({
-    super.key,
-    required this.state,
-    required this.app,
-    required this.file,
-    required this.asset,
-    required this.workspace,
-    required this.window,
-    required this.child,
-  });
+  const AppMenu({super.key, required this.child});
 
-  final AppMenuState state;
-  final AppMenuAppActions app;
-  final AppMenuFileActions file;
-  final AppMenuAssetActions asset;
-  final AppMenuWorkspaceActions workspace;
-  final AppMenuWindowActions window;
   final Widget child;
 
-  List<PlatformMenuItem> _buildWindowMenuItems() {
+  List<PlatformMenuItem> _buildWindowMenuItems({
+    required AppMenuState state,
+    required AppMenuWindowActions window,
+  }) {
     final recentlyClosedItems = state.recentlyClosedWindows.take(8).map((entry) {
       return PlatformMenuItem(
         label: 'Restore ${entry.window.asset.filename}',
@@ -47,7 +35,7 @@ class AppMenu extends StatelessWidget {
     ];
   }
 
-  List<PlatformMenuItem> _buildAppMenuItems() {
+  List<PlatformMenuItem> _buildAppMenuItems({required AppMenuAppActions app}) {
     return [
       PlatformMenuItem(label: 'About Serenity', onSelected: app.showAboutSerenity),
       PlatformMenuItem(
@@ -63,7 +51,7 @@ class AppMenu extends StatelessWidget {
     ];
   }
 
-  List<PlatformMenuItem> _buildFileMenuItems() {
+  List<PlatformMenuItem> _buildFileMenuItems({required AppMenuFileActions file}) {
     return [
       PlatformMenuItem(
         label: 'New Environment…',
@@ -93,7 +81,10 @@ class AppMenu extends StatelessWidget {
     ];
   }
 
-  List<PlatformMenuItem> _buildAssetMenuItems() {
+  List<PlatformMenuItem> _buildAssetMenuItems({
+    required AppMenuState state,
+    required AppMenuAssetActions asset,
+  }) {
     final focusedWindow = state.focusedWindow;
     final focusedVideoWindow = focusedWindow?.asset.type == AssetType.video ? focusedWindow : null;
     final focusedWindowLabel = focusedWindow == null
@@ -143,7 +134,7 @@ class AppMenu extends StatelessWidget {
     ];
   }
 
-  List<PlatformMenuItem> _buildViewMenuItems() {
+  List<PlatformMenuItem> _buildViewMenuItems({required AppMenuWorkspaceActions workspace}) {
     return [
       PlatformMenuItem(
         label: 'Expose',
@@ -158,7 +149,10 @@ class AppMenu extends StatelessWidget {
     ];
   }
 
-  List<PlatformMenuItem> _buildWorkspaceMenuItems() {
+  List<PlatformMenuItem> _buildWorkspaceMenuItems({
+    required AppMenuState state,
+    required AppMenuWorkspaceActions workspace,
+  }) {
     return [
       PlatformMenuItem(
         label: 'New',
@@ -207,14 +201,21 @@ class AppMenu extends StatelessWidget {
     ];
   }
 
-  List<PlatformMenuItem> _buildMenus() {
+  List<PlatformMenuItem> _buildMenus({
+    required AppMenuState state,
+    required AppMenuAppActions app,
+    required AppMenuFileActions file,
+    required AppMenuAssetActions asset,
+    required AppMenuWorkspaceActions workspace,
+    required AppMenuWindowActions window,
+  }) {
     return [
-      PlatformMenu(label: 'Serenity', menus: _buildAppMenuItems()),
-      PlatformMenu(label: 'File', menus: _buildFileMenuItems()),
-      PlatformMenu(label: 'Asset', menus: _buildAssetMenuItems()),
-      PlatformMenu(label: 'View', menus: _buildViewMenuItems()),
-      PlatformMenu(label: 'Workspace', menus: _buildWorkspaceMenuItems()),
-      PlatformMenu(label: 'Window', menus: _buildWindowMenuItems()),
+      PlatformMenu(label: 'Serenity', menus: _buildAppMenuItems(app: app)),
+      PlatformMenu(label: 'File', menus: _buildFileMenuItems(file: file)),
+      PlatformMenu(label: 'Asset', menus: _buildAssetMenuItems(state: state, asset: asset)),
+      PlatformMenu(label: 'View', menus: _buildViewMenuItems(workspace: workspace)),
+      PlatformMenu(label: 'Workspace', menus: _buildWorkspaceMenuItems(state: state, workspace: workspace)),
+      PlatformMenu(label: 'Window', menus: _buildWindowMenuItems(state: state, window: window)),
     ];
   }
 
@@ -235,6 +236,17 @@ class AppMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PlatformMenuBar(menus: _buildMenus(), child: child);
+    final bindings = buildAppMenuBindings(context);
+    return PlatformMenuBar(
+      menus: _buildMenus(
+        state: bindings.state,
+        app: bindings.app,
+        file: bindings.file,
+        asset: bindings.asset,
+        workspace: bindings.workspace,
+        window: bindings.window,
+      ),
+      child: child,
+    );
   }
 }

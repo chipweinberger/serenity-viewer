@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/header/app_header.dart';
 import 'package:serenity_viewer/src/app/header/app_tab_bar_actions.dart';
+import 'package:serenity_viewer/src/app/views/app_main_view_binding_builder.dart';
 import 'package:serenity_viewer/src/app/views/app_main_view_contract.dart';
 import 'package:serenity_viewer/src/app/views/library_view.dart';
 import 'package:serenity_viewer/src/app/views/workspace_view.dart';
@@ -13,28 +14,37 @@ export 'package:serenity_viewer/src/app/views/app_main_view_binding_builder.dart
 export 'package:serenity_viewer/src/app/views/app_main_view_contract.dart';
 
 class AppMainView extends StatelessWidget {
-  const AppMainView({super.key, required this.model, required this.services, required this.actions});
+  const AppMainView({super.key});
 
-  final AppMainViewModel model;
-  final AppMainViewServices services;
-  final AppMainViewActions actions;
-
-  int get _activeScreenIndex {
+  int _activeScreenIndex(AppMainViewModel model) {
     return switch (model.uiState.screen) {
       SerenityScreen.workspace => 0,
       SerenityScreen.library => 1,
     };
   }
 
-  Widget _buildWorkspaceScreen(MediaLoadPlan workspaceLoadPlan) {
+  Widget _buildWorkspaceScreen(
+    MediaLoadPlan workspaceLoadPlan, {
+    required AppMainViewModel model,
+    required AppMainViewServices services,
+    required AppMainViewActions actions,
+  }) {
     return WorkspaceView(model: model, services: services, actions: actions, workspaceLoadPlan: workspaceLoadPlan);
   }
 
-  Widget _buildLibraryScreen(MediaLoadPlan workspaceLoadPlan) {
+  Widget _buildLibraryScreen(
+    MediaLoadPlan workspaceLoadPlan, {
+    required AppMainViewModel model,
+    required AppMainViewServices services,
+    required AppMainViewActions actions,
+  }) {
     return LibraryView(model: model, services: services, actions: actions, workspaceLoadPlan: workspaceLoadPlan);
   }
 
-  Widget _buildWorkspaceUiOverlay() {
+  Widget _buildWorkspaceUiOverlay({
+    required AppMainViewModel model,
+    required AppMainViewServices services,
+  }) {
     return AppHeader(
       windowTitle: model.windowTitle,
       openWorkspaces: model.openWorkspaces,
@@ -58,6 +68,10 @@ class AppMainView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bindings = buildAppMainViewBindings(context);
+    final model = bindings.model;
+    final services = bindings.services;
+    final actions = bindings.actions;
     final workspaceLoadPlan = buildWorkspaceLoadPlan(
       environment: model.environment,
       activeWorkspace: model.activeWorkspaceOrNull,
@@ -71,11 +85,14 @@ class AppMainView extends StatelessWidget {
       children: [
         Positioned.fill(
           child: IndexedStack(
-            index: _activeScreenIndex,
-            children: [_buildWorkspaceScreen(workspaceLoadPlan), _buildLibraryScreen(workspaceLoadPlan)],
+            index: _activeScreenIndex(model),
+            children: [
+              _buildWorkspaceScreen(workspaceLoadPlan, model: model, services: services, actions: actions),
+              _buildLibraryScreen(workspaceLoadPlan, model: model, services: services, actions: actions),
+            ],
           ),
         ),
-        _buildWorkspaceUiOverlay(),
+        _buildWorkspaceUiOverlay(model: model, services: services),
       ],
     );
   }

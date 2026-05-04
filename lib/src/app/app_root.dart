@@ -118,8 +118,7 @@ class _AppRootState extends State<AppRoot> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    final bindings = buildAppMainViewBindings(context);
-    return AppMainView(model: bindings.model, services: bindings.services, actions: bindings.actions);
+    return const AppMainView();
   }
 
   @override
@@ -212,24 +211,13 @@ class _AppRootState extends State<AppRoot> {
       listenable: _stateStore.shellListenable,
       builder: (context, _) {
         return _buildProviders(
-          child: Builder(
-            builder: (context) {
-              final menu = buildAppMenuBindings(context);
-              return AppMenu(
-                state: menu.state,
-                app: menu.app,
-                file: menu.file,
-                asset: menu.asset,
-                workspace: menu.workspace,
-                window: menu.window,
-                child: Focus(
-                  focusNode: _uiHandles.focusNode,
-                  autofocus: true,
-                  onKeyEvent: (_, event) => _runtime.workspaceShortcutController.onKeyEvent(event),
-                  child: Scaffold(body: SafeArea(top: false, child: _buildContent(context))),
-                ),
-              );
-            },
+          child: AppMenu(
+            child: Focus(
+              focusNode: _uiHandles.focusNode,
+              autofocus: true,
+              onKeyEvent: (_, event) => _runtime.workspaceShortcutController.onKeyEvent(event),
+              child: Scaffold(body: SafeArea(top: false, child: _buildContent(context))),
+            ),
           ),
         );
       },
