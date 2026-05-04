@@ -93,24 +93,15 @@ createAppWorkspaceServices({
 
   final thumbnailController = createThumbnailController(scope: scope);
   final workspaceLinksController = createWorkspaceLinksController(scope: scope);
-  final workspaceGestureController = createWorkspaceGestureController(scope: scope);
-  final workspaceExposeController = createWorkspaceExposeController(scope: scope);
-  final workspaceWindowsController = createWorkspaceWindowsController(scope: scope);
-  final workspaceViewportController = createWorkspaceViewportController(
+  final workspaceCoreControllers = createWorkspaceCoreControllers(
     scope: scope,
     thumbnailController: thumbnailController,
   );
-  final workspacePlaybackController = createWorkspacePlaybackController(scope: scope);
-  final workspaceEnvironmentController = createWorkspaceEnvironmentController();
-  final workspaceWindowController = createWorkspaceWindowController(
-    scope: scope,
-    gestureController: workspaceGestureController,
-    windowsController: workspaceWindowsController,
-  );
+  final workspaceWindowController = createWorkspaceWindowController(scope: scope, core: workspaceCoreControllers);
   final environmentNavigationController = createEnvironmentNavigationController(
     scope: scope,
     thumbnailController: thumbnailController,
-    exposeController: workspaceExposeController,
+    exposeController: workspaceCoreControllers.expose,
   );
   final workspaceExposeLayoutController = createWorkspaceExposeLayoutController(
     scope: scope,
@@ -120,8 +111,8 @@ createAppWorkspaceServices({
     scope: scope,
     navigationController: environmentNavigationController,
     thumbnailController: thumbnailController,
-    environmentController: workspaceEnvironmentController,
-    exposeController: workspaceExposeController,
+    environmentController: workspaceCoreControllers.environment,
+    exposeController: workspaceCoreControllers.expose,
   );
   final environmentController = EnvironmentController(
     navigation: environmentNavigationController,
@@ -153,17 +144,10 @@ createAppWorkspaceServices({
   final environmentWindowHistoryController = createEnvironmentWindowHistoryController(
     scope: scope,
     environmentWindowHistoryState: environmentWindowHistoryState,
-    exposeController: workspaceExposeController,
-    windowsController: workspaceWindowsController,
-    playbackController: workspacePlaybackController,
+    core: workspaceCoreControllers,
   );
   final workspaceController = createWorkspaceController(
-    gesture: workspaceGestureController,
-    expose: workspaceExposeController,
-    windows: workspaceWindowsController,
-    viewport: workspaceViewportController,
-    playback: workspacePlaybackController,
-    environment: workspaceEnvironmentController,
+    core: workspaceCoreControllers,
     window: workspaceWindowController,
     media: workspaceMediaController,
     layout: workspaceExposeLayoutController,

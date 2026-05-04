@@ -20,6 +20,15 @@ import 'package:serenity_viewer/src/workspace/tracking/workspace_view_tracking_c
 
 import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_scope.dart';
 
+typedef WorkspaceCoreControllers = ({
+  WorkspaceGestureController gesture,
+  WorkspaceExposeController expose,
+  WorkspaceWindowsController windows,
+  WorkspaceViewportController viewport,
+  WorkspacePlaybackController playback,
+  WorkspaceEnvironmentController environment,
+});
+
 ThumbnailController createThumbnailController({required WorkspaceFactoryScope scope}) {
   return ThumbnailController(
     state: scope.thumbState,
@@ -50,12 +59,7 @@ WorkspaceLinksController createWorkspaceLinksController({required WorkspaceFacto
 }
 
 WorkspaceController createWorkspaceController({
-  required WorkspaceGestureController gesture,
-  required WorkspaceExposeController expose,
-  required WorkspaceWindowsController windows,
-  required WorkspaceViewportController viewport,
-  required WorkspacePlaybackController playback,
-  required WorkspaceEnvironmentController environment,
+  required WorkspaceCoreControllers core,
   required WorkspaceWindowController window,
   required WorkspaceMediaController media,
   required WorkspaceExposeLayoutController layout,
@@ -65,12 +69,12 @@ WorkspaceController createWorkspaceController({
   required WorkspaceViewTrackingController tracking,
 }) {
   return WorkspaceController(
-    gesture: gesture,
-    expose: expose,
-    windows: windows,
-    viewport: viewport,
-    playback: playback,
-    environment: environment,
+    gesture: core.gesture,
+    expose: core.expose,
+    windows: core.windows,
+    viewport: core.viewport,
+    playback: core.playback,
+    environment: core.environment,
     window: window,
     media: media,
     layout: layout,
@@ -81,27 +85,18 @@ WorkspaceController createWorkspaceController({
   );
 }
 
-WorkspaceGestureController createWorkspaceGestureController({required WorkspaceFactoryScope scope}) {
-  return WorkspaceGestureController(windowInteractionState: scope.interactionState);
-}
-
-WorkspaceExposeController createWorkspaceExposeController({required WorkspaceFactoryScope scope}) {
-  return WorkspaceExposeController(windowInteractionState: scope.interactionState);
-}
-
-WorkspaceWindowsController createWorkspaceWindowsController({required WorkspaceFactoryScope scope}) {
-  return WorkspaceWindowsController(
+WorkspaceCoreControllers createWorkspaceCoreControllers({
+  required WorkspaceFactoryScope scope,
+  required ThumbnailController thumbnailController,
+}) {
+  final gesture = WorkspaceGestureController(windowInteractionState: scope.interactionState);
+  final expose = WorkspaceExposeController(windowInteractionState: scope.interactionState);
+  final windows = WorkspaceWindowsController(
     appUiState: scope.uiState,
     windowInteractionState: scope.interactionState,
     replaceWorkspace: scope.replaceWorkspace,
   );
-}
-
-WorkspaceViewportController createWorkspaceViewportController({
-  required WorkspaceFactoryScope scope,
-  required ThumbnailController thumbnailController,
-}) {
-  return WorkspaceViewportController(
+  final viewport = WorkspaceViewportController(
     environmentStoreState: scope.envState,
     appUiState: scope.uiState,
     windowInteractionState: scope.interactionState,
@@ -112,51 +107,51 @@ WorkspaceViewportController createWorkspaceViewportController({
     applyWorkspaceViewport: scope.setWorkspaceViewport,
     refreshActiveWorkspaceThumbnail: thumbnailController.refreshActiveWorkspaceIfNeeded,
   );
-}
-
-WorkspacePlaybackController createWorkspacePlaybackController({required WorkspaceFactoryScope scope}) {
-  return WorkspacePlaybackController(
+  final playback = WorkspacePlaybackController(
     windowInteractionState: scope.interactionState,
     replaceWorkspace: scope.replaceWorkspace,
     environment: () => scope.envState.environment,
     activeWorkspaceOrNull: scope.activeWorkspace,
   );
-}
+  final environment = WorkspaceEnvironmentController();
 
-WorkspaceEnvironmentController createWorkspaceEnvironmentController() {
-  return WorkspaceEnvironmentController();
+  return (
+    gesture: gesture,
+    expose: expose,
+    windows: windows,
+    viewport: viewport,
+    playback: playback,
+    environment: environment,
+  );
 }
 
 WorkspaceWindowController createWorkspaceWindowController({
   required WorkspaceFactoryScope scope,
-  required WorkspaceGestureController gestureController,
-  required WorkspaceWindowsController windowsController,
+  required WorkspaceCoreControllers core,
 }) {
   return WorkspaceWindowController(
     appUiState: scope.uiState,
     windowInteractionState: scope.interactionState,
     activeWorkspace: () => scope.activeWorkspace()!,
     activeWorkspaceOrNull: scope.activeWorkspace,
-    gestureController: gestureController,
-    windowsController: windowsController,
+    gestureController: core.gesture,
+    windowsController: core.windows,
   );
 }
 
 EnvironmentWindowHistoryController createEnvironmentWindowHistoryController({
   required WorkspaceFactoryScope scope,
   required EnvironmentWindowHistoryState environmentWindowHistoryState,
-  required WorkspaceExposeController exposeController,
-  required WorkspaceWindowsController windowsController,
-  required WorkspacePlaybackController playbackController,
+  required WorkspaceCoreControllers core,
 }) {
   return EnvironmentWindowHistoryController(
     environment: () => scope.envState.environment,
     workspaces: scope.workspaces,
     activeWorkspace: scope.activeWorkspace,
     environmentWindowHistoryState: environmentWindowHistoryState,
-    exposeController: exposeController,
-    windowsController: windowsController,
-    playbackController: playbackController,
+    exposeController: core.expose,
+    windowsController: core.windows,
+    playbackController: core.playback,
     updateEnvironment: scope.store.updateEnvironment,
     replaceWorkspace: scope.store.replaceWorkspace,
     showMessage: scope.showMessage,
