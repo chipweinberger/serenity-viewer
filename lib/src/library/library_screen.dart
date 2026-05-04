@@ -13,7 +13,6 @@ import 'package:serenity_viewer/src/shared_widgets/glass_chip.dart';
 @immutable
 class LibraryScreenActions {
   const LibraryScreenActions({
-    required this.onSearchChanged,
     required this.onWorkspaceSortChanged,
     required this.onToggleWorkspaceOpen,
     required this.onRenameWorkspace,
@@ -21,7 +20,6 @@ class LibraryScreenActions {
     required this.onSetActiveWorkspace,
   });
 
-  final ValueChanged<String> onSearchChanged;
   final ValueChanged<WorkspaceSort> onWorkspaceSortChanged;
   final ValueChanged<String> onToggleWorkspaceOpen;
   final Future<void> Function(String workspaceId) onRenameWorkspace;
@@ -215,7 +213,6 @@ class LibraryScreen extends StatelessWidget {
       width: 280,
       child: TextField(
         controller: searchController,
-        onChanged: actions.onSearchChanged,
         decoration: InputDecoration(
           prefixIcon: const Icon(Icons.search_rounded),
           hintText: 'Search by name',
@@ -285,40 +282,45 @@ class LibraryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final visibleOpenWorkspaces = _visibleOpenWorkspaces();
-    final knownWorkspaces = _sortedKnownWorkspaces();
-    final knownWorkspaceCount = knownWorkspaces.length;
+    return ListenableBuilder(
+      listenable: searchController,
+      builder: (context, _) {
+        final visibleOpenWorkspaces = _visibleOpenWorkspaces();
+        final knownWorkspaces = _sortedKnownWorkspaces();
+        final knownWorkspaceCount = knownWorkspaces.length;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SizedBox.expand(
-          child: DecoratedBox(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFFF5EBD8), Color(0xFFE0D1BA)],
-              ),
-            ),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(24, 88, 24, 28),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minWidth: constraints.maxWidth, minHeight: constraints.maxHeight - 116),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildOpenNowSection(context, visibleOpenWorkspaces),
-                    const SizedBox(height: 48),
-                    _buildAllWorkspacesSection(
-                      context,
-                      knownWorkspaces: knownWorkspaces,
-                      knownWorkspaceCount: knownWorkspaceCount,
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            return SizedBox.expand(
+              child: DecoratedBox(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFFF5EBD8), Color(0xFFE0D1BA)],
+                  ),
+                ),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(24, 88, 24, 28),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minWidth: constraints.maxWidth, minHeight: constraints.maxHeight - 116),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildOpenNowSection(context, visibleOpenWorkspaces),
+                        const SizedBox(height: 48),
+                        _buildAllWorkspacesSection(
+                          context,
+                          knownWorkspaces: knownWorkspaces,
+                          knownWorkspaceCount: knownWorkspaceCount,
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );

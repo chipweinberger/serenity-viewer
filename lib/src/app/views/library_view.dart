@@ -28,7 +28,6 @@ class LibraryView extends StatelessWidget {
       workspaceSort: model.uiState.workspaceSort,
       refreshingWorkspaceIds: services.thumbnailController.refreshingWorkspaceIds,
       actions: LibraryScreenActions(
-        onSearchChanged: (_) => actions.app.state.commitStateChange(() {}),
         onWorkspaceSortChanged: services.appUiController.setWorkspaceSort,
         onToggleWorkspaceOpen: services.environmentController.management.toggleOpen,
         onRenameWorkspace: services.environmentController.management.renameWorkspace,
