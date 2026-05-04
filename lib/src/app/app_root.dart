@@ -13,6 +13,7 @@ import 'package:serenity_viewer/src/app/builders/app_screen_host_scope.dart';
 import 'package:serenity_viewer/src/app/controllers/app_feedback_controller.dart';
 import 'package:serenity_viewer/src/app/seed_environment.dart';
 import 'package:serenity_viewer/src/environment/document/document_persistence_controller.dart';
+import 'package:serenity_viewer/src/settings/behavior/app_settings_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_windows_controller.dart';
 
 class AppRoot extends StatefulWidget {
@@ -26,6 +27,7 @@ class _AppRootState extends State<AppRoot> {
   final _ownedState = AppOwnedState();
   late final AppRuntime _runtime;
   late final AppFeedbackController _feedback;
+  late final AppSettingsController _settings;
   late final DocumentPersistenceController _documentPersistence;
 
   AppStateServices get _state => _runtime.state;
@@ -82,7 +84,7 @@ class _AppRootState extends State<AppRoot> {
 
     return AppMenuBuilder(
       showAboutSerenity: _feedback.showAboutSerenity,
-      openSettings: _feedback.openSettings,
+      openSettings: _settings.openSettings,
       createEnvironment: _documents.documentCoordinator.createDocument,
       openEnvironment: _documents.documentCoordinator.openDocument,
       openAssets: _pickAndImportAssets,
@@ -179,7 +181,8 @@ class _AppRootState extends State<AppRoot> {
   void initState() {
     super.initState();
     _runtime = AppRuntime.create(_buildRuntimeConfig());
-    _feedback = AppFeedbackController(
+    _feedback = AppFeedbackController(context: () => context);
+    _settings = AppSettingsController(
       context: () => context,
       environmentStoreState: _state.environmentStoreState,
       updateEnvironment: _foundation.environmentStore.updateEnvironment,
