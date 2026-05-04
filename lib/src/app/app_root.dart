@@ -50,31 +50,27 @@ class _AppRootState extends State<AppRoot> {
 
   AppStateStore get _state => _stateStore;
   DocumentCoordinator get _documentCoordinator => _runtime.documentCoordinator;
-  AppUiController get _appUiController => _runtime.foundation.appUiController;
-  SharedVideoControllerPool get _sharedVideoControllerPool => _runtime.foundation.sharedVideoControllerPool;
-  PlatformBridge get _platformBridge => _runtime.foundation.platformBridge;
-  EnvironmentStore get _environmentStore => _runtime.foundation.environmentStore;
-  EnvironmentBookmarkSynchronizer get _environmentBookmarkSynchronizer =>
-      _runtime.foundation.environmentBookmarkSynchronizer;
-  WorkspaceController get _workspaceController => _runtime.workspace.workspaceController;
-  EnvironmentController get _environmentController => _runtime.workspace.environmentController;
-  WorkspaceExposeLayoutController get _workspaceExposeLayoutController =>
-      _runtime.workspace.workspaceExposeLayoutController;
-  WorkspaceLinksController get _workspaceLinksController => _runtime.workspace.workspaceLinksController;
-  WorkspaceLinksLauncher get _workspaceLinksLauncher => _runtime.workspace.workspaceLinksLauncher;
-  WorkspaceLinksPrompts get _workspaceLinksPrompts => _runtime.workspace.workspaceLinksPrompts;
-  ThumbnailController get _thumbnailController => _runtime.workspace.thumbnailController;
-  WorkspaceWindowHistoryController get _workspaceWindowHistoryController =>
-      _runtime.workspace.workspaceWindowHistoryController;
-  WorkspaceMediaImportController get _workspaceMediaImportController => _runtime.workspace.workspaceMediaImportController;
-  WorkspaceWindowController get _workspaceWindowController => _runtime.workspace.workspaceWindowController;
+  AppUiController get _appUiController => _runtime.appUiController;
+  SharedVideoControllerPool get _sharedVideoControllerPool => _runtime.sharedVideoControllerPool;
+  PlatformBridge get _platformBridge => _runtime.platformBridge;
+  EnvironmentStore get _environmentStore => _runtime.environmentStore;
+  EnvironmentBookmarkSynchronizer get _environmentBookmarkSynchronizer => _runtime.environmentBookmarkSynchronizer;
+  WorkspaceController get _workspaceController => _runtime.workspaceController;
+  EnvironmentController get _environmentController => _runtime.environmentController;
+  WorkspaceExposeLayoutController get _workspaceExposeLayoutController => _runtime.workspaceExposeLayoutController;
+  WorkspaceLinksController get _workspaceLinksController => _runtime.workspaceLinksController;
+  WorkspaceLinksLauncher get _workspaceLinksLauncher => _runtime.workspaceLinksLauncher;
+  WorkspaceLinksPrompts get _workspaceLinksPrompts => _runtime.workspaceLinksPrompts;
+  ThumbnailController get _thumbnailController => _runtime.thumbnailController;
+  WorkspaceWindowHistoryController get _workspaceWindowHistoryController => _runtime.workspaceWindowHistoryController;
+  WorkspaceMediaImportController get _workspaceMediaImportController => _runtime.workspaceMediaImportController;
+  WorkspaceWindowController get _workspaceWindowController => _runtime.workspaceWindowController;
   WorkspaceViewportSessionController get _workspaceViewportSessionController =>
-      _runtime.workspace.workspaceViewportSessionController;
-  WorkspaceCollateController get _workspaceCollateController => _runtime.workspace.workspaceCollateController;
-  WorkspaceVideoConversionController get _workspaceVideoConversionController =>
-      _runtime.workspace.workspaceVideoConversionController;
-  WorkspaceAssetPickerController get _workspaceAssetPickerController => _runtime.workspace.workspaceAssetPickerController;
-  WorkspaceShortcutController get _workspaceShortcutController => _runtime.workspace.workspaceShortcutController;
+      _runtime.workspaceViewportSessionController;
+  WorkspaceCollateController get _workspaceCollateController => _runtime.workspaceCollateController;
+  WorkspaceVideoConversionController get _workspaceVideoConversionController => _runtime.workspaceVideoConversionController;
+  WorkspaceAssetPickerController get _workspaceAssetPickerController => _runtime.workspaceAssetPickerController;
+  WorkspaceShortcutController get _workspaceShortcutController => _runtime.workspaceShortcutController;
 
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), behavior: SnackBarBehavior.floating));
