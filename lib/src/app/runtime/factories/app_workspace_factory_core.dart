@@ -45,7 +45,7 @@ ThumbnailController createThumbnailController({required WorkspaceFactoryScope sc
       store: ThumbnailStore(thumbnailDirectory: scope.platform.thumbnailDirectory),
     ),
     activeScreen: () => scope.uiState.screen,
-    activeWorkspaceId: () => scope.ws.activeWorkspace()?.id,
+    activeWorkspaceId: () => scope.inputs.activeWorkspace()?.id,
     viewportSize: () => scope.viewportState.viewportSize,
   );
 }
@@ -54,10 +54,10 @@ WorkspaceLinksController createWorkspaceLinksController({required WorkspaceFacto
   return WorkspaceLinksController(
     screen: () => scope.uiState.screen,
     hasSession: () => scope.envState.environment != null,
-    activeWorkspace: scope.ws.activeWorkspace,
-    workspaces: scope.ws.workspaces,
+    activeWorkspace: scope.inputs.activeWorkspace,
+    workspaces: scope.inputs.workspaces,
     replaceWorkspace: scope.inputs.replaceWorkspace,
-    newId: scope.ws.newId,
+    newId: scope.inputs.newId,
     showMessage: scope.inputs.showMessage,
   );
 }
@@ -79,7 +79,7 @@ WorkspaceController createWorkspaceController({
     windowInteractionState: scope.interactionState,
     workspaceViewportState: scope.viewportState,
     replaceWorkspace: scope.inputs.replaceWorkspace,
-    setWorkspaceViewport: scope.ws.setWorkspaceViewport,
+    setWorkspaceViewport: scope.inputs.setWorkspaceViewport,
     refreshActiveWorkspaceThumbnail: thumbnailController.refreshActiveWorkspaceIfNeeded,
   );
 }
@@ -91,8 +91,8 @@ WorkspaceWindowController createWorkspaceWindowController({
   return WorkspaceWindowController(
     appUiState: scope.uiState,
     environment: () => scope.envState.environment,
-    activeWorkspace: () => scope.ws.activeWorkspace()!,
-    activeWorkspaceOrNull: scope.ws.activeWorkspace,
+    activeWorkspace: () => scope.inputs.activeWorkspace()!,
+    activeWorkspaceOrNull: scope.inputs.activeWorkspace,
     workspaceController: workspaceController,
   );
 }
@@ -103,14 +103,14 @@ WorkspaceWindowHistoryController createWorkspaceWindowHistoryController({
 }) {
   return WorkspaceWindowHistoryController(
     environment: () => scope.envState.environment,
-    workspaces: scope.ws.workspaces,
-    activeWorkspace: scope.ws.activeWorkspace,
+    workspaces: scope.inputs.workspaces,
+    activeWorkspace: scope.inputs.activeWorkspace,
     workspaceWindowHistoryState: scope.stateStore.workspaceWindowHistoryState,
     workspaceController: workspaceController,
     updateEnvironment: scope.store.updateEnvironment,
     replaceWorkspace: scope.store.replaceWorkspace,
     showMessage: scope.inputs.showMessage,
-    showWorkspaceScreen: scope.ws.showWorkspaceScreen,
+    showWorkspaceScreen: scope.inputs.showWorkspaceScreen,
     screen: () => scope.uiState.screen,
     maxRecentlyClosedWindows: 12,
   );

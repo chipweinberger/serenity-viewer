@@ -17,9 +17,9 @@ WorkspaceVideoConversionController createWorkspaceVideoConversionController({
     videoFrameExporter: videoFrameExporter,
     videoConversionPrompts: workspaceVideoConversionPrompts.confirmOverwriteJpeg,
     createFileBookmark: scope.platform.createFileBookmark,
-    activeWorkspace: scope.ws.activeWorkspace,
+    activeWorkspace: scope.inputs.activeWorkspace,
     replaceWorkspace: scope.inputs.replaceWorkspace,
-    colorFromDigest: scope.ws.colorFromDigest,
+    colorFromDigest: scope.inputs.colorFromDigest,
     removePausedVideoWindow: scope.interactionState.removePausedVideoWindow,
   );
 }
@@ -34,7 +34,7 @@ WorkspaceMediaImportController createWorkspaceMediaImportController({
     imageExtensions: const ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tif', 'tiff'],
     videoExtensions: const ['mp4', 'mov', 'm4v', 'avi', 'mkv', 'webm'],
     environmentStoreState: scope.envState,
-    activeWorkspace: () => scope.ws.activeWorkspace()!,
+    activeWorkspace: () => scope.inputs.activeWorkspace()!,
     confirmSingleFrameConversion: workspaceVideoConversionPrompts.confirmSingleFrameConversion,
     videoFrameExporter: videoFrameExporter,
     createFileBookmark: scope.platform.createFileBookmark,

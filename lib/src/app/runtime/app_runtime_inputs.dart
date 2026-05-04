@@ -26,25 +26,6 @@ class AppRuntimeInputs {
     required this.updateEnvironment,
     required this.replaceWorkspace,
     required this.saveEnvironment,
-    required this.workspace,
-  });
-
-  final bool isRunningInWidgetTest;
-  final AppStateStore stateStore;
-  final AppUiHandles uiHandles;
-  final String Function() windowTitle;
-  final BuildContext Function() context;
-  final bool Function() mounted;
-  final ValueChanged<String> showMessage;
-  final Environment Function() seedEnvironment;
-  final ValueChanged<Environment> updateEnvironment;
-  final void Function(Workspace workspace, {bool queueThumbnail}) replaceWorkspace;
-  final Future<void> Function() saveEnvironment;
-  final AppRuntimeWorkspaceInputs workspace;
-}
-
-class AppRuntimeWorkspaceInputs {
-  const AppRuntimeWorkspaceInputs({
     required this.newId,
     required this.colorFromDigest,
     required this.activeWorkspace,
@@ -58,6 +39,17 @@ class AppRuntimeWorkspaceInputs {
     required this.toggleVideoPlayback,
   });
 
+  final bool isRunningInWidgetTest;
+  final AppStateStore stateStore;
+  final AppUiHandles uiHandles;
+  final String Function() windowTitle;
+  final BuildContext Function() context;
+  final bool Function() mounted;
+  final ValueChanged<String> showMessage;
+  final Environment Function() seedEnvironment;
+  final ValueChanged<Environment> updateEnvironment;
+  final void Function(Workspace workspace, {bool queueThumbnail}) replaceWorkspace;
+  final Future<void> Function() saveEnvironment;
   final String Function(String prefix) newId;
   final int Function(String value) colorFromDigest;
   final Workspace? Function() activeWorkspace;
@@ -101,12 +93,29 @@ Future<void> Function() _buildRuntimeSaveEnvironment({
   return () => documentPersistence().saveEnvironment();
 }
 
-AppRuntimeWorkspaceInputs _buildAppRuntimeWorkspaceInputs({
+AppRuntimeInputs buildAppRuntimeInputs({
   required AppStateStore stateStore,
+  required AppUiHandles uiHandles,
+  required BuildContext Function() context,
+  required bool Function() mounted,
+  required ValueChanged<String> showMessage,
+  required bool isRunningInWidgetTest,
   required AppFoundation Function() foundation,
   required AppWorkspaceServices Function() workspace,
+  required DocumentPersistenceController Function() documentPersistence,
 }) {
-  return AppRuntimeWorkspaceInputs(
+  return AppRuntimeInputs(
+    isRunningInWidgetTest: isRunningInWidgetTest,
+    stateStore: stateStore,
+    uiHandles: uiHandles,
+    windowTitle: _buildRuntimeWindowTitle(stateStore: stateStore),
+    context: context,
+    mounted: mounted,
+    showMessage: showMessage,
+    seedEnvironment: _buildRuntimeSeedEnvironment(),
+    updateEnvironment: _buildRuntimeUpdateEnvironment(foundation: foundation),
+    replaceWorkspace: _buildRuntimeReplaceWorkspace(foundation: foundation),
+    saveEnvironment: _buildRuntimeSaveEnvironment(documentPersistence: documentPersistence),
     newId: newSerenityId,
     colorFromDigest: assetColorValueFromDigest,
     activeWorkspace: () => deriveActiveWorkspaceOrNull(stateStore),
@@ -142,36 +151,5 @@ AppRuntimeWorkspaceInputs _buildAppRuntimeWorkspaceInputs({
             ),
     toggleExpose: () => foundation().appUiController.toggleExpose(),
     toggleVideoPlayback: (windowId) => workspace().workspaceWindowController.toggleVideoPlayback(windowId),
-  );
-}
-
-AppRuntimeInputs buildAppRuntimeInputs({
-  required AppStateStore stateStore,
-  required AppUiHandles uiHandles,
-  required BuildContext Function() context,
-  required bool Function() mounted,
-  required ValueChanged<String> showMessage,
-  required bool isRunningInWidgetTest,
-  required AppFoundation Function() foundation,
-  required AppWorkspaceServices Function() workspace,
-  required DocumentPersistenceController Function() documentPersistence,
-}) {
-  return AppRuntimeInputs(
-    isRunningInWidgetTest: isRunningInWidgetTest,
-    stateStore: stateStore,
-    uiHandles: uiHandles,
-    windowTitle: _buildRuntimeWindowTitle(stateStore: stateStore),
-    context: context,
-    mounted: mounted,
-    showMessage: showMessage,
-    seedEnvironment: _buildRuntimeSeedEnvironment(),
-    updateEnvironment: _buildRuntimeUpdateEnvironment(foundation: foundation),
-    replaceWorkspace: _buildRuntimeReplaceWorkspace(foundation: foundation),
-    saveEnvironment: _buildRuntimeSaveEnvironment(documentPersistence: documentPersistence),
-    workspace: _buildAppRuntimeWorkspaceInputs(
-      stateStore: stateStore,
-      foundation: foundation,
-      workspace: workspace,
-    ),
   );
 }
