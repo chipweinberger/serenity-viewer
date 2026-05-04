@@ -28,7 +28,42 @@ import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.da
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresher.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_renderer.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_store.dart';
+import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresh_state.dart';
 import 'package:serenity_viewer/src/workspace/tracking/workspace_view_tracking_controller.dart';
+import 'package:serenity_viewer/src/workspace/tracking/workspace_view_tracking_state.dart';
+import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
+import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
+import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
+import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
+import 'package:serenity_viewer/src/app/state/app_state_store.dart';
+
+class _WorkspaceFactoryState {
+  const _WorkspaceFactoryState({
+    required this.stateStore,
+    required this.environmentStoreState,
+    required this.appUiState,
+    required this.windowInteractionState,
+    required this.workspaceViewTrackingState,
+    required this.workspaceViewportState,
+    required this.thumbnailRefreshState,
+  });
+
+  final AppStateStore stateStore;
+  final EnvironmentStoreState environmentStoreState;
+  final AppUiState appUiState;
+  final WindowInteractionState windowInteractionState;
+  final WorkspaceViewTrackingState workspaceViewTrackingState;
+  final WorkspaceViewportState workspaceViewportState;
+  final ThumbnailRefreshState thumbnailRefreshState;
+}
+
+class _WorkspaceFactoryScope {
+  const _WorkspaceFactoryScope({required this.inputs, required this.foundation, required this.state});
+
+  final AppRuntimeInputs inputs;
+  final AppFoundation foundation;
+  final _WorkspaceFactoryState state;
+}
 
 AppFoundation createAppFoundation({
   required AppRuntimeInputs inputs,
@@ -102,44 +137,37 @@ AppDocument createAppDocument({
   return AppDocument(documentCoordinator: documentCoordinator);
 }
 
-ThumbnailController _createThumbnailController({
-  required AppRuntimeInputs inputs,
-  required AppFoundation foundation,
-  required environmentStoreState,
-  required appUiState,
-  required workspaceViewportState,
-  required thumbnailRefreshState,
-}) {
+ThumbnailController _createThumbnailController({required _WorkspaceFactoryScope scope}) {
   return ThumbnailController(
-    state: thumbnailRefreshState,
+    state: scope.state.thumbnailRefreshState,
     refresher: ThumbnailRefresher(
-      environmentStoreState: environmentStoreState,
-      updateEnvironment: foundation.environmentStore.updateEnvironment,
-      renderer: ThumbnailRenderer(isRunningInWidgetTest: inputs.isRunningInWidgetTest),
-      store: ThumbnailStore(thumbnailDirectory: foundation.platformBridge.thumbnailDirectory),
+      environmentStoreState: scope.state.environmentStoreState,
+      updateEnvironment: scope.foundation.environmentStore.updateEnvironment,
+      renderer: ThumbnailRenderer(isRunningInWidgetTest: scope.inputs.isRunningInWidgetTest),
+      store: ThumbnailStore(thumbnailDirectory: scope.foundation.platformBridge.thumbnailDirectory),
     ),
-    activeScreen: () => appUiState.screen,
-    activeWorkspaceId: () => inputs.workspace.activeWorkspace()?.id,
-    viewportSize: () => workspaceViewportState.viewportSize,
-    commitStateChange: inputs.app.commitStateChange,
-    isMounted: inputs.app.mounted,
+    activeScreen: () => scope.state.appUiState.screen,
+    activeWorkspaceId: () => scope.inputs.workspace.activeWorkspace()?.id,
+    viewportSize: () => scope.state.workspaceViewportState.viewportSize,
+    commitStateChange: scope.inputs.app.commitStateChange,
+    isMounted: scope.inputs.app.mounted,
   );
 }
 
 ({WorkspaceLinksController controller, WorkspaceLinksLauncher launcher, WorkspaceLinksPrompts prompts})
-_createWorkspaceLinkServices({required AppRuntimeInputs inputs, required appUiState, required environmentStoreState}) {
+_createWorkspaceLinkServices({required _WorkspaceFactoryScope scope}) {
   return (
     controller: WorkspaceLinksController(
-      screen: () => appUiState.screen,
-      hasSession: () => environmentStoreState.environment != null,
-      activeWorkspace: inputs.workspace.activeWorkspace,
-      workspaces: inputs.workspace.workspaces,
-      replaceWorkspace: inputs.environment.replaceWorkspace,
-      newId: inputs.workspace.newId,
-      showMessage: inputs.app.showMessage,
+      screen: () => scope.state.appUiState.screen,
+      hasSession: () => scope.state.environmentStoreState.environment != null,
+      activeWorkspace: scope.inputs.workspace.activeWorkspace,
+      workspaces: scope.inputs.workspace.workspaces,
+      replaceWorkspace: scope.inputs.environment.replaceWorkspace,
+      newId: scope.inputs.workspace.newId,
+      showMessage: scope.inputs.app.showMessage,
     ),
-    launcher: WorkspaceLinksLauncher(showMessage: inputs.app.showMessage, mounted: inputs.app.mounted),
-    prompts: WorkspaceLinksPrompts(context: inputs.app.context),
+    launcher: WorkspaceLinksLauncher(showMessage: scope.inputs.app.showMessage, mounted: scope.inputs.app.mounted),
+    prompts: WorkspaceLinksPrompts(context: scope.inputs.app.context),
   );
 }
 
@@ -149,51 +177,42 @@ _createWorkspaceLinkServices({required AppRuntimeInputs inputs, required appUiSt
   WorkspaceWindowHistoryController workspaceWindowHistoryController,
   WorkspaceViewportSessionController workspaceViewportSessionController,
 })
-_createWorkspaceControllers({
-  required AppRuntimeInputs inputs,
-  required AppFoundation foundation,
-  required ThumbnailController thumbnailController,
-  required stateStore,
-  required environmentStoreState,
-  required appUiState,
-  required windowInteractionState,
-  required workspaceViewportState,
-}) {
+_createWorkspaceControllers({required _WorkspaceFactoryScope scope, required ThumbnailController thumbnailController}) {
   final workspaceController = WorkspaceController(
-    appUiState: appUiState,
-    windowInteractionState: windowInteractionState,
-    workspaceViewportState: workspaceViewportState,
-    commitInteractionState: inputs.app.commitStateChange,
-    replaceWorkspace: inputs.environment.replaceWorkspace,
-    setWorkspaceViewport: inputs.workspace.setWorkspaceViewport,
+    appUiState: scope.state.appUiState,
+    windowInteractionState: scope.state.windowInteractionState,
+    workspaceViewportState: scope.state.workspaceViewportState,
+    commitInteractionState: scope.inputs.app.commitStateChange,
+    replaceWorkspace: scope.inputs.environment.replaceWorkspace,
+    setWorkspaceViewport: scope.inputs.workspace.setWorkspaceViewport,
     refreshActiveWorkspaceThumbnail: thumbnailController.refreshActiveWorkspaceIfNeeded,
   );
   final workspaceWindowController = WorkspaceWindowController(
-    appUiState: appUiState,
-    environment: () => environmentStoreState.environment,
-    activeWorkspace: () => inputs.workspace.activeWorkspace()!,
-    activeWorkspaceOrNull: inputs.workspace.activeWorkspace,
+    appUiState: scope.state.appUiState,
+    environment: () => scope.state.environmentStoreState.environment,
+    activeWorkspace: () => scope.inputs.workspace.activeWorkspace()!,
+    activeWorkspaceOrNull: scope.inputs.workspace.activeWorkspace,
     workspaceController: workspaceController,
   );
   final workspaceWindowHistoryController = WorkspaceWindowHistoryController(
-    environment: () => environmentStoreState.environment,
-    workspaces: inputs.workspace.workspaces,
-    activeWorkspace: inputs.workspace.activeWorkspace,
-    workspaceWindowHistoryState: stateStore.workspaceWindowHistoryState,
+    environment: () => scope.state.environmentStoreState.environment,
+    workspaces: scope.inputs.workspace.workspaces,
+    activeWorkspace: scope.inputs.workspace.activeWorkspace,
+    workspaceWindowHistoryState: scope.state.stateStore.workspaceWindowHistoryState,
     workspaceController: workspaceController,
-    updateEnvironment: foundation.environmentStore.updateEnvironment,
-    replaceWorkspace: foundation.environmentStore.replaceWorkspace,
-    commitStateChange: inputs.app.commitStateChange,
-    showMessage: inputs.app.showMessage,
-    showWorkspaceScreen: inputs.workspace.showWorkspaceScreen,
-    screen: () => appUiState.screen,
+    updateEnvironment: scope.foundation.environmentStore.updateEnvironment,
+    replaceWorkspace: scope.foundation.environmentStore.replaceWorkspace,
+    commitStateChange: scope.inputs.app.commitStateChange,
+    showMessage: scope.inputs.app.showMessage,
+    showWorkspaceScreen: scope.inputs.workspace.showWorkspaceScreen,
+    screen: () => scope.state.appUiState.screen,
     maxRecentlyClosedWindows: 12,
   );
   final workspaceViewportSessionController = WorkspaceViewportSessionController(
-    environmentStoreState: environmentStoreState,
-    workspaceViewportState: workspaceViewportState,
+    environmentStoreState: scope.state.environmentStoreState,
+    workspaceViewportState: scope.state.workspaceViewportState,
     thumbnailController: thumbnailController,
-    replaceWorkspace: foundation.environmentStore.replaceWorkspace,
+    replaceWorkspace: scope.foundation.environmentStore.replaceWorkspace,
   );
 
   return (
@@ -213,85 +232,80 @@ _createWorkspaceControllers({
   WorkspaceViewTrackingController workspaceViewTrackingController,
 })
 _createEnvironmentAndWorkspaceFlows({
-  required AppRuntimeInputs inputs,
-  required AppFoundation foundation,
+  required _WorkspaceFactoryScope scope,
   required ThumbnailController thumbnailController,
   required WorkspaceLinksController workspaceLinksController,
   required WorkspaceController workspaceController,
-  required environmentStoreState,
-  required appUiState,
-  required workspaceViewTrackingState,
-  required workspaceViewportState,
 }) {
   final navigationController = EnvironmentNavigationController(
     EnvironmentNavigationDependencies(
-      environmentStoreState: environmentStoreState,
-      appUiState: appUiState,
+      environmentStoreState: scope.state.environmentStoreState,
+      appUiState: scope.state.appUiState,
       workspaceController: workspaceController,
-      openWorkspaces: inputs.workspace.openWorkspaces,
-      updateEnvironment: inputs.environment.updateEnvironment,
-      showWorkspaceScreen: inputs.workspace.showWorkspaceScreen,
-      showLibraryScreen: inputs.workspace.showLibraryScreen,
-      workspaceSwitchTarget: foundation.appUiController.workspaceSwitchTarget,
+      openWorkspaces: scope.inputs.workspace.openWorkspaces,
+      updateEnvironment: scope.inputs.environment.updateEnvironment,
+      showWorkspaceScreen: scope.inputs.workspace.showWorkspaceScreen,
+      showLibraryScreen: scope.inputs.workspace.showLibraryScreen,
+      workspaceSwitchTarget: scope.foundation.appUiController.workspaceSwitchTarget,
       refreshActiveWorkspaceThumbnail: thumbnailController.refreshActiveWorkspaceIfNeeded,
     ),
   );
   final workspaceExposeLayoutController = WorkspaceExposeLayoutController(
     WorkspaceExposeLayoutDependencies(
-      appUiState: appUiState,
-      workspaceViewportState: workspaceViewportState,
-      context: inputs.app.context,
-      mounted: inputs.app.mounted,
-      activeWorkspace: inputs.workspace.activeWorkspace,
-      replaceWorkspace: inputs.environment.replaceWorkspace,
-      showWorkspaceScreen: inputs.workspace.showWorkspaceScreen,
+      appUiState: scope.state.appUiState,
+      workspaceViewportState: scope.state.workspaceViewportState,
+      context: scope.inputs.app.context,
+      mounted: scope.inputs.app.mounted,
+      activeWorkspace: scope.inputs.workspace.activeWorkspace,
+      replaceWorkspace: scope.inputs.environment.replaceWorkspace,
+      showWorkspaceScreen: scope.inputs.workspace.showWorkspaceScreen,
     ),
   );
   final environmentManagementMutations = EnvironmentManagementMutations(
     EnvironmentManagementMutationDependencies(
-      environmentStoreState: environmentStoreState,
-      appUiState: appUiState,
+      environmentStoreState: scope.state.environmentStoreState,
+      appUiState: scope.state.appUiState,
       workspaceController: workspaceController,
-      workspaces: inputs.workspace.workspaces,
-      updateEnvironment: inputs.environment.updateEnvironment,
-      replaceWorkspace: inputs.environment.replaceWorkspace,
-      showWorkspaceScreen: inputs.workspace.showWorkspaceScreen,
-      newId: inputs.workspace.newId,
+      workspaces: scope.inputs.workspace.workspaces,
+      updateEnvironment: scope.inputs.environment.updateEnvironment,
+      replaceWorkspace: scope.inputs.environment.replaceWorkspace,
+      showWorkspaceScreen: scope.inputs.workspace.showWorkspaceScreen,
+      newId: scope.inputs.workspace.newId,
       queueWorkspaceRefresh: thumbnailController.queueWorkspaceRefresh,
     ),
   );
   final managementController = EnvironmentManagementController(
     EnvironmentManagementDependencies(
-      environmentStoreState: environmentStoreState,
+      environmentStoreState: scope.state.environmentStoreState,
       workspaceController: workspaceController,
-      context: inputs.app.context,
-      mounted: inputs.app.mounted,
-      workspaces: inputs.workspace.workspaces,
-      activeWorkspace: inputs.workspace.activeWorkspace,
-      showMessage: inputs.app.showMessage,
+      context: scope.inputs.app.context,
+      mounted: scope.inputs.app.mounted,
+      workspaces: scope.inputs.workspace.workspaces,
+      activeWorkspace: scope.inputs.workspace.activeWorkspace,
+      showMessage: scope.inputs.app.showMessage,
       navigation: navigationController,
       mutations: environmentManagementMutations,
     ),
   );
   final workspaceShortcutController = WorkspaceShortcutController(
     WorkspaceShortcutDependencies(
-      appUiState: appUiState,
+      appUiState: scope.state.appUiState,
       workspaceLinksController: workspaceLinksController,
-      focusedWindowOrNull: inputs.workspace.focusedWindowOrNull,
-      showWorkspaceScreen: inputs.workspace.showWorkspaceScreen,
-      toggleExpose: inputs.workspace.toggleExpose,
-      toggleVideoPlayback: inputs.workspace.toggleVideoPlayback,
+      focusedWindowOrNull: scope.inputs.workspace.focusedWindowOrNull,
+      showWorkspaceScreen: scope.inputs.workspace.showWorkspaceScreen,
+      toggleExpose: scope.inputs.workspace.toggleExpose,
+      toggleVideoPlayback: scope.inputs.workspace.toggleVideoPlayback,
       navigation: navigationController,
     ),
   );
   final workspaceViewTrackingController = WorkspaceViewTrackingController(
     WorkspaceViewTrackingDependencies(
-      environmentStoreState: environmentStoreState,
-      appUiState: appUiState,
-      workspaceViewTrackingState: workspaceViewTrackingState,
-      mounted: inputs.app.mounted,
-      activeWorkspace: inputs.workspace.activeWorkspace,
-      updateEnvironment: inputs.environment.updateEnvironment,
+      environmentStoreState: scope.state.environmentStoreState,
+      appUiState: scope.state.appUiState,
+      workspaceViewTrackingState: scope.state.workspaceViewTrackingState,
+      mounted: scope.inputs.app.mounted,
+      activeWorkspace: scope.inputs.workspace.activeWorkspace,
+      updateEnvironment: scope.inputs.environment.updateEnvironment,
     ),
   );
 
@@ -309,42 +323,36 @@ _createEnvironmentAndWorkspaceFlows({
   WorkspaceVideoConversionController workspaceVideoConversionController,
   WorkspaceMediaImportController workspaceMediaImportController,
 })
-_createMediaFlows({
-  required AppRuntimeInputs inputs,
-  required AppFoundation foundation,
-  required ThumbnailController thumbnailController,
-  required environmentStoreState,
-  required windowInteractionState,
-}) {
-  final videoFrameExporter = VideoFrameExporter(mediaInspector: foundation.mediaInspector);
-  final workspaceVideoConversionPrompts = WorkspaceVideoConversionPrompts(context: inputs.app.context);
+_createMediaFlows({required _WorkspaceFactoryScope scope, required ThumbnailController thumbnailController}) {
+  final videoFrameExporter = VideoFrameExporter(mediaInspector: scope.foundation.mediaInspector);
+  final workspaceVideoConversionPrompts = WorkspaceVideoConversionPrompts(context: scope.inputs.app.context);
   final workspaceVideoConversionController = WorkspaceVideoConversionController(
-    showMessage: inputs.app.showMessage,
-    mediaInspector: foundation.mediaInspector,
+    showMessage: scope.inputs.app.showMessage,
+    mediaInspector: scope.foundation.mediaInspector,
     videoFrameExporter: videoFrameExporter,
     videoConversionPrompts: workspaceVideoConversionPrompts.confirmOverwriteJpeg,
-    createFileBookmark: foundation.platformBridge.createFileBookmark,
-    activeWorkspace: inputs.workspace.activeWorkspace,
-    replaceWorkspace: inputs.environment.replaceWorkspace,
-    colorFromDigest: inputs.workspace.colorFromDigest,
+    createFileBookmark: scope.foundation.platformBridge.createFileBookmark,
+    activeWorkspace: scope.inputs.workspace.activeWorkspace,
+    replaceWorkspace: scope.inputs.environment.replaceWorkspace,
+    colorFromDigest: scope.inputs.workspace.colorFromDigest,
     removePausedVideoWindow: (windowId) {
-      inputs.app.commitStateChange(() {
-        windowInteractionState.pausedVideoWindows.remove(windowId);
+      scope.inputs.app.commitStateChange(() {
+        scope.state.windowInteractionState.pausedVideoWindows.remove(windowId);
       });
     },
   );
   final workspaceMediaImportController = WorkspaceMediaImportController(
     imageExtensions: const ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tif', 'tiff'],
     videoExtensions: const ['mp4', 'mov', 'm4v', 'avi', 'mkv', 'webm'],
-    environmentStoreState: environmentStoreState,
-    activeWorkspace: () => inputs.workspace.activeWorkspace()!,
+    environmentStoreState: scope.state.environmentStoreState,
+    activeWorkspace: () => scope.inputs.workspace.activeWorkspace()!,
     confirmSingleFrameConversion: workspaceVideoConversionPrompts.confirmSingleFrameConversion,
     videoFrameExporter: videoFrameExporter,
-    createFileBookmark: foundation.platformBridge.createFileBookmark,
-    mediaInspector: foundation.mediaInspector,
-    updateEnvironment: foundation.environmentStore.updateEnvironment,
+    createFileBookmark: scope.foundation.platformBridge.createFileBookmark,
+    mediaInspector: scope.foundation.mediaInspector,
+    updateEnvironment: scope.foundation.environmentStore.updateEnvironment,
     thumbnailController: thumbnailController,
-    showMessage: inputs.app.showMessage,
+    showMessage: scope.inputs.app.showMessage,
   );
 
   return (
@@ -354,55 +362,30 @@ _createMediaFlows({
 }
 
 AppWorkspaceServices createAppWorkspaceServices({required AppRuntimeInputs inputs, required AppFoundation foundation}) {
-  final stateStore = inputs.stateStore;
-  final environmentStoreState = stateStore.environmentStoreState;
-  final appUiState = stateStore.appUiState;
-  final windowInteractionState = stateStore.windowInteractionState;
-  final workspaceViewTrackingState = stateStore.workspaceViewTrackingState;
-  final workspaceViewportState = stateStore.workspaceViewportState;
-  final thumbnailRefreshState = stateStore.thumbnailRefreshState;
+  final scope = _WorkspaceFactoryScope(
+    inputs: inputs,
+    foundation: foundation,
+    state: _WorkspaceFactoryState(
+      stateStore: inputs.stateStore,
+      environmentStoreState: inputs.stateStore.environmentStoreState,
+      appUiState: inputs.stateStore.appUiState,
+      windowInteractionState: inputs.stateStore.windowInteractionState,
+      workspaceViewTrackingState: inputs.stateStore.workspaceViewTrackingState,
+      workspaceViewportState: inputs.stateStore.workspaceViewportState,
+      thumbnailRefreshState: inputs.stateStore.thumbnailRefreshState,
+    ),
+  );
 
-  final thumbnailController = _createThumbnailController(
-    inputs: inputs,
-    foundation: foundation,
-    environmentStoreState: environmentStoreState,
-    appUiState: appUiState,
-    workspaceViewportState: workspaceViewportState,
-    thumbnailRefreshState: thumbnailRefreshState,
-  );
-  final workspaceLinksServices = _createWorkspaceLinkServices(
-    inputs: inputs,
-    appUiState: appUiState,
-    environmentStoreState: environmentStoreState,
-  );
-  final workspaceControllers = _createWorkspaceControllers(
-    inputs: inputs,
-    foundation: foundation,
-    thumbnailController: thumbnailController,
-    stateStore: stateStore,
-    environmentStoreState: environmentStoreState,
-    appUiState: appUiState,
-    windowInteractionState: windowInteractionState,
-    workspaceViewportState: workspaceViewportState,
-  );
+  final thumbnailController = _createThumbnailController(scope: scope);
+  final workspaceLinksServices = _createWorkspaceLinkServices(scope: scope);
+  final workspaceControllers = _createWorkspaceControllers(scope: scope, thumbnailController: thumbnailController);
   final environmentAndWorkspaceFlows = _createEnvironmentAndWorkspaceFlows(
-    inputs: inputs,
-    foundation: foundation,
+    scope: scope,
     thumbnailController: thumbnailController,
     workspaceLinksController: workspaceLinksServices.controller,
     workspaceController: workspaceControllers.workspaceController,
-    environmentStoreState: environmentStoreState,
-    appUiState: appUiState,
-    workspaceViewTrackingState: workspaceViewTrackingState,
-    workspaceViewportState: workspaceViewportState,
   );
-  final mediaFlows = _createMediaFlows(
-    inputs: inputs,
-    foundation: foundation,
-    thumbnailController: thumbnailController,
-    environmentStoreState: environmentStoreState,
-    windowInteractionState: windowInteractionState,
-  );
+  final mediaFlows = _createMediaFlows(scope: scope, thumbnailController: thumbnailController);
 
   return AppWorkspaceServices(
     thumbnailController: thumbnailController,

@@ -77,84 +77,69 @@ class _AppRootState extends State<AppRoot> {
     }
   }
 
-  AppMainViewModel _buildAppMainViewModel() {
-    return AppMainViewModel(
-      uiState: _state.appUiState,
-      environment: _state.environmentStoreState.environment!,
-      windowTitle: _derivedState.windowTitle,
-      workspaces: _derivedState.workspaces,
-      openWorkspaces: _derivedState.openWorkspaces,
-      activeWorkspace: _derivedState.activeWorkspace,
-      activeWorkspaceOrNull: _derivedState.activeWorkspaceOrNull,
-      selectedExposeWindowCount: _workspaceRuntime.workspaceController.expose.count(),
-      windowInteractionState: _state.windowInteractionState,
-      workspaceViewportState: _state.workspaceViewportState,
-    );
-  }
-
-  AppMainViewServices _buildAppMainViewServices() {
-    return AppMainViewServices(
-      appUiController: _foundation.appUiController,
-      sharedVideoControllerPool: _foundation.sharedVideoControllerPool,
-      environmentController: _workspaceRuntime.environmentController,
-      workspaceExposeLayoutController: _workspaceRuntime.workspaceExposeLayoutController,
-      workspaceLinksController: _workspaceRuntime.workspaceLinksController,
-      workspaceLinksLauncher: _workspaceRuntime.workspaceLinksLauncher,
-      workspaceLinksPrompts: _workspaceRuntime.workspaceLinksPrompts,
-      thumbnailController: _workspaceRuntime.thumbnailController,
-      windowHistoryController: _workspaceRuntime.workspaceWindowHistoryController,
-      searchController: _uiHandles.searchController,
-      tabScrollController: _uiHandles.tabScrollController,
-    );
-  }
-
-  AppMainViewAppActions _buildAppMainViewAppActions() {
-    return AppMainViewAppActions(
-      commitStateChange: setState,
-      importFiles: _workspaceRuntime.workspaceMediaImportController.importFiles,
-      revealAssetInFinder: _foundation.platformBridge.revealAssetInFinder,
-    );
-  }
-
-  AppMainViewWindowActions _buildAppMainViewWindowActions() {
-    return AppMainViewWindowActions(
-      handleOptionGestureHover: _workspaceRuntime.workspaceWindowController.handleOptionGestureHover,
-      focusWindow: _workspaceRuntime.workspaceWindowController.focusWindow,
-      restorePreviousWindowZOrder: _workspaceRuntime.workspaceWindowController.restorePreviousWindowZOrder,
-      moveWindow: _workspaceRuntime.workspaceWindowController.moveWindow,
-      resizeWindow: _workspaceRuntime.workspaceWindowController.resizeWindow,
-      transformWindowFromTrackpad: _workspaceRuntime.workspaceWindowController.transformWindowFromTrackpad,
-      fitWindowToContent: _workspaceRuntime.workspaceWindowController.fitWindowToContent,
-      setWindowZoom: _workspaceRuntime.workspaceWindowController.setWindowZoom,
-      setVideoPosition: _workspaceRuntime.workspaceWindowController.setVideoPosition,
-      cycleVideoPlaybackSpeed: _workspaceRuntime.workspaceWindowController.cycleVideoPlaybackSpeed,
-      setWindowIntrinsicSize: _workspaceRuntime.workspaceWindowController.setWindowIntrinsicSize,
-      isVideoWindowPaused: _workspaceRuntime.workspaceWindowController.isVideoWindowPaused,
-      toggleVideoPlayback: _workspaceRuntime.workspaceWindowController.toggleVideoPlayback,
-      setPinnedHoverWindow: _workspaceRuntime.workspaceWindowController.setPinnedHoverWindow,
-      clearPinnedHoverWindow: _workspaceRuntime.workspaceWindowController.clearPinnedHoverWindow,
-      flashWindow: (windowId) => _workspaceRuntime.workspaceWindowController.flashWindow(windowId, mounted: mounted),
-      setActiveGestureWindow: _workspaceRuntime.workspaceWindowController.setActiveGestureWindow,
-    );
-  }
-
-  AppMainViewWorkspaceActions _buildAppMainViewWorkspaceActions() {
-    return AppMainViewWorkspaceActions(
-      handleWorkspacePanZoomStart: _workspaceRuntime.workspaceWindowController.handleWorkspacePanZoomStart,
-      handleWorkspacePanZoomUpdate: _workspaceRuntime.workspaceWindowController.handleWorkspacePanZoomUpdate,
-      handleWorkspacePanZoomEnd: _workspaceRuntime.workspaceWindowController.handleWorkspacePanZoomEnd,
-      toggleExpose: _foundation.appUiController.toggleExpose,
-      fitWorkspaceViewportToContent: _workspaceRuntime.workspaceWindowController.fitWorkspaceViewportToContent,
-      confirmCollateWorkspaceWindows: _confirmCollateWorkspaceWindows,
-      setWorkspaceViewport: _workspaceRuntime.workspaceViewportSessionController.setWorkspaceViewport,
-    );
-  }
-
-  AppMainViewActions _buildAppMainViewActions() {
-    return AppMainViewActions(
-      app: _buildAppMainViewAppActions(),
-      window: _buildAppMainViewWindowActions(),
-      workspace: _buildAppMainViewWorkspaceActions(),
+  ({AppMainViewModel model, AppMainViewServices services, AppMainViewActions actions}) _buildAppMainViewBindings() {
+    return (
+      model: AppMainViewModel(
+        uiState: _state.appUiState,
+        environment: _state.environmentStoreState.environment!,
+        windowTitle: _derivedState.windowTitle,
+        workspaces: _derivedState.workspaces,
+        openWorkspaces: _derivedState.openWorkspaces,
+        activeWorkspace: _derivedState.activeWorkspace,
+        activeWorkspaceOrNull: _derivedState.activeWorkspaceOrNull,
+        selectedExposeWindowCount: _workspaceRuntime.workspaceController.expose.count(),
+        windowInteractionState: _state.windowInteractionState,
+        workspaceViewportState: _state.workspaceViewportState,
+      ),
+      services: AppMainViewServices(
+        appUiController: _foundation.appUiController,
+        sharedVideoControllerPool: _foundation.sharedVideoControllerPool,
+        environmentController: _workspaceRuntime.environmentController,
+        workspaceExposeLayoutController: _workspaceRuntime.workspaceExposeLayoutController,
+        workspaceLinksController: _workspaceRuntime.workspaceLinksController,
+        workspaceLinksLauncher: _workspaceRuntime.workspaceLinksLauncher,
+        workspaceLinksPrompts: _workspaceRuntime.workspaceLinksPrompts,
+        thumbnailController: _workspaceRuntime.thumbnailController,
+        windowHistoryController: _workspaceRuntime.workspaceWindowHistoryController,
+        searchController: _uiHandles.searchController,
+        tabScrollController: _uiHandles.tabScrollController,
+      ),
+      actions: AppMainViewActions(
+        app: AppMainViewAppActions(
+          commitStateChange: setState,
+          importFiles: _workspaceRuntime.workspaceMediaImportController.importFiles,
+          revealAssetInFinder: _foundation.platformBridge.revealAssetInFinder,
+        ),
+        window: AppMainViewWindowActions(
+          handleOptionGestureHover: _workspaceRuntime.workspaceWindowController.handleOptionGestureHover,
+          focusWindow: _workspaceRuntime.workspaceWindowController.focusWindow,
+          restorePreviousWindowZOrder: _workspaceRuntime.workspaceWindowController.restorePreviousWindowZOrder,
+          moveWindow: _workspaceRuntime.workspaceWindowController.moveWindow,
+          resizeWindow: _workspaceRuntime.workspaceWindowController.resizeWindow,
+          transformWindowFromTrackpad: _workspaceRuntime.workspaceWindowController.transformWindowFromTrackpad,
+          fitWindowToContent: _workspaceRuntime.workspaceWindowController.fitWindowToContent,
+          setWindowZoom: _workspaceRuntime.workspaceWindowController.setWindowZoom,
+          setVideoPosition: _workspaceRuntime.workspaceWindowController.setVideoPosition,
+          cycleVideoPlaybackSpeed: _workspaceRuntime.workspaceWindowController.cycleVideoPlaybackSpeed,
+          setWindowIntrinsicSize: _workspaceRuntime.workspaceWindowController.setWindowIntrinsicSize,
+          isVideoWindowPaused: _workspaceRuntime.workspaceWindowController.isVideoWindowPaused,
+          toggleVideoPlayback: _workspaceRuntime.workspaceWindowController.toggleVideoPlayback,
+          setPinnedHoverWindow: _workspaceRuntime.workspaceWindowController.setPinnedHoverWindow,
+          clearPinnedHoverWindow: _workspaceRuntime.workspaceWindowController.clearPinnedHoverWindow,
+          flashWindow: (windowId) =>
+              _workspaceRuntime.workspaceWindowController.flashWindow(windowId, mounted: mounted),
+          setActiveGestureWindow: _workspaceRuntime.workspaceWindowController.setActiveGestureWindow,
+        ),
+        workspace: AppMainViewWorkspaceActions(
+          handleWorkspacePanZoomStart: _workspaceRuntime.workspaceWindowController.handleWorkspacePanZoomStart,
+          handleWorkspacePanZoomUpdate: _workspaceRuntime.workspaceWindowController.handleWorkspacePanZoomUpdate,
+          handleWorkspacePanZoomEnd: _workspaceRuntime.workspaceWindowController.handleWorkspacePanZoomEnd,
+          toggleExpose: _foundation.appUiController.toggleExpose,
+          fitWorkspaceViewportToContent: _workspaceRuntime.workspaceWindowController.fitWorkspaceViewportToContent,
+          confirmCollateWorkspaceWindows: _confirmCollateWorkspaceWindows,
+          setWorkspaceViewport: _workspaceRuntime.workspaceViewportSessionController.setWorkspaceViewport,
+        ),
+      ),
     );
   }
 
@@ -163,11 +148,8 @@ class _AppRootState extends State<AppRoot> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return AppMainView(
-      model: _buildAppMainViewModel(),
-      services: _buildAppMainViewServices(),
-      actions: _buildAppMainViewActions(),
-    );
+    final bindings = _buildAppMainViewBindings();
+    return AppMainView(model: bindings.model, services: bindings.services, actions: bindings.actions);
   }
 
   @override
@@ -218,76 +200,29 @@ class _AppRootState extends State<AppRoot> {
         WidgetsBinding.instance.runtimeType.toString().contains('Test');
   }
 
-  AppMenuState _buildAppMenuState() {
-    final focusedWindow = _workspaceRuntime.workspaceWindowController.focusedWindowOrNull();
-    final focusedWindowIsSelected =
-        focusedWindow != null && _workspaceRuntime.workspaceController.expose.contains(focusedWindow.asset.id);
-
-    return AppMenuState(
-      activeWorkspaceId: _state.environmentStoreState.environment?.activeWorkspaceId,
-      focusedWindow: focusedWindow,
-      focusedWindowIsSelected: focusedWindowIsSelected,
-      recentlyClosedWindows: _state.workspaceWindowHistoryState.entries,
-    );
-  }
-
-  AppMenuAppActions _buildAppMenuAppActions() {
-    return AppMenuAppActions(showAboutSerenity: _feedback.showAboutSerenity, openSettings: _settings.openSettings);
-  }
-
-  AppMenuFileActions _buildAppMenuFileActions() {
-    return AppMenuFileActions(
-      createEnvironment: _documents.documentCoordinator.createDocument,
-      openEnvironment: _documents.documentCoordinator.openDocument,
+  AppMenuBindings _buildAppMenuBindings() {
+    return AppMenuBindingBuilder(
+      state: _state,
+      foundation: _foundation,
+      documents: _documents,
+      workspace: _workspaceRuntime,
+      feedback: _feedback,
+      settings: _settings,
       openAssets: _pickAndImportAssets,
-      saveEnvironment: _documents.documentCoordinator.saveDocument,
-      saveEnvironmentAs: _documents.documentCoordinator.saveDocumentAs,
-    );
-  }
-
-  AppMenuAssetActions _buildAppMenuAssetActions() {
-    return AppMenuAssetActions(
-      revealAssetInFinder: _foundation.platformBridge.revealAssetInFinder,
-      toggleWindowSelected: _workspaceRuntime.environmentController.navigation.toggleSelectedWindow,
-      fitWindowToContent: _workspaceRuntime.workspaceWindowController.fitWindowToContent,
-      restorePreviousWindowZOrder: _workspaceRuntime.workspaceWindowController.restorePreviousWindowZOrder,
-      convertVideoWindowToJpeg: _workspaceRuntime.workspaceVideoConversionController.convertVideoWindowToJpeg,
-      closeWindow: _workspaceRuntime.workspaceWindowHistoryController.removeWindow,
-    );
-  }
-
-  AppMenuWorkspaceActions _buildAppMenuWorkspaceActions() {
-    return AppMenuWorkspaceActions(
-      toggleExpose: _foundation.appUiController.toggleExpose,
-      toggleWorkspaceOverview: _workspaceRuntime.environmentController.navigation.toggleOverview,
-      createWorkspace: _workspaceRuntime.environmentController.management.create,
-      switchToPreviousWorkspace: () => _workspaceRuntime.environmentController.navigation.switchWorkspace(-1),
-      switchToNextWorkspace: () => _workspaceRuntime.environmentController.navigation.switchWorkspace(1),
-      fitWorkspaceViewportToContent: _workspaceRuntime.workspaceWindowController.fitWorkspaceViewportToContent,
       confirmCollateWorkspaceWindows: _confirmCollateWorkspaceWindows,
-      pauseAllVideos: _workspaceRuntime.workspaceWindowController.pauseAllVideos,
-      showNoWorkspaceToRenameMessage: () => _feedback.showMessage('There is no workspace to rename.'),
-      renameWorkspace: _workspaceRuntime.environmentController.management.renameWorkspace,
-      showNoWorkspaceToDeleteMessage: () => _feedback.showMessage('There is no workspace to delete.'),
-      confirmDeleteWorkspace: _workspaceRuntime.environmentController.management.confirmDeleteWorkspace,
-    );
-  }
-
-  AppMenuWindowActions _buildAppMenuWindowActions() {
-    return AppMenuWindowActions(
-      restoreRecentlyClosedWindow: _workspaceRuntime.workspaceWindowHistoryController.restoreRecentlyClosedWindow,
-    );
+    ).build();
   }
 
   @override
   Widget build(BuildContext context) {
+    final menu = _buildAppMenuBindings();
     return AppMenu(
-      state: _buildAppMenuState(),
-      app: _buildAppMenuAppActions(),
-      file: _buildAppMenuFileActions(),
-      asset: _buildAppMenuAssetActions(),
-      workspace: _buildAppMenuWorkspaceActions(),
-      window: _buildAppMenuWindowActions(),
+      state: menu.state,
+      app: menu.app,
+      file: menu.file,
+      asset: menu.asset,
+      workspace: menu.workspace,
+      window: menu.window,
       child: Focus(
         focusNode: _uiHandles.focusNode,
         autofocus: true,
