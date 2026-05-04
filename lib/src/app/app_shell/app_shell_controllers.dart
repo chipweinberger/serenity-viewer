@@ -12,8 +12,8 @@ import 'package:serenity_viewer/src/app/app_shell/controllers/app_shell_workspac
 import 'package:serenity_viewer/src/settings/behavior/chrome_controller.dart';
 import 'package:serenity_viewer/src/workspace/session/recently_closed_window_entry.dart';
 
-class AppShellControllers {
-  AppShellControllers({
+class AppShellController {
+  AppShellController({
     required this.context,
     required this.mounted,
     required this.commitStateChange,
@@ -26,43 +26,14 @@ class AppShellControllers {
     required this.foundation,
     required this.documents,
     required this.workspace,
-  });
-
-  final BuildContext Function() context;
-  final bool Function() mounted;
-  final StateSetter commitStateChange;
-  final List<RecentlyClosedWindowEntry> recentlyClosedWindows;
-  final int maxRecentlyClosedWindows;
-  final List<String> imageExtensions;
-  final List<String> videoExtensions;
-  final AppShellRuntimeStateServices state;
-  final AppShellDerivedState derived;
-  final AppShellRuntimeFoundationServices foundation;
-  final AppShellRuntimeDocumentServices documents;
-  final AppShellRuntimeWorkspaceServices workspace;
-
-  EnvironmentController get environment {
-    return foundation.environmentController;
-  }
-
-  ChromeController get chrome {
-    return foundation.chromeController;
-  }
-
-  AppShellNavigationController get navigation {
-    return AppShellNavigationController(chromeController: foundation.chromeController);
-  }
-
-  AppShellUiController get ui {
-    return AppShellUiController(
+  }) {
+    navigation = AppShellNavigationController(chromeController: foundation.chromeController);
+    ui = AppShellUiController(
       context: context,
       persistenceState: state.persistenceState,
       updateEnvironment: environment.updateEnvironment,
     );
-  }
-
-  AppShellWindowHistoryController get windowHistory {
-    return AppShellWindowHistoryController(
+    windowHistory = AppShellWindowHistoryController(
       environment: () => state.persistenceState.environment,
       workspaces: () => derived.workspaces,
       activeWorkspace: () => derived.activeWorkspaceOrNull,
@@ -76,10 +47,7 @@ class AppShellControllers {
       screen: () => state.chromeState.screen,
       maxRecentlyClosedWindows: maxRecentlyClosedWindows,
     );
-  }
-
-  AppShellWindowController get window {
-    return AppShellWindowController(
+    window = AppShellWindowController(
       context: context,
       mounted: mounted,
       chromeState: state.chromeState,
@@ -89,19 +57,13 @@ class AppShellControllers {
       workspaceController: workspace.workspaceController,
       showMessage: ui.showMessage,
     );
-  }
-
-  AppShellWorkspaceGeometryController get geometry {
-    return AppShellWorkspaceGeometryController(
+    geometry = AppShellWorkspaceGeometryController(
       persistenceState: state.persistenceState,
       workspaceViewportState: state.workspaceViewportState,
       thumbnailController: workspace.thumbnailController,
       replaceWorkspace: environment.replaceWorkspace,
     );
-  }
-
-  AppShellMediaImportController get mediaImport {
-    return AppShellMediaImportController(
+    mediaImport = AppShellMediaImportController(
       imageExtensions: imageExtensions,
       videoExtensions: videoExtensions,
       persistenceState: state.persistenceState,
@@ -115,5 +77,32 @@ class AppShellControllers {
       thumbnailController: workspace.thumbnailController,
       showMessage: ui.showMessage,
     );
+  }
+
+  final BuildContext Function() context;
+  final bool Function() mounted;
+  final StateSetter commitStateChange;
+  final List<RecentlyClosedWindowEntry> recentlyClosedWindows;
+  final int maxRecentlyClosedWindows;
+  final List<String> imageExtensions;
+  final List<String> videoExtensions;
+  final AppShellRuntimeStateServices state;
+  final AppShellDerivedState derived;
+  final AppShellRuntimeFoundationServices foundation;
+  final AppShellRuntimeDocumentServices documents;
+  final AppShellRuntimeWorkspaceServices workspace;
+  late final AppShellNavigationController navigation;
+  late final AppShellUiController ui;
+  late final AppShellWindowHistoryController windowHistory;
+  late final AppShellWindowController window;
+  late final AppShellWorkspaceGeometryController geometry;
+  late final AppShellMediaImportController mediaImport;
+
+  EnvironmentController get environment {
+    return foundation.environmentController;
+  }
+
+  ChromeController get chrome {
+    return foundation.chromeController;
   }
 }

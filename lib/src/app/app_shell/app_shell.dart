@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/dependencies/shell_dependencies.dart';
@@ -10,6 +12,7 @@ import 'package:serenity_viewer/src/app/app_shell/builders/app_shell_content_sco
 import 'package:serenity_viewer/src/app/app_shell/builders/app_shell_menu_builder.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_seed_environment.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_runtime.dart';
+import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/workspace/session/recently_closed_window_entry.dart';
 
 class AppShell extends StatefulWidget {
@@ -27,32 +30,21 @@ class _AppShellState extends State<AppShell> {
   final _dependencies = ShellDependencies();
   final List<RecentlyClosedWindowEntry> _recentlyClosedWindows = [];
   late final AppShellRuntime _runtime;
+  late final AppShellController _controller;
 
   AppShellRuntimeStateServices get _state => _runtime.state;
   AppShellDerivedState get _derived => AppShellDerivedState(_state);
   AppShellRuntimeFoundationServices get _foundation => _runtime.foundation;
   AppShellRuntimeDocumentServices get _documents => _runtime.documents;
   AppShellRuntimeWorkspaceServices get _workspaceRuntime => _runtime.workspace;
-  AppShellControllers get _controllers {
-    return AppShellControllers(
-      context: () => context,
-      mounted: () => mounted,
-      commitStateChange: setState,
-      recentlyClosedWindows: _recentlyClosedWindows,
-      maxRecentlyClosedWindows: _AppShellState._maxRecentlyClosedWindows,
-      imageExtensions: _AppShellState._imageExtensions,
-      videoExtensions: _AppShellState._videoExtensions,
-      state: _state,
-      derived: _derived,
-      foundation: _foundation,
-      documents: _documents,
-      workspace: _workspaceRuntime,
-    );
-  }
 
   bool get _isRunningInWidgetTest {
     return Platform.environment.containsKey('FLUTTER_TEST') ||
         WidgetsBinding.instance.runtimeType.toString().contains('Test');
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), behavior: SnackBarBehavior.floating));
   }
 
   Future<void> _restoreEnvironment() async {
@@ -111,38 +103,38 @@ class _AppShellState extends State<AppShell> {
   }
 
   List<PlatformMenuItem> _buildMenus() {
-    final focusedWindow = _controllers.windowHistory.focusedWindowOrNull();
+    final focusedWindow = _controller.windowHistory.focusedWindowOrNull();
     final focusedWindowIsSelected =
         focusedWindow != null && _workspaceRuntime.workspaceController.expose.contains(focusedWindow.asset.id);
 
     return AppShellMenuBuilder(
-      showAboutSerenity: _controllers.ui.showAboutSerenity,
-      openSettings: _controllers.ui.openSettings,
+      showAboutSerenity: _controller.ui.showAboutSerenity,
+      openSettings: _controller.ui.openSettings,
       createEnvironment: _documents.sryDocumentCoordinator.createDocument,
       openEnvironment: _documents.sryDocumentCoordinator.openDocument,
-      openAssets: _controllers.mediaImport.pickAndImportAssets,
+      openAssets: _controller.mediaImport.pickAndImportAssets,
       saveEnvironment: _documents.sryDocumentCoordinator.saveDocument,
       saveEnvironmentAs: _documents.sryDocumentCoordinator.saveDocumentAs,
       revealAssetInFinder: _foundation.mediaBridge.revealAssetInFinder,
       toggleWindowSelected: _workspaceRuntime.workspaceShellController.navigation.toggleSelectedWindow,
-      fitWindowToContent: _controllers.window.fitWindowToContent,
-      restorePreviousWindowZOrder: _controllers.window.restorePreviousWindowZOrder,
+      fitWindowToContent: _controller.window.fitWindowToContent,
+      restorePreviousWindowZOrder: _controller.window.restorePreviousWindowZOrder,
       convertVideoWindowToJpeg: (windowId) =>
           _workspaceRuntime.videoConversionCoordinator.convertVideoWindowToJpeg(windowId),
-      closeWindow: _controllers.windowHistory.removeWindow,
-      toggleExpose: _controllers.chrome.toggleExpose,
+      closeWindow: _controller.windowHistory.removeWindow,
+      toggleExpose: _controller.chrome.toggleExpose,
       toggleWorkspaceOverview: _workspaceRuntime.workspaceShellController.navigation.toggleOverview,
       createWorkspace: _workspaceRuntime.workspaceShellController.management.mutations.create,
       switchToPreviousWorkspace: () => _workspaceRuntime.workspaceShellController.navigation.switchWorkspace(-1),
       switchToNextWorkspace: () => _workspaceRuntime.workspaceShellController.navigation.switchWorkspace(1),
-      fitWorkspaceViewportToContent: _controllers.window.fitWorkspaceViewportToContent,
-      confirmCollateWorkspaceWindows: _controllers.window.confirmCollateWorkspaceWindows,
-      pauseAllVideos: _controllers.window.pauseAllVideos,
-      showNoWorkspaceToRenameMessage: () => _controllers.ui.showMessage('There is no workspace to rename.'),
+      fitWorkspaceViewportToContent: _controller.window.fitWorkspaceViewportToContent,
+      confirmCollateWorkspaceWindows: _controller.window.confirmCollateWorkspaceWindows,
+      pauseAllVideos: _controller.window.pauseAllVideos,
+      showNoWorkspaceToRenameMessage: () => _controller.ui.showMessage('There is no workspace to rename.'),
       renameWorkspace: _workspaceRuntime.workspaceShellController.management.renameWorkspace,
-      showNoWorkspaceToDeleteMessage: () => _controllers.ui.showMessage('There is no workspace to delete.'),
+      showNoWorkspaceToDeleteMessage: () => _controller.ui.showMessage('There is no workspace to delete.'),
       confirmDeleteWorkspace: _workspaceRuntime.workspaceShellController.management.confirmDeleteWorkspace,
-      restoreRecentlyClosedWindow: _controllers.windowHistory.restoreRecentlyClosedWindow,
+      restoreRecentlyClosedWindow: _controller.windowHistory.restoreRecentlyClosedWindow,
     ).build(
       activeWorkspaceId: _state.persistenceState.environment?.activeWorkspaceId,
       focusedWindow: focusedWindow,
@@ -174,37 +166,37 @@ class _AppShellState extends State<AppShell> {
         workspaceShellController: _workspaceRuntime.workspaceShellController,
         workspaceLinksController: _workspaceRuntime.workspaceLinksController,
         thumbnailController: _workspaceRuntime.thumbnailController,
-        windowHistoryController: _controllers.windowHistory,
+        windowHistoryController: _controller.windowHistory,
         searchController: _state.handles.searchController,
         tabScrollController: _state.handles.tabScrollController,
       ),
       actions: AppShellContentActions(
         commitStateChange: setState,
-        importFiles: _controllers.mediaImport.importFiles,
-        handleOptionGestureHover: _controllers.window.handleOptionGestureHover,
-        handleWorkspacePanZoomStart: _controllers.window.handleWorkspacePanZoomStart,
-        handleWorkspacePanZoomUpdate: _controllers.window.handleWorkspacePanZoomUpdate,
-        handleWorkspacePanZoomEnd: _controllers.window.handleWorkspacePanZoomEnd,
-        focusWindow: _controllers.window.focusWindow,
-        restorePreviousWindowZOrder: _controllers.window.restorePreviousWindowZOrder,
-        moveWindow: _controllers.window.moveWindow,
-        resizeWindow: _controllers.window.resizeWindow,
-        transformWindowFromTrackpad: _controllers.window.transformWindowFromTrackpad,
-        fitWindowToContent: _controllers.window.fitWindowToContent,
-        setWindowZoom: _controllers.window.setWindowZoom,
-        setVideoPosition: _controllers.window.setVideoPosition,
-        cycleVideoPlaybackSpeed: _controllers.window.cycleVideoPlaybackSpeed,
-        setWindowIntrinsicSize: _controllers.window.setWindowIntrinsicSize,
-        isVideoWindowPaused: _controllers.window.isVideoWindowPaused,
-        toggleVideoPlayback: _controllers.window.toggleVideoPlayback,
-        toggleExpose: _controllers.chrome.toggleExpose,
-        setPinnedHoverWindow: _controllers.window.setPinnedHoverWindow,
-        clearPinnedHoverWindow: _controllers.window.clearPinnedHoverWindow,
-        flashWindow: (windowId) => _controllers.window.flashWindow(windowId, mounted: mounted),
-        setActiveGestureWindow: _controllers.window.setActiveGestureWindow,
-        fitWorkspaceViewportToContent: _controllers.window.fitWorkspaceViewportToContent,
-        confirmCollateWorkspaceWindows: _controllers.window.confirmCollateWorkspaceWindows,
-        setWorkspaceViewport: _controllers.geometry.setWorkspaceViewport,
+        importFiles: _controller.mediaImport.importFiles,
+        handleOptionGestureHover: _controller.window.handleOptionGestureHover,
+        handleWorkspacePanZoomStart: _controller.window.handleWorkspacePanZoomStart,
+        handleWorkspacePanZoomUpdate: _controller.window.handleWorkspacePanZoomUpdate,
+        handleWorkspacePanZoomEnd: _controller.window.handleWorkspacePanZoomEnd,
+        focusWindow: _controller.window.focusWindow,
+        restorePreviousWindowZOrder: _controller.window.restorePreviousWindowZOrder,
+        moveWindow: _controller.window.moveWindow,
+        resizeWindow: _controller.window.resizeWindow,
+        transformWindowFromTrackpad: _controller.window.transformWindowFromTrackpad,
+        fitWindowToContent: _controller.window.fitWindowToContent,
+        setWindowZoom: _controller.window.setWindowZoom,
+        setVideoPosition: _controller.window.setVideoPosition,
+        cycleVideoPlaybackSpeed: _controller.window.cycleVideoPlaybackSpeed,
+        setWindowIntrinsicSize: _controller.window.setWindowIntrinsicSize,
+        isVideoWindowPaused: _controller.window.isVideoWindowPaused,
+        toggleVideoPlayback: _controller.window.toggleVideoPlayback,
+        toggleExpose: _controller.chrome.toggleExpose,
+        setPinnedHoverWindow: _controller.window.setPinnedHoverWindow,
+        clearPinnedHoverWindow: _controller.window.clearPinnedHoverWindow,
+        flashWindow: (windowId) => _controller.window.flashWindow(windowId, mounted: mounted),
+        setActiveGestureWindow: _controller.window.setActiveGestureWindow,
+        fitWorkspaceViewportToContent: _controller.window.fitWorkspaceViewportToContent,
+        confirmCollateWorkspaceWindows: _controller.window.confirmCollateWorkspaceWindows,
+        setWorkspaceViewport: _controller.geometry.setWorkspaceViewport,
       ),
     ).build();
   }
@@ -221,28 +213,67 @@ class _AppShellState extends State<AppShell> {
           context: () => context,
           mounted: () => mounted,
           commitStateChange: setState,
-          showMessage: _controllers.ui.showMessage,
+          showMessage: _showMessage,
         ),
         environment: AppShellRuntimeEnvironmentConfig(
           seedEnvironment: buildSeedEnvironment,
-          updateEnvironment: _controllers.environment.updateEnvironment,
-          replaceWorkspace: _controllers.environment.replaceWorkspace,
+          updateEnvironment: (environment) => _foundation.environmentController.updateEnvironment(environment),
+          replaceWorkspace: (workspace, {queueThumbnail = true}) =>
+              _foundation.environmentController.replaceWorkspace(workspace, queueThumbnail: queueThumbnail),
           saveEnvironment: _saveEnvironment,
         ),
         workspace: AppShellRuntimeWorkspaceConfig(
-          newId: _controllers.geometry.newId,
-          colorFromDigest: _controllers.geometry.colorFromDigest,
+          newId: _newId,
+          colorFromDigest: _colorFromDigest,
           activeWorkspace: () => _derived.activeWorkspaceOrNull,
           workspaces: () => _derived.workspaces,
           openWorkspaces: () => _derived.openWorkspaces,
-          focusedWindowOrNull: _controllers.windowHistory.focusedWindowOrNull,
-          setWorkspaceViewport: _controllers.geometry.setWorkspaceViewport,
-          showWorkspaceScreen: _controllers.navigation.showWorkspaceScreen,
-          showLibraryScreen: _controllers.navigation.showLibraryScreen,
-          toggleExpose: _controllers.chrome.toggleExpose,
-          toggleVideoPlayback: _controllers.window.toggleVideoPlayback,
+          focusedWindowOrNull: () => _controller.windowHistory.focusedWindowOrNull(),
+          setWorkspaceViewport:
+              ({required String workspaceId, Offset? center, double? zoom, bool queueThumbnail = false}) =>
+                  _controller.geometry.setWorkspaceViewport(
+                    workspaceId: workspaceId,
+                    center: center,
+                    zoom: zoom,
+                    queueThumbnail: queueThumbnail,
+                  ),
+          showWorkspaceScreen:
+              ({
+                WorkspaceLayoutMode workspaceLayoutMode = WorkspaceLayoutMode.freeform,
+                bool resetEditMode = true,
+                bool clearExposeSelection = true,
+                bool refreshWorkspaceTracking = true,
+              }) => _foundation.chromeController.showWorkspaceScreen(
+                workspaceLayoutMode: workspaceLayoutMode,
+                resetEditMode: resetEditMode,
+                clearExposeSelection: clearExposeSelection,
+                refreshWorkspaceTrackingEnabled: refreshWorkspaceTracking,
+              ),
+          showLibraryScreen:
+              ({bool resetEditMode = true, bool clearExposeSelection = true, bool refreshWorkspaceTracking = true}) =>
+                  _foundation.chromeController.showLibraryScreen(
+                    resetEditMode: resetEditMode,
+                    clearExposeSelection: clearExposeSelection,
+                    refreshWorkspaceTrackingEnabled: refreshWorkspaceTracking,
+                  ),
+          toggleExpose: () => _foundation.chromeController.toggleExpose(),
+          toggleVideoPlayback: (windowId) => _controller.window.toggleVideoPlayback(windowId),
         ),
       ),
+    );
+    _controller = AppShellController(
+      context: () => context,
+      mounted: () => mounted,
+      commitStateChange: setState,
+      recentlyClosedWindows: _recentlyClosedWindows,
+      maxRecentlyClosedWindows: _AppShellState._maxRecentlyClosedWindows,
+      imageExtensions: _AppShellState._imageExtensions,
+      videoExtensions: _AppShellState._videoExtensions,
+      state: _state,
+      derived: _derived,
+      foundation: _foundation,
+      documents: _documents,
+      workspace: _workspaceRuntime,
     );
     _restoreEnvironment();
   }
@@ -251,6 +282,14 @@ class _AppShellState extends State<AppShell> {
   void dispose() {
     _runtime.dispose();
     super.dispose();
+  }
+
+  String _newId(String prefix) {
+    return '$prefix-${DateTime.now().microsecondsSinceEpoch}-${math.Random().nextInt(9999)}';
+  }
+
+  int _colorFromDigest(String value) {
+    return assetColorFromMd5(value).toARGB32();
   }
 
   @override
