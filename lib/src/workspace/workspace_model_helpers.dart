@@ -3,7 +3,7 @@ import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 
-class WorkspaceHelpers {
+class WorkspaceModelHelpers {
   static Workspace? workspaceById(Environment environment, String workspaceId) {
     return environment.workspaces.where((workspace) => workspace.id == workspaceId).firstOrNull;
   }

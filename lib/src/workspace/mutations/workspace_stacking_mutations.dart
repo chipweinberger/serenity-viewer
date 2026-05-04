@@ -1,11 +1,11 @@
 import 'dart:math' as math;
 
 import 'package:serenity_viewer/src/environment/workspace.dart';
-import 'package:serenity_viewer/src/workspace/workspace_state_helpers.dart';
+import 'package:serenity_viewer/src/workspace/workspace_model_helpers.dart';
 
 class WorkspaceStackingMutations {
   static ({Workspace workspace, int? previousZOrder}) focusWindow(Workspace workspace, String windowId) {
-    final currentWindow = WorkspaceHelpers.windowById(workspace, windowId);
+    final currentWindow = WorkspaceModelHelpers.windowById(workspace, windowId);
     if (currentWindow == null) {
       return (workspace: workspace, previousZOrder: null);
     }
@@ -16,7 +16,11 @@ class WorkspaceStackingMutations {
     }
 
     return (
-      workspace: WorkspaceHelpers.updateWindowById(workspace, windowId, (window) => window.copyWith(zIndex: maxZ + 1)),
+      workspace: WorkspaceModelHelpers.updateWindowById(
+        workspace,
+        windowId,
+        (window) => window.copyWith(zIndex: maxZ + 1),
+      ),
       previousZOrder: currentWindow.zIndex,
     );
   }

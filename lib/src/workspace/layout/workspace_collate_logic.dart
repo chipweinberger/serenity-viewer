@@ -2,7 +2,7 @@ part of 'workspace_layout.dart';
 
 Workspace _collateWorkspaceWindows(Workspace workspace, {required Size targetBox}) {
   final targetCenter = workspace.viewportCenter;
-  return WorkspaceHelpers.mapWindows(workspace, (window) {
+  return WorkspaceModelHelpers.mapWindows(workspace, (window) {
     if (window.asset.type != AssetType.image && window.asset.type != AssetType.video) {
       return window;
     }

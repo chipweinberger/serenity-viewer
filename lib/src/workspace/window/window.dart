@@ -15,8 +15,8 @@ import 'package:serenity_viewer/src/workspace/window/frame/window_resize_helpers
 import 'package:serenity_viewer/src/workspace/window/interaction/window_zoom_update.dart';
 import 'package:serenity_viewer/src/workspace/window/presentation/window_view_model.dart';
 
-part 'window_interactions.dart';
-part 'window_presentation.dart';
+part 'window_pointer_interactions.dart';
+part 'window_frame_builder.dart';
 
 class WorkspaceWindow extends StatefulWidget {
   const WorkspaceWindow({

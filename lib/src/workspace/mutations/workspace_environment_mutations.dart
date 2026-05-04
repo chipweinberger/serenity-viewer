@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
-import 'package:serenity_viewer/src/workspace/workspace_state_helpers.dart';
+import 'package:serenity_viewer/src/workspace/workspace_model_helpers.dart';
 
 class WorkspaceEnvironmentMutations {
   static Environment replaceWorkspace(Environment environment, Workspace nextWorkspace) {
@@ -72,8 +72,8 @@ class WorkspaceEnvironmentMutations {
       return environment;
     }
 
-    final sourceWorkspace = WorkspaceHelpers.workspaceById(environment, sourceWorkspaceId);
-    final destinationWorkspace = WorkspaceHelpers.workspaceById(environment, destinationWorkspaceId);
+    final sourceWorkspace = WorkspaceModelHelpers.workspaceById(environment, sourceWorkspaceId);
+    final destinationWorkspace = WorkspaceModelHelpers.workspaceById(environment, destinationWorkspaceId);
     if (sourceWorkspace == null || destinationWorkspace == null) {
       return environment;
     }

@@ -1,7 +1,7 @@
 part of 'workspace_layout.dart';
 
 Workspace _moveWindow(Workspace workspace, String windowId, Offset delta) {
-  return WorkspaceHelpers.updateWindowById(
+  return WorkspaceModelHelpers.updateWindowById(
     workspace,
     windowId,
     (window) => window.copyWith(position: _clampWindowPosition(window.position + delta, window.size)),
@@ -9,11 +9,15 @@ Workspace _moveWindow(Workspace workspace, String windowId, Offset delta) {
 }
 
 Workspace _resizeWindow(Workspace workspace, String windowId, WindowResizeHandle handle, Offset delta) {
-  return WorkspaceHelpers.updateWindowById(workspace, windowId, (window) => _resizeWindowState(window, handle, delta));
+  return WorkspaceModelHelpers.updateWindowById(
+    workspace,
+    windowId,
+    (window) => _resizeWindowState(window, handle, delta),
+  );
 }
 
 Workspace _transformWindowFromTrackpad(Workspace workspace, String windowId, double scaleDelta) {
-  return WorkspaceHelpers.updateWindowById(
+  return WorkspaceModelHelpers.updateWindowById(
     workspace,
     windowId,
     (window) => _scaleWindowAroundCenter(window, scaleDelta, mirrorContentZoom: false),
@@ -21,16 +25,16 @@ Workspace _transformWindowFromTrackpad(Workspace workspace, String windowId, dou
 }
 
 Workspace _fitWindowToContent(Workspace workspace, String windowId) {
-  final currentWindow = WorkspaceHelpers.windowById(workspace, windowId);
+  final currentWindow = WorkspaceModelHelpers.windowById(workspace, windowId);
   if (currentWindow == null) {
     return workspace;
   }
 
-  return WorkspaceHelpers.updateWindowById(workspace, windowId, (_) => _fitWindowToVisibleContent(currentWindow));
+  return WorkspaceModelHelpers.updateWindowById(workspace, windowId, (_) => _fitWindowToVisibleContent(currentWindow));
 }
 
 Workspace _setWindowZoom(Workspace workspace, String windowId, WindowZoomUpdate update) {
-  return WorkspaceHelpers.updateWindowById(
+  return WorkspaceModelHelpers.updateWindowById(
     workspace,
     windowId,
     (window) => window.copyWith(
@@ -50,7 +54,7 @@ Workspace _setWindowIntrinsicSize(Workspace workspace, String windowId, Size int
     return workspace;
   }
 
-  final currentWindow = WorkspaceHelpers.windowById(workspace, windowId);
+  final currentWindow = WorkspaceModelHelpers.windowById(workspace, windowId);
   if (currentWindow == null) {
     return workspace;
   }
@@ -69,7 +73,7 @@ Workspace _setWindowIntrinsicSize(Workspace workspace, String windowId, Size int
     return workspace;
   }
 
-  return WorkspaceHelpers.updateWindowById(workspace, windowId, (window) {
+  return WorkspaceModelHelpers.updateWindowById(workspace, windowId, (window) {
     final nextSize = shouldAdoptContentSize
         ? _windowSizeByFittingAspect(
             currentSize: currentWindow.size,
