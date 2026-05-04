@@ -3,8 +3,10 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
+import 'package:serenity_viewer/src/app/app_root.dart';
+import 'package:serenity_viewer/src/app/state/app_derived_state.dart';
 import 'package:serenity_viewer/src/environment/history/environment_window_history_controller.dart';
-import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
+import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/app/runtime/factories/app_document_factory.dart';
 import 'package:serenity_viewer/src/app/runtime/factories/app_foundation_factory.dart';
 import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory.dart';
@@ -54,39 +56,57 @@ class AppRuntime {
 }
 
 AppRuntime createAppRuntime({
-  required EnvironmentStoreState environmentStoreState,
-  required WorkspaceState workspaceState,
-  required WorkspaceRuntime workspaceRuntime,
-  required WorkspaceQueries workspaceQueries,
+  required AppRootObjects rootObjects,
+  required BuildContext Function() context,
   required String Function() windowTitle,
+  required bool Function() mounted,
+  required bool isRunningInWidgetTest,
+  required Environment Function() seedEnvironment,
   required Future<void> Function() saveEnvironment,
-  required DocumentCreationActions documentCreation,
+  required ValueChanged<String> showMessage,
 }) {
   late final AppFoundation foundation;
   late final AppUiController appUiController;
   late final EnvironmentStore environmentStore;
   late final WorkspaceParts workspace;
+  
+  final workspaceRuntime = WorkspaceRuntime(
+    isRunningInWidgetTest: isRunningInWidgetTest,
+    context: context,
+    mounted: mounted,
+    showMessage: showMessage,
+  );
+
+  final workspaceQueries = WorkspaceQueries(
+    activeWorkspace: () => deriveActiveWorkspaceOrNull(rootObjects.environmentStoreState),
+    workspaces: () => deriveWorkspaces(rootObjects.environmentStoreState),
+    openWorkspaces: () => deriveOpenWorkspaces(rootObjects.environmentStoreState),
+    focusedWindowOrNull: () => workspace.workspaceController.window.focusedWindowOrNull(),
+  );
 
   foundation = createAppFoundation(
-    isRunningInWidgetTest: workspaceRuntime.isRunningInWidgetTest,
-    environmentStoreState: environmentStoreState,
+    rootObjects: rootObjects,
+    isRunningInWidgetTest: isRunningInWidgetTest,
     windowTitle: windowTitle,
     showMessage: workspaceRuntime.showMessage,
     mounted: workspaceRuntime.mounted,
   );
+
   appUiController = AppUiController(
-    appUiState: workspaceState.appUiState,
-    windowInteractionState: workspaceState.windowInteractionState,
+    appUiState: rootObjects.appUiState,
+    windowInteractionState: rootObjects.windowInteractionState,
     refreshWorkspaceTracking: () => workspace.workspaceController.tracking.refresh(),
   );
+
   environmentStore = EnvironmentStore(
-    environmentStoreState: environmentStoreState,
-    appUiState: workspaceState.appUiState,
+    environmentStoreState: rootObjects.environmentStoreState,
+    appUiState: rootObjects.appUiState,
     markWorkspaceThumbnailDirty: (workspaceId) =>
         workspace.workspaceController.thumbnails.markWorkspaceDirty(workspaceId),
     refreshWorkspaceTracking: () => workspace.workspaceController.tracking.refresh(),
     syncWindowTitle: foundation.platformBridge.syncWindowTitle,
   );
+
   workspace = assembleWorkspace(
     dependencies: WorkspaceDependencies(
       services: WorkspaceServices(
@@ -96,10 +116,11 @@ AppRuntime createAppRuntime({
         appUiController: appUiController,
       ),
       runtime: workspaceRuntime,
-      state: workspaceState,
+      rootObjects: rootObjects,
       queries: workspaceQueries,
     ),
   );
+
   final documentCoordinator = createAppDocumentCoordinator(
     environmentStore: environmentStore,
     ui: DocumentUiActions(
@@ -119,14 +140,16 @@ AppRuntime createAppRuntime({
       storeLastEnvironmentPath: foundation.platformBridge.storeLastEnvironmentPath,
       syncWindowTitle: foundation.platformBridge.syncWindowTitle,
     ),
-    creation: documentCreation,
+    creation: DocumentCreationActions(seedEnvironment: seedEnvironment),
     thumbnails: DocumentThumbnailActions(thumbnailDirectory: foundation.platformBridge.thumbnailDirectory),
   );
+
   final autosaveTimer = Timer.periodic(const Duration(minutes: 1), (_) {
-    if (environmentStoreState.hasUnsavedChanges) {
+    if (rootObjects.environmentStoreState.hasUnsavedChanges) {
       unawaited(saveEnvironment());
     }
   });
+
   final appLifecycleListener = AppLifecycleListener(
     onStateChange: workspace.workspaceController.tracking.handleAppLifecycleStateChanged,
     onExitRequested: () async {

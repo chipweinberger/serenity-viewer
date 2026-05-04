@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 
+import 'package:serenity_viewer/src/app/app_root.dart';
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
-import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_management_controller.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_management_mutations.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_navigation_controller.dart';
 import 'package:serenity_viewer/src/environment/history/environment_window_history_controller.dart';
-import 'package:serenity_viewer/src/environment/history/environment_window_history_state.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
@@ -34,12 +33,8 @@ import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.d
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresher.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_renderer.dart';
-import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresh_state.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_store.dart';
 import 'package:serenity_viewer/src/workspace/tracking/workspace_view_tracking_controller.dart';
-import 'package:serenity_viewer/src/workspace/tracking/workspace_view_tracking_state.dart';
-import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
-import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
 
 class WorkspaceServices {
   const WorkspaceServices({
@@ -69,24 +64,6 @@ class WorkspaceRuntime {
   final ValueChanged<String> showMessage;
 }
 
-class WorkspaceState {
-  const WorkspaceState({
-    required this.appUiState,
-    required this.windowInteractionState,
-    required this.workspaceViewTrackingState,
-    required this.workspaceViewportState,
-    required this.thumbnailRefreshState,
-    required this.environmentWindowHistoryState,
-  });
-
-  final AppUiState appUiState;
-  final WindowInteractionState windowInteractionState;
-  final WorkspaceViewTrackingState workspaceViewTrackingState;
-  final WorkspaceViewportState workspaceViewportState;
-  final ThumbnailRefreshState thumbnailRefreshState;
-  final EnvironmentWindowHistoryState environmentWindowHistoryState;
-}
-
 class WorkspaceQueries {
   const WorkspaceQueries({
     required this.activeWorkspace,
@@ -103,15 +80,15 @@ class WorkspaceQueries {
 
 class WorkspaceDependencies {
   const WorkspaceDependencies({
+    required this.rootObjects,
     required this.services,
     required this.runtime,
-    required this.state,
     required this.queries,
   });
 
+  final AppRootObjects rootObjects;
   final WorkspaceServices services;
   final WorkspaceRuntime runtime;
-  final WorkspaceState state;
   final WorkspaceQueries queries;
 }
 
@@ -129,22 +106,22 @@ class WorkspaceParts {
 
 ThumbnailController createThumbnailController({required WorkspaceDependencies dependencies}) {
   return ThumbnailController(
-    state: dependencies.state.thumbnailRefreshState,
+    state: dependencies.rootObjects.thumbnailRefreshState,
     refresher: ThumbnailRefresher(
       environmentStoreState: dependencies.services.environmentStore.environmentStoreState,
       updateEnvironment: dependencies.services.environmentStore.updateEnvironment,
       renderer: ThumbnailRenderer(isRunningInWidgetTest: dependencies.runtime.isRunningInWidgetTest),
       store: ThumbnailStore(thumbnailDirectory: dependencies.services.platformBridge.thumbnailDirectory),
     ),
-    activeScreen: () => dependencies.state.appUiState.screen,
+    activeScreen: () => dependencies.rootObjects.appUiState.screen,
     activeWorkspaceId: () => dependencies.queries.activeWorkspace()?.id,
-    viewportSize: () => dependencies.state.workspaceViewportState.viewportSize,
+    viewportSize: () => dependencies.rootObjects.workspaceViewportState.viewportSize,
   );
 }
 
 WorkspaceLinksController createWorkspaceLinksController({required WorkspaceDependencies dependencies}) {
   return WorkspaceLinksController(
-    screen: () => dependencies.state.appUiState.screen,
+    screen: () => dependencies.rootObjects.appUiState.screen,
     hasSession: () => dependencies.services.environmentStore.environmentStoreState.environment != null,
     activeWorkspace: dependencies.queries.activeWorkspace,
     workspaces: dependencies.queries.workspaces,
@@ -162,8 +139,8 @@ WorkspaceWindowController createWorkspaceWindowController({
   required WorkspaceWindowsController windowsController,
 }) {
   return WorkspaceWindowController(
-    appUiState: dependencies.state.appUiState,
-    windowInteractionState: dependencies.state.windowInteractionState,
+    appUiState: dependencies.rootObjects.appUiState,
+    windowInteractionState: dependencies.rootObjects.windowInteractionState,
     activeWorkspace: () => dependencies.queries.activeWorkspace()!,
     activeWorkspaceOrNull: dependencies.queries.activeWorkspace,
     gestureController: gestureController,
@@ -185,7 +162,7 @@ WorkspaceVideoConversionController createWorkspaceVideoConversionController({
     activeWorkspace: dependencies.queries.activeWorkspace,
     replaceWorkspace: dependencies.services.environmentStore.replaceWorkspace,
     colorFromDigest: assetColorValueFromDigest,
-    removePausedVideoWindow: dependencies.state.windowInteractionState.removePausedVideoWindow,
+    removePausedVideoWindow: dependencies.rootObjects.windowInteractionState.removePausedVideoWindow,
   );
 }
 
@@ -220,7 +197,7 @@ EnvironmentNavigationController createEnvironmentNavigationController({
   return EnvironmentNavigationController(
     EnvironmentNavigationDependencies(
       environmentStoreState: dependencies.services.environmentStore.environmentStoreState,
-      appUiState: dependencies.state.appUiState,
+      appUiState: dependencies.rootObjects.appUiState,
       exposeController: exposeController,
       openWorkspaces: dependencies.queries.openWorkspaces,
       updateEnvironment: dependencies.services.environmentStore.updateEnvironment,
@@ -257,8 +234,8 @@ WorkspaceExposeLayoutController createWorkspaceExposeLayoutController({
 
   return WorkspaceExposeLayoutController(
     WorkspaceExposeLayoutDependencies(
-      appUiState: dependencies.state.appUiState,
-      workspaceViewportState: dependencies.state.workspaceViewportState,
+      appUiState: dependencies.rootObjects.appUiState,
+      workspaceViewportState: dependencies.rootObjects.workspaceViewportState,
       context: dependencies.runtime.context,
       mounted: dependencies.runtime.mounted,
       activeWorkspace: dependencies.queries.activeWorkspace,
@@ -292,7 +269,7 @@ EnvironmentManagementMutations createEnvironmentManagementMutations({
   return EnvironmentManagementMutations(
     EnvironmentManagementMutationDependencies(
       environmentStoreState: dependencies.services.environmentStore.environmentStoreState,
-      appUiState: dependencies.state.appUiState,
+      appUiState: dependencies.rootObjects.appUiState,
       tabsController: environmentController.tabs,
       windowTransferController: environmentController.windowTransfer,
       exposeController: exposeController,
@@ -357,7 +334,7 @@ WorkspaceShortcutController createWorkspaceShortcutController({
 
   return WorkspaceShortcutController(
     WorkspaceShortcutDependencies(
-      appUiState: dependencies.state.appUiState,
+      appUiState: dependencies.rootObjects.appUiState,
       appUiController: appUiController,
       playbackController: playbackController,
       workspaceLinksController: workspaceLinksController,
@@ -383,8 +360,8 @@ WorkspaceViewTrackingController createWorkspaceViewTrackingController({required 
   return WorkspaceViewTrackingController(
     WorkspaceViewTrackingDependencies(
       environmentStoreState: dependencies.services.environmentStore.environmentStoreState,
-      appUiState: dependencies.state.appUiState,
-      workspaceViewTrackingState: dependencies.state.workspaceViewTrackingState,
+      appUiState: dependencies.rootObjects.appUiState,
+      workspaceViewTrackingState: dependencies.rootObjects.workspaceViewTrackingState,
       mounted: dependencies.runtime.mounted,
       activeWorkspace: dependencies.queries.activeWorkspace,
       updateEnvironment: dependencies.services.environmentStore.updateEnvironment,
@@ -404,7 +381,7 @@ EnvironmentWindowHistoryController createEnvironmentWindowHistoryController({
     environment: () => dependencies.services.environmentStore.environmentStoreState.environment,
     workspaces: dependencies.queries.workspaces,
     activeWorkspace: dependencies.queries.activeWorkspace,
-    environmentWindowHistoryState: dependencies.state.environmentWindowHistoryState,
+    environmentWindowHistoryState: dependencies.rootObjects.environmentWindowHistoryState,
     exposeController: exposeController,
     windowsController: windowsController,
     playbackController: playbackController,
@@ -423,7 +400,7 @@ EnvironmentWindowHistoryController createEnvironmentWindowHistoryController({
           clearExposeSelection: clearExposeSelection,
           refreshWorkspaceTrackingEnabled: refreshWorkspaceTracking,
         ),
-    screen: () => dependencies.state.appUiState.screen,
+    screen: () => dependencies.rootObjects.appUiState.screen,
     maxRecentlyClosedWindows: 12,
   );
 }
@@ -464,25 +441,25 @@ WorkspaceParts assembleWorkspace({required WorkspaceDependencies dependencies}) 
   final thumbnails = createThumbnailController(dependencies: dependencies);
   final links = createWorkspaceLinksController(dependencies: dependencies);
 
-  final gesture = WorkspaceGestureController(windowInteractionState: dependencies.state.windowInteractionState);
-  final expose = WorkspaceExposeController(windowInteractionState: dependencies.state.windowInteractionState);
+  final gesture = WorkspaceGestureController(windowInteractionState: dependencies.rootObjects.windowInteractionState);
+  final expose = WorkspaceExposeController(windowInteractionState: dependencies.rootObjects.windowInteractionState);
   final windows = WorkspaceWindowsController(
-    appUiState: dependencies.state.appUiState,
-    windowInteractionState: dependencies.state.windowInteractionState,
+    appUiState: dependencies.rootObjects.appUiState,
+    windowInteractionState: dependencies.rootObjects.windowInteractionState,
     replaceWorkspace: dependencies.services.environmentStore.replaceWorkspace,
   );
   final viewport = WorkspaceViewportController(
     environmentStoreState: dependencies.services.environmentStore.environmentStoreState,
-    appUiState: dependencies.state.appUiState,
-    windowInteractionState: dependencies.state.windowInteractionState,
-    workspaceViewportState: dependencies.state.workspaceViewportState,
+    appUiState: dependencies.rootObjects.appUiState,
+    windowInteractionState: dependencies.rootObjects.windowInteractionState,
+    workspaceViewportState: dependencies.rootObjects.workspaceViewportState,
     thumbnailController: thumbnails,
     replaceWorkspace: dependencies.services.environmentStore.replaceWorkspace,
     activeWorkspaceOrNull: dependencies.queries.activeWorkspace,
     refreshActiveWorkspaceThumbnail: thumbnails.refreshActiveWorkspaceIfNeeded,
   );
   final playback = WorkspacePlaybackController(
-    windowInteractionState: dependencies.state.windowInteractionState,
+    windowInteractionState: dependencies.rootObjects.windowInteractionState,
     replaceWorkspace: dependencies.services.environmentStore.replaceWorkspace,
     environment: () => dependencies.services.environmentStore.environmentStoreState.environment,
     activeWorkspaceOrNull: dependencies.queries.activeWorkspace,

@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import 'package:serenity_viewer/src/app/app_root.dart';
 import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
-import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/environment/store/environment_bookmark_synchronizer.dart';
 import 'package:serenity_viewer/src/media/video/media_inspector.dart';
 import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
@@ -21,15 +21,15 @@ class AppFoundation {
 }
 
 AppFoundation createAppFoundation({
+  required AppRootObjects rootObjects,
   required bool isRunningInWidgetTest,
-  required EnvironmentStoreState environmentStoreState,
   required String Function() windowTitle,
   required ValueChanged<String> showMessage,
   required bool Function() mounted,
 }) {
   final mediaInspector = MediaInspector(isRunningInWidgetTest: isRunningInWidgetTest);
   final platformBridge = PlatformBridge(
-    environmentStoreState: environmentStoreState,
+    environmentStoreState: rootObjects.environmentStoreState,
     isRunningInWidgetTest: isRunningInWidgetTest,
     windowTitle: windowTitle,
     showMessage: showMessage,
