@@ -8,7 +8,7 @@ import 'package:serenity_viewer/src/workspace/window/frame/window_resize_helpers
 import 'package:serenity_viewer/src/workspace/window/content/asset_zoom_utils.dart';
 import 'package:serenity_viewer/src/workspace/window/interaction/window_zoom_update.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
-import 'package:serenity_viewer/src/workspace/workspace_model_helpers.dart';
+import 'package:serenity_viewer/src/workspace/window/workspace_window_model_helpers.dart';
 
 part 'workspace_collate_logic.dart';
 part 'workspace_viewport_bounds.dart';
