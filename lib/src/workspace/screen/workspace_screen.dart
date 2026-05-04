@@ -369,21 +369,42 @@ class WorkspaceScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildWorkspaceLoadingIndicator() {
+  Widget _buildWorkspaceLoadingIndicator(BuildContext context, {required int unloadedCount}) {
+    final label = unloadedCount == 1 ? 'Loading 1 asset…' : 'Loading $unloadedCount assets…';
+
     return Positioned.fill(
       child: IgnorePointer(
         child: Center(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.34),
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: const Padding(
-              padding: EdgeInsets.all(10),
-              child: SizedBox(
-                width: 18,
-                height: 18,
-                child: CircularProgressIndicator(strokeWidth: 2.2, color: Colors.white),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: BackdropFilter(
+              filter: ui.ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.52),
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(strokeWidth: 2.6, color: Colors.white),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        label,
+                        style: Theme.of(
+                          context,
+                        ).textTheme.titleSmall?.copyWith(color: Colors.white, fontWeight: FontWeight.w800),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -393,7 +414,8 @@ class WorkspaceScreen extends StatelessWidget {
   }
 
   Widget _buildWorkspaceCanvasLayers(BuildContext context, _WorkspaceCanvasViewModel canvasViewModel) {
-    final showsLoadingIndicator = unloadedWorkspaceWindowCount(canvasViewModel.workspace, canvasViewModel.loadPlan) > 0;
+    final unloadedCount = unloadedWorkspaceWindowCount(canvasViewModel.workspace, canvasViewModel.loadPlan);
+    final showsLoadingIndicator = unloadedCount > 0;
 
     return Stack(
       children: [
@@ -405,7 +427,7 @@ class WorkspaceScreen extends StatelessWidget {
         if (!canvasViewModel.isExposeMode && canvasViewModel.windows.isEmpty)
           Positioned.fill(child: _buildEmptyWorkspaceCanvasState(context)),
         if (canvasViewModel.isDropTargetActive) _buildWorkspaceDropOverlay(),
-        if (showsLoadingIndicator) _buildWorkspaceLoadingIndicator(),
+        if (showsLoadingIndicator) _buildWorkspaceLoadingIndicator(context, unloadedCount: unloadedCount),
         Positioned(left: 18, bottom: 18, child: workspaceHud),
       ],
     );
