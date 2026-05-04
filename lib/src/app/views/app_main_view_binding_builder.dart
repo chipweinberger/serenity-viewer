@@ -1,7 +1,10 @@
+import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/app/runtime/app_runtime_groups.dart';
 import 'package:serenity_viewer/src/app/state/app_derived_state.dart';
 import 'package:serenity_viewer/src/app/state/app_state_store.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
+import 'package:serenity_viewer/src/environment/asset.dart';
+import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
 
 import 'package:serenity_viewer/src/app/views/app_main_view_contract.dart';
 
@@ -32,13 +35,14 @@ AppMainViewModel _buildAppMainViewModel({
 }
 
 AppMainViewServices _buildAppMainViewServices({
-  required AppFoundation foundation,
+  required AppUiController appUiController,
+  required SharedVideoControllerPool sharedVideoControllerPool,
   required AppWorkspaceServices workspace,
   required AppUiHandles uiHandles,
 }) {
   return AppMainViewServices(
-    appUiController: foundation.appUiController,
-    sharedVideoControllerPool: foundation.sharedVideoControllerPool,
+    appUiController: appUiController,
+    sharedVideoControllerPool: sharedVideoControllerPool,
     environmentController: workspace.environmentController,
     workspaceExposeLayoutController: workspace.workspaceExposeLayoutController,
     workspaceLinksController: workspace.workspaceLinksController,
@@ -52,7 +56,8 @@ AppMainViewServices _buildAppMainViewServices({
 }
 
 AppMainViewActions _buildAppMainViewActions({
-  required AppFoundation foundation,
+  required AppUiController appUiController,
+  required Future<void> Function(Asset asset) revealAssetInFinder,
   required AppWorkspaceServices workspace,
   required bool Function() mounted,
 }) {
@@ -61,7 +66,7 @@ AppMainViewActions _buildAppMainViewActions({
   return AppMainViewActions(
     app: AppActions(
       files: AppFileActions(importFiles: workspace.workspaceMediaImportController.importFiles),
-      platform: AppPlatformActions(revealAssetInFinder: foundation.platformBridge.revealAssetInFinder),
+      platform: AppPlatformActions(revealAssetInFinder: revealAssetInFinder),
     ),
     window: WindowActions(
       interaction: WindowInteractionActions(
@@ -99,14 +104,16 @@ AppMainViewActions _buildAppMainViewActions({
       layout: WorkspaceLayoutActions(
         confirmCollateWorkspaceWindows: workspace.workspaceCollateController.confirmCollateWorkspaceWindows,
       ),
-      mode: WorkspaceModeActions(toggleExpose: foundation.appUiController.toggleExpose),
+      mode: WorkspaceModeActions(toggleExpose: appUiController.toggleExpose),
     ),
   );
 }
 
 AppMainViewBindings buildAppMainViewBindings({
   required AppStateStore state,
-  required AppFoundation foundation,
+  required AppUiController appUiController,
+  required SharedVideoControllerPool sharedVideoControllerPool,
+  required Future<void> Function(Asset asset) revealAssetInFinder,
   required AppWorkspaceServices workspace,
   required AppUiHandles uiHandles,
   required bool Function() mounted,
@@ -116,7 +123,17 @@ AppMainViewBindings buildAppMainViewBindings({
       state: state,
       selectedExposeWindowCount: workspace.workspaceController.expose.count(),
     ),
-    services: _buildAppMainViewServices(foundation: foundation, workspace: workspace, uiHandles: uiHandles),
-    actions: _buildAppMainViewActions(foundation: foundation, workspace: workspace, mounted: mounted),
+    services: _buildAppMainViewServices(
+      appUiController: appUiController,
+      sharedVideoControllerPool: sharedVideoControllerPool,
+      workspace: workspace,
+      uiHandles: uiHandles,
+    ),
+    actions: _buildAppMainViewActions(
+      appUiController: appUiController,
+      revealAssetInFinder: revealAssetInFinder,
+      workspace: workspace,
+      mounted: mounted,
+    ),
   );
 }

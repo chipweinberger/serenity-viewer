@@ -40,7 +40,9 @@ class _AppRootState extends State<AppRoot> {
   AppMainViewBindings _buildAppMainViewBindings() {
     return buildAppMainViewBindings(
       state: _state,
-      foundation: _foundation,
+      appUiController: _foundation.appUiController,
+      sharedVideoControllerPool: _foundation.sharedVideoControllerPool,
+      revealAssetInFinder: _foundation.platformBridge.revealAssetInFinder,
       workspace: _workspaceRuntime,
       uiHandles: _uiHandles,
       mounted: () => mounted,
@@ -68,7 +70,9 @@ class _AppRootState extends State<AppRoot> {
     );
     _documentPersistence = DocumentPersistenceController(
       state: _state,
-      foundation: _foundation,
+      environmentStore: _foundation.environmentStore,
+      platformBridge: _foundation.platformBridge,
+      environmentBookmarkSynchronizer: _foundation.environmentBookmarkSynchronizer,
       documentCoordinator: _documentCoordinator,
       mounted: () => mounted,
       seedEnvironment: buildSeedEnvironment,
@@ -107,7 +111,8 @@ class _AppRootState extends State<AppRoot> {
   AppMenuBindings _buildAppMenuBindings() {
     return buildAppMenuBindings(
       state: _state,
-      foundation: _foundation,
+      appUiController: _foundation.appUiController,
+      revealAssetInFinder: _foundation.platformBridge.revealAssetInFinder,
       documentCoordinator: _documentCoordinator,
       workspace: _workspaceRuntime,
       feedback: _feedback,

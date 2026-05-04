@@ -3,15 +3,19 @@ import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 
-import 'package:serenity_viewer/src/app/runtime/app_runtime.dart';
 import 'package:serenity_viewer/src/app/state/app_state_store.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/document/document_coordinator.dart';
+import 'package:serenity_viewer/src/environment/store/environment_bookmark_synchronizer.dart';
+import 'package:serenity_viewer/src/environment/store/environment_store.dart';
+import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
 
 class DocumentPersistenceController {
   const DocumentPersistenceController({
     required this.state,
-    required this.foundation,
+    required this.environmentStore,
+    required this.platformBridge,
+    required this.environmentBookmarkSynchronizer,
     required this.documentCoordinator,
     required this.mounted,
     required this.seedEnvironment,
@@ -19,7 +23,9 @@ class DocumentPersistenceController {
   });
 
   final AppStateStore state;
-  final AppFoundation foundation;
+  final EnvironmentStore environmentStore;
+  final PlatformBridge platformBridge;
+  final EnvironmentBookmarkSynchronizer environmentBookmarkSynchronizer;
   final DocumentCoordinator documentCoordinator;
   final bool Function() mounted;
   final Environment Function() seedEnvironment;
@@ -27,12 +33,12 @@ class DocumentPersistenceController {
 
   Future<void> restoreEnvironment() async {
     if (isRunningInWidgetTest) {
-      foundation.environmentStore.restoreWidgetTestEnvironment(seedEnvironment());
+      environmentStore.restoreWidgetTestEnvironment(seedEnvironment());
       return;
     }
 
     try {
-      final lastEnvironmentPath = await foundation.platformBridge.loadLastEnvironmentPath();
+      final lastEnvironmentPath = await platformBridge.loadLastEnvironmentPath();
       if (lastEnvironmentPath != null && lastEnvironmentPath.isNotEmpty && await File(lastEnvironmentPath).exists()) {
         await documentCoordinator.loadDocumentFromPath(
           lastEnvironmentPath,
@@ -41,12 +47,12 @@ class DocumentPersistenceController {
         );
         return;
       }
-      await foundation.platformBridge.storeLastEnvironmentPath(null);
+      await platformBridge.storeLastEnvironmentPath(null);
     } catch (_) {
-      await foundation.platformBridge.storeLastEnvironmentPath(null);
+      await platformBridge.storeLastEnvironmentPath(null);
     }
 
-    foundation.environmentStore.showMissingStartupState();
+    environmentStore.showMissingStartupState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(documentCoordinator.promptForStartupDocument());
     });
@@ -63,8 +69,8 @@ class DocumentPersistenceController {
     }
 
     try {
-      final sessionToSave = await foundation.environmentBookmarkSynchronizer.synchronize(environment);
-      foundation.environmentStore.applySavedEnvironment(
+      final sessionToSave = await environmentBookmarkSynchronizer.synchronize(environment);
+      environmentStore.applySavedEnvironment(
         originalEnvironment: environment,
         savedEnvironment: sessionToSave,
         mounted: mounted(),
@@ -74,7 +80,7 @@ class DocumentPersistenceController {
         environmentOverride: sessionToSave,
         showMessageOnFailure: false,
       );
-      await foundation.platformBridge.syncWindowTitle();
+      await platformBridge.syncWindowTitle();
     } catch (_) {
       // Widget tests and unsupported platforms can skip local persistence.
     }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/controllers/app_feedback_controller.dart';
+import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/app/runtime/app_runtime_groups.dart';
 import 'package:serenity_viewer/src/app/state/app_state_store.dart';
 import 'package:serenity_viewer/src/environment/asset.dart';
@@ -155,11 +156,11 @@ AppMenuFileActions _buildAppMenuFileActions({
 }
 
 AppMenuAssetActions _buildAppMenuAssetActions({
-  required AppFoundation foundation,
+  required Future<void> Function(Asset asset) revealAssetInFinder,
   required AppWorkspaceServices workspace,
 }) {
   return AppMenuAssetActions(
-    revealAssetInFinder: foundation.platformBridge.revealAssetInFinder,
+    revealAssetInFinder: revealAssetInFinder,
     toggleWindowSelected: workspace.environmentController.navigation.toggleSelectedWindow,
     fitWindowToContent: workspace.workspaceWindowController.fitWindowToContent,
     restorePreviousWindowZOrder: workspace.workspaceWindowController.restorePreviousWindowZOrder,
@@ -169,12 +170,12 @@ AppMenuAssetActions _buildAppMenuAssetActions({
 }
 
 AppMenuWorkspaceActions _buildAppMenuWorkspaceActions({
-  required AppFoundation foundation,
+  required AppUiController appUiController,
   required AppWorkspaceServices workspace,
   required AppFeedbackController feedback,
 }) {
   return AppMenuWorkspaceActions(
-    toggleExpose: foundation.appUiController.toggleExpose,
+    toggleExpose: appUiController.toggleExpose,
     toggleWorkspaceOverview: workspace.environmentController.navigation.toggleOverview,
     createWorkspace: workspace.environmentController.management.create,
     switchToPreviousWorkspace: () => workspace.environmentController.navigation.switchWorkspace(-1),
@@ -197,7 +198,8 @@ AppMenuWindowActions _buildAppMenuWindowActions({required AppWorkspaceServices w
 
 AppMenuBindings buildAppMenuBindings({
   required AppStateStore state,
-  required AppFoundation foundation,
+  required AppUiController appUiController,
+  required Future<void> Function(Asset asset) revealAssetInFinder,
   required DocumentCoordinator documentCoordinator,
   required AppWorkspaceServices workspace,
   required AppFeedbackController feedback,
@@ -208,8 +210,12 @@ AppMenuBindings buildAppMenuBindings({
     state: _buildAppMenuState(state: state, workspace: workspace),
     app: _buildAppMenuAppActions(feedback: feedback, settings: settings),
     file: _buildAppMenuFileActions(documentCoordinator: documentCoordinator, openAssets: openAssets),
-    asset: _buildAppMenuAssetActions(foundation: foundation, workspace: workspace),
-    workspace: _buildAppMenuWorkspaceActions(foundation: foundation, workspace: workspace, feedback: feedback),
+    asset: _buildAppMenuAssetActions(revealAssetInFinder: revealAssetInFinder, workspace: workspace),
+    workspace: _buildAppMenuWorkspaceActions(
+      appUiController: appUiController,
+      workspace: workspace,
+      feedback: feedback,
+    ),
     window: _buildAppMenuWindowActions(workspace: workspace),
   );
 }
