@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -7,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:serenity_viewer/src/app/dependencies/shell_dependencies.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_controllers.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_derived_state.dart';
+import 'package:serenity_viewer/src/app/app_shell/app_shell_persistence_controller.dart';
 import 'package:serenity_viewer/src/app/app_shell/builders/app_shell_content_builder.dart';
 import 'package:serenity_viewer/src/app/app_shell/builders/app_shell_content_scope.dart';
 import 'package:serenity_viewer/src/app/app_shell/builders/app_shell_menu_builder.dart';
@@ -31,6 +31,7 @@ class _AppShellState extends State<AppShell> {
   final List<RecentlyClosedWindowEntry> _recentlyClosedWindows = [];
   late final AppShellRuntime _runtime;
   late final AppShellController _controller;
+  late final AppShellPersistenceController _persistence;
 
   AppShellRuntimeStateServices get _state => _runtime.state;
   AppShellDerivedState get _derived => AppShellDerivedState(_state);
@@ -38,68 +39,8 @@ class _AppShellState extends State<AppShell> {
   AppShellRuntimeDocumentServices get _documents => _runtime.documents;
   AppShellRuntimeWorkspaceServices get _workspaceRuntime => _runtime.workspace;
 
-  bool get _isRunningInWidgetTest {
-    return Platform.environment.containsKey('FLUTTER_TEST') ||
-        WidgetsBinding.instance.runtimeType.toString().contains('Test');
-  }
-
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), behavior: SnackBarBehavior.floating));
-  }
-
-  Future<void> _restoreEnvironment() async {
-    if (_isRunningInWidgetTest) {
-      _foundation.environmentController.restoreWidgetTestEnvironment(buildSeedEnvironment());
-      return;
-    }
-
-    try {
-      final lastEnvironmentPath = await _foundation.appShellPlatformBridge.loadLastEnvironmentPath();
-      if (lastEnvironmentPath != null && lastEnvironmentPath.isNotEmpty && await File(lastEnvironmentPath).exists()) {
-        await _documents.sryDocumentCoordinator.loadDocumentFromPath(
-          lastEnvironmentPath,
-          showSuccessMessage: false,
-          persistAsLastOpened: true,
-        );
-        return;
-      }
-      await _foundation.appShellPlatformBridge.storeLastEnvironmentPath(null);
-    } catch (_) {
-      await _foundation.appShellPlatformBridge.storeLastEnvironmentPath(null);
-    }
-
-    _foundation.environmentController.showMissingStartupState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(_documents.sryDocumentCoordinator.promptForStartupDocument());
-    });
-  }
-
-  Future<void> _saveEnvironment({bool force = false}) async {
-    final environment = _state.persistenceState.environment;
-    final environmentPath = _state.persistenceState.currentEnvironmentPath;
-    if (environment == null || environmentPath == null || environmentPath.isEmpty) {
-      return;
-    }
-    if (!force && !_state.persistenceState.hasUnsavedChanges) {
-      return;
-    }
-
-    try {
-      final sessionToSave = await _foundation.environmentBookmarkSynchronizer.synchronize(environment);
-      _foundation.environmentController.applySavedEnvironment(
-        originalEnvironment: environment,
-        savedEnvironment: sessionToSave,
-        mounted: mounted,
-      );
-      await _documents.sryDocumentCoordinator.saveDocumentToPath(
-        environmentPath,
-        environmentOverride: sessionToSave,
-        showMessageOnFailure: false,
-      );
-      await _foundation.appShellPlatformBridge.syncWindowTitle();
-    } catch (_) {
-      // Widget tests and unsupported platforms can skip local persistence.
-    }
   }
 
   List<PlatformMenuItem> _buildMenus() {
@@ -220,7 +161,7 @@ class _AppShellState extends State<AppShell> {
           updateEnvironment: (environment) => _foundation.environmentController.updateEnvironment(environment),
           replaceWorkspace: (workspace, {queueThumbnail = true}) =>
               _foundation.environmentController.replaceWorkspace(workspace, queueThumbnail: queueThumbnail),
-          saveEnvironment: _saveEnvironment,
+          saveEnvironment: () => _persistence.saveEnvironment(),
         ),
         workspace: AppShellRuntimeWorkspaceConfig(
           newId: _newId,
@@ -275,7 +216,15 @@ class _AppShellState extends State<AppShell> {
       documents: _documents,
       workspace: _workspaceRuntime,
     );
-    _restoreEnvironment();
+    _persistence = AppShellPersistenceController(
+      state: _state,
+      foundation: _foundation,
+      documents: _documents,
+      mounted: () => mounted,
+      seedEnvironment: buildSeedEnvironment,
+      isRunningInWidgetTest: _isRunningInWidgetTest,
+    );
+    _persistence.restoreEnvironment();
   }
 
   @override
@@ -290,6 +239,11 @@ class _AppShellState extends State<AppShell> {
 
   int _colorFromDigest(String value) {
     return assetColorFromMd5(value).toARGB32();
+  }
+
+  bool get _isRunningInWidgetTest {
+    return Platform.environment.containsKey('FLUTTER_TEST') ||
+        WidgetsBinding.instance.runtimeType.toString().contains('Test');
   }
 
   @override
