@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller_types.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
+import 'package:serenity_viewer/src/environment/history/environment_window_history_controller.dart';
 import 'package:serenity_viewer/src/environment/history/environment_window_history_state.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
@@ -37,6 +38,7 @@ class AppRuntime {
     required this.documentCoordinator,
     required this.workspaceController,
     required this.environmentController,
+    required this.environmentWindowHistoryController,
     required this.autosaveTimer,
     required this.appLifecycleListener,
   });
@@ -49,6 +51,7 @@ class AppRuntime {
   final DocumentCoordinator documentCoordinator;
   final WorkspaceController workspaceController;
   final EnvironmentController environmentController;
+  final EnvironmentWindowHistoryController environmentWindowHistoryController;
   final Timer autosaveTimer;
   final AppLifecycleListener appLifecycleListener;
 
@@ -100,7 +103,12 @@ AppRuntime createAppRuntime({
     EnvironmentStore environmentStore,
   })
   foundation;
-  late final ({WorkspaceController workspaceController, EnvironmentController environmentController}) workspace;
+  late final ({
+    WorkspaceController workspaceController,
+    EnvironmentController environmentController,
+    EnvironmentWindowHistoryController environmentWindowHistoryController,
+  })
+  workspace;
 
   foundation = createAppFoundation(
     isRunningInWidgetTest: isRunningInWidgetTest,
@@ -184,6 +192,7 @@ AppRuntime createAppRuntime({
     documentCoordinator: documentCoordinator,
     workspaceController: workspace.workspaceController,
     environmentController: workspace.environmentController,
+    environmentWindowHistoryController: workspace.environmentWindowHistoryController,
     autosaveTimer: autosaveTimer,
     appLifecycleListener: appLifecycleListener,
   );

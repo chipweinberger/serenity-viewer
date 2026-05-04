@@ -8,15 +8,11 @@ import 'package:serenity_viewer/src/environment/link.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/app/app_theme.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.dart';
-import 'package:serenity_viewer/src/workspace/links/workspace_links_launcher.dart';
-import 'package:serenity_viewer/src/workspace/links/workspace_links_prompts.dart';
 
 Future<void> showWorkspaceLinksDialog({
   required BuildContext context,
   required Workspace initialWorkspace,
   required WorkspaceLinksController controller,
-  required WorkspaceLinksLauncher launcher,
-  required WorkspaceLinksPrompts prompts,
 }) async {
   await showGeneralDialog<void>(
     context: context,
@@ -24,12 +20,7 @@ Future<void> showWorkspaceLinksDialog({
     barrierLabel: 'Workspace links',
     barrierColor: Colors.black.withValues(alpha: 0.26),
     pageBuilder: (dialogContext, animation, secondaryAnimation) {
-      return _WorkspaceLinksDialog(
-        initialWorkspace: initialWorkspace,
-        controller: controller,
-        launcher: launcher,
-        prompts: prompts,
-      );
+      return _WorkspaceLinksDialog(initialWorkspace: initialWorkspace, controller: controller);
     },
     transitionBuilder: (context, animation, secondaryAnimation, child) {
       final curve = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
@@ -42,17 +33,10 @@ Future<void> showWorkspaceLinksDialog({
 }
 
 class _WorkspaceLinksDialog extends StatefulWidget {
-  const _WorkspaceLinksDialog({
-    required this.initialWorkspace,
-    required this.controller,
-    required this.launcher,
-    required this.prompts,
-  });
+  const _WorkspaceLinksDialog({required this.initialWorkspace, required this.controller});
 
   final Workspace initialWorkspace;
   final WorkspaceLinksController controller;
-  final WorkspaceLinksLauncher launcher;
-  final WorkspaceLinksPrompts prompts;
 
   @override
   State<_WorkspaceLinksDialog> createState() => _WorkspaceLinksDialogState();
@@ -84,11 +68,11 @@ class _WorkspaceLinksDialogState extends State<_WorkspaceLinksDialog> {
   }
 
   Future<void> _openLink(Link link) async {
-    await widget.launcher.openLink(link);
+    await widget.controller.openLink(link);
   }
 
   Future<void> _renameLink(Link link) async {
-    final customName = await widget.prompts.promptForLinkName(link);
+    final customName = await widget.controller.promptForLinkName(link);
     if (customName == null) {
       return;
     }
@@ -96,10 +80,7 @@ class _WorkspaceLinksDialogState extends State<_WorkspaceLinksDialog> {
   }
 
   Future<void> _removeLink(Link link) async {
-    final shouldRemove = await widget.prompts.confirmRemoveLink(
-      link: link,
-      middleTruncatedLabel: widget.controller.middleTruncatedLabel,
-    );
+    final shouldRemove = await widget.controller.confirmRemoveLink(link);
     if (!shouldRemove) {
       return;
     }
@@ -227,7 +208,7 @@ class _WorkspaceLinksDialogState extends State<_WorkspaceLinksDialog> {
                   ? Colors.white.withValues(alpha: 0.18)
                   : Colors.white.withValues(alpha: 0.34),
               child: InkWell(
-                onTap: _workspace.links.isEmpty ? null : () => unawaited(widget.launcher.openAllLinks(_workspace)),
+                onTap: _workspace.links.isEmpty ? null : () => unawaited(widget.controller.openAllLinks(_workspace)),
                 child: SizedBox(
                   height: 32,
                   child: Padding(

@@ -6,6 +6,7 @@ import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
 import 'package:serenity_viewer/src/app/state/app_derived_state.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
+import 'package:serenity_viewer/src/environment/history/environment_window_history_controller.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
@@ -39,6 +40,7 @@ class WorkspaceView extends StatelessWidget {
     AppUiController appUiController,
     PlatformBridge platformBridge,
     EnvironmentController environmentController,
+    EnvironmentWindowHistoryController environmentWindowHistoryController,
     WorkspaceController workspaceController,
     SharedVideoControllerPool sharedVideoControllerPool,
   })
@@ -47,6 +49,7 @@ class WorkspaceView extends StatelessWidget {
       appUiController: context.read<AppUiController>(),
       platformBridge: context.read<PlatformBridge>(),
       environmentController: context.read<EnvironmentController>(),
+      environmentWindowHistoryController: context.read<EnvironmentWindowHistoryController>(),
       workspaceController: context.read<WorkspaceController>(),
       sharedVideoControllerPool: context.read<SharedVideoControllerPool>(),
     );
@@ -104,9 +107,9 @@ class WorkspaceView extends StatelessWidget {
         viewport: WorkspaceScreenViewportActions(
           trackViewportSize: state.workspaceViewportState.setViewportSize,
           handleOptionGestureHover: dependencies.workspaceController.window.handleOptionGestureHover,
-          handleWorkspacePanZoomStart: dependencies.workspaceController.window.handleWorkspacePanZoomStart,
-          handleWorkspacePanZoomUpdate: dependencies.workspaceController.window.handleWorkspacePanZoomUpdate,
-          handleWorkspacePanZoomEnd: dependencies.workspaceController.window.handleWorkspacePanZoomEnd,
+          handleWorkspacePanZoomStart: dependencies.workspaceController.viewport.handleWorkspacePanZoomStart,
+          handleWorkspacePanZoomUpdate: dependencies.workspaceController.viewport.handleWorkspacePanZoomUpdate,
+          handleWorkspacePanZoomEnd: dependencies.workspaceController.viewport.handleWorkspacePanZoomEnd,
         ),
         window: WorkspaceScreenWindowActions(
           focusWindow: dependencies.workspaceController.window.focusWindow,
@@ -116,18 +119,18 @@ class WorkspaceView extends StatelessWidget {
           transformWindowFromTrackpad: dependencies.workspaceController.window.transformWindowFromTrackpad,
           fitWindowToContent: dependencies.workspaceController.window.fitWindowToContent,
           setWindowZoom: dependencies.workspaceController.window.setWindowZoom,
-          setVideoPosition: dependencies.workspaceController.window.setVideoPosition,
-          cycleVideoPlaybackSpeed: dependencies.workspaceController.window.cycleVideoPlaybackSpeed,
+          setVideoPosition: dependencies.workspaceController.playback.setVideoPosition,
+          cycleVideoPlaybackSpeed: dependencies.workspaceController.playback.cycleVideoPlaybackSpeed,
           setWindowIntrinsicSize: dependencies.workspaceController.window.setWindowIntrinsicSize,
-          isVideoWindowPaused: dependencies.workspaceController.window.isVideoWindowPaused,
-          toggleVideoPlayback: dependencies.workspaceController.window.toggleVideoPlayback,
+          isVideoWindowPaused: dependencies.workspaceController.playback.isVideoWindowPaused,
+          toggleVideoPlayback: dependencies.workspaceController.playback.toggleVideoPlayback,
           toggleExpose: dependencies.appUiController.toggleExpose,
           setPinnedHoverWindow: dependencies.workspaceController.window.setPinnedHoverWindow,
           clearPinnedHoverWindow: dependencies.workspaceController.window.clearPinnedHoverWindow,
           flashWindow: (windowId) =>
               dependencies.workspaceController.window.flashWindow(windowId, mounted: context.mounted),
           toggleSelectedWindow: dependencies.environmentController.navigation.toggleSelectedWindow,
-          removeWindow: dependencies.workspaceController.history.removeWindow,
+          removeWindow: dependencies.environmentWindowHistoryController.removeWindow,
           setActiveGestureWindow: dependencies.workspaceController.window.setActiveGestureWindow,
           revealAssetInFinder: dependencies.platformBridge.revealAssetInFinder,
         ),
@@ -136,7 +139,7 @@ class WorkspaceView extends StatelessWidget {
         viewModel: workspaceHudViewModel,
         actions: WorkspaceHudActions(
           onToggleExpose: dependencies.appUiController.toggleExpose,
-          onFitWorkspaceViewportToContent: dependencies.workspaceController.window.fitWorkspaceViewportToContent,
+          onFitWorkspaceViewportToContent: dependencies.workspaceController.viewport.fitWorkspaceViewportToContent,
           onConfirmCollateWorkspaceWindows: dependencies.workspaceController.layout.confirmCollateWorkspaceWindows,
           onConfirmApplyExposeGridToWorkspace:
               dependencies.workspaceController.layout.confirmApplyExposeGridToWorkspace,
@@ -144,8 +147,6 @@ class WorkspaceView extends StatelessWidget {
             context: context,
             initialWorkspace: activeWorkspace,
             controller: dependencies.workspaceController.links,
-            launcher: dependencies.workspaceController.linksLauncher,
-            prompts: dependencies.workspaceController.linksPrompts,
           ),
           onClearExposeSelection: dependencies.environmentController.navigation.clearExposeSelection,
           onSetWorkspaceZoom: (workspaceId, zoom) => dependencies.workspaceController.viewport.setWorkspaceViewport(

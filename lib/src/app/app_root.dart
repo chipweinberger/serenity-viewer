@@ -13,6 +13,7 @@ import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/app/seed_environment.dart';
 import 'package:serenity_viewer/src/app/state/app_derived_state.dart';
+import 'package:serenity_viewer/src/environment/history/environment_window_history_controller.dart';
 import 'package:serenity_viewer/src/environment/history/environment_window_history_state.dart';
 import 'package:serenity_viewer/src/environment/document/document_persistence_controller.dart';
 import 'package:serenity_viewer/src/environment/document/document_coordinator.dart';
@@ -106,7 +107,7 @@ class _AppRootState extends State<AppRoot> {
                 refreshWorkspaceTrackingEnabled: refreshWorkspaceTracking,
               ),
       toggleExpose: () => _runtime.appUiController.toggleExpose(),
-      toggleVideoPlayback: (windowId) => _runtime.workspaceController.window.toggleVideoPlayback(windowId),
+      toggleVideoPlayback: (windowId) => _runtime.workspaceController.playback.toggleVideoPlayback(windowId),
     );
   }
 
@@ -148,6 +149,7 @@ class _AppRootState extends State<AppRoot> {
       Provider<DocumentCoordinator>.value(value: _runtime.documentCoordinator),
       Provider<WorkspaceController>.value(value: _runtime.workspaceController),
       Provider<EnvironmentController>.value(value: _runtime.environmentController),
+      Provider<EnvironmentWindowHistoryController>.value(value: _runtime.environmentWindowHistoryController),
     ];
   }
 

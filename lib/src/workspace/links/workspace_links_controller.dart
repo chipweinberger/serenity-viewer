@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/environment/link.dart';
@@ -15,6 +16,8 @@ class WorkspaceLinksController {
     required this.replaceWorkspace,
     required this.newId,
     required this.showMessage,
+    required this.mounted,
+    required this.context,
   });
 
   final SerenityScreen Function() screen;
@@ -24,6 +27,8 @@ class WorkspaceLinksController {
   final ValueChanged<Workspace> replaceWorkspace;
   final String Function(String prefix) newId;
   final ValueChanged<String> showMessage;
+  final bool Function() mounted;
+  final BuildContext Function() context;
 
   bool shouldHandlePasteLinksShortcut(KeyDownEvent event) {
     if (screen() != SerenityScreen.workspace || !hasSession()) {
@@ -133,6 +138,96 @@ class WorkspaceLinksController {
 
   Workspace? workspaceForId(String workspaceId) {
     return workspaces().where((entry) => entry.id == workspaceId).firstOrNull;
+  }
+
+  Future<void> openLink(Link link) async {
+    final uri = Uri.tryParse(link.url);
+    if (uri == null) {
+      showMessage('That link is invalid.');
+      return;
+    }
+
+    final didLaunch = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!didLaunch && mounted()) {
+      showMessage('Could not open that link.');
+    }
+  }
+
+  Future<void> openAllLinks(Workspace workspace) async {
+    if (workspace.links.isEmpty) {
+      showMessage('There are no links to open.');
+      return;
+    }
+
+    var openedCount = 0;
+    for (final link in workspace.links) {
+      final uri = Uri.tryParse(link.url);
+      if (uri == null) {
+        continue;
+      }
+      final didLaunch = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (didLaunch) {
+        openedCount += 1;
+      }
+    }
+
+    if (!mounted()) {
+      return;
+    }
+
+    if (openedCount == 0) {
+      showMessage('Could not open any links.');
+      return;
+    }
+
+    if (openedCount < workspace.links.length) {
+      showMessage('Opened $openedCount of ${workspace.links.length} links.');
+      return;
+    }
+
+    showMessage('Opened all ${workspace.links.length} links.');
+  }
+
+  Future<bool> confirmRemoveLink(Link link) async {
+    final shouldRemove = await showDialog<bool>(
+      context: context(),
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Remove link?'),
+          content: Text(middleTruncatedLabel(link.displayName, maxLength: 72)),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
+            FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Remove')),
+          ],
+        );
+      },
+    );
+
+    return shouldRemove == true;
+  }
+
+  Future<String?> promptForLinkName(Link link) async {
+    final controller = TextEditingController(text: link.customName);
+    final result = await showDialog<String>(
+      context: context(),
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Name'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            decoration: const InputDecoration(),
+            onSubmitted: (value) => Navigator.of(context).pop(value.trim()),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
+            FilledButton(onPressed: () => Navigator.of(context).pop(controller.text.trim()), child: const Text('Done')),
+          ],
+        );
+      },
+    );
+    controller.dispose();
+    return result;
   }
 
   String middleTruncatedLabel(String value, {int maxLength = 42}) {

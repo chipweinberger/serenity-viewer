@@ -1,8 +1,13 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 
+import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
+
+import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
-import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
+import 'package:serenity_viewer/src/foundation/keyboard_modifiers.dart';
+import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/layout/workspace_layout.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
@@ -18,6 +23,7 @@ class WorkspaceViewportController {
     required this.workspaceViewportState,
     required this.thumbnailController,
     required this.replaceWorkspace,
+    required this.activeWorkspaceOrNull,
     required SerenityWorkspaceViewportSetter applyWorkspaceViewport,
     required this.refreshActiveWorkspaceThumbnail,
   }) : gesture = WorkspaceViewportGestureController(
@@ -39,9 +45,31 @@ class WorkspaceViewportController {
   final WorkspaceViewportState workspaceViewportState;
   final ThumbnailController thumbnailController;
   final SerenityWorkspaceReplace replaceWorkspace;
+  final Workspace? Function() activeWorkspaceOrNull;
   final Future<void> Function() refreshActiveWorkspaceThumbnail;
   final WorkspaceViewportGestureController gesture;
   final WorkspaceViewportFitController fit;
+
+  void fitWorkspaceViewportToContent() {
+    fit.toContent(activeWorkspaceOrNull());
+  }
+
+  void handleWorkspacePanZoomStart(PointerPanZoomStartEvent event, Workspace workspace) {
+    gesture.handlePanZoomStart(
+      event,
+      workspace,
+      isCommandPressedForContentGesture: isCommandPressed(),
+      isOptionPressedForWindowGesture: isOptionPressed(),
+    );
+  }
+
+  void handleWorkspacePanZoomUpdate(PointerPanZoomUpdateEvent event, Workspace workspace, Size viewportSize) {
+    gesture.handlePanZoomUpdate(event, workspace, viewportSize);
+  }
+
+  void handleWorkspacePanZoomEnd() {
+    unawaited(gesture.handlePanZoomEnd());
+  }
 
   void setWorkspaceViewport({required String workspaceId, Offset? center, double? zoom, bool queueThumbnail = false}) {
     final environment = environmentStoreState.environment;

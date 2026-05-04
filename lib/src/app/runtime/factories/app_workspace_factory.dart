@@ -11,9 +11,11 @@ import 'package:serenity_viewer/src/environment/store/environment_store_state.da
 import 'package:serenity_viewer/src/media/video/media_inspector.dart';
 import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
 import 'package:serenity_viewer/src/media/video/video_frame_exporter.dart';
+import 'package:serenity_viewer/src/workspace/actions/workspace_media_controller.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_video_conversion_prompts.dart';
-import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 import 'package:serenity_viewer/src/environment/history/environment_window_history_state.dart';
+import 'package:serenity_viewer/src/environment/history/environment_window_history_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresh_state.dart';
 import 'package:serenity_viewer/src/workspace/tracking/workspace_view_tracking_state.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
@@ -23,7 +25,12 @@ import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_
 import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_media.dart';
 import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_scope.dart';
 
-({WorkspaceController workspaceController, EnvironmentController environmentController}) createAppWorkspaceServices({
+({
+  WorkspaceController workspaceController,
+  EnvironmentController environmentController,
+  EnvironmentWindowHistoryController environmentWindowHistoryController,
+})
+createAppWorkspaceServices({
   required PlatformBridge platformBridge,
   required EnvironmentStore environmentStore,
   required MediaInspector mediaInspector,
@@ -86,8 +93,6 @@ import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_
 
   final thumbnailController = createThumbnailController(scope: scope);
   final workspaceLinksController = createWorkspaceLinksController(scope: scope);
-  final workspaceLinksLauncher = createWorkspaceLinksLauncher(scope: scope);
-  final workspaceLinksPrompts = createWorkspaceLinksPrompts(scope: scope);
   final workspaceGestureController = createWorkspaceGestureController(scope: scope);
   final workspaceExposeController = createWorkspaceExposeController(scope: scope);
   final workspaceWindowsController = createWorkspaceWindowsController(scope: scope);
@@ -101,8 +106,6 @@ import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_
     scope: scope,
     gestureController: workspaceGestureController,
     windowsController: workspaceWindowsController,
-    viewportController: workspaceViewportController,
-    playbackController: workspacePlaybackController,
   );
   final environmentNavigationController = createEnvironmentNavigationController(
     scope: scope,
@@ -143,8 +146,9 @@ import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_
     navigationController: environmentNavigationController,
     workspaceLinksController: workspaceLinksController,
   );
-  final workspaceAssetPickerController = createWorkspaceAssetPickerController(
-    workspaceMediaImportController: workspaceMediaImportController,
+  final workspaceMediaController = WorkspaceMediaController(
+    importController: workspaceMediaImportController,
+    videoConversionController: workspaceVideoConversionController,
   );
   final environmentWindowHistoryController = createEnvironmentWindowHistoryController(
     scope: scope,
@@ -161,18 +165,17 @@ import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_
     playback: workspacePlaybackController,
     environment: workspaceEnvironmentController,
     window: workspaceWindowController,
-    history: environmentWindowHistoryController,
-    media: workspaceMediaImportController,
+    media: workspaceMediaController,
     layout: workspaceExposeLayoutController,
-    videoConversion: workspaceVideoConversionController,
-    assetPicker: workspaceAssetPickerController,
     shortcuts: workspaceShortcutController,
     links: workspaceLinksController,
-    linksLauncher: workspaceLinksLauncher,
-    linksPrompts: workspaceLinksPrompts,
     thumbnails: thumbnailController,
     tracking: workspaceViewTrackingController,
   );
 
-  return (workspaceController: workspaceController, environmentController: environmentController);
+  return (
+    workspaceController: workspaceController,
+    environmentController: environmentController,
+    environmentWindowHistoryController: environmentWindowHistoryController,
+  );
 }
