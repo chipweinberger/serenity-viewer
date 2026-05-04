@@ -11,6 +11,22 @@ class WorkspacePlaybackRuntimeController {
     return windowInteractionState.pausedVideoWindows[windowId] ?? true;
   }
 
+  bool anyPlaying(Environment? environment) {
+    if (environment == null) {
+      return false;
+    }
+
+    for (final workspace in environment.workspaces) {
+      for (final window in workspace.windows) {
+        if (window.asset.type == AssetType.video && !isPaused(window.asset.id)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
   void toggle(String windowId) {
     windowInteractionState.setWindowPaused(windowId, !(windowInteractionState.pausedVideoWindows[windowId] ?? true));
   }

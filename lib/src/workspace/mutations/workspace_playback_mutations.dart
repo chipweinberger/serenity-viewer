@@ -12,6 +12,14 @@ class WorkspacePlaybackMutations {
     );
   }
 
+  static Workspace clearVideoPosition(Workspace workspace, String windowId) {
+    return WorkspaceWindowModelHelpers.updateWindowById(
+      workspace,
+      windowId,
+      (window) => window.copyWith(clearVideoPosition: true),
+    );
+  }
+
   static Workspace cycleVideoPlaybackSpeed(Workspace workspace, String windowId) {
     final currentWindow = WorkspaceWindowModelHelpers.videoWindowById(workspace, windowId);
     if (currentWindow == null) {

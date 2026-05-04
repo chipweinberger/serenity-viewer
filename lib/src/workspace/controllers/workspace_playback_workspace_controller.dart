@@ -25,6 +25,19 @@ class WorkspacePlaybackWorkspaceController {
     );
   }
 
+  void clearPosition(Workspace? workspace, String windowId) {
+    if (workspace == null) {
+      return;
+    }
+
+    final currentWindow = workspace.windows.where((window) => window.asset.id == windowId).firstOrNull;
+    if (currentWindow == null || currentWindow.videoPositionMs == null) {
+      return;
+    }
+
+    replaceWorkspace(WorkspacePlaybackMutations.clearVideoPosition(workspace, windowId), queueThumbnail: false);
+  }
+
   void cycleSpeed(Workspace? workspace, String windowId) {
     if (workspace == null ||
         workspace.windows

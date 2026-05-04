@@ -9,10 +9,15 @@ import 'package:serenity_viewer/src/app/app_theme.dart';
 import 'package:serenity_viewer/src/window/content/zoom_box.dart';
 
 class _PlaybackCoordinator {
-  _PlaybackCoordinator({required this.onIntrinsicSizeResolved, required this.onPositionChanged});
+  _PlaybackCoordinator({
+    required this.onIntrinsicSizeResolved,
+    required this.onPositionChanged,
+    required this.shouldPersistPosition,
+  });
 
   final ValueChanged<Size> onIntrinsicSizeResolved;
   final ValueChanged<int> onPositionChanged;
+  final bool Function() shouldPersistPosition;
 
   VideoPlayerController? _controller;
   double? _reportedAspectRatio;
@@ -49,6 +54,10 @@ class _PlaybackCoordinator {
   }
 
   void reportPlaybackPosition(Duration position) {
+    if (!shouldPersistPosition()) {
+      return;
+    }
+
     final bucket = (position.inMilliseconds / 100).round();
     if (_lastReportedPositionBucket == bucket) {
       return;
@@ -140,7 +149,7 @@ class VideoSurface extends StatefulWidget {
     required this.onPositionChanged,
     required this.onCyclePlaybackSpeed,
     required this.showControls,
-    this.showPlayButton = false,
+    this.showPausedPlaybackButton = false,
     this.workspaceZoom = 1,
     required this.onControlInteractionChanged,
     this.previewMode = false,
@@ -154,13 +163,13 @@ class VideoSurface extends StatefulWidget {
   final Offset contentOffset;
   final ValueChanged<Size> onIntrinsicSizeResolved;
   final bool isPaused;
-  final VoidCallback onTogglePlayback;
+  final ValueChanged<int?> onTogglePlayback;
   final int? positionMs;
   final double playbackSpeed;
   final ValueChanged<int> onPositionChanged;
   final VoidCallback onCyclePlaybackSpeed;
   final bool showControls;
-  final bool showPlayButton;
+  final bool showPausedPlaybackButton;
   final double workspaceZoom;
   final ValueChanged<bool> onControlInteractionChanged;
   final bool previewMode;
@@ -178,6 +187,7 @@ class _SerenityVideoSurfaceState extends State<VideoSurface> {
     _playbackCoordinator = _PlaybackCoordinator(
       onIntrinsicSizeResolved: widget.onIntrinsicSizeResolved,
       onPositionChanged: widget.onPositionChanged,
+      shouldPersistPosition: () => widget.isPaused,
     );
     _playbackCoordinator.attach(widget.controller);
     unawaited(_syncControllerToWidget(forceSeek: true));
@@ -292,11 +302,11 @@ class _SerenityVideoSurfaceState extends State<VideoSurface> {
                   uiScale: uiScale,
                 ),
               ),
-            if (widget.showPlayButton && widget.isPaused && durationMs > 0)
+            if (widget.showPausedPlaybackButton && widget.isPaused && durationMs > 0)
               Positioned(
                 left: 4 * uiScale,
                 bottom: 4 * uiScale,
-                child: _buildPausedPlayButton(uiScale: uiScale),
+                child: _buildPausedPlayButton(uiScale: uiScale, positionMs: positionMs),
               ),
           ],
         );
@@ -379,6 +389,7 @@ class _SerenityVideoSurfaceState extends State<VideoSurface> {
                 icon: widget.isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
                 padding: 6 * uiScale,
                 iconSize: 14 * uiScale,
+                positionMs: positionMs,
               ),
               SizedBox(width: 8 * uiScale),
               Expanded(
@@ -428,12 +439,13 @@ class _SerenityVideoSurfaceState extends State<VideoSurface> {
     );
   }
 
-  Widget _buildPausedPlayButton({required double uiScale}) {
+  Widget _buildPausedPlayButton({required double uiScale, required int positionMs}) {
     return _buildPlaybackButton(
       uiScale: uiScale,
       icon: Icons.play_arrow_rounded,
       padding: 4 * uiScale,
       iconSize: 12 * uiScale,
+      positionMs: positionMs,
     );
   }
 
@@ -442,6 +454,7 @@ class _SerenityVideoSurfaceState extends State<VideoSurface> {
     required IconData icon,
     required double padding,
     required double iconSize,
+    required int positionMs,
   }) {
     return ClipOval(
       child: BackdropFilter(
@@ -449,7 +462,7 @@ class _SerenityVideoSurfaceState extends State<VideoSurface> {
         child: Material(
           color: Colors.black.withValues(alpha: 0.42),
           child: InkWell(
-            onTap: widget.onTogglePlayback,
+            onTap: () => widget.onTogglePlayback(positionMs),
             child: Padding(
               padding: EdgeInsets.all(padding),
               child: Icon(icon, size: iconSize, color: Colors.white),

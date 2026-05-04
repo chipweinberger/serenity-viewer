@@ -20,6 +20,20 @@ class SharedVideoState {
 class SharedVideoControllerPool {
   final Map<String, _SharedVideoControllerEntry> _sharedVideoControllers = {};
 
+  int? currentPositionMsForWindow(String windowId) {
+    final controller = _sharedVideoControllers[windowId]?.controller;
+    if (controller == null || !controller.value.isInitialized) {
+      return null;
+    }
+
+    final durationMs = controller.value.duration.inMilliseconds;
+    final positionMs = controller.value.position.inMilliseconds;
+    if (durationMs <= 0) {
+      return positionMs;
+    }
+    return positionMs.clamp(0, durationMs);
+  }
+
   SharedVideoState? sharedVideoForWindow(Window window, {required bool isLoaded}) {
     if (!isLoaded || window.asset.type != AssetType.video) {
       return null;

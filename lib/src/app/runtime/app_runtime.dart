@@ -111,6 +111,7 @@ AppRuntime createAppRuntime({
       services: WorkspaceServices(
         platformBridge: foundation.platformBridge,
         environmentStore: environmentStore,
+        sharedVideoControllerPool: foundation.sharedVideoControllerPool,
         mediaInspector: foundation.mediaInspector,
         appUiController: appUiController,
       ),

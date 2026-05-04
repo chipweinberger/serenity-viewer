@@ -27,6 +27,7 @@ class _MenuState {
     required this.selectedExposeWindowIds,
     required this.focusedWindowIsSelected,
     required this.recentlyClosedWindows,
+    required this.anyVideosPlaying,
   });
 
   final String? activeWorkspaceId;
@@ -35,6 +36,7 @@ class _MenuState {
   final Set<String> selectedExposeWindowIds;
   final bool focusedWindowIsSelected;
   final List<EnvironmentWindowHistoryEntry> recentlyClosedWindows;
+  final bool anyVideosPlaying;
 }
 
 class AppMenu extends StatelessWidget {
@@ -46,6 +48,7 @@ class AppMenu extends StatelessWidget {
     String? activeWorkspaceId,
     Environment? environment,
     String? pinnedHoverWindowId,
+    Map<String, bool> pausedVideoWindows,
     List<EnvironmentWindowHistoryEntry> recentlyClosedWindows,
     Set<String> selectedExposeWindowIds,
   })
@@ -54,6 +57,9 @@ class AppMenu extends StatelessWidget {
       activeWorkspaceId: context.select((EnvironmentStoreState state) => state.environment?.activeWorkspaceId),
       environment: context.select((EnvironmentStoreState state) => state.environment),
       pinnedHoverWindowId: context.select((WindowInteractionState state) => state.pinnedHoverWindowId),
+      pausedVideoWindows: context.select(
+        (WindowInteractionState state) => Map<String, bool>.of(state.pausedVideoWindows),
+      ),
       selectedExposeWindowIds: context.select(
         (WindowInteractionState state) => Set<String>.of(state.selectedExposeWindowIds),
       ),
@@ -88,10 +94,12 @@ class AppMenu extends StatelessWidget {
     required String? activeWorkspaceId,
     required Environment? environment,
     required String? pinnedHoverWindowId,
+    required Map<String, bool> pausedVideoWindows,
     required Set<String> selectedExposeWindowIds,
     required List<EnvironmentWindowHistoryEntry> recentlyClosedWindows,
     required WorkspaceController workspaceController,
   }) {
+    final _ = pausedVideoWindows;
     final focusedWindow = workspaceController.window.focusedWindowOrNull();
     final pinnedHoverWindow = _findWindowById(environment, pinnedHoverWindowId);
     final focusedWindowIsSelected = focusedWindow != null && selectedExposeWindowIds.contains(focusedWindow.asset.id);
@@ -103,6 +111,7 @@ class AppMenu extends StatelessWidget {
       selectedExposeWindowIds: selectedExposeWindowIds,
       focusedWindowIsSelected: focusedWindowIsSelected,
       recentlyClosedWindows: recentlyClosedWindows,
+      anyVideosPlaying: workspaceController.playback.anyVideosPlaying(),
     );
   }
 
@@ -351,14 +360,9 @@ class AppMenu extends StatelessWidget {
         shortcut: const SingleActivator(LogicalKeyboardKey.digit3, meta: true),
       ),
       PlatformMenuItem(
-        label: 'Play All',
-        onSelected: workspaceController.playback.playAllVideos,
+        label: state.anyVideosPlaying ? 'Pause All' : 'Play All',
+        onSelected: workspaceController.playback.toggleAllVideos,
         shortcut: const SingleActivator(LogicalKeyboardKey.keyP, meta: true, alt: true),
-      ),
-      PlatformMenuItem(
-        label: 'Pause All',
-        onSelected: workspaceController.playback.pauseAllVideos,
-        shortcut: const SingleActivator(LogicalKeyboardKey.keyP, meta: true, shift: true),
       ),
       PlatformMenuItem(
         label: 'Rename…',
@@ -472,6 +476,7 @@ class AppMenu extends StatelessWidget {
       activeWorkspaceId: state.activeWorkspaceId,
       environment: state.environment,
       pinnedHoverWindowId: state.pinnedHoverWindowId,
+      pausedVideoWindows: state.pausedVideoWindows,
       selectedExposeWindowIds: state.selectedExposeWindowIds,
       recentlyClosedWindows: state.recentlyClosedWindows,
       workspaceController: dependencies.workspaceController,

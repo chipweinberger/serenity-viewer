@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
@@ -9,6 +11,8 @@ class WorkspacePlaybackController {
   WorkspacePlaybackController({
     required this.windowInteractionState,
     required this.replaceWorkspace,
+    required this.markDirty,
+    required this.currentVideoPositionMs,
     required this.environment,
     required this.activeWorkspaceOrNull,
   }) : runtime = WorkspacePlaybackRuntimeController(windowInteractionState: windowInteractionState),
@@ -16,6 +20,8 @@ class WorkspacePlaybackController {
 
   final WindowInteractionState windowInteractionState;
   final SerenityWorkspaceReplace replaceWorkspace;
+  final VoidCallback markDirty;
+  final int? Function(String windowId) currentVideoPositionMs;
   final Environment? Function() environment;
   final Workspace? Function() activeWorkspaceOrNull;
   final WorkspacePlaybackRuntimeController runtime;
@@ -33,12 +39,27 @@ class WorkspacePlaybackController {
     return runtime.isPaused(windowId);
   }
 
-  void toggleVideoPlayback(String windowId) {
+  bool anyVideosPlaying() {
+    return runtime.anyPlaying(environment());
+  }
+
+  void toggleVideoPlayback(String windowId, {int? positionMs}) {
     if (!workspace.canToggle(activeWorkspaceOrNull(), windowId)) {
       return;
     }
 
+    final wasPaused = runtime.isPaused(windowId);
+    if (wasPaused) {
+      workspace.clearPosition(activeWorkspaceOrNull(), windowId);
+    } else {
+      final nextPositionMs = positionMs ?? currentVideoPositionMs(windowId);
+      if (nextPositionMs != null) {
+        workspace.setPosition(activeWorkspaceOrNull(), windowId, nextPositionMs);
+      }
+    }
+
     runtime.toggle(windowId);
+    markDirty();
   }
 
   void pauseAllVideos() {
@@ -47,5 +68,14 @@ class WorkspacePlaybackController {
 
   void playAllVideos() {
     runtime.playAll(environment());
+  }
+
+  void toggleAllVideos() {
+    if (anyVideosPlaying()) {
+      pauseAllVideos();
+      return;
+    }
+
+    playAllVideos();
   }
 }

@@ -19,7 +19,7 @@ extension on _WindowState {
 
   bool get _showControls => _areControlsPinned || _showControlsFromCommand;
 
-  bool get _showPlayButton => !_showControls;
+  bool get _showPausedPlaybackButton => !_showControls;
 
   bool get _showHoverFrame => _shouldShowCommandOverlay;
 
@@ -64,7 +64,7 @@ extension on _WindowState {
     return WorkspaceWindowContent(
       viewModel: widget.viewModel,
       showControls: _showControls,
-      showPlayButton: _showPlayButton,
+      showPausedPlaybackButton: _showPausedPlaybackButton,
       shrinkContent: shrinkContent,
       inset: inset,
       onTap: _handleContentTap,

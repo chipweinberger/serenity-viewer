@@ -54,7 +54,7 @@ class WorkspaceWindow extends StatefulWidget {
   final ValueChanged<Size> onIntrinsicSizeResolved;
   final ValueChanged<int> onVideoPositionChanged;
   final VoidCallback onCycleVideoPlaybackSpeed;
-  final VoidCallback onTogglePlayback;
+  final ValueChanged<int?> onTogglePlayback;
   final VoidCallback? onFitToContent;
   final VoidCallback? onShowInFinder;
   final VoidCallback? onRestorePreviousZOrder;

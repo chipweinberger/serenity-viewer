@@ -15,6 +15,7 @@ import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/foundation/serenity_identity.dart';
 import 'package:serenity_viewer/src/media/import/workspace_media_import_controller.dart';
 import 'package:serenity_viewer/src/media/video/media_inspector.dart';
+import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
 import 'package:serenity_viewer/src/media/video/video_frame_exporter.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_expose_layout_controller.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_media_controller.dart';
@@ -40,12 +41,14 @@ class WorkspaceServices {
   const WorkspaceServices({
     required this.platformBridge,
     required this.environmentStore,
+    required this.sharedVideoControllerPool,
     required this.mediaInspector,
     required this.appUiController,
   });
 
   final PlatformBridge platformBridge;
   final EnvironmentStore environmentStore;
+  final SharedVideoControllerPool sharedVideoControllerPool;
   final MediaInspector mediaInspector;
   final AppUiController appUiController;
 }
@@ -461,6 +464,8 @@ WorkspaceParts assembleWorkspace({required WorkspaceDependencies dependencies}) 
   final playback = WorkspacePlaybackController(
     windowInteractionState: dependencies.rootObjects.windowInteractionState,
     replaceWorkspace: dependencies.services.environmentStore.replaceWorkspace,
+    markDirty: dependencies.services.environmentStore.markDirty,
+    currentVideoPositionMs: dependencies.services.sharedVideoControllerPool.currentPositionMsForWindow,
     environment: () => dependencies.services.environmentStore.environmentStoreState.environment,
     activeWorkspaceOrNull: dependencies.queries.activeWorkspace,
   );

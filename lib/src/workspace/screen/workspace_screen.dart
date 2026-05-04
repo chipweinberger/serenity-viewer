@@ -203,6 +203,14 @@ class WorkspaceScreen extends StatelessWidget {
     );
   }
 
+  bool _isWorkspaceVisible(Workspace workspace) {
+    return appUiState.screen == SerenityScreen.workspace && workspace.id == environment.activeWorkspaceId;
+  }
+
+  bool _isVideoTemporarilyPaused(Workspace workspace, String windowId) {
+    return !_isWorkspaceVisible(workspace) || workspaceController.playback.isVideoWindowPaused(windowId);
+  }
+
   Widget _buildFreeformWindow(_WorkspaceCanvasViewModel canvasViewModel, Window window, Size viewportSize) {
     final workspace = canvasViewModel.workspace;
     final screenOffset = workspaceScreenOffsetForWindow(workspace, window, viewportSize);
@@ -220,7 +228,7 @@ class WorkspaceScreen extends StatelessWidget {
       flashNonce: window.asset.id == windowInteractionState.flashedWindowId
           ? windowInteractionState.windowFlashNonce
           : 0,
-      isVideoPaused: workspaceController.playback.isVideoWindowPaused(window.asset.id),
+      isVideoPaused: _isVideoTemporarilyPaused(workspace, window.asset.id),
       isCommandPressed: windowInteractionState.isCommandPressed,
       isOptionPressed: windowInteractionState.isOptionPressed,
       isOptionGestureTarget: windowInteractionState.activeGestureWindowId == window.asset.id,
@@ -256,7 +264,8 @@ class WorkspaceScreen extends StatelessWidget {
             onVideoPositionChanged: (positionMs) =>
                 workspaceController.playback.setVideoPosition(window.asset.id, positionMs),
             onCycleVideoPlaybackSpeed: () => workspaceController.playback.cycleVideoPlaybackSpeed(window.asset.id),
-            onTogglePlayback: () => workspaceController.playback.toggleVideoPlayback(window.asset.id),
+            onTogglePlayback: (positionMs) =>
+                workspaceController.playback.toggleVideoPlayback(window.asset.id, positionMs: positionMs),
             onFitToContent: () => workspaceController.window.fitWindowToContent(window.asset.id),
             onShowInFinder: _showInFinderCallbackForWindow(window),
             onRestorePreviousZOrder: _restorePreviousZOrderCallbackForWindow(window),
@@ -304,7 +313,7 @@ class WorkspaceScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildExposeWindowCard(WorkspaceExposeWindowLayout layout, MediaLoadPlan loadPlan) {
+  Widget _buildExposeWindowCard(Workspace workspace, WorkspaceExposeWindowLayout layout, MediaLoadPlan loadPlan) {
     final window = layout.window;
     final isLoaded = _isWindowLoaded(loadPlan, window);
     final sharedVideoState = sharedVideoLookup(window, isLoaded: isLoaded);
@@ -316,7 +325,7 @@ class WorkspaceScreen extends StatelessWidget {
         isLoaded: isLoaded,
         sharedVideoController: sharedVideoState?.controller,
         sharedVideoInitialization: sharedVideoState?.initialization,
-        isVideoPaused: workspaceController.playback.isVideoWindowPaused(window.asset.id),
+        isVideoPaused: _isVideoTemporarilyPaused(workspace, window.asset.id),
         isSelected: windowInteractionState.selectedExposeWindowIds.contains(window.asset.id),
         isCommandPressed: windowInteractionState.isCommandPressed,
         editMode: appUiState.editMode,
@@ -332,7 +341,7 @@ class WorkspaceScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildExposeWorkspaceViewport(List<Window> windows, MediaLoadPlan loadPlan) {
+  Widget _buildExposeWorkspaceViewport(Workspace workspace, List<Window> windows, MediaLoadPlan loadPlan) {
     return Positioned.fill(
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -344,7 +353,9 @@ class WorkspaceScreen extends StatelessWidget {
           }
 
           final exposeLayouts = buildWorkspaceExposeLayouts(windows: windows, viewportSize: viewportSize);
-          return Stack(children: [for (final layout in exposeLayouts) _buildExposeWindowCard(layout, loadPlan)]);
+          return Stack(
+            children: [for (final layout in exposeLayouts) _buildExposeWindowCard(workspace, layout, loadPlan)],
+          );
         },
       ),
     );
@@ -421,7 +432,7 @@ class WorkspaceScreen extends StatelessWidget {
       children: [
         _buildWorkspaceCanvasBackground(),
         if (canvasViewModel.isExposeMode)
-          _buildExposeWorkspaceViewport(canvasViewModel.windows, canvasViewModel.loadPlan)
+          _buildExposeWorkspaceViewport(canvasViewModel.workspace, canvasViewModel.windows, canvasViewModel.loadPlan)
         else
           _buildFreeformWorkspaceViewport(canvasViewModel),
         if (!canvasViewModel.isExposeMode && canvasViewModel.windows.isEmpty)
