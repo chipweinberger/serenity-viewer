@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/runtime/app_runtime.dart';
@@ -13,7 +12,6 @@ import 'package:serenity_viewer/src/app/menu/app_menu.dart';
 import 'package:serenity_viewer/src/app/views/app_main_view.dart';
 import 'package:serenity_viewer/src/environment/document/document_persistence_controller.dart';
 import 'package:serenity_viewer/src/settings/behavior/app_settings_controller.dart';
-import 'package:serenity_viewer/src/workspace/controllers/workspace_windows_controller.dart';
 
 class AppRoot extends StatefulWidget {
   const AppRoot({super.key});
@@ -40,43 +38,6 @@ class _AppRootState extends State<AppRoot> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), behavior: SnackBarBehavior.floating));
   }
 
-  Future<void> _pickAndImportAssets() async {
-    final files = await openFiles(
-      acceptedTypeGroups: _workspaceRuntime.workspaceMediaImportController.acceptedTypeGroups,
-    );
-    await _workspaceRuntime.workspaceMediaImportController.importFiles(files);
-  }
-
-  Future<void> _confirmCollateWorkspaceWindows() async {
-    final collatableWindowCount = _workspaceRuntime.workspaceWindowController.collatableWindowCount();
-    if (collatableWindowCount == 0) {
-      _feedback.showMessage('There are no image or video windows to collate.');
-      return;
-    }
-
-    final shouldCollate = await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Collate Windows?'),
-          content: Text(
-            'Center and resize $collatableWindowCount image/video window'
-            '${collatableWindowCount == 1 ? '' : 's'} into a fixed ${workspaceCollateTargetBox.width.toInt()} × '
-            '${workspaceCollateTargetBox.height.toInt()} box?',
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
-            FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Collate')),
-          ],
-        );
-      },
-    );
-
-    if (shouldCollate == true && mounted) {
-      _workspaceRuntime.workspaceWindowController.collateActiveWorkspace();
-    }
-  }
-
   AppMainViewBindings _buildAppMainViewBindings() {
     return AppMainViewBindingBuilder(
       state: _state,
@@ -86,7 +47,6 @@ class _AppRootState extends State<AppRoot> {
       uiHandles: _uiHandles,
       commitStateChange: setState,
       mounted: () => mounted,
-      confirmCollateWorkspaceWindows: _confirmCollateWorkspaceWindows,
     ).build();
   }
 
@@ -155,8 +115,7 @@ class _AppRootState extends State<AppRoot> {
       workspace: _workspaceRuntime,
       feedback: _feedback,
       settings: _settings,
-      openAssets: _pickAndImportAssets,
-      confirmCollateWorkspaceWindows: _confirmCollateWorkspaceWindows,
+      openAssets: _workspaceRuntime.workspaceAssetPickerController.pickAndImportAssets,
     ).build();
   }
 

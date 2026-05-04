@@ -125,7 +125,6 @@ class AppMenuBindingBuilder {
     required this.feedback,
     required this.settings,
     required this.openAssets,
-    required this.confirmCollateWorkspaceWindows,
   });
 
   final AppRuntimeState state;
@@ -135,7 +134,6 @@ class AppMenuBindingBuilder {
   final AppFeedbackController feedback;
   final AppSettingsController settings;
   final Future<void> Function() openAssets;
-  final Future<void> Function() confirmCollateWorkspaceWindows;
 
   AppMenuState _buildState() {
     final focusedWindow = workspace.workspaceWindowController.focusedWindowOrNull();
@@ -183,7 +181,7 @@ class AppMenuBindingBuilder {
       switchToPreviousWorkspace: () => workspace.environmentController.navigation.switchWorkspace(-1),
       switchToNextWorkspace: () => workspace.environmentController.navigation.switchWorkspace(1),
       fitWorkspaceViewportToContent: workspace.workspaceWindowController.fitWorkspaceViewportToContent,
-      confirmCollateWorkspaceWindows: confirmCollateWorkspaceWindows,
+      confirmCollateWorkspaceWindows: workspace.workspaceCollateController.confirmCollateWorkspaceWindows,
       pauseAllVideos: workspace.workspaceWindowController.pauseAllVideos,
       showNoWorkspaceToRenameMessage: () => feedback.showMessage('There is no workspace to rename.'),
       renameWorkspace: workspace.environmentController.management.renameWorkspace,

@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/header/app_header.dart';
 import 'package:serenity_viewer/src/app/header/app_tab_bar_actions.dart';
-import 'package:serenity_viewer/src/app/views/app_main_view_bindings.dart';
+import 'package:serenity_viewer/src/app/views/app_main_view_contract.dart';
 import 'package:serenity_viewer/src/app/views/library_view.dart';
 import 'package:serenity_viewer/src/app/views/workspace_view.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
 import 'package:serenity_viewer/src/media/loading/workspace_load_plan.dart';
 
-export 'package:serenity_viewer/src/app/views/app_main_view_bindings.dart';
+export 'package:serenity_viewer/src/app/views/app_main_view_binding_builder.dart';
+export 'package:serenity_viewer/src/app/views/app_main_view_contract.dart';
 
 class AppMainView extends StatelessWidget {
   const AppMainView({super.key, required this.model, required this.services, required this.actions});

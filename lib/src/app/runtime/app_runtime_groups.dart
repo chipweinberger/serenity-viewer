@@ -11,6 +11,8 @@ import 'package:serenity_viewer/src/media/import/workspace_media_import_controll
 import 'package:serenity_viewer/src/media/video/media_inspector.dart';
 import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
 import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
+import 'package:serenity_viewer/src/workspace/actions/workspace_asset_picker_controller.dart';
+import 'package:serenity_viewer/src/workspace/actions/workspace_collate_controller.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_expose_layout_controller.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_video_conversion_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
@@ -77,6 +79,8 @@ class AppDocument {
 class AppWorkspaceServices {
   const AppWorkspaceServices({
     required this.thumbnailController,
+    required this.workspaceAssetPickerController,
+    required this.workspaceCollateController,
     required this.workspaceVideoConversionController,
     required this.workspaceMediaImportController,
     required this.workspaceLinksController,
@@ -93,6 +97,8 @@ class AppWorkspaceServices {
   });
 
   final ThumbnailController thumbnailController;
+  final WorkspaceAssetPickerController workspaceAssetPickerController;
+  final WorkspaceCollateController workspaceCollateController;
   final WorkspaceVideoConversionController workspaceVideoConversionController;
   final WorkspaceMediaImportController workspaceMediaImportController;
   final WorkspaceLinksController workspaceLinksController;
