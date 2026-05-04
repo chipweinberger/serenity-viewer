@@ -4,18 +4,19 @@ import 'dart:io';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 
+import 'package:serenity_viewer/src/environment/document/document_loader.dart' as document_loader;
+import 'package:serenity_viewer/src/environment/document/document_saver.dart' as document_saver;
+import 'package:serenity_viewer/src/environment/document/document_startup_prompter.dart' as document_startup_prompter;
+import 'package:serenity_viewer/src/environment/document/document_thumbnail_restorer.dart'
+    as document_thumbnail_restorer;
 import 'package:serenity_viewer/src/environment/store/environment_store.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
-import 'package:serenity_viewer/src/environment/workspace.dart';
-import 'package:serenity_viewer/src/environment/document/document_codec.dart';
-import 'package:serenity_viewer/src/environment/document/document_missing_asset_resolver.dart';
-import 'package:serenity_viewer/src/environment/document/startup_environment_choice.dart';
 
-part 'document_loader.dart';
-part 'document_saver.dart';
-part 'document_startup_prompter.dart';
-part 'document_thumbnail_restorer.dart';
+const suggestedDocumentName = 'serenity-enviroment';
+const documentTypeGroups = [
+  XTypeGroup(label: 'Serenity Environment', extensions: ['sry']),
+];
 
 class DocumentCoordinator {
   DocumentCoordinator({
@@ -33,15 +34,7 @@ class DocumentCoordinator {
     required this.thumbnailDirectory,
     required this.updateEnvironment,
     required this.saveEnvironment,
-  }) : _loader = _DocumentLoader(),
-       _saver = _DocumentSaver(),
-       _startupPrompter = _DocumentStartupPrompter(),
-       _thumbnailRestorer = _DocumentThumbnailRestorer();
-
-  static const String _suggestedDocumentName = 'serenity-enviroment';
-  static const List<XTypeGroup> _documentTypeGroups = [
-    XTypeGroup(label: 'Serenity Environment', extensions: ['sry']),
-  ];
+  });
 
   final EnvironmentStoreState environmentStoreState;
   final EnvironmentStore environmentStore;
@@ -58,13 +51,8 @@ class DocumentCoordinator {
   final ValueChanged<Environment> updateEnvironment;
   final Future<void> Function() saveEnvironment;
 
-  final _DocumentLoader _loader;
-  final _DocumentSaver _saver;
-  final _DocumentStartupPrompter _startupPrompter;
-  final _DocumentThumbnailRestorer _thumbnailRestorer;
-
   Future<void> saveDocumentToPath(String path, {Environment? environmentOverride, bool showMessageOnFailure = true}) {
-    return _saver.saveDocumentToPath(
+    return document_saver.saveDocumentToPath(
       this,
       path,
       environmentOverride: environmentOverride,
@@ -73,19 +61,19 @@ class DocumentCoordinator {
   }
 
   Future<void> saveDocumentAs() {
-    return _saver.saveDocumentAs(this);
+    return document_saver.saveDocumentAs(this);
   }
 
   Future<void> saveDocument() {
-    return _saver.saveDocument(this);
+    return document_saver.saveDocument(this);
   }
 
   Future<bool> openDocument({bool showSuccessMessage = true}) {
-    return _loader.openDocument(this, showSuccessMessage: showSuccessMessage);
+    return document_loader.openDocument(this, showSuccessMessage: showSuccessMessage);
   }
 
   Future<bool> loadDocumentFromPath(String path, {bool showSuccessMessage = true, bool persistAsLastOpened = true}) {
-    return _loader.loadDocumentFromPath(
+    return document_loader.loadDocumentFromPath(
       this,
       path,
       showSuccessMessage: showSuccessMessage,
@@ -94,14 +82,18 @@ class DocumentCoordinator {
   }
 
   Future<bool> createDocument() {
-    return _loader.createDocument(this);
+    return document_loader.createDocument(this);
   }
 
   Future<void> promptForStartupDocument() {
-    return _startupPrompter.promptForStartupDocument(this);
+    return document_startup_prompter.promptForStartupDocument(this);
   }
 
   Future<void> restoreDocumentThumbnails(Map<String, List<int>> thumbnailBytesByWorkspaceId, Environment environment) {
-    return _thumbnailRestorer.restoreDocumentThumbnails(this, thumbnailBytesByWorkspaceId, environment);
+    return document_thumbnail_restorer.restoreDocumentThumbnails(
+      this,
+      thumbnailBytesByWorkspaceId,
+      environment,
+    );
   }
 }
