@@ -1,12 +1,12 @@
 import 'dart:io';
 
-import 'package:serenity_viewer/src/app/assembly/app_runtime.dart';
+import 'package:serenity_viewer/src/app/assembly/app_runtime_services.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 
-class AppViewState {
-  const AppViewState(this.state);
+class AppDerivedState {
+  const AppDerivedState(this.state);
 
-  final AppStateServices state;
+  final AppRuntimeState state;
 
   List<Workspace> get workspaces => state.environmentStoreState.environment?.workspaces ?? const [];
 

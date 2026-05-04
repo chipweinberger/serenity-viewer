@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/assembly/app_runtime.dart';
 import 'package:serenity_viewer/src/app/assembly/app_runtime_config_builder.dart';
-import 'package:serenity_viewer/src/app/app_main_view_data.dart';
-import 'package:serenity_viewer/src/app/app_owned_state.dart';
-import 'package:serenity_viewer/src/app/app_view_state.dart';
+import 'package:serenity_viewer/src/app/state/app_derived_state.dart';
+import 'package:serenity_viewer/src/app/state/app_state_store.dart';
+import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
 import 'package:serenity_viewer/src/app/controllers/app_feedback_controller.dart';
 import 'package:serenity_viewer/src/app/seed_environment.dart';
 import 'package:serenity_viewer/src/app/app_menu.dart';
@@ -24,14 +24,15 @@ class AppRoot extends StatefulWidget {
 }
 
 class _AppRootState extends State<AppRoot> {
-  final _ownedState = AppOwnedState();
+  final _stateStore = AppStateStore();
+  final _uiHandles = AppUiHandles();
   late final AppRuntime _runtime;
   late final AppFeedbackController _feedback;
   late final AppSettingsController _settings;
   late final DocumentPersistenceController _documentPersistence;
 
-  AppStateServices get _state => _runtime.state;
-  AppViewState get _viewState => AppViewState(_state);
+  AppRuntimeState get _state => _runtime.state;
+  AppDerivedState get _derivedState => AppDerivedState(_state);
   AppFoundation get _foundation => _runtime.foundation;
   AppDocument get _documents => _runtime.documents;
   AppWorkspaceServices get _workspaceRuntime => _runtime.workspace;
@@ -83,18 +84,19 @@ class _AppRootState extends State<AppRoot> {
     }
 
     return AppMainView(
-      state: AppMainViewState(
-        context: context,
+      model: AppMainViewModel(
         uiState: _state.appUiState,
         environment: _state.environmentStoreState.environment!,
-        windowTitle: _viewState.windowTitle,
-        workspaces: _viewState.workspaces,
-        openWorkspaces: _viewState.openWorkspaces,
-        activeWorkspace: _viewState.activeWorkspace,
-        activeWorkspaceOrNull: _viewState.activeWorkspaceOrNull,
+        windowTitle: _derivedState.windowTitle,
+        workspaces: _derivedState.workspaces,
+        openWorkspaces: _derivedState.openWorkspaces,
+        activeWorkspace: _derivedState.activeWorkspace,
+        activeWorkspaceOrNull: _derivedState.activeWorkspaceOrNull,
         selectedExposeWindowCount: _workspaceRuntime.workspaceController.expose.count(),
         windowInteractionState: _state.windowInteractionState,
         workspaceViewportState: _state.workspaceViewportState,
+      ),
+      services: AppMainViewServices(
         appUiController: _foundation.appUiController,
         sharedVideoControllerPool: _foundation.sharedVideoControllerPool,
         environmentController: _workspaceRuntime.environmentController,
@@ -104,8 +106,8 @@ class _AppRootState extends State<AppRoot> {
         workspaceLinksPrompts: _workspaceRuntime.workspaceLinksPrompts,
         thumbnailController: _workspaceRuntime.thumbnailController,
         windowHistoryController: _workspaceRuntime.workspaceWindowHistoryController,
-        searchController: _state.uiHandles.searchController,
-        tabScrollController: _state.uiHandles.tabScrollController,
+        searchController: _uiHandles.searchController,
+        tabScrollController: _uiHandles.tabScrollController,
       ),
       actions: AppMainViewActions(
         app: AppMainViewAppActions(
@@ -175,13 +177,14 @@ class _AppRootState extends State<AppRoot> {
 
   AppRuntimeConfig _buildRuntimeConfig() {
     return AppRuntimeConfigBuilder(
-      ownedState: _ownedState,
+      stateStore: _stateStore,
+      uiHandles: _uiHandles,
       context: () => context,
       mounted: () => mounted,
       commitStateChange: setState,
       showMessage: _showMessage,
       isRunningInWidgetTest: _isRunningInWidgetTest,
-      viewState: () => _viewState,
+      derivedState: () => _derivedState,
       foundation: () => _foundation,
       workspace: () => _workspaceRuntime,
       documentPersistence: () => _documentPersistence,
@@ -231,7 +234,7 @@ class _AppRootState extends State<AppRoot> {
       confirmDeleteWorkspace: _workspaceRuntime.environmentController.management.confirmDeleteWorkspace,
       restoreRecentlyClosedWindow: _workspaceRuntime.workspaceWindowHistoryController.restoreRecentlyClosedWindow,
       child: Focus(
-        focusNode: _state.uiHandles.focusNode,
+        focusNode: _uiHandles.focusNode,
         autofocus: true,
         onKeyEvent: (_, event) => _workspaceRuntime.workspaceShortcutController.onKeyEvent(event),
         child: Scaffold(body: SafeArea(top: false, child: _buildContent(context))),

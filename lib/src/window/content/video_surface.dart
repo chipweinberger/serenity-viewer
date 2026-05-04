@@ -5,7 +5,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
-import 'package:serenity_viewer/src/settings/appearance/theme.dart';
+import 'package:serenity_viewer/src/app/app_theme.dart';
 import 'package:serenity_viewer/src/window/content/zoom_box.dart';
 
 class _PlaybackCoordinator {

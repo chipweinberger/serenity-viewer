@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/settings/appearance/theme.dart';
+import 'package:serenity_viewer/src/app/app_theme.dart';
 import 'package:serenity_viewer/src/environment/asset.dart';
 
 class MissingMediaPlaceholder extends StatelessWidget {

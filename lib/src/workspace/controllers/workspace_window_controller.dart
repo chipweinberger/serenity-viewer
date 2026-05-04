@@ -10,7 +10,7 @@ import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/foundation/keyboard_modifiers.dart';
-import 'package:serenity_viewer/src/app/app_ui_state.dart';
+import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 import 'package:serenity_viewer/src/window/frame/window_resize_helpers.dart';
 import 'package:serenity_viewer/src/window/interaction/window_zoom_update.dart';

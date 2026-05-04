@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/header/app_tab_bar_actions.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
-import 'package:serenity_viewer/src/settings/appearance/glass_chip.dart';
-import 'package:serenity_viewer/src/settings/appearance/theme.dart';
+import 'package:serenity_viewer/src/components/glass_chip.dart';
+import 'package:serenity_viewer/src/app/app_theme.dart';
 
 class AppTab extends StatelessWidget {
   const AppTab({

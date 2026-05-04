@@ -1,5 +1,5 @@
 import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
-import 'package:serenity_viewer/src/app/app_ui_state.dart';
+import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_viewport_fit_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_viewport_gesture_controller.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/app_root.dart';
-import 'package:serenity_viewer/src/settings/appearance/theme.dart';
+import 'package:serenity_viewer/src/app/app_theme.dart';
 
 class SerenityApp extends StatelessWidget {
   const SerenityApp({super.key});

@@ -2,7 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/settings/appearance/theme.dart';
+import 'package:serenity_viewer/src/app/app_theme.dart';
 
 class GlassChip extends StatelessWidget {
   const GlassChip({super.key, required this.child, required this.onTap, this.selected = false, this.trailing});

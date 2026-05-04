@@ -13,14 +13,14 @@ import 'package:serenity_viewer/src/window/interaction/window_zoom_update.dart';
 import 'package:serenity_viewer/src/window/presentation/expose_window_card.dart';
 import 'package:serenity_viewer/src/window/presentation/workspace_window_view_model.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/settings/appearance/theme.dart';
+import 'package:serenity_viewer/src/app/app_theme.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/asset.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
-import 'package:serenity_viewer/src/app/app_ui_state.dart';
+import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/workspace/layout/workspace_expose_layout.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_projection.dart';
 

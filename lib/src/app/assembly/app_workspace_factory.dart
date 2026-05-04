@@ -28,13 +28,13 @@ class AppWorkspaceFactory {
   final AppRuntimeConfig config;
 
   AppWorkspaceServices create({required AppFoundation foundation}) {
-    final ownedState = config.ownedState;
-    final environmentStoreState = ownedState.environmentStoreState;
-    final appUiState = ownedState.appUiState;
-    final windowInteractionState = ownedState.windowInteractionState;
-    final workspaceViewTrackingState = ownedState.workspaceViewTrackingState;
-    final workspaceViewportState = ownedState.workspaceViewportState;
-    final thumbnailRefreshState = ownedState.thumbnailRefreshState;
+    final stateStore = config.stateStore;
+    final environmentStoreState = stateStore.environmentStoreState;
+    final appUiState = stateStore.appUiState;
+    final windowInteractionState = stateStore.windowInteractionState;
+    final workspaceViewTrackingState = stateStore.workspaceViewTrackingState;
+    final workspaceViewportState = stateStore.workspaceViewportState;
+    final thumbnailRefreshState = stateStore.thumbnailRefreshState;
 
     final thumbnailController = ThumbnailController(
       state: thumbnailRefreshState,
@@ -86,7 +86,7 @@ class AppWorkspaceFactory {
       environment: () => environmentStoreState.environment,
       workspaces: config.workspace.workspaces,
       activeWorkspace: config.workspace.activeWorkspace,
-      workspaceWindowHistoryState: ownedState.workspaceWindowHistoryState,
+      workspaceWindowHistoryState: stateStore.workspaceWindowHistoryState,
       workspaceController: workspaceController,
       updateEnvironment: foundation.environmentStore.updateEnvironment,
       replaceWorkspace: foundation.environmentStore.replaceWorkspace,

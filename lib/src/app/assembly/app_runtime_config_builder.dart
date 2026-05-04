@@ -2,34 +2,37 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/assembly/app_runtime_config.dart';
 import 'package:serenity_viewer/src/app/assembly/app_runtime_services.dart';
-import 'package:serenity_viewer/src/app/app_view_state.dart';
 import 'package:serenity_viewer/src/app/seed_environment.dart';
 import 'package:serenity_viewer/src/environment/document/document_persistence_controller.dart';
 import 'package:serenity_viewer/src/foundation/serenity_identity.dart';
-import 'package:serenity_viewer/src/app/app_owned_state.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
+import 'package:serenity_viewer/src/app/state/app_derived_state.dart';
+import 'package:serenity_viewer/src/app/state/app_state_store.dart';
+import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
 
 class AppRuntimeConfigBuilder {
   const AppRuntimeConfigBuilder({
-    required this.ownedState,
+    required this.stateStore,
+    required this.uiHandles,
     required this.context,
     required this.mounted,
     required this.commitStateChange,
     required this.showMessage,
     required this.isRunningInWidgetTest,
-    required this.viewState,
+    required this.derivedState,
     required this.foundation,
     required this.workspace,
     required this.documentPersistence,
   });
 
-  final AppOwnedState ownedState;
+  final AppStateStore stateStore;
+  final AppUiHandles uiHandles;
   final BuildContext Function() context;
   final bool Function() mounted;
   final StateSetter commitStateChange;
   final ValueChanged<String> showMessage;
   final bool isRunningInWidgetTest;
-  final AppViewState Function() viewState;
+  final AppDerivedState Function() derivedState;
   final AppFoundation Function() foundation;
   final AppWorkspaceServices Function() workspace;
   final DocumentPersistenceController Function() documentPersistence;
@@ -37,9 +40,10 @@ class AppRuntimeConfigBuilder {
   AppRuntimeConfig build() {
     return AppRuntimeConfig(
       isRunningInWidgetTest: isRunningInWidgetTest,
-      ownedState: ownedState,
+      stateStore: stateStore,
+      uiHandles: uiHandles,
       shell: AppConfig(
-        windowTitle: () => viewState().windowTitle,
+        windowTitle: () => derivedState().windowTitle,
         context: context,
         mounted: mounted,
         commitStateChange: commitStateChange,
@@ -55,9 +59,9 @@ class AppRuntimeConfigBuilder {
       workspace: WorkspaceConfig(
         newId: newSerenityId,
         colorFromDigest: assetColorValueFromDigest,
-        activeWorkspace: () => viewState().activeWorkspaceOrNull,
-        workspaces: () => viewState().workspaces,
-        openWorkspaces: () => viewState().openWorkspaces,
+        activeWorkspace: () => derivedState().activeWorkspaceOrNull,
+        workspaces: () => derivedState().workspaces,
+        openWorkspaces: () => derivedState().openWorkspaces,
         focusedWindowOrNull: () => workspace().workspaceWindowController.focusedWindowOrNull(),
         setWorkspaceViewport:
             ({required String workspaceId, Offset? center, double? zoom, bool queueThumbnail = false}) =>

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
-import 'package:serenity_viewer/src/app/app_ui_state.dart';
+import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 
 import 'workspace_controller.dart';
 import 'workspace_window_arrangement_controller.dart';

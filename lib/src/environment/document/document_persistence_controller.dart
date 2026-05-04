@@ -16,7 +16,7 @@ class DocumentPersistenceController {
     required this.isRunningInWidgetTest,
   });
 
-  final AppStateServices state;
+  final AppRuntimeState state;
   final AppFoundation foundation;
   final AppDocument documents;
   final bool Function() mounted;

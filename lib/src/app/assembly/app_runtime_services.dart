@@ -1,4 +1,4 @@
-import 'package:serenity_viewer/src/app/app_owned_state.dart';
+import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
 import 'package:serenity_viewer/src/environment/document/document_coordinator.dart';
@@ -9,7 +9,7 @@ import 'package:serenity_viewer/src/environment/store/environment_store_state.da
 import 'package:serenity_viewer/src/media/import/workspace_media_import_controller.dart';
 import 'package:serenity_viewer/src/media/video/media_inspector.dart';
 import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
-import 'package:serenity_viewer/src/app/app_ui_state.dart';
+import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_viewport_session_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
@@ -28,8 +28,8 @@ import 'package:serenity_viewer/src/workspace/actions/workspace_video_conversion
 import 'package:serenity_viewer/src/workspace/history/workspace_window_history_controller.dart';
 import 'package:serenity_viewer/src/workspace/history/workspace_window_history_state.dart';
 
-class AppStateServices {
-  const AppStateServices({
+class AppRuntimeState {
+  const AppRuntimeState({
     required this.uiHandles,
     required this.environmentStoreState,
     required this.appUiState,

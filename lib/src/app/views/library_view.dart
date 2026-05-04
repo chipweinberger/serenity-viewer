@@ -1,32 +1,39 @@
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/app/app_main_view_data.dart';
+import 'package:serenity_viewer/src/app/views/app_main_view.dart';
 import 'package:serenity_viewer/src/library/library_screen.dart';
 import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
 
 class LibraryView extends StatelessWidget {
-  const LibraryView({super.key, required this.state, required this.actions, required this.workspaceLoadPlan});
+  const LibraryView({
+    super.key,
+    required this.model,
+    required this.services,
+    required this.actions,
+    required this.workspaceLoadPlan,
+  });
 
-  final AppMainViewState state;
+  final AppMainViewModel model;
+  final AppMainViewServices services;
   final AppMainViewActions actions;
   final MediaLoadPlan workspaceLoadPlan;
 
   @override
   Widget build(BuildContext context) {
     return LibraryScreen(
-      allWorkspaces: state.workspaces,
-      openWorkspaces: state.openWorkspaces,
+      allWorkspaces: model.workspaces,
+      openWorkspaces: model.openWorkspaces,
       loadPlan: workspaceLoadPlan,
-      searchController: state.searchController,
-      workspaceSort: state.uiState.workspaceSort,
-      refreshingWorkspaceIds: state.thumbnailController.refreshingWorkspaceIds,
+      searchController: services.searchController,
+      workspaceSort: model.uiState.workspaceSort,
+      refreshingWorkspaceIds: services.thumbnailController.refreshingWorkspaceIds,
       actions: LibraryScreenActions(
         onSearchChanged: (_) => actions.app.commitStateChange(() {}),
-        onWorkspaceSortChanged: state.appUiController.setWorkspaceSort,
-        onToggleWorkspaceOpen: state.environmentController.management.toggleOpen,
-        onRenameWorkspace: state.environmentController.management.renameWorkspace,
-        onDeleteWorkspace: state.environmentController.management.confirmDeleteWorkspace,
-        onSetActiveWorkspace: state.environmentController.navigation.setActiveWorkspace,
+        onWorkspaceSortChanged: services.appUiController.setWorkspaceSort,
+        onToggleWorkspaceOpen: services.environmentController.management.toggleOpen,
+        onRenameWorkspace: services.environmentController.management.renameWorkspace,
+        onDeleteWorkspace: services.environmentController.management.confirmDeleteWorkspace,
+        onSetActiveWorkspace: services.environmentController.navigation.setActiveWorkspace,
       ),
     );
   }

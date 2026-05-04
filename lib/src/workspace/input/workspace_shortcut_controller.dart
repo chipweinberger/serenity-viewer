@@ -7,7 +7,7 @@ import 'package:serenity_viewer/src/environment/controller/environment_controlle
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.dart';
-import 'package:serenity_viewer/src/app/app_ui_state.dart';
+import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_navigation_controller.dart';
 
 class WorkspaceShortcutDependencies {

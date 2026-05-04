@@ -4,7 +4,7 @@ import 'dart:ui' as ui;
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/settings/appearance/theme.dart';
+import 'package:serenity_viewer/src/app/app_theme.dart';
 import 'package:serenity_viewer/src/settings/behavior/settings_result.dart';
 
 class SettingsDialog extends StatefulWidget {

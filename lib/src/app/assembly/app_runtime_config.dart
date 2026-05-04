@@ -4,19 +4,22 @@ import 'package:serenity_viewer/src/environment/controller/environment_controlle
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
-import 'package:serenity_viewer/src/app/app_owned_state.dart';
+import 'package:serenity_viewer/src/app/state/app_state_store.dart';
+import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
 
 class AppRuntimeConfig {
   const AppRuntimeConfig({
     required this.isRunningInWidgetTest,
-    required this.ownedState,
+    required this.stateStore,
+    required this.uiHandles,
     required this.shell,
     required this.environment,
     required this.workspace,
   });
 
   final bool isRunningInWidgetTest;
-  final AppOwnedState ownedState;
+  final AppStateStore stateStore;
+  final AppUiHandles uiHandles;
   final AppConfig shell;
   final EnvironmentConfig environment;
   final WorkspaceConfig workspace;

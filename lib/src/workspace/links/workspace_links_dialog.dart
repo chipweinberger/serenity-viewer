@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/environment/link.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
-import 'package:serenity_viewer/src/settings/appearance/theme.dart';
+import 'package:serenity_viewer/src/app/app_theme.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_launcher.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_prompts.dart';

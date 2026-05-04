@@ -6,7 +6,7 @@ import 'package:serenity_viewer/src/environment/store/environment_store_state.da
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/app/app_ui_state.dart';
+import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/workspace/tracking/workspace_view_tracking_state.dart';
 
 class WorkspaceViewTrackingDependencies {

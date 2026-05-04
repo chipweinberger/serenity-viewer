@@ -16,10 +16,10 @@ class AppFoundationFactory {
     required void Function(String workspaceId) markWorkspaceThumbnailDirty,
     required Future<void> Function() syncWindowTitle,
   }) {
-    final ownedState = config.ownedState;
-    final environmentStoreState = ownedState.environmentStoreState;
-    final appUiState = ownedState.appUiState;
-    final windowInteractionState = ownedState.windowInteractionState;
+    final stateStore = config.stateStore;
+    final environmentStoreState = stateStore.environmentStoreState;
+    final appUiState = stateStore.appUiState;
+    final windowInteractionState = stateStore.windowInteractionState;
 
     final appUiController = AppUiController(
       appUiState: appUiState,
