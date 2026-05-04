@@ -42,7 +42,7 @@ import 'package:serenity_viewer/src/window/interaction/window_interaction_state.
 import 'package:serenity_viewer/src/workspace/history/workspace_window_history_state.dart';
 
 class AppRuntime {
-  AppRuntime.assembled({
+  AppRuntime({
     required this.appUiController,
     required this.platformBridge,
     required this.sharedVideoControllerPool,
@@ -222,7 +222,7 @@ class AppRuntime {
       },
     );
 
-    return AppRuntime.assembled(
+    return AppRuntime(
       appUiController: foundation.appUiController,
       platformBridge: foundation.platformBridge,
       sharedVideoControllerPool: foundation.sharedVideoControllerPool,
