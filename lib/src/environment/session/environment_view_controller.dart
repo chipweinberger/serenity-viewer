@@ -4,13 +4,11 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/environment/session/environment_store_state.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
-import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/settings/behavior/app_ui_state.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/layout/workspace_expose_layout.dart';
-import 'package:serenity_viewer/src/workspace/layout/workspace_layout.dart';
 import 'package:serenity_viewer/src/environment/session/environment_session.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 
@@ -143,36 +141,11 @@ class EnvironmentViewController {
       return;
     }
 
-    final sortedWindows = [...workspace.windows]..sort((a, b) => a.asset.filename.compareTo(b.asset.filename));
-    final exposeLayouts = computeWorkspaceExposeLayout(
-      windows: sortedWindows,
-      viewportSize: _dependencies.workspaceViewportState.viewportSize,
-    );
-    if (exposeLayouts.isEmpty) {
-      return;
-    }
-
-    final viewportCenter = _dependencies.workspaceViewportState.viewportSize.center(Offset.zero);
-    final safeViewportZoom = workspace.viewportZoom <= 0 ? 1.0 : workspace.viewportZoom;
-    final nextViewportZoom = WorkspaceLayout.clampWorkspaceZoom(safeViewportZoom * _appliedExposeViewportZoomFactor);
-    final relaidOutById = <String, Window>{};
-    for (final layout in exposeLayouts) {
-      final rect = layout.rect;
-      final nextSize = Size(rect.width / nextViewportZoom, rect.height / nextViewportZoom);
-      final nextPosition = WorkspaceLayout.clampWindowPosition(
-        Offset(
-          workspace.viewportCenter.dx + ((rect.left - viewportCenter.dx) / nextViewportZoom),
-          workspace.viewportCenter.dy + ((rect.top - viewportCenter.dy) / nextViewportZoom),
-        ),
-        nextSize,
-      );
-      relaidOutById[layout.window.asset.id] = layout.window.copyWith(position: nextPosition, size: nextSize);
-    }
-
     _dependencies.replaceWorkspace(
-      workspace.copyWith(
-        windows: workspace.windows.map((window) => relaidOutById[window.asset.id] ?? window).toList(),
-        viewportZoom: nextViewportZoom,
+      applyWorkspaceExposeGridLayout(
+        workspace: workspace,
+        viewportSize: _dependencies.workspaceViewportState.viewportSize,
+        appliedExposeViewportZoomFactor: _appliedExposeViewportZoomFactor,
       ),
     );
 

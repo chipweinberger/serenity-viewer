@@ -2,11 +2,58 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
+import 'package:serenity_viewer/src/workspace/layout/workspace_layout.dart';
 
 typedef WorkspaceExposeWindowLayout = ({Window window, Rect rect});
 
-List<WorkspaceExposeWindowLayout> computeWorkspaceExposeLayout({
+List<WorkspaceExposeWindowLayout> buildWorkspaceExposeLayouts({
+  required List<Window> windows,
+  required Size viewportSize,
+}) {
+  return _computeWorkspaceExposeLayout(windows: windows, viewportSize: viewportSize);
+}
+
+Workspace applyWorkspaceExposeGridLayout({
+  required Workspace workspace,
+  required Size viewportSize,
+  required double appliedExposeViewportZoomFactor,
+}) {
+  if (viewportSize.width <= 0 || viewportSize.height <= 0 || workspace.windows.isEmpty) {
+    return workspace;
+  }
+
+  final sortedWindows = [...workspace.windows]..sort((a, b) => a.asset.filename.compareTo(b.asset.filename));
+  final exposeLayouts = _computeWorkspaceExposeLayout(windows: sortedWindows, viewportSize: viewportSize);
+  if (exposeLayouts.isEmpty) {
+    return workspace;
+  }
+
+  final viewportCenter = viewportSize.center(Offset.zero);
+  final safeViewportZoom = workspace.viewportZoom <= 0 ? 1.0 : workspace.viewportZoom;
+  final nextViewportZoom = WorkspaceLayout.clampWorkspaceZoom(safeViewportZoom * appliedExposeViewportZoomFactor);
+  final relaidOutById = <String, Window>{};
+  for (final layout in exposeLayouts) {
+    final rect = layout.rect;
+    final nextSize = Size(rect.width / nextViewportZoom, rect.height / nextViewportZoom);
+    final nextPosition = WorkspaceLayout.clampWindowPosition(
+      Offset(
+        workspace.viewportCenter.dx + ((rect.left - viewportCenter.dx) / nextViewportZoom),
+        workspace.viewportCenter.dy + ((rect.top - viewportCenter.dy) / nextViewportZoom),
+      ),
+      nextSize,
+    );
+    relaidOutById[layout.window.asset.id] = layout.window.copyWith(position: nextPosition, size: nextSize);
+  }
+
+  return workspace.copyWith(
+    windows: workspace.windows.map((window) => relaidOutById[window.asset.id] ?? window).toList(),
+    viewportZoom: nextViewportZoom,
+  );
+}
+
+List<WorkspaceExposeWindowLayout> _computeWorkspaceExposeLayout({
   required List<Window> windows,
   required Size viewportSize,
 }) {

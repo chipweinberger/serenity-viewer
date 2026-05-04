@@ -371,7 +371,7 @@ class WorkspaceScreenHost extends StatelessWidget {
             return const SizedBox.shrink();
           }
 
-          final exposeLayouts = computeWorkspaceExposeLayout(windows: windows, viewportSize: viewportSize);
+          final exposeLayouts = buildWorkspaceExposeLayouts(windows: windows, viewportSize: viewportSize);
           return Stack(children: [for (final layout in exposeLayouts) _buildExposeWindowCard(layout, loadPlan)]);
         },
       ),
