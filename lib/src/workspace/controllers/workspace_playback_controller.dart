@@ -4,18 +4,11 @@ import 'package:serenity_viewer/src/workspace/controllers/workspace_playback_run
 import 'package:serenity_viewer/src/workspace/controllers/workspace_playback_workspace_controller.dart';
 
 class WorkspacePlaybackController {
-  WorkspacePlaybackController({
-    required this.windowInteractionState,
-    required this.commitInteractionState,
-    required this.replaceWorkspace,
-  }) : runtime = WorkspacePlaybackRuntimeController(
-         windowInteractionState: windowInteractionState,
-         commitInteractionState: commitInteractionState,
-       ),
-       workspace = WorkspacePlaybackWorkspaceController(replaceWorkspace: replaceWorkspace);
+  WorkspacePlaybackController({required this.windowInteractionState, required this.replaceWorkspace})
+    : runtime = WorkspacePlaybackRuntimeController(windowInteractionState: windowInteractionState),
+      workspace = WorkspacePlaybackWorkspaceController(replaceWorkspace: replaceWorkspace);
 
   final WindowInteractionState windowInteractionState;
-  final SerenityWorkspaceCommit commitInteractionState;
   final SerenityWorkspaceReplace replaceWorkspace;
   final WorkspacePlaybackRuntimeController runtime;
   final WorkspacePlaybackWorkspaceController workspace;

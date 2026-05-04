@@ -140,9 +140,7 @@ class AppUiController {
     );
 
     if (shouldClearSelection) {
-      commitStateChange(() {
-        windowInteractionState.selectedExposeWindowIds.clear();
-      });
+      windowInteractionState.clearSelectedExposeWindows();
     }
 
     if (refreshWorkspaceTrackingEnabled && (stateChanged || shouldClearSelection)) {

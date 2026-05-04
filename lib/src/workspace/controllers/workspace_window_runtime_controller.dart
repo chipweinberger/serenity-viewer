@@ -6,32 +6,24 @@ import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/workspace/history/workspace_window_history_entry.dart';
 import 'package:serenity_viewer/src/workspace/history/workspace_window_history_state.dart';
 
-import 'workspace_controller.dart';
-
 class WorkspaceWindowRuntimeController {
-  const WorkspaceWindowRuntimeController({required this.commitInteractionState, required this.windowInteractionState});
+  const WorkspaceWindowRuntimeController({required this.windowInteractionState});
 
-  final SerenityWorkspaceCommit commitInteractionState;
   final WindowInteractionState windowInteractionState;
 
   void flash(String windowId, {required bool mounted}) {
     windowInteractionState.windowFlashTimer?.cancel();
-    commitInteractionState(() {
-      windowInteractionState.flashedWindowId = windowId;
-      windowInteractionState.windowFlashNonce += 1;
-    });
+    windowInteractionState.showWindowFlash(windowId);
     windowInteractionState.windowFlashTimer = Timer(const Duration(milliseconds: 300), () {
       if (!mounted || windowInteractionState.flashedWindowId != windowId) {
         return;
       }
-      commitInteractionState(() {
-        windowInteractionState.flashedWindowId = null;
-      });
+      windowInteractionState.clearWindowFlash(windowId);
     });
   }
 
   void clear(String windowId) {
-    windowInteractionState.previousWindowZOrders.remove(windowId);
+    windowInteractionState.clearWindowRuntimeState(windowId);
   }
 
   void rememberClosed(

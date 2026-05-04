@@ -15,11 +15,7 @@ _MediaFlows _createMediaFlows({
     activeWorkspace: scope.ws.activeWorkspace,
     replaceWorkspace: scope.env.replaceWorkspace,
     colorFromDigest: scope.ws.colorFromDigest,
-    removePausedVideoWindow: (windowId) {
-      scope.app.commitStateChange(() {
-        scope.interactionState.pausedVideoWindows.remove(windowId);
-      });
-    },
+    removePausedVideoWindow: scope.interactionState.removePausedVideoWindow,
   );
   final workspaceMediaImportController = WorkspaceMediaImportController(
     imageExtensions: const ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tif', 'tiff'],

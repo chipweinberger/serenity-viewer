@@ -59,7 +59,6 @@ _WorkspaceControllers _createWorkspaceControllers({
     appUiState: scope.uiState,
     windowInteractionState: scope.interactionState,
     workspaceViewportState: scope.viewportState,
-    commitInteractionState: scope.app.commitStateChange,
     replaceWorkspace: scope.env.replaceWorkspace,
     setWorkspaceViewport: scope.ws.setWorkspaceViewport,
     refreshActiveWorkspaceThumbnail: thumbnailController.refreshActiveWorkspaceIfNeeded,

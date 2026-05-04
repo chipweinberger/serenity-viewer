@@ -2,26 +2,17 @@ import 'package:serenity_viewer/src/window/interaction/window_interaction_state.
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 
-import 'workspace_controller.dart';
-
 class WorkspacePlaybackRuntimeController {
-  const WorkspacePlaybackRuntimeController({
-    required this.windowInteractionState,
-    required this.commitInteractionState,
-  });
+  const WorkspacePlaybackRuntimeController({required this.windowInteractionState});
 
   final WindowInteractionState windowInteractionState;
-  final SerenityWorkspaceCommit commitInteractionState;
 
   bool isPaused(String windowId) {
     return windowInteractionState.pausedVideoWindows[windowId] ?? true;
   }
 
   void toggle(String windowId) {
-    commitInteractionState(() {
-      windowInteractionState.pausedVideoWindows[windowId] =
-          !(windowInteractionState.pausedVideoWindows[windowId] ?? true);
-    });
+    windowInteractionState.setWindowPaused(windowId, !(windowInteractionState.pausedVideoWindows[windowId] ?? true));
   }
 
   void stopAll(Environment? environment) {
@@ -29,18 +20,15 @@ class WorkspacePlaybackRuntimeController {
       return;
     }
 
-    commitInteractionState(() {
-      for (final workspace in environment.workspaces) {
-        for (final window in workspace.windows) {
-          if (window.asset.type == AssetType.video) {
-            windowInteractionState.pausedVideoWindows[window.asset.id] = true;
-          }
-        }
-      }
-    });
+    windowInteractionState.pauseAllVideoWindows(
+      environment.workspaces.expand(
+        (workspace) =>
+            workspace.windows.where((window) => window.asset.type == AssetType.video).map((window) => window.asset.id),
+      ),
+    );
   }
 
   void clear(String windowId) {
-    windowInteractionState.pausedVideoWindows.remove(windowId);
+    windowInteractionState.removePausedVideoWindow(windowId);
   }
 }

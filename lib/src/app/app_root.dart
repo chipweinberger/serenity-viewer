@@ -69,6 +69,7 @@ class _AppRootState extends State<AppRoot> {
       _state.appUiState,
       _state.thumbnailRefreshState,
       _state.workspaceWindowHistoryState,
+      _state.windowInteractionState,
     ]);
     _feedback = AppFeedbackController(context: () => context);
     _settings = AppSettingsController(

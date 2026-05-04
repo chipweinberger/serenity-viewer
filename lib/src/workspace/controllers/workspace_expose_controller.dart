@@ -1,31 +1,17 @@
 import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
-import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 
 class WorkspaceExposeController {
-  WorkspaceExposeController({required this.windowInteractionState, required this.commitInteractionState});
+  WorkspaceExposeController({required this.windowInteractionState});
 
   final WindowInteractionState windowInteractionState;
-  final SerenityWorkspaceCommit commitInteractionState;
 
   void toggle(String windowId) {
-    commitInteractionState(() {
-      if (windowInteractionState.selectedExposeWindowIds.contains(windowId)) {
-        windowInteractionState.selectedExposeWindowIds.remove(windowId);
-      } else {
-        windowInteractionState.selectedExposeWindowIds.add(windowId);
-      }
-    });
+    windowInteractionState.toggleSelectedExposeWindow(windowId);
   }
 
   void clear() {
-    if (windowInteractionState.selectedExposeWindowIds.isEmpty) {
-      return;
-    }
-
-    commitInteractionState(() {
-      windowInteractionState.selectedExposeWindowIds.clear();
-    });
+    windowInteractionState.clearSelectedExposeWindows();
   }
 
   int countIn(Workspace workspace) {
@@ -51,6 +37,6 @@ class WorkspaceExposeController {
   }
 
   void remove(String windowId) {
-    windowInteractionState.selectedExposeWindowIds.remove(windowId);
+    windowInteractionState.removeSelectedExposeWindow(windowId);
   }
 }

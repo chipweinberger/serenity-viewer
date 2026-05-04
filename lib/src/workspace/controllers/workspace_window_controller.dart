@@ -54,7 +54,7 @@ class WorkspaceWindowController {
   void focusWindow(String windowId) {
     final result = workspaceController.windows.arrangement.focus(activeWorkspace(), windowId);
     if (result?.previousZOrder != null) {
-      workspaceController.windowInteractionState.previousWindowZOrders[windowId] = result!.previousZOrder!;
+      workspaceController.windowInteractionState.rememberPreviousWindowZOrder(windowId, result!.previousZOrder!);
     }
   }
 
@@ -63,7 +63,7 @@ class WorkspaceWindowController {
   }
 
   void restorePreviousWindowZOrder(String windowId) {
-    final previousZOrder = workspaceController.windowInteractionState.previousWindowZOrders.remove(windowId);
+    final previousZOrder = workspaceController.windowInteractionState.takePreviousWindowZOrder(windowId);
     if (previousZOrder == null) {
       return;
     }

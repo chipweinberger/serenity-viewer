@@ -23,21 +23,13 @@ class WorkspaceController {
     required this.appUiState,
     required this.windowInteractionState,
     required this.workspaceViewportState,
-    required this.commitInteractionState,
     required this.replaceWorkspace,
     required this.setWorkspaceViewport,
     required this.refreshActiveWorkspaceThumbnail,
-  }) : gesture = WorkspaceGestureController(
-         windowInteractionState: windowInteractionState,
-         commitInteractionState: commitInteractionState,
-       ),
-       expose = WorkspaceExposeController(
-         windowInteractionState: windowInteractionState,
-         commitInteractionState: commitInteractionState,
-       ),
+  }) : gesture = WorkspaceGestureController(windowInteractionState: windowInteractionState),
+       expose = WorkspaceExposeController(windowInteractionState: windowInteractionState),
        windows = WorkspaceWindowsController(
          appUiState: appUiState,
-         commitInteractionState: commitInteractionState,
          windowInteractionState: windowInteractionState,
          replaceWorkspace: replaceWorkspace,
        ),
@@ -51,7 +43,6 @@ class WorkspaceController {
        ),
        playback = WorkspacePlaybackController(
          windowInteractionState: windowInteractionState,
-         commitInteractionState: commitInteractionState,
          replaceWorkspace: replaceWorkspace,
        ),
        environment = WorkspaceEnvironmentController();
@@ -59,7 +50,6 @@ class WorkspaceController {
   final AppUiState appUiState;
   final WindowInteractionState windowInteractionState;
   final WorkspaceViewportState workspaceViewportState;
-  final SerenityWorkspaceCommit commitInteractionState;
   final SerenityWorkspaceReplace replaceWorkspace;
   final SerenityWorkspaceViewportSetter setWorkspaceViewport;
   final Future<void> Function() refreshActiveWorkspaceThumbnail;
