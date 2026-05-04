@@ -1,5 +1,6 @@
 import 'package:serenity_viewer/src/app/assembly/app_runtime.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.dart';
+import 'package:serenity_viewer/src/workspace/links/workspace_links_launcher.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_prompts.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresher.dart';
@@ -52,6 +53,9 @@ class AppWorkspaceFactory {
       workspaces: config.workspace.workspaces,
       replaceWorkspace: config.environment.replaceWorkspace,
       newId: config.workspace.newId,
+      showMessage: config.shell.showMessage,
+    );
+    final workspaceLinksLauncher = WorkspaceLinksLauncher(
       showMessage: config.shell.showMessage,
       mounted: config.shell.mounted,
     );
@@ -154,6 +158,7 @@ class AppWorkspaceFactory {
       thumbnailController: thumbnailController,
       workspaceMediaImportController: workspaceMediaImportController,
       workspaceLinksController: workspaceLinksController,
+      workspaceLinksLauncher: workspaceLinksLauncher,
       workspaceLinksPrompts: workspaceLinksPrompts,
       workspaceController: workspaceController,
       workspaceWindowController: workspaceWindowController,

@@ -78,6 +78,7 @@ class WorkspaceContentBuilder {
             context: state.context,
             initialWorkspace: state.activeWorkspace,
             controller: state.workspaceLinksController,
+            launcher: state.workspaceLinksLauncher,
             prompts: state.workspaceLinksPrompts,
           ),
           onClearExposeSelection: state.environmentSession.navigation.clearExposeSelection,
