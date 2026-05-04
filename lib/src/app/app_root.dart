@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:serenity_viewer/src/app/runtime/app_runtime.dart';
 import 'package:serenity_viewer/src/app/state/app_state_store.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
+import 'package:serenity_viewer/src/app/state/app_derived_state.dart';
 import 'package:serenity_viewer/src/app/controllers/app_feedback_controller.dart';
 import 'package:serenity_viewer/src/app/seed_environment.dart';
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
@@ -32,6 +33,8 @@ import 'package:serenity_viewer/src/workspace/links/workspace_links_launcher.dar
 import 'package:serenity_viewer/src/workspace/links/workspace_links_prompts.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_asset_picker_controller.dart';
+import 'package:serenity_viewer/src/foundation/app_constants.dart';
+import 'package:serenity_viewer/src/foundation/serenity_identity.dart';
 
 class AppRoot extends StatefulWidget {
   const AppRoot({super.key});
@@ -140,18 +143,49 @@ class _AppRootState extends State<AppRoot> {
   }
 
   AppRuntimeInputs _buildRuntimeInputs() {
-    return buildAppRuntimeInputs(
+    return AppRuntimeInputs(
+      isRunningInWidgetTest: _isRunningInWidgetTest,
       stateStore: _stateStore,
       uiHandles: _uiHandles,
+      windowTitle: () => deriveWindowTitle(_stateStore),
       context: () => context,
       mounted: () => mounted,
       showMessage: _showMessage,
-      isRunningInWidgetTest: _isRunningInWidgetTest,
-      environmentStore: () => _environmentStore,
-      appUiController: () => _appUiController,
-      workspaceWindowController: () => _workspaceWindowController,
-      workspaceViewportSessionController: () => _workspaceViewportSessionController,
-      documentPersistence: () => _documentPersistence,
+      seedEnvironment: buildSeedEnvironment,
+      updateEnvironment: _environmentStore.updateEnvironment,
+      replaceWorkspace: _environmentStore.replaceWorkspace,
+      saveEnvironment: _documentPersistence.saveEnvironment,
+      newId: newSerenityId,
+      colorFromDigest: assetColorValueFromDigest,
+      activeWorkspace: () => deriveActiveWorkspaceOrNull(_stateStore),
+      workspaces: () => deriveWorkspaces(_stateStore),
+      openWorkspaces: () => deriveOpenWorkspaces(_stateStore),
+      focusedWindowOrNull: _workspaceWindowController.focusedWindowOrNull,
+      setWorkspaceViewport: _workspaceViewportSessionController.setWorkspaceViewport,
+      showWorkspaceScreen:
+          ({
+            WorkspaceLayoutMode workspaceLayoutMode = WorkspaceLayoutMode.freeform,
+            bool resetEditMode = true,
+            bool clearExposeSelection = true,
+            bool refreshWorkspaceTracking = true,
+          }) => _appUiController.showWorkspaceScreen(
+            workspaceLayoutMode: workspaceLayoutMode,
+            resetEditMode: resetEditMode,
+            clearExposeSelection: clearExposeSelection,
+            refreshWorkspaceTrackingEnabled: refreshWorkspaceTracking,
+          ),
+      showLibraryScreen:
+          ({
+            bool resetEditMode = true,
+            bool clearExposeSelection = true,
+            bool refreshWorkspaceTracking = true,
+          }) => _appUiController.showLibraryScreen(
+            resetEditMode: resetEditMode,
+            clearExposeSelection: clearExposeSelection,
+            refreshWorkspaceTrackingEnabled: refreshWorkspaceTracking,
+          ),
+      toggleExpose: _appUiController.toggleExpose,
+      toggleVideoPlayback: _workspaceWindowController.toggleVideoPlayback,
     );
   }
 
