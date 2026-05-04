@@ -65,13 +65,28 @@ class AppScreenHostState {
 }
 
 class AppScreenHostActions {
-  const AppScreenHostActions({
+  const AppScreenHostActions({required this.app, required this.window, required this.workspace});
+
+  final AppScreenHostAppActions app;
+  final AppScreenHostWindowActions window;
+  final AppScreenHostWorkspaceActions workspace;
+}
+
+class AppScreenHostAppActions {
+  const AppScreenHostAppActions({
     required this.commitStateChange,
     required this.importFiles,
+    required this.revealAssetInFinder,
+  });
+
+  final void Function(VoidCallback fn) commitStateChange;
+  final Future<void> Function(List<XFile> files) importFiles;
+  final Future<void> Function(Asset asset) revealAssetInFinder;
+}
+
+class AppScreenHostWindowActions {
+  const AppScreenHostWindowActions({
     required this.handleOptionGestureHover,
-    required this.handleWorkspacePanZoomStart,
-    required this.handleWorkspacePanZoomUpdate,
-    required this.handleWorkspacePanZoomEnd,
     required this.focusWindow,
     required this.restorePreviousWindowZOrder,
     required this.moveWindow,
@@ -84,24 +99,13 @@ class AppScreenHostActions {
     required this.setWindowIntrinsicSize,
     required this.isVideoWindowPaused,
     required this.toggleVideoPlayback,
-    required this.toggleExpose,
     required this.setPinnedHoverWindow,
     required this.clearPinnedHoverWindow,
     required this.flashWindow,
     required this.setActiveGestureWindow,
-    required this.fitWorkspaceViewportToContent,
-    required this.confirmCollateWorkspaceWindows,
-    required this.setWorkspaceViewport,
-    required this.revealAssetInFinder,
   });
 
-  final void Function(VoidCallback fn) commitStateChange;
-  final Future<void> Function(List<XFile> files) importFiles;
   final void Function(PointerHoverEvent event, Workspace workspace) handleOptionGestureHover;
-  final void Function(PointerPanZoomStartEvent event, Workspace workspace) handleWorkspacePanZoomStart;
-  final void Function(PointerPanZoomUpdateEvent event, Workspace workspace, Size viewportSize)
-  handleWorkspacePanZoomUpdate;
-  final VoidCallback handleWorkspacePanZoomEnd;
   final ValueChanged<String> focusWindow;
   final ValueChanged<String> restorePreviousWindowZOrder;
   final void Function(String windowId, Offset delta) moveWindow;
@@ -114,14 +118,30 @@ class AppScreenHostActions {
   final void Function(String windowId, Size intrinsicSize) setWindowIntrinsicSize;
   final bool Function(String windowId) isVideoWindowPaused;
   final ValueChanged<String> toggleVideoPlayback;
-  final VoidCallback toggleExpose;
   final ValueChanged<String> setPinnedHoverWindow;
   final VoidCallback clearPinnedHoverWindow;
   final ValueChanged<String> flashWindow;
   final ValueChanged<String?> setActiveGestureWindow;
+}
+
+class AppScreenHostWorkspaceActions {
+  const AppScreenHostWorkspaceActions({
+    required this.handleWorkspacePanZoomStart,
+    required this.handleWorkspacePanZoomUpdate,
+    required this.handleWorkspacePanZoomEnd,
+    required this.toggleExpose,
+    required this.fitWorkspaceViewportToContent,
+    required this.confirmCollateWorkspaceWindows,
+    required this.setWorkspaceViewport,
+  });
+
+  final void Function(PointerPanZoomStartEvent event, Workspace workspace) handleWorkspacePanZoomStart;
+  final void Function(PointerPanZoomUpdateEvent event, Workspace workspace, Size viewportSize)
+  handleWorkspacePanZoomUpdate;
+  final VoidCallback handleWorkspacePanZoomEnd;
   final VoidCallback fitWorkspaceViewportToContent;
   final Future<void> Function() confirmCollateWorkspaceWindows;
   final void Function({required String workspaceId, Offset? center, double? zoom, bool queueThumbnail})
   setWorkspaceViewport;
-  final Future<void> Function(Asset asset) revealAssetInFinder;
+  final VoidCallback toggleExpose;
 }

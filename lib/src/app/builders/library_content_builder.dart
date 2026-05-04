@@ -19,7 +19,7 @@ class LibraryContentBuilder {
       workspaceSort: state.uiState.workspaceSort,
       refreshingWorkspaceIds: state.thumbnailController.refreshingWorkspaceIds,
       actions: LibraryScreenActions(
-        onSearchChanged: (_) => actions.commitStateChange(() {}),
+        onSearchChanged: (_) => actions.app.commitStateChange(() {}),
         onWorkspaceSortChanged: state.appUiController.setWorkspaceSort,
         onToggleWorkspaceOpen: state.environmentSession.management.toggleOpen,
         onRenameWorkspace: state.environmentSession.management.renameWorkspace,
