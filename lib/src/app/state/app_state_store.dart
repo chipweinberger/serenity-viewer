@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
@@ -16,14 +14,6 @@ class AppStateStore {
   final WorkspaceViewportState workspaceViewportState = WorkspaceViewportState();
   final ThumbnailRefreshState thumbnailRefreshState = ThumbnailRefreshState();
   final WorkspaceWindowHistoryState workspaceWindowHistoryState = WorkspaceWindowHistoryState();
-
-  late final Listenable shellListenable = Listenable.merge([
-    environmentStoreState,
-    appUiState,
-    thumbnailRefreshState,
-    workspaceWindowHistoryState,
-    windowInteractionState,
-  ]);
 
   void dispose() {
     environmentStoreState.dispose();

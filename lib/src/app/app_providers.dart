@@ -49,7 +49,6 @@ class AppProviders extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider<AppStateStore>.value(value: stateStore),
         Provider<AppUiHandles>.value(value: uiHandles),
         Provider<AppFeedbackController>.value(value: feedback),
         Provider<AppSettingsController>.value(value: settings),

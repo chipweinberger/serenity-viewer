@@ -6,9 +6,10 @@ import 'package:serenity_viewer/src/app/header/app_tab_bar_actions.dart';
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
 import 'package:serenity_viewer/src/app/state/app_derived_state.dart';
-import 'package:serenity_viewer/src/app/state/app_state_store.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
+import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/app/views/app_main_view_contract.dart';
+import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/app/views/library_view.dart';
 import 'package:serenity_viewer/src/app/views/workspace_view.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
@@ -17,6 +18,7 @@ import 'package:serenity_viewer/src/media/import/workspace_media_import_controll
 import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
 import 'package:serenity_viewer/src/media/loading/workspace_load_plan.dart';
 import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
+import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_collate_controller.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_expose_layout_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
@@ -27,6 +29,7 @@ import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.d
 import 'package:serenity_viewer/src/workspace/links/workspace_links_launcher.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_prompts.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
+import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 
 export 'package:serenity_viewer/src/app/views/app_main_view_contract.dart';
 
@@ -34,20 +37,23 @@ class AppMainView extends StatelessWidget {
   const AppMainView({super.key});
 
   AppMainViewModel _buildModel({
-    required AppStateStore state,
+    required AppUiState appUiState,
+    required EnvironmentStoreState environmentStoreState,
+    required WindowInteractionState windowInteractionState,
+    required WorkspaceViewportState workspaceViewportState,
     required WorkspaceController workspaceController,
   }) {
     return AppMainViewModel(
-      uiState: state.appUiState,
-      environment: state.environmentStoreState.environment!,
-      windowTitle: deriveWindowTitle(state),
-      workspaces: deriveWorkspaces(state),
-      openWorkspaces: deriveOpenWorkspaces(state),
-      activeWorkspace: deriveActiveWorkspace(state),
-      activeWorkspaceOrNull: deriveActiveWorkspaceOrNull(state),
+      uiState: appUiState,
+      environment: environmentStoreState.environment!,
+      windowTitle: deriveWindowTitle(environmentStoreState),
+      workspaces: deriveWorkspaces(environmentStoreState),
+      openWorkspaces: deriveOpenWorkspaces(environmentStoreState),
+      activeWorkspace: deriveActiveWorkspace(environmentStoreState),
+      activeWorkspaceOrNull: deriveActiveWorkspaceOrNull(environmentStoreState),
       selectedExposeWindowCount: workspaceController.expose.count(),
-      windowInteractionState: state.windowInteractionState,
-      workspaceViewportState: state.workspaceViewportState,
+      windowInteractionState: windowInteractionState,
+      workspaceViewportState: workspaceViewportState,
     );
   }
 
@@ -185,7 +191,10 @@ class AppMainView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final state = context.read<AppStateStore>();
+    final appUiState = context.watch<AppUiState>();
+    final environmentStoreState = context.watch<EnvironmentStoreState>();
+    final windowInteractionState = context.watch<WindowInteractionState>();
+    final workspaceViewportState = context.watch<WorkspaceViewportState>();
     final uiHandles = context.read<AppUiHandles>();
     final appUiController = context.read<AppUiController>();
     final sharedVideoControllerPool = context.read<SharedVideoControllerPool>();
@@ -203,7 +212,13 @@ class AppMainView extends StatelessWidget {
     final workspaceCollateController = context.read<WorkspaceCollateController>();
     final workspaceController = context.read<WorkspaceController>();
 
-    final model = _buildModel(state: state, workspaceController: workspaceController);
+    final model = _buildModel(
+      appUiState: appUiState,
+      environmentStoreState: environmentStoreState,
+      windowInteractionState: windowInteractionState,
+      workspaceViewportState: workspaceViewportState,
+      workspaceController: workspaceController,
+    );
     final services = _buildServices(
       appUiController: appUiController,
       sharedVideoControllerPool: sharedVideoControllerPool,

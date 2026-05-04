@@ -1,18 +1,18 @@
 import 'dart:io';
 
-import 'package:serenity_viewer/src/app/state/app_state_store.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
+import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 
-List<Workspace> deriveWorkspaces(AppStateStore state) {
-  return state.environmentStoreState.environment?.workspaces ?? const [];
+List<Workspace> deriveWorkspaces(EnvironmentStoreState state) {
+  return state.environment?.workspaces ?? const [];
 }
 
-List<Workspace> deriveOpenWorkspaces(AppStateStore state) {
+List<Workspace> deriveOpenWorkspaces(EnvironmentStoreState state) {
   return deriveWorkspaces(state).where((workspace) => workspace.isOpen).toList();
 }
 
-Workspace? deriveActiveWorkspaceOrNull(AppStateStore state) {
-  final environment = state.environmentStoreState.environment;
+Workspace? deriveActiveWorkspaceOrNull(EnvironmentStoreState state) {
+  final environment = state.environment;
   if (environment == null || environment.workspaces.isEmpty) {
     return null;
   }
@@ -21,13 +21,13 @@ Workspace? deriveActiveWorkspaceOrNull(AppStateStore state) {
   return matches.isNotEmpty ? matches.first : environment.workspaces.first;
 }
 
-Workspace deriveActiveWorkspace(AppStateStore state) {
+Workspace deriveActiveWorkspace(EnvironmentStoreState state) {
   return deriveActiveWorkspaceOrNull(state) ?? (throw StateError('No active workspace is available.'));
 }
 
-String deriveWindowTitle(AppStateStore state) {
-  final path = state.environmentStoreState.currentEnvironmentPath;
-  final suffix = state.environmentStoreState.hasUnsavedChanges ? ' *' : '';
+String deriveWindowTitle(EnvironmentStoreState state) {
+  final path = state.currentEnvironmentPath;
+  final suffix = state.hasUnsavedChanges ? ' *' : '';
   if (path == null || path.isEmpty) {
     return 'Serenity$suffix';
   }

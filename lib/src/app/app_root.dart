@@ -4,13 +4,12 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/app_providers.dart';
 import 'package:serenity_viewer/src/app/runtime/app_runtime.dart';
+import 'package:serenity_viewer/src/app/app_shell.dart';
 import 'package:serenity_viewer/src/app/state/app_state_store.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
 import 'package:serenity_viewer/src/app/state/app_derived_state.dart';
 import 'package:serenity_viewer/src/app/controllers/app_feedback_controller.dart';
 import 'package:serenity_viewer/src/app/seed_environment.dart';
-import 'package:serenity_viewer/src/app/menu/app_menu.dart';
-import 'package:serenity_viewer/src/app/views/app_main_view.dart';
 import 'package:serenity_viewer/src/environment/document/document_persistence_controller.dart';
 import 'package:serenity_viewer/src/settings/behavior/app_settings_controller.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
@@ -31,18 +30,8 @@ class _AppRootState extends State<AppRoot> {
   late final AppSettingsController _settings;
   late final DocumentPersistenceController _documentPersistence;
 
-  AppStateStore get _state => _stateStore;
-
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), behavior: SnackBarBehavior.floating));
-  }
-
-  Widget _buildContent(BuildContext context) {
-    if (_state.environmentStoreState.isLoading || _state.environmentStoreState.environment == null) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    return const AppMainView();
   }
 
   @override
@@ -57,7 +46,7 @@ class _AppRootState extends State<AppRoot> {
       workspaceViewportState: _stateStore.workspaceViewportState,
       thumbnailRefreshState: _stateStore.thumbnailRefreshState,
       workspaceWindowHistoryState: _stateStore.workspaceWindowHistoryState,
-      windowTitle: () => deriveWindowTitle(_stateStore),
+      windowTitle: () => deriveWindowTitle(_stateStore.environmentStoreState),
       context: () => context,
       mounted: () => mounted,
       showMessage: _showMessage,
@@ -69,9 +58,9 @@ class _AppRootState extends State<AppRoot> {
       saveEnvironment: () => _documentPersistence.saveEnvironment(),
       newId: newSerenityId,
       colorFromDigest: assetColorValueFromDigest,
-      activeWorkspace: () => deriveActiveWorkspaceOrNull(_stateStore),
-      workspaces: () => deriveWorkspaces(_stateStore),
-      openWorkspaces: () => deriveOpenWorkspaces(_stateStore),
+      activeWorkspace: () => deriveActiveWorkspaceOrNull(_stateStore.environmentStoreState),
+      workspaces: () => deriveWorkspaces(_stateStore.environmentStoreState),
+      openWorkspaces: () => deriveOpenWorkspaces(_stateStore.environmentStoreState),
       focusedWindowOrNull: () => _runtime.workspaceWindowController.focusedWindowOrNull(),
       setWorkspaceViewport: ({required workspaceId, center, zoom, queueThumbnail = true}) {
         _runtime.workspaceViewportSessionController.setWorkspaceViewport(
@@ -109,11 +98,11 @@ class _AppRootState extends State<AppRoot> {
     _feedback = AppFeedbackController(context: () => context);
     _settings = AppSettingsController(
       context: () => context,
-      environmentStoreState: _state.environmentStoreState,
+      environmentStoreState: _stateStore.environmentStoreState,
       updateEnvironment: _runtime.environmentStore.updateEnvironment,
     );
     _documentPersistence = DocumentPersistenceController(
-      state: _state,
+      state: _stateStore,
       environmentStore: _runtime.environmentStore,
       platformBridge: _runtime.platformBridge,
       environmentBookmarkSynchronizer: _runtime.environmentBookmarkSynchronizer,
@@ -140,25 +129,13 @@ class _AppRootState extends State<AppRoot> {
 
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: _stateStore.shellListenable,
-      builder: (context, _) {
-        return AppProviders(
-          stateStore: _stateStore,
-          uiHandles: _uiHandles,
-          feedback: _feedback,
-          settings: _settings,
-          runtime: _runtime,
-          child: AppMenu(
-            child: Focus(
-              focusNode: _uiHandles.focusNode,
-              autofocus: true,
-              onKeyEvent: (_, event) => _runtime.workspaceShortcutController.onKeyEvent(event),
-              child: Scaffold(body: SafeArea(top: false, child: _buildContent(context))),
-            ),
-          ),
-        );
-      },
+    return AppProviders(
+      stateStore: _stateStore,
+      uiHandles: _uiHandles,
+      feedback: _feedback,
+      settings: _settings,
+      runtime: _runtime,
+      child: const AppShell(),
     );
   }
 }
