@@ -106,24 +106,6 @@ class AppMenuWindowActions {
   final void Function([WorkspaceWindowHistoryEntry? entry]) restoreRecentlyClosedWindow;
 }
 
-class AppMenuBindings {
-  const AppMenuBindings({
-    required this.state,
-    required this.app,
-    required this.file,
-    required this.asset,
-    required this.workspace,
-    required this.window,
-  });
-
-  final AppMenuState state;
-  final AppMenuAppActions app;
-  final AppMenuFileActions file;
-  final AppMenuAssetActions asset;
-  final AppMenuWorkspaceActions workspace;
-  final AppMenuWindowActions window;
-}
-
 AppMenuState _buildAppMenuState({
   required AppStateStore state,
   required WorkspaceWindowController workspaceWindowController,
@@ -208,7 +190,14 @@ AppMenuWindowActions _buildAppMenuWindowActions({
   );
 }
 
-AppMenuBindings buildAppMenuBindings({
+({
+  AppMenuState state,
+  AppMenuAppActions app,
+  AppMenuFileActions file,
+  AppMenuAssetActions asset,
+  AppMenuWorkspaceActions workspace,
+  AppMenuWindowActions window,
+}) buildAppMenuBindings({
   required AppStateStore state,
   required AppUiController appUiController,
   required Future<void> Function(Asset asset) revealAssetInFinder,
@@ -223,7 +212,7 @@ AppMenuBindings buildAppMenuBindings({
   required AppSettingsController settings,
   required Future<void> Function() openAssets,
 }) {
-  return AppMenuBindings(
+  return (
     state: _buildAppMenuState(
       state: state,
       workspaceWindowController: workspaceWindowController,

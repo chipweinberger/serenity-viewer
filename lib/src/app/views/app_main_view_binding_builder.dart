@@ -19,14 +19,6 @@ import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.da
 
 import 'package:serenity_viewer/src/app/views/app_main_view_contract.dart';
 
-class AppMainViewBindings {
-  const AppMainViewBindings({required this.model, required this.services, required this.actions});
-
-  final AppMainViewModel model;
-  final AppMainViewServices services;
-  final AppMainViewActions actions;
-}
-
 AppMainViewModel _buildAppMainViewModel({
   required AppStateStore state,
   required int selectedExposeWindowCount,
@@ -127,7 +119,11 @@ AppMainViewActions _buildAppMainViewActions({
   );
 }
 
-AppMainViewBindings buildAppMainViewBindings({
+({
+  AppMainViewModel model,
+  AppMainViewServices services,
+  AppMainViewActions actions,
+}) buildAppMainViewBindings({
   required AppStateStore state,
   required AppUiController appUiController,
   required SharedVideoControllerPool sharedVideoControllerPool,
@@ -147,7 +143,7 @@ AppMainViewBindings buildAppMainViewBindings({
   required AppUiHandles uiHandles,
   required bool Function() mounted,
 }) {
-  return AppMainViewBindings(
+  return (
     model: _buildAppMainViewModel(
       state: state,
       selectedExposeWindowCount: workspaceController.expose.count(),

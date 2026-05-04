@@ -72,7 +72,7 @@ class _AppRootState extends State<AppRoot> {
     _runtime.environmentStore.updateEnvironment(environment);
   }
 
-  AppMainViewBindings _buildAppMainViewBindings() {
+  ({AppMainViewModel model, AppMainViewServices services, AppMainViewActions actions}) _buildAppMainViewBindings() {
     return buildAppMainViewBindings(
       state: _state,
       appUiController: _runtime.appUiController,
@@ -188,7 +188,14 @@ class _AppRootState extends State<AppRoot> {
         WidgetsBinding.instance.runtimeType.toString().contains('Test');
   }
 
-  AppMenuBindings _buildAppMenuBindings() {
+  ({
+    AppMenuState state,
+    AppMenuAppActions app,
+    AppMenuFileActions file,
+    AppMenuAssetActions asset,
+    AppMenuWorkspaceActions workspace,
+    AppMenuWindowActions window,
+  }) _buildAppMenuBindings() {
     return buildAppMenuBindings(
       state: _state,
       appUiController: _runtime.appUiController,
