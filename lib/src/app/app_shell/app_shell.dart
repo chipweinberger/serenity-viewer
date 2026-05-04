@@ -7,6 +7,7 @@ import 'package:serenity_viewer/src/app/dependencies/shell_dependencies.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_controllers.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_derived_state.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_persistence_controller.dart';
+import 'package:serenity_viewer/src/app/app_shell/app_shell_runtime_config_builder.dart';
 import 'package:serenity_viewer/src/app/app_shell/builders/app_shell_content_builder.dart';
 import 'package:serenity_viewer/src/app/app_shell/builders/app_shell_content_scope.dart';
 import 'package:serenity_viewer/src/app/app_shell/builders/app_shell_menu_builder.dart';
@@ -145,63 +146,7 @@ class _AppShellState extends State<AppShell> {
   @override
   void initState() {
     super.initState();
-    _runtime = AppShellRuntime.create(
-      AppShellRuntimeConfig(
-        isRunningInWidgetTest: _isRunningInWidgetTest,
-        dependencies: _dependencies,
-        shell: AppShellRuntimeShellConfig(
-          windowTitle: () => _derived.windowTitle,
-          context: () => context,
-          mounted: () => mounted,
-          commitStateChange: setState,
-          showMessage: _showMessage,
-        ),
-        environment: AppShellRuntimeEnvironmentConfig(
-          seedEnvironment: buildSeedEnvironment,
-          updateEnvironment: (environment) => _foundation.environmentController.updateEnvironment(environment),
-          replaceWorkspace: (workspace, {queueThumbnail = true}) =>
-              _foundation.environmentController.replaceWorkspace(workspace, queueThumbnail: queueThumbnail),
-          saveEnvironment: () => _persistence.saveEnvironment(),
-        ),
-        workspace: AppShellRuntimeWorkspaceConfig(
-          newId: _newId,
-          colorFromDigest: _colorFromDigest,
-          activeWorkspace: () => _derived.activeWorkspaceOrNull,
-          workspaces: () => _derived.workspaces,
-          openWorkspaces: () => _derived.openWorkspaces,
-          focusedWindowOrNull: () => _controller.windowHistory.focusedWindowOrNull(),
-          setWorkspaceViewport:
-              ({required String workspaceId, Offset? center, double? zoom, bool queueThumbnail = false}) =>
-                  _controller.geometry.setWorkspaceViewport(
-                    workspaceId: workspaceId,
-                    center: center,
-                    zoom: zoom,
-                    queueThumbnail: queueThumbnail,
-                  ),
-          showWorkspaceScreen:
-              ({
-                WorkspaceLayoutMode workspaceLayoutMode = WorkspaceLayoutMode.freeform,
-                bool resetEditMode = true,
-                bool clearExposeSelection = true,
-                bool refreshWorkspaceTracking = true,
-              }) => _foundation.chromeController.showWorkspaceScreen(
-                workspaceLayoutMode: workspaceLayoutMode,
-                resetEditMode: resetEditMode,
-                clearExposeSelection: clearExposeSelection,
-                refreshWorkspaceTrackingEnabled: refreshWorkspaceTracking,
-              ),
-          showLibraryScreen:
-              ({bool resetEditMode = true, bool clearExposeSelection = true, bool refreshWorkspaceTracking = true}) =>
-                  _foundation.chromeController.showLibraryScreen(
-                    resetEditMode: resetEditMode,
-                    clearExposeSelection: clearExposeSelection,
-                    refreshWorkspaceTrackingEnabled: refreshWorkspaceTracking,
-                  ),
-          toggleExpose: () => _foundation.chromeController.toggleExpose(),
-          toggleVideoPlayback: (windowId) => _controller.window.toggleVideoPlayback(windowId),
-        ),
-      ),
-    );
+    _runtime = AppShellRuntime.create(_buildRuntimeConfig());
     _controller = AppShellController(
       context: () => context,
       mounted: () => mounted,
@@ -239,6 +184,23 @@ class _AppShellState extends State<AppShell> {
 
   int _colorFromDigest(String value) {
     return assetColorFromMd5(value).toARGB32();
+  }
+
+  AppShellRuntimeConfig _buildRuntimeConfig() {
+    return AppShellRuntimeConfigBuilder(
+      dependencies: _dependencies,
+      context: () => context,
+      mounted: () => mounted,
+      commitStateChange: setState,
+      showMessage: _showMessage,
+      isRunningInWidgetTest: _isRunningInWidgetTest,
+      derivedState: () => _derived,
+      foundation: () => _foundation,
+      controller: () => _controller,
+      persistence: () => _persistence,
+      newId: _newId,
+      colorFromDigest: _colorFromDigest,
+    ).build();
   }
 
   bool get _isRunningInWidgetTest {
