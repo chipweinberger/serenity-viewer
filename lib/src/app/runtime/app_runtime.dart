@@ -14,6 +14,7 @@ import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/app/runtime/factories/app_document_factory.dart';
 import 'package:serenity_viewer/src/app/runtime/factories/app_foundation_factory.dart';
 import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory.dart';
+import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_scope.dart';
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
 import 'package:serenity_viewer/src/environment/document/document_coordinator.dart';
@@ -124,34 +125,36 @@ AppRuntime createAppRuntime({
     syncWindowTitle: () async => foundation.platformBridge.syncWindowTitle(),
   );
   workspace = createAppWorkspaceServices(
-    platformBridge: foundation.platformBridge,
-    environmentStore: foundation.environmentStore,
-    mediaInspector: foundation.mediaInspector,
-    appUiController: foundation.appUiController,
-    isRunningInWidgetTest: isRunningInWidgetTest,
-    context: context,
-    mounted: mounted,
-    showMessage: showMessage,
-    updateEnvironment: updateEnvironment,
-    replaceWorkspace: replaceWorkspace,
-    newId: newId,
-    colorFromDigest: colorFromDigest,
-    activeWorkspace: activeWorkspace,
-    workspaces: workspaces,
-    openWorkspaces: openWorkspaces,
-    focusedWindowOrNull: focusedWindowOrNull,
-    setWorkspaceViewport: setWorkspaceViewport,
-    showWorkspaceScreen: showWorkspaceScreen,
-    showLibraryScreen: showLibraryScreen,
-    toggleExpose: toggleExpose,
-    toggleVideoPlayback: toggleVideoPlayback,
-    envState: environmentStoreState,
-    uiState: appUiState,
-    interactionState: windowInteractionState,
-    trackingState: workspaceViewTrackingState,
-    viewportState: workspaceViewportState,
-    thumbState: thumbnailRefreshState,
-    environmentWindowHistoryState: environmentWindowHistoryState,
+    inputs: WorkspaceFactoryInputs(
+      platformBridge: foundation.platformBridge,
+      environmentStore: foundation.environmentStore,
+      mediaInspector: foundation.mediaInspector,
+      appUiController: foundation.appUiController,
+      isRunningInWidgetTest: isRunningInWidgetTest,
+      context: context,
+      mounted: mounted,
+      showMessage: showMessage,
+      updateEnvironment: updateEnvironment,
+      replaceWorkspace: replaceWorkspace,
+      newId: newId,
+      colorFromDigest: colorFromDigest,
+      activeWorkspace: activeWorkspace,
+      workspaces: workspaces,
+      openWorkspaces: openWorkspaces,
+      focusedWindowOrNull: focusedWindowOrNull,
+      setWorkspaceViewport: setWorkspaceViewport,
+      showWorkspaceScreen: showWorkspaceScreen,
+      showLibraryScreen: showLibraryScreen,
+      toggleExpose: toggleExpose,
+      toggleVideoPlayback: toggleVideoPlayback,
+      environmentStoreState: environmentStoreState,
+      appUiState: appUiState,
+      windowInteractionState: windowInteractionState,
+      workspaceViewTrackingState: workspaceViewTrackingState,
+      workspaceViewportState: workspaceViewportState,
+      thumbnailRefreshState: thumbnailRefreshState,
+      environmentWindowHistoryState: environmentWindowHistoryState,
+    ),
   );
   final documentCoordinator = createAppDocumentCoordinator(
     environmentStoreState: environmentStoreState,
