@@ -9,8 +9,8 @@ import 'package:serenity_viewer/src/media/video/media_inspector.dart';
 import 'package:serenity_viewer/src/media/video/video_models.dart';
 import 'package:serenity_viewer/src/workspace/window/content/asset_zoom_utils.dart';
 
-class VideoConversionCoordinator {
-  VideoConversionCoordinator({
+class WorkspaceVideoConversionController {
+  WorkspaceVideoConversionController({
     required this.context,
     required this.mounted,
     required this.showMessage,

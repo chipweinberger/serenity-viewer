@@ -5,11 +5,11 @@ import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresher.dar
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_renderer.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_store.dart';
 import 'package:serenity_viewer/src/media/import/workspace_media_import_controller.dart';
-import 'package:serenity_viewer/src/media/video/video_conversion_coordinator.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_viewport_session_controller.dart';
 import 'package:serenity_viewer/src/environment/session/environment_session.dart';
+import 'package:serenity_viewer/src/workspace/window/session/workspace_video_conversion_controller.dart';
 import 'package:serenity_viewer/src/workspace/window/session/workspace_window_history_controller.dart';
 
 class AppWorkspaceFactory {
@@ -116,7 +116,7 @@ class AppWorkspaceFactory {
         toggleVideoPlayback: config.workspace.toggleVideoPlayback,
       ),
     );
-    final videoConversionCoordinator = VideoConversionCoordinator(
+    final workspaceVideoConversionController = WorkspaceVideoConversionController(
       context: config.shell.context,
       mounted: config.shell.mounted,
       showMessage: config.shell.showMessage,
@@ -136,7 +136,7 @@ class AppWorkspaceFactory {
       videoExtensions: const ['mp4', 'mov', 'm4v', 'avi', 'mkv', 'webm'],
       environmentStoreState: environmentStoreState,
       activeWorkspace: () => config.workspace.activeWorkspace()!,
-      videoConversionCoordinator: videoConversionCoordinator,
+      workspaceVideoConversionController: workspaceVideoConversionController,
       createFileBookmark: foundation.platformBridge.createFileBookmark,
       mediaInspector: foundation.mediaInspector,
       updateEnvironment: foundation.environmentStore.updateEnvironment,
@@ -153,7 +153,7 @@ class AppWorkspaceFactory {
       workspaceWindowHistoryController: workspaceWindowHistoryController,
       workspaceViewportSessionController: workspaceViewportSessionController,
       environmentSession: environmentSession,
-      videoConversionCoordinator: videoConversionCoordinator,
+      workspaceVideoConversionController: workspaceVideoConversionController,
     );
   }
 }

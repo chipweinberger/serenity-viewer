@@ -10,7 +10,6 @@ import 'package:serenity_viewer/src/environment/session/workspace_view_tracking_
 import 'package:serenity_viewer/src/media/import/workspace_media_import_controller.dart';
 import 'package:serenity_viewer/src/media/video/media_inspector.dart';
 import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
-import 'package:serenity_viewer/src/media/video/video_conversion_coordinator.dart';
 import 'package:serenity_viewer/src/settings/behavior/app_ui_state.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_viewport_session_controller.dart';
@@ -21,6 +20,7 @@ import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresh_state
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 import 'package:serenity_viewer/src/workspace/window/interaction/window_interaction_state.dart';
 import 'package:serenity_viewer/src/workspace/window/session/recently_closed_windows_state.dart';
+import 'package:serenity_viewer/src/workspace/window/session/workspace_video_conversion_controller.dart';
 import 'package:serenity_viewer/src/workspace/window/session/workspace_window_history_controller.dart';
 
 class AppStateServices {
@@ -72,7 +72,7 @@ class AppDocument {
 class AppWorkspaceServices {
   const AppWorkspaceServices({
     required this.thumbnailController,
-    required this.videoConversionCoordinator,
+    required this.workspaceVideoConversionController,
     required this.workspaceMediaImportController,
     required this.workspaceLinksController,
     required this.workspaceController,
@@ -83,7 +83,7 @@ class AppWorkspaceServices {
   });
 
   final ThumbnailController thumbnailController;
-  final VideoConversionCoordinator videoConversionCoordinator;
+  final WorkspaceVideoConversionController workspaceVideoConversionController;
   final WorkspaceMediaImportController workspaceMediaImportController;
   final WorkspaceLinksController workspaceLinksController;
   final WorkspaceController workspaceController;

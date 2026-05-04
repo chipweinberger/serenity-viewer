@@ -9,8 +9,8 @@ import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/foundation/serenity_identity.dart';
 import 'package:serenity_viewer/src/media/import/import_coordinator.dart';
 import 'package:serenity_viewer/src/media/video/media_inspector.dart';
-import 'package:serenity_viewer/src/media/video/video_conversion_coordinator.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
+import 'package:serenity_viewer/src/workspace/window/session/workspace_video_conversion_controller.dart';
 
 class WorkspaceMediaImportController {
   const WorkspaceMediaImportController({
@@ -18,7 +18,7 @@ class WorkspaceMediaImportController {
     required this.videoExtensions,
     required this.environmentStoreState,
     required this.activeWorkspace,
-    required this.videoConversionCoordinator,
+    required this.workspaceVideoConversionController,
     required this.createFileBookmark,
     required this.mediaInspector,
     required this.updateEnvironment,
@@ -30,7 +30,7 @@ class WorkspaceMediaImportController {
   final List<String> videoExtensions;
   final EnvironmentStoreState environmentStoreState;
   final Workspace Function() activeWorkspace;
-  final VideoConversionCoordinator videoConversionCoordinator;
+  final WorkspaceVideoConversionController workspaceVideoConversionController;
   final Future<String?> Function(String path) createFileBookmark;
   final MediaInspector mediaInspector;
   final ValueChanged<Environment> updateEnvironment;
@@ -77,9 +77,9 @@ class WorkspaceMediaImportController {
     return ImportCoordinator(
       imageExtensions: imageExtensions,
       videoExtensions: videoExtensions,
-      confirmSingleFrameConversion: videoConversionCoordinator.confirmSingleFrameConversion,
+      confirmSingleFrameConversion: workspaceVideoConversionController.confirmSingleFrameConversion,
       exportVideoFrameToJpeg: ({required sourcePath, required probe, positionMs}) {
-        return videoConversionCoordinator.exportVideoFrameToJpeg(
+        return workspaceVideoConversionController.exportVideoFrameToJpeg(
           sourcePath: sourcePath,
           probe: probe,
           positionMs: positionMs,

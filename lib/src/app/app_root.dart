@@ -93,7 +93,7 @@ class _AppRootState extends State<AppRoot> {
       fitWindowToContent: _workspaceRuntime.workspaceWindowController.fitWindowToContent,
       restorePreviousWindowZOrder: _workspaceRuntime.workspaceWindowController.restorePreviousWindowZOrder,
       convertVideoWindowToJpeg: (windowId) =>
-          _workspaceRuntime.videoConversionCoordinator.convertVideoWindowToJpeg(windowId),
+          _workspaceRuntime.workspaceVideoConversionController.convertVideoWindowToJpeg(windowId),
       closeWindow: _workspaceRuntime.workspaceWindowHistoryController.removeWindow,
       toggleExpose: _foundation.appUiController.toggleExpose,
       toggleWorkspaceOverview: _workspaceRuntime.environmentSession.navigation.toggleOverview,
