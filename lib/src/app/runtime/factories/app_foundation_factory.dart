@@ -1,13 +1,19 @@
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
-import 'package:serenity_viewer/src/app/runtime/app_runtime_groups.dart';
 import 'package:serenity_viewer/src/app/runtime/app_runtime_inputs.dart';
 import 'package:serenity_viewer/src/environment/store/environment_bookmark_synchronizer.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store.dart';
 import 'package:serenity_viewer/src/media/video/media_inspector.dart';
 import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
 
-AppFoundation createAppFoundation({
+({
+  AppUiController appUiController,
+  MediaInspector mediaInspector,
+  PlatformBridge platformBridge,
+  SharedVideoControllerPool sharedVideoControllerPool,
+  EnvironmentBookmarkSynchronizer environmentBookmarkSynchronizer,
+  EnvironmentStore environmentStore,
+}) createAppFoundation({
   required AppRuntimeInputs inputs,
   required Future<void> Function() refreshWorkspaceTracking,
   required void Function(String workspaceId) markWorkspaceThumbnailDirty,
@@ -42,7 +48,7 @@ AppFoundation createAppFoundation({
     createFileBookmark: platformBridge.createFileBookmark,
   );
 
-  return AppFoundation(
+  return (
     appUiController: appUiController,
     mediaInspector: mediaInspector,
     platformBridge: platformBridge,

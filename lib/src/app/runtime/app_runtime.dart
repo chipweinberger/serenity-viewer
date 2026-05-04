@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:serenity_viewer/src/app/runtime/factories/app_document_factory.dart';
 import 'package:serenity_viewer/src/app/runtime/factories/app_foundation_factory.dart';
 import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory.dart';
-import 'package:serenity_viewer/src/app/runtime/app_runtime_groups.dart';
 import 'package:serenity_viewer/src/app/runtime/app_runtime_inputs.dart';
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
@@ -15,6 +14,7 @@ import 'package:serenity_viewer/src/environment/controller/environment_controlle
 import 'package:serenity_viewer/src/environment/store/environment_bookmark_synchronizer.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store.dart';
 import 'package:serenity_viewer/src/media/import/workspace_media_import_controller.dart';
+import 'package:serenity_viewer/src/media/video/media_inspector.dart';
 import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_asset_picker_controller.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_collate_controller.dart';
@@ -89,8 +89,32 @@ class AppRuntime {
   static AppRuntime create(AppRuntimeInputs inputs) {
     final stateStore = inputs.stateStore;
     final environmentStoreState = stateStore.environmentStoreState;
-    late final AppFoundation foundation;
-    late final AppWorkspaceServices workspace;
+    late final ({
+      AppUiController appUiController,
+      MediaInspector mediaInspector,
+      PlatformBridge platformBridge,
+      SharedVideoControllerPool sharedVideoControllerPool,
+      EnvironmentBookmarkSynchronizer environmentBookmarkSynchronizer,
+      EnvironmentStore environmentStore,
+    }) foundation;
+    late final ({
+      ThumbnailController thumbnailController,
+      WorkspaceAssetPickerController workspaceAssetPickerController,
+      WorkspaceCollateController workspaceCollateController,
+      WorkspaceVideoConversionController workspaceVideoConversionController,
+      WorkspaceMediaImportController workspaceMediaImportController,
+      WorkspaceLinksController workspaceLinksController,
+      WorkspaceLinksLauncher workspaceLinksLauncher,
+      WorkspaceLinksPrompts workspaceLinksPrompts,
+      WorkspaceController workspaceController,
+      WorkspaceWindowController workspaceWindowController,
+      WorkspaceWindowHistoryController workspaceWindowHistoryController,
+      WorkspaceViewportSessionController workspaceViewportSessionController,
+      EnvironmentController environmentController,
+      WorkspaceExposeLayoutController workspaceExposeLayoutController,
+      WorkspaceShortcutController workspaceShortcutController,
+      WorkspaceViewTrackingController workspaceViewTrackingController,
+    }) workspace;
 
     foundation = createAppFoundation(
       inputs: inputs,

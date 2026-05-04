@@ -1,18 +1,49 @@
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
-import 'package:serenity_viewer/src/app/runtime/app_runtime_groups.dart';
 import 'package:serenity_viewer/src/app/runtime/app_runtime_inputs.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store.dart';
+import 'package:serenity_viewer/src/media/import/workspace_media_import_controller.dart';
 import 'package:serenity_viewer/src/media/video/media_inspector.dart';
 import 'package:serenity_viewer/src/media/video/video_frame_exporter.dart';
+import 'package:serenity_viewer/src/workspace/actions/workspace_asset_picker_controller.dart';
+import 'package:serenity_viewer/src/workspace/actions/workspace_collate_controller.dart';
+import 'package:serenity_viewer/src/workspace/actions/workspace_expose_layout_controller.dart';
+import 'package:serenity_viewer/src/workspace/actions/workspace_video_conversion_controller.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_video_conversion_prompts.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_viewport_session_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
+import 'package:serenity_viewer/src/workspace/history/workspace_window_history_controller.dart';
+import 'package:serenity_viewer/src/workspace/input/workspace_shortcut_controller.dart';
+import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.dart';
+import 'package:serenity_viewer/src/workspace/links/workspace_links_launcher.dart';
+import 'package:serenity_viewer/src/workspace/links/workspace_links_prompts.dart';
+import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
+import 'package:serenity_viewer/src/workspace/tracking/workspace_view_tracking_controller.dart';
 import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_core.dart';
 import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_environment.dart';
 import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_media.dart';
 import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_scope.dart';
 
-AppWorkspaceServices createAppWorkspaceServices({
+({
+  ThumbnailController thumbnailController,
+  WorkspaceAssetPickerController workspaceAssetPickerController,
+  WorkspaceCollateController workspaceCollateController,
+  WorkspaceVideoConversionController workspaceVideoConversionController,
+  WorkspaceMediaImportController workspaceMediaImportController,
+  WorkspaceLinksController workspaceLinksController,
+  WorkspaceLinksLauncher workspaceLinksLauncher,
+  WorkspaceLinksPrompts workspaceLinksPrompts,
+  WorkspaceController workspaceController,
+  WorkspaceWindowController workspaceWindowController,
+  WorkspaceWindowHistoryController workspaceWindowHistoryController,
+  WorkspaceViewportSessionController workspaceViewportSessionController,
+  EnvironmentController environmentController,
+  WorkspaceExposeLayoutController workspaceExposeLayoutController,
+  WorkspaceShortcutController workspaceShortcutController,
+  WorkspaceViewTrackingController workspaceViewTrackingController,
+}) createAppWorkspaceServices({
   required AppRuntimeInputs inputs,
   required PlatformBridge platformBridge,
   required EnvironmentStore environmentStore,
@@ -87,7 +118,7 @@ AppWorkspaceServices createAppWorkspaceServices({
     workspaceMediaImportController: workspaceMediaImportController,
   );
 
-  return AppWorkspaceServices(
+  return (
     thumbnailController: thumbnailController,
     workspaceAssetPickerController: workspaceAssetPickerController,
     workspaceCollateController: workspaceCollateController,
