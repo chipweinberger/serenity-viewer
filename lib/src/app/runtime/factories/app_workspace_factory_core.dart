@@ -35,20 +35,24 @@ ThumbnailController _createThumbnailController({required _WorkspaceFactoryScope 
   );
 }
 
-_WorkspaceLinkServices _createWorkspaceLinkServices({required _WorkspaceFactoryScope scope}) {
-  return _WorkspaceLinkServices(
-    controller: WorkspaceLinksController(
-      screen: () => scope.uiState.screen,
-      hasSession: () => scope.envState.environment != null,
-      activeWorkspace: scope.ws.activeWorkspace,
-      workspaces: scope.ws.workspaces,
-      replaceWorkspace: scope.env.replaceWorkspace,
-      newId: scope.ws.newId,
-      showMessage: scope.app.showMessage,
-    ),
-    launcher: WorkspaceLinksLauncher(showMessage: scope.app.showMessage, mounted: scope.app.mounted),
-    prompts: WorkspaceLinksPrompts(context: scope.app.context),
+WorkspaceLinksController _createWorkspaceLinksController({required _WorkspaceFactoryScope scope}) {
+  return WorkspaceLinksController(
+    screen: () => scope.uiState.screen,
+    hasSession: () => scope.envState.environment != null,
+    activeWorkspace: scope.ws.activeWorkspace,
+    workspaces: scope.ws.workspaces,
+    replaceWorkspace: scope.env.replaceWorkspace,
+    newId: scope.ws.newId,
+    showMessage: scope.app.showMessage,
   );
+}
+
+WorkspaceLinksLauncher _createWorkspaceLinksLauncher({required _WorkspaceFactoryScope scope}) {
+  return WorkspaceLinksLauncher(showMessage: scope.app.showMessage, mounted: scope.app.mounted);
+}
+
+WorkspaceLinksPrompts _createWorkspaceLinksPrompts({required _WorkspaceFactoryScope scope}) {
+  return WorkspaceLinksPrompts(context: scope.app.context);
 }
 
 _WorkspaceControllers _createWorkspaceControllers({

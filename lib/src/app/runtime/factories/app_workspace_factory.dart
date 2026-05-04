@@ -48,7 +48,9 @@ AppWorkspaceServices createAppWorkspaceServices({required AppRuntimeInputs input
   );
 
   final thumbnailController = _createThumbnailController(scope: scope);
-  final workspaceLinksServices = _createWorkspaceLinkServices(scope: scope);
+  final workspaceLinksController = _createWorkspaceLinksController(scope: scope);
+  final workspaceLinksLauncher = _createWorkspaceLinksLauncher(scope: scope);
+  final workspaceLinksPrompts = _createWorkspaceLinksPrompts(scope: scope);
   final workspaceControllers = _createWorkspaceControllers(scope: scope, thumbnailController: thumbnailController);
   final workspaceCollateController = _createWorkspaceCollateController(
     scope: scope,
@@ -57,22 +59,34 @@ AppWorkspaceServices createAppWorkspaceServices({required AppRuntimeInputs input
   final environmentAndWorkspaceFlows = _createEnvironmentAndWorkspaceFlows(
     scope: scope,
     thumbnailController: thumbnailController,
-    workspaceLinksController: workspaceLinksServices.controller,
+    workspaceLinksController: workspaceLinksController,
     workspaceController: workspaceControllers.workspaceController,
   );
-  final mediaFlows = _createMediaFlows(scope: scope, thumbnailController: thumbnailController);
+  final videoFrameExporter = VideoFrameExporter(mediaInspector: scope.media);
+  final workspaceVideoConversionPrompts = WorkspaceVideoConversionPrompts(context: scope.app.context);
+  final workspaceVideoConversionController = _createWorkspaceVideoConversionController(
+    scope: scope,
+    videoFrameExporter: videoFrameExporter,
+    workspaceVideoConversionPrompts: workspaceVideoConversionPrompts,
+  );
+  final workspaceMediaImportController = _createWorkspaceMediaImportController(
+    scope: scope,
+    thumbnailController: thumbnailController,
+    videoFrameExporter: videoFrameExporter,
+    workspaceVideoConversionPrompts: workspaceVideoConversionPrompts,
+  );
   final workspaceAssetPickerController = _createWorkspaceAssetPickerController(
-    workspaceMediaImportController: mediaFlows.workspaceMediaImportController,
+    workspaceMediaImportController: workspaceMediaImportController,
   );
 
   return AppWorkspaceServices(
     thumbnailController: thumbnailController,
     workspaceAssetPickerController: workspaceAssetPickerController,
     workspaceCollateController: workspaceCollateController,
-    workspaceMediaImportController: mediaFlows.workspaceMediaImportController,
-    workspaceLinksController: workspaceLinksServices.controller,
-    workspaceLinksLauncher: workspaceLinksServices.launcher,
-    workspaceLinksPrompts: workspaceLinksServices.prompts,
+    workspaceMediaImportController: workspaceMediaImportController,
+    workspaceLinksController: workspaceLinksController,
+    workspaceLinksLauncher: workspaceLinksLauncher,
+    workspaceLinksPrompts: workspaceLinksPrompts,
     workspaceController: workspaceControllers.workspaceController,
     workspaceWindowController: workspaceControllers.workspaceWindowController,
     workspaceWindowHistoryController: workspaceControllers.workspaceWindowHistoryController,
@@ -81,6 +95,6 @@ AppWorkspaceServices createAppWorkspaceServices({required AppRuntimeInputs input
     workspaceExposeLayoutController: environmentAndWorkspaceFlows.workspaceExposeLayoutController,
     workspaceShortcutController: environmentAndWorkspaceFlows.workspaceShortcutController,
     workspaceViewTrackingController: environmentAndWorkspaceFlows.workspaceViewTrackingController,
-    workspaceVideoConversionController: mediaFlows.workspaceVideoConversionController,
+    workspaceVideoConversionController: workspaceVideoConversionController,
   );
 }

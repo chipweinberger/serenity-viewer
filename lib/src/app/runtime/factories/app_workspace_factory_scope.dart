@@ -22,14 +22,6 @@ class _WorkspaceFactoryScope {
   ThumbnailRefreshState get thumbState => stateStore.thumbnailRefreshState;
 }
 
-class _WorkspaceLinkServices {
-  const _WorkspaceLinkServices({required this.controller, required this.launcher, required this.prompts});
-
-  final WorkspaceLinksController controller;
-  final WorkspaceLinksLauncher launcher;
-  final WorkspaceLinksPrompts prompts;
-}
-
 class _WorkspaceControllers {
   const _WorkspaceControllers({
     required this.workspaceController,
@@ -60,11 +52,4 @@ class _EnvironmentAndWorkspaceFlows {
   final WorkspaceExposeLayoutController workspaceExposeLayoutController;
   final WorkspaceShortcutController workspaceShortcutController;
   final WorkspaceViewTrackingController workspaceViewTrackingController;
-}
-
-class _MediaFlows {
-  const _MediaFlows({required this.workspaceVideoConversionController, required this.workspaceMediaImportController});
-
-  final WorkspaceVideoConversionController workspaceVideoConversionController;
-  final WorkspaceMediaImportController workspaceMediaImportController;
 }
