@@ -12,18 +12,11 @@ class WorkspaceHelpers {
     return workspace.windows.where((window) => window.asset.id == windowId).firstOrNull;
   }
 
-  static Workspace mapWindows(
-    Workspace workspace,
-    Window Function(Window window) transform,
-  ) {
+  static Workspace mapWindows(Workspace workspace, Window Function(Window window) transform) {
     return workspace.copyWith(windows: workspace.windows.map(transform).toList());
   }
 
-  static Workspace updateWindowById(
-    Workspace workspace,
-    String windowId,
-    Window Function(Window window) transform,
-  ) {
+  static Workspace updateWindowById(Workspace workspace, String windowId, Window Function(Window window) transform) {
     return mapWindows(workspace, (window) => window.asset.id == windowId ? transform(window) : window);
   }
 

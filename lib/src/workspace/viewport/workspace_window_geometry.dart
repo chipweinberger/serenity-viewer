@@ -45,38 +45,38 @@ _WindowEdges _windowEdges(Window window) {
   );
 }
 
-_WindowEdges _applyResizeDelta(_WindowEdges edges, AssetWindowResizeHandle handle, Offset delta) {
+_WindowEdges _applyResizeDelta(_WindowEdges edges, WindowResizeHandle handle, Offset delta) {
   var left = edges.left;
   var top = edges.top;
   var right = edges.right;
   var bottom = edges.bottom;
 
   switch (handle) {
-    case AssetWindowResizeHandle.left:
+    case WindowResizeHandle.left:
       left += delta.dx;
       break;
-    case AssetWindowResizeHandle.right:
+    case WindowResizeHandle.right:
       right += delta.dx;
       break;
-    case AssetWindowResizeHandle.top:
+    case WindowResizeHandle.top:
       top += delta.dy;
       break;
-    case AssetWindowResizeHandle.bottom:
+    case WindowResizeHandle.bottom:
       bottom += delta.dy;
       break;
-    case AssetWindowResizeHandle.topLeft:
+    case WindowResizeHandle.topLeft:
       left += delta.dx;
       top += delta.dy;
       break;
-    case AssetWindowResizeHandle.topRight:
+    case WindowResizeHandle.topRight:
       right += delta.dx;
       top += delta.dy;
       break;
-    case AssetWindowResizeHandle.bottomLeft:
+    case WindowResizeHandle.bottomLeft:
       left += delta.dx;
       bottom += delta.dy;
       break;
-    case AssetWindowResizeHandle.bottomRight:
+    case WindowResizeHandle.bottomRight:
       right += delta.dx;
       bottom += delta.dy;
       break;
@@ -85,23 +85,15 @@ _WindowEdges _applyResizeDelta(_WindowEdges edges, AssetWindowResizeHandle handl
   return (left: left, top: top, right: right, bottom: bottom);
 }
 
-bool _resizesFromLeft(AssetWindowResizeHandle handle) {
-  return {
-    AssetWindowResizeHandle.left,
-    AssetWindowResizeHandle.topLeft,
-    AssetWindowResizeHandle.bottomLeft,
-  }.contains(handle);
+bool _resizesFromLeft(WindowResizeHandle handle) {
+  return {WindowResizeHandle.left, WindowResizeHandle.topLeft, WindowResizeHandle.bottomLeft}.contains(handle);
 }
 
-bool _resizesFromTop(AssetWindowResizeHandle handle) {
-  return {
-    AssetWindowResizeHandle.top,
-    AssetWindowResizeHandle.topLeft,
-    AssetWindowResizeHandle.topRight,
-  }.contains(handle);
+bool _resizesFromTop(WindowResizeHandle handle) {
+  return {WindowResizeHandle.top, WindowResizeHandle.topLeft, WindowResizeHandle.topRight}.contains(handle);
 }
 
-_WindowBounds _clampResizedBounds(_WindowEdges edges, AssetWindowResizeHandle handle) {
+_WindowBounds _clampResizedBounds(_WindowEdges edges, WindowResizeHandle handle) {
   var left = edges.left;
   var top = edges.top;
   var right = edges.right;
@@ -135,21 +127,17 @@ _WindowBounds _clampResizedBounds(_WindowEdges edges, AssetWindowResizeHandle ha
   return (position: Offset(left, top), size: Size(width, height));
 }
 
-_WindowBounds _resizedBoundsForWindow(Window window, AssetWindowResizeHandle handle, Offset delta) {
+_WindowBounds _resizedBoundsForWindow(Window window, WindowResizeHandle handle, Offset delta) {
   final resizedEdges = _applyResizeDelta(_windowEdges(window), handle, delta);
   return _clampResizedBounds(resizedEdges, handle);
 }
 
-Window _resizeWindowState(Window window, AssetWindowResizeHandle handle, Offset delta) {
+Window _resizeWindowState(Window window, WindowResizeHandle handle, Offset delta) {
   final nextBounds = _resizedBoundsForWindow(window, handle, delta);
   return window.copyWith(position: nextBounds.position, size: nextBounds.size);
 }
 
-Window _scaleWindowAroundCenter(
-  Window window,
-  double scaleDelta, {
-  required bool mirrorContentZoom,
-}) {
+Window _scaleWindowAroundCenter(Window window, double scaleDelta, {required bool mirrorContentZoom}) {
   final clampedScaleDelta = scaleDelta.clamp(0.5, 2.0);
   final focalWorldPoint = Offset(
     window.position.dx + (window.size.width / 2),

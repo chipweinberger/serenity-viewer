@@ -8,12 +8,8 @@ Workspace _moveWindow(Workspace workspace, String windowId, Offset delta) {
   );
 }
 
-Workspace _resizeWindow(Workspace workspace, String windowId, AssetWindowResizeHandle handle, Offset delta) {
-  return WorkspaceHelpers.updateWindowById(
-    workspace,
-    windowId,
-    (window) => _resizeWindowState(window, handle, delta),
-  );
+Workspace _resizeWindow(Workspace workspace, String windowId, WindowResizeHandle handle, Offset delta) {
+  return WorkspaceHelpers.updateWindowById(workspace, windowId, (window) => _resizeWindowState(window, handle, delta));
 }
 
 Workspace _transformWindowFromTrackpad(Workspace workspace, String windowId, double scaleDelta) {
@@ -33,7 +29,7 @@ Workspace _fitWindowToContent(Workspace workspace, String windowId) {
   return WorkspaceHelpers.updateWindowById(workspace, windowId, (_) => _fitWindowToVisibleContent(currentWindow));
 }
 
-Workspace _setWindowZoom(Workspace workspace, String windowId, AssetWindowZoomUpdate update) {
+Workspace _setWindowZoom(Workspace workspace, String windowId, WindowZoomUpdate update) {
   return WorkspaceHelpers.updateWindowById(
     workspace,
     windowId,

@@ -17,12 +17,7 @@ Offset _clampWorkspaceCenter({required Offset center, required double zoom, requ
   return Offset(center.dx.clamp(minCenterX, maxCenterX), center.dy.clamp(minCenterY, maxCenterY));
 }
 
-Workspace _setWorkspaceViewport(
-  Workspace workspace, {
-  required Size viewportSize,
-  Offset? center,
-  double? zoom,
-}) {
+Workspace _setWorkspaceViewport(Workspace workspace, {required Size viewportSize, Offset? center, double? zoom}) {
   final nextZoom = _clampWorkspaceZoom(zoom ?? workspace.viewportZoom);
   final nextCenter = _clampWorkspaceCenter(
     center: center ?? workspace.viewportCenter,

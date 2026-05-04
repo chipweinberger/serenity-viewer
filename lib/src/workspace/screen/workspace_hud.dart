@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
-import 'package:serenity_viewer/src/workspace/screen/workspace_chrome_view_model.dart';
+import 'package:serenity_viewer/src/workspace/screen/workspace_hud_view_model.dart';
 
 @immutable
 class WorkspaceHudActions {
@@ -36,7 +36,7 @@ class WorkspaceHud extends StatelessWidget {
 
   static const double gap = 10;
 
-  final WorkspaceChromeViewModel viewModel;
+  final WorkspaceHudViewModel viewModel;
   final WorkspaceHudActions actions;
 
   Widget _buildHudAction({required String tooltip, required VoidCallback? onTap, required Widget child}) {

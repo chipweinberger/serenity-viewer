@@ -6,10 +6,7 @@ import 'package:serenity_viewer/src/environment/window.dart';
 
 typedef SerenityWindowLayout = ({Window window, Rect rect});
 
-List<SerenityWindowLayout> computeExposeLayoutRects({
-  required List<Window> windows,
-  required Size viewportSize,
-}) {
+List<SerenityWindowLayout> computeExposeLayoutRects({required List<Window> windows, required Size viewportSize}) {
   const horizontalPadding = 28.0;
   const topPadding = 86.0;
   const bottomPadding = 92.0;

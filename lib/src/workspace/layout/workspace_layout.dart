@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
-import 'package:serenity_viewer/src/asset_window/frame/asset_window_resize_helpers.dart';
-import 'package:serenity_viewer/src/asset_window/content/asset_zoom_utils.dart';
-import 'package:serenity_viewer/src/asset_window/interaction/asset_window_zoom_update.dart';
+import 'package:serenity_viewer/src/workspace/window/frame/window_resize_helpers.dart';
+import 'package:serenity_viewer/src/workspace/window/content/asset_zoom_utils.dart';
+import 'package:serenity_viewer/src/workspace/window/interaction/window_zoom_update.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/workspace/workspace_state_helpers.dart';
 
@@ -69,11 +69,7 @@ class WorkspaceLayout {
     return _moveWindow(workspace, windowId, delta);
   }
 
-  static Window scaleWindowAroundCenter(
-    Window window,
-    double scaleDelta, {
-    required bool mirrorContentZoom,
-  }) {
+  static Window scaleWindowAroundCenter(Window window, double scaleDelta, {required bool mirrorContentZoom}) {
     return _scaleWindowAroundCenter(window, scaleDelta, mirrorContentZoom: mirrorContentZoom);
   }
 
@@ -85,12 +81,7 @@ class WorkspaceLayout {
     return _collateWorkspaceWindows(workspace, targetBox: targetBox);
   }
 
-  static Workspace resizeWindow(
-    Workspace workspace,
-    String windowId,
-    AssetWindowResizeHandle handle,
-    Offset delta,
-  ) {
+  static Workspace resizeWindow(Workspace workspace, String windowId, WindowResizeHandle handle, Offset delta) {
     return _resizeWindow(workspace, windowId, handle, delta);
   }
 
@@ -102,7 +93,7 @@ class WorkspaceLayout {
     return _fitWindowToContent(workspace, windowId);
   }
 
-  static Workspace setWindowZoom(Workspace workspace, String windowId, AssetWindowZoomUpdate update) {
+  static Workspace setWindowZoom(Workspace workspace, String windowId, WindowZoomUpdate update) {
     return _setWindowZoom(workspace, windowId, update);
   }
 

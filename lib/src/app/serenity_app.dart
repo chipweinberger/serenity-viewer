@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/app/app_shell/app_shell.dart';
+import 'package:serenity_viewer/src/app/app_root.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
 
 class SerenityApp extends StatelessWidget {
@@ -20,6 +20,6 @@ class SerenityApp extends StatelessWidget {
       useMaterial3: true,
     );
 
-    return MaterialApp(title: 'Serenity', debugShowCheckedModeBanner: false, theme: theme, home: const AppShell());
+    return MaterialApp(title: 'Serenity', debugShowCheckedModeBanner: false, theme: theme, home: const AppRoot());
   }
 }

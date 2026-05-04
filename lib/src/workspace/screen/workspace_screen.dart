@@ -6,21 +6,21 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/asset_window/asset_window.dart';
-import 'package:serenity_viewer/src/asset_window/frame/asset_window_resize_helpers.dart';
-import 'package:serenity_viewer/src/asset_window/interaction/asset_window_interaction_state.dart';
-import 'package:serenity_viewer/src/asset_window/interaction/asset_window_zoom_update.dart';
-import 'package:serenity_viewer/src/asset_window/presentation/asset_window_view_model.dart';
-import 'package:serenity_viewer/src/asset_window/presentation/expose_asset_window_card.dart';
-import 'package:serenity_viewer/src/video_tools/media_bridge.dart';
+import 'package:serenity_viewer/src/workspace/window/window.dart';
+import 'package:serenity_viewer/src/workspace/window/frame/window_resize_helpers.dart';
+import 'package:serenity_viewer/src/workspace/window/interaction/window_interaction_state.dart';
+import 'package:serenity_viewer/src/workspace/window/interaction/window_zoom_update.dart';
+import 'package:serenity_viewer/src/workspace/window/presentation/window_view_model.dart';
+import 'package:serenity_viewer/src/workspace/window/presentation/expose_window_card.dart';
+import 'package:serenity_viewer/src/media/video/media_bridge.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/settings/appearance/theme.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
-import 'package:serenity_viewer/src/workspace_loading/media_load_plan.dart';
+import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/asset.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
-import 'package:serenity_viewer/src/settings/behavior/chrome_state.dart';
+import 'package:serenity_viewer/src/settings/behavior/app_ui_state.dart';
 import 'package:serenity_viewer/src/expose/expose_layouts.dart';
 import 'package:serenity_viewer/src/workspace/screen/workspace_canvas_view_model.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_projection.dart';
@@ -70,10 +70,10 @@ class WorkspaceScreenActions {
   final ValueChanged<String> focusWindow;
   final ValueChanged<String> restorePreviousWindowZOrder;
   final void Function(String windowId, Offset delta) moveWindow;
-  final void Function(String windowId, AssetWindowResizeHandle handle, Offset delta) resizeWindow;
+  final void Function(String windowId, WindowResizeHandle handle, Offset delta) resizeWindow;
   final void Function(String windowId, double scaleDelta, Offset localFocalPoint) transformWindowFromTrackpad;
   final ValueChanged<String> fitWindowToContent;
-  final void Function(String windowId, AssetWindowZoomUpdate update) setWindowZoom;
+  final void Function(String windowId, WindowZoomUpdate update) setWindowZoom;
   final void Function(String windowId, int positionMs) setVideoPosition;
   final ValueChanged<String> cycleVideoPlaybackSpeed;
   final void Function(String windowId, Size intrinsicSize) setWindowIntrinsicSize;
@@ -94,7 +94,7 @@ class WorkspaceScreen extends StatelessWidget {
     super.key,
     required this.environment,
     required this.openWorkspaces,
-    required this.chromeState,
+    required this.appUiState,
     required this.windowInteractionState,
     required this.loadPlan,
     required this.sharedVideoLookup,
@@ -104,8 +104,8 @@ class WorkspaceScreen extends StatelessWidget {
 
   final Environment environment;
   final List<Workspace> openWorkspaces;
-  final ChromeState chromeState;
-  final AssetWindowInteractionState windowInteractionState;
+  final AppUiState appUiState;
+  final WindowInteractionState windowInteractionState;
   final MediaLoadPlan loadPlan;
   final SharedVideoLookup sharedVideoLookup;
   final WorkspaceScreenActions actions;
@@ -149,8 +149,8 @@ class WorkspaceScreen extends StatelessWidget {
 
   bool _isExposeModeForWorkspace(Workspace workspace) {
     return workspace.id == environment.activeWorkspaceId &&
-        chromeState.screen == SerenityScreen.workspace &&
-        chromeState.workspaceLayoutMode == WorkspaceLayoutMode.expose;
+        appUiState.screen == SerenityScreen.workspace &&
+        appUiState.workspaceLayoutMode == WorkspaceLayoutMode.expose;
   }
 
   List<Window> _sortedWorkspaceWindows(Workspace workspace, {required bool isExposeMode}) {
@@ -179,7 +179,7 @@ class WorkspaceScreen extends StatelessWidget {
       windows: windows,
       focusedWindowId: _focusedWindowIdForCanvas(windows, isExposeMode: isExposeMode),
       loadPlan: loadPlan,
-      isDropTargetActive: chromeState.isDropTargetActive,
+      isDropTargetActive: appUiState.isDropTargetActive,
     );
   }
 
@@ -225,7 +225,7 @@ class WorkspaceScreen extends StatelessWidget {
     final screenOffset = workspaceScreenOffsetForWindow(workspace, window, viewportSize);
     final isLoaded = _isWindowLoaded(canvasViewModel.loadPlan, window);
     final sharedVideoState = sharedVideoLookup(window, isLoaded: isLoaded);
-    final windowViewModel = AssetWindowViewModel(
+    final windowViewModel = WindowViewModel(
       window: window,
       isLoaded: isLoaded,
       sharedVideoController: sharedVideoState?.controller,
@@ -251,7 +251,7 @@ class WorkspaceScreen extends StatelessWidget {
         child: SizedBox(
           width: window.size.width,
           height: window.size.height,
-          child: AssetWindow(
+          child: WorkspaceWindow(
             viewModel: windowViewModel,
             onTap: () => _handleFreeformWindowTap(window),
             onPinnedHoverRequested: () => actions.setPinnedHoverWindow(window.asset.id),
@@ -315,21 +315,21 @@ class WorkspaceScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildExposeAssetWindowCard(SerenityWindowLayout layout, MediaLoadPlan loadPlan) {
+  Widget _buildExposeWindowCard(SerenityWindowLayout layout, MediaLoadPlan loadPlan) {
     final window = layout.window;
     final isLoaded = _isWindowLoaded(loadPlan, window);
     final sharedVideoState = sharedVideoLookup(window, isLoaded: isLoaded);
 
     return Positioned.fromRect(
       rect: layout.rect,
-      child: ExposeAssetWindowCard(
+      child: ExposeWindowCard(
         window: window,
         isLoaded: isLoaded,
         sharedVideoController: sharedVideoState?.controller,
         sharedVideoInitialization: sharedVideoState?.initialization,
         isVideoPaused: actions.isVideoWindowPaused(window.asset.id),
         isSelected: windowInteractionState.selectedExposeWindowIds.contains(window.asset.id),
-        editMode: chromeState.editMode,
+        editMode: appUiState.editMode,
         onOpen: () {
           actions.focusWindow(window.asset.id);
           actions.toggleExpose();
@@ -354,7 +354,7 @@ class WorkspaceScreen extends StatelessWidget {
           }
 
           final exposeLayouts = computeExposeLayoutRects(windows: windows, viewportSize: viewportSize);
-          return Stack(children: [for (final layout in exposeLayouts) _buildExposeAssetWindowCard(layout, loadPlan)]);
+          return Stack(children: [for (final layout in exposeLayouts) _buildExposeWindowCard(layout, loadPlan)]);
         },
       ),
     );
