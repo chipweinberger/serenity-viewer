@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/app/builders/content_scope.dart';
+import 'package:serenity_viewer/src/app/builders/app_screen_host_scope.dart';
 import 'package:serenity_viewer/src/workspace/screen/workspace_top_bar_overlay.dart';
 
 class AppTopBarOverlayBuilder {
   const AppTopBarOverlayBuilder({required this.state});
 
-  final ContentState state;
+  final AppScreenHostState state;
 
   Widget build() {
     return WorkspaceTopBarOverlay(

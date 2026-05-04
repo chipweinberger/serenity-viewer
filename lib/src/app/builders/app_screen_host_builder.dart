@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/builders/app_top_bar_overlay_builder.dart';
-import 'package:serenity_viewer/src/app/builders/content_scope.dart';
+import 'package:serenity_viewer/src/app/builders/app_screen_host_scope.dart';
 import 'package:serenity_viewer/src/app/builders/library_content_builder.dart';
 import 'package:serenity_viewer/src/app/builders/workspace_content_builder.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
@@ -11,8 +11,8 @@ import 'package:serenity_viewer/src/media/loading/workspace_load_plan.dart';
 class AppScreenHostBuilder {
   const AppScreenHostBuilder({required this.state, required this.actions});
 
-  final ContentState state;
-  final ContentActions actions;
+  final AppScreenHostState state;
+  final AppScreenHostActions actions;
 
   Widget build() {
     final workspaceLoadPlan = buildWorkspaceLoadPlan(

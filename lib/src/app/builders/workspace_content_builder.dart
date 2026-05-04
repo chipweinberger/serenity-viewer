@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/app/builders/content_scope.dart';
+import 'package:serenity_viewer/src/app/builders/app_screen_host_scope.dart';
 import 'package:serenity_viewer/src/workspace/links/presentation/workspace_links_dialog.dart';
 import 'package:serenity_viewer/src/workspace/screen/workspace_hud_view_model.dart';
 import 'package:serenity_viewer/src/workspace/screen/workspace_hud.dart';
@@ -11,8 +11,8 @@ import 'package:serenity_viewer/src/media/loading/workspace_load_plan.dart';
 class WorkspaceContentBuilder {
   const WorkspaceContentBuilder({required this.state, required this.actions});
 
-  final ContentState state;
-  final ContentActions actions;
+  final AppScreenHostState state;
+  final AppScreenHostActions actions;
 
   WorkspaceHudViewModel _buildWorkspaceHudViewModel() {
     final mediaCounts = workspaceMediaCounts(state.activeWorkspace);

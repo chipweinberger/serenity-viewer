@@ -10,7 +10,7 @@ import 'package:serenity_viewer/src/app/app_actions.dart';
 import 'package:serenity_viewer/src/app/app_derived_state.dart';
 import 'package:serenity_viewer/src/app/app_persistence_controller.dart';
 import 'package:serenity_viewer/src/app/builders/app_screen_host_builder.dart';
-import 'package:serenity_viewer/src/app/builders/content_scope.dart';
+import 'package:serenity_viewer/src/app/builders/app_screen_host_scope.dart';
 import 'package:serenity_viewer/src/app/builders/menu_builder.dart';
 import 'package:serenity_viewer/src/app/seed_environment.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_windows_controller.dart';
@@ -122,7 +122,7 @@ class _AppRootState extends State<AppRoot> {
     }
 
     return AppScreenHostBuilder(
-      state: ContentState(
+      state: AppScreenHostState(
         context: context,
         uiState: _state.appUiState,
         environment: _state.environmentStoreState.environment!,
@@ -143,7 +143,7 @@ class _AppRootState extends State<AppRoot> {
         searchController: _state.handles.searchController,
         tabScrollController: _state.handles.tabScrollController,
       ),
-      actions: ContentActions(
+      actions: AppScreenHostActions(
         commitStateChange: setState,
         importFiles: _workspaceRuntime.workspaceMediaImportController.importFiles,
         handleOptionGestureHover: _workspaceRuntime.workspaceWindowController.handleOptionGestureHover,

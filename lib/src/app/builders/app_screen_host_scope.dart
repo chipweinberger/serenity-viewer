@@ -17,8 +17,8 @@ import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dar
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 import 'package:serenity_viewer/src/workspace/window/session/workspace_window_history_controller.dart';
 
-class ContentState {
-  const ContentState({
+class AppScreenHostState {
+  const AppScreenHostState({
     required this.context,
     required this.uiState,
     required this.environment,
@@ -61,8 +61,8 @@ class ContentState {
   final ScrollController tabScrollController;
 }
 
-class ContentActions {
-  const ContentActions({
+class AppScreenHostActions {
+  const AppScreenHostActions({
     required this.commitStateChange,
     required this.importFiles,
     required this.handleOptionGestureHover,
