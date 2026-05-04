@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
-import 'package:serenity_viewer/src/window/history/workspace_window_history_entry.dart';
+import 'package:serenity_viewer/src/workspace/history/workspace_window_history_entry.dart';
 
 import 'workspace_controller.dart';
 

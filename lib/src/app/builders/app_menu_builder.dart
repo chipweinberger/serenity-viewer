@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:serenity_viewer/src/environment/asset.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/window/history/workspace_window_history_entry.dart';
+import 'package:serenity_viewer/src/workspace/history/workspace_window_history_entry.dart';
 
 class AppMenuBuilder {
   AppMenuBuilder({

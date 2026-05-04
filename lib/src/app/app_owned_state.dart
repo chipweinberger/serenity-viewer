@@ -6,7 +6,7 @@ import 'package:serenity_viewer/src/window/interaction/window_interaction_state.
 import 'package:serenity_viewer/src/environment/session/workspace_view_tracking_state.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresh_state.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
-import 'package:serenity_viewer/src/window/history/workspace_window_history_state.dart';
+import 'package:serenity_viewer/src/workspace/history/workspace_window_history_state.dart';
 
 class AppOwnedState {
   final AppUiHandles uiHandles = AppUiHandles();

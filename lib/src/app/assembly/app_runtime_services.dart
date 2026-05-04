@@ -19,9 +19,9 @@ import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.da
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresh_state.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
-import 'package:serenity_viewer/src/window/actions/workspace_video_conversion_controller.dart';
-import 'package:serenity_viewer/src/window/history/workspace_window_history_controller.dart';
-import 'package:serenity_viewer/src/window/history/workspace_window_history_state.dart';
+import 'package:serenity_viewer/src/workspace/actions/workspace_video_conversion_controller.dart';
+import 'package:serenity_viewer/src/workspace/history/workspace_window_history_controller.dart';
+import 'package:serenity_viewer/src/workspace/history/workspace_window_history_state.dart';
 
 class AppStateServices {
   const AppStateServices({

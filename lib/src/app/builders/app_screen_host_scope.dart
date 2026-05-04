@@ -15,7 +15,7 @@ import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.da
 import 'package:serenity_viewer/src/environment/session/environment_session.dart';
 import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
-import 'package:serenity_viewer/src/window/history/workspace_window_history_controller.dart';
+import 'package:serenity_viewer/src/workspace/history/workspace_window_history_controller.dart';
 
 class AppScreenHostState {
   const AppScreenHostState({
