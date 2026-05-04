@@ -14,6 +14,7 @@ import 'package:serenity_viewer/src/app/app_theme.dart';
 import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
+import 'package:serenity_viewer/src/media/loading/workspace_load_plan.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
@@ -368,7 +369,32 @@ class WorkspaceScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildWorkspaceLoadingIndicator() {
+    return Positioned.fill(
+      child: IgnorePointer(
+        child: Center(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.34),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: const Padding(
+              padding: EdgeInsets.all(10),
+              child: SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2.2, color: Colors.white),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildWorkspaceCanvasLayers(BuildContext context, _WorkspaceCanvasViewModel canvasViewModel) {
+    final showsLoadingIndicator = unloadedWorkspaceWindowCount(canvasViewModel.workspace, canvasViewModel.loadPlan) > 0;
+
     return Stack(
       children: [
         _buildWorkspaceCanvasBackground(),
@@ -379,6 +405,7 @@ class WorkspaceScreen extends StatelessWidget {
         if (!canvasViewModel.isExposeMode && canvasViewModel.windows.isEmpty)
           Positioned.fill(child: _buildEmptyWorkspaceCanvasState(context)),
         if (canvasViewModel.isDropTargetActive) _buildWorkspaceDropOverlay(),
+        if (showsLoadingIndicator) _buildWorkspaceLoadingIndicator(),
         Positioned(left: 18, bottom: 18, child: workspaceHud),
       ],
     );
