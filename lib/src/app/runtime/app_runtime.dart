@@ -67,7 +67,6 @@ class AppRuntime {
     return AppRuntime.assembled(
       stateStore: stateStore,
       state: AppRuntimeState(
-        uiHandles: inputs.uiHandles,
         environmentStoreState: stateStore.environmentStoreState,
         appUiState: stateStore.appUiState,
         windowInteractionState: stateStore.windowInteractionState,
@@ -91,6 +90,5 @@ class AppRuntime {
     workspace.thumbnailController.dispose();
     foundation.sharedVideoControllerPool.dispose();
     stateStore.dispose();
-    state.uiHandles.dispose();
   }
 }

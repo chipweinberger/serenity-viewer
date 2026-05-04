@@ -83,6 +83,7 @@ class _AppRootState extends State<AppRoot> {
   @override
   void dispose() {
     _runtime.dispose();
+    _uiHandles.dispose();
     super.dispose();
   }
 

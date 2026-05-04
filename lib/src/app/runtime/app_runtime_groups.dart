@@ -1,6 +1,5 @@
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
-import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
 import 'package:serenity_viewer/src/environment/store/environment_bookmark_synchronizer.dart';
@@ -31,7 +30,6 @@ import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.
 
 class AppRuntimeState {
   const AppRuntimeState({
-    required this.uiHandles,
     required this.environmentStoreState,
     required this.appUiState,
     required this.windowInteractionState,
@@ -41,7 +39,6 @@ class AppRuntimeState {
     required this.workspaceWindowHistoryState,
   });
 
-  final AppUiHandles uiHandles;
   final EnvironmentStoreState environmentStoreState;
   final AppUiState appUiState;
   final WindowInteractionState windowInteractionState;
