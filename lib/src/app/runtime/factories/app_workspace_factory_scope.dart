@@ -35,21 +35,3 @@ class _WorkspaceControllers {
   final WorkspaceWindowHistoryController workspaceWindowHistoryController;
   final WorkspaceViewportSessionController workspaceViewportSessionController;
 }
-
-class _EnvironmentAndWorkspaceFlows {
-  const _EnvironmentAndWorkspaceFlows({
-    required this.navigationController,
-    required this.managementController,
-    required this.environmentController,
-    required this.workspaceExposeLayoutController,
-    required this.workspaceShortcutController,
-    required this.workspaceViewTrackingController,
-  });
-
-  final EnvironmentNavigationController navigationController;
-  final EnvironmentManagementController managementController;
-  final EnvironmentController environmentController;
-  final WorkspaceExposeLayoutController workspaceExposeLayoutController;
-  final WorkspaceShortcutController workspaceShortcutController;
-  final WorkspaceViewTrackingController workspaceViewTrackingController;
-}

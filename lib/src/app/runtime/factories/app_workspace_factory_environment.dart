@@ -1,40 +1,5 @@
 part of 'app_workspace_factory.dart';
 
-_EnvironmentAndWorkspaceFlows _createEnvironmentAndWorkspaceFlows({
-  required _WorkspaceFactoryScope scope,
-  required ThumbnailController thumbnailController,
-  required WorkspaceLinksController workspaceLinksController,
-  required WorkspaceController workspaceController,
-}) {
-  final navigationController = _createEnvironmentNavigationController(
-    scope: scope,
-    thumbnailController: thumbnailController,
-    workspaceController: workspaceController,
-  );
-  final workspaceExposeLayoutController = _createWorkspaceExposeLayoutController(scope: scope);
-  final managementController = _createEnvironmentManagementController(
-    scope: scope,
-    navigationController: navigationController,
-    thumbnailController: thumbnailController,
-    workspaceController: workspaceController,
-  );
-  final workspaceShortcutController = _createWorkspaceShortcutController(
-    scope: scope,
-    navigationController: navigationController,
-    workspaceLinksController: workspaceLinksController,
-  );
-  final workspaceViewTrackingController = _createWorkspaceViewTrackingController(scope: scope);
-
-  return _EnvironmentAndWorkspaceFlows(
-    navigationController: navigationController,
-    managementController: managementController,
-    environmentController: EnvironmentController(navigation: navigationController, management: managementController),
-    workspaceExposeLayoutController: workspaceExposeLayoutController,
-    workspaceShortcutController: workspaceShortcutController,
-    workspaceViewTrackingController: workspaceViewTrackingController,
-  );
-}
-
 EnvironmentNavigationController _createEnvironmentNavigationController({
   required _WorkspaceFactoryScope scope,
   required ThumbnailController thumbnailController,

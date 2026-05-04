@@ -56,12 +56,28 @@ AppWorkspaceServices createAppWorkspaceServices({required AppRuntimeInputs input
     scope: scope,
     workspaceWindowController: workspaceControllers.workspaceWindowController,
   );
-  final environmentAndWorkspaceFlows = _createEnvironmentAndWorkspaceFlows(
+  final environmentNavigationController = _createEnvironmentNavigationController(
     scope: scope,
     thumbnailController: thumbnailController,
-    workspaceLinksController: workspaceLinksController,
     workspaceController: workspaceControllers.workspaceController,
   );
+  final workspaceExposeLayoutController = _createWorkspaceExposeLayoutController(scope: scope);
+  final environmentManagementController = _createEnvironmentManagementController(
+    scope: scope,
+    navigationController: environmentNavigationController,
+    thumbnailController: thumbnailController,
+    workspaceController: workspaceControllers.workspaceController,
+  );
+  final environmentController = EnvironmentController(
+    navigation: environmentNavigationController,
+    management: environmentManagementController,
+  );
+  final workspaceShortcutController = _createWorkspaceShortcutController(
+    scope: scope,
+    navigationController: environmentNavigationController,
+    workspaceLinksController: workspaceLinksController,
+  );
+  final workspaceViewTrackingController = _createWorkspaceViewTrackingController(scope: scope);
   final videoFrameExporter = VideoFrameExporter(mediaInspector: scope.media);
   final workspaceVideoConversionPrompts = WorkspaceVideoConversionPrompts(context: scope.app.context);
   final workspaceVideoConversionController = _createWorkspaceVideoConversionController(
@@ -91,10 +107,10 @@ AppWorkspaceServices createAppWorkspaceServices({required AppRuntimeInputs input
     workspaceWindowController: workspaceControllers.workspaceWindowController,
     workspaceWindowHistoryController: workspaceControllers.workspaceWindowHistoryController,
     workspaceViewportSessionController: workspaceControllers.workspaceViewportSessionController,
-    environmentController: environmentAndWorkspaceFlows.environmentController,
-    workspaceExposeLayoutController: environmentAndWorkspaceFlows.workspaceExposeLayoutController,
-    workspaceShortcutController: environmentAndWorkspaceFlows.workspaceShortcutController,
-    workspaceViewTrackingController: environmentAndWorkspaceFlows.workspaceViewTrackingController,
+    environmentController: environmentController,
+    workspaceExposeLayoutController: workspaceExposeLayoutController,
+    workspaceShortcutController: workspaceShortcutController,
+    workspaceViewTrackingController: workspaceViewTrackingController,
     workspaceVideoConversionController: workspaceVideoConversionController,
   );
 }
