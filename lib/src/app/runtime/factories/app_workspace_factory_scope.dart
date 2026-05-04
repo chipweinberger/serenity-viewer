@@ -1,6 +1,5 @@
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
-import 'package:serenity_viewer/src/app/runtime/app_runtime_groups.dart';
 import 'package:serenity_viewer/src/app/runtime/app_runtime_inputs.dart';
 import 'package:serenity_viewer/src/app/state/app_state_store.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
@@ -13,16 +12,21 @@ import 'package:serenity_viewer/src/workspace/tracking/workspace_view_tracking_s
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 
 class WorkspaceFactoryScope {
-  const WorkspaceFactoryScope({required this.inputs, required this.foundation});
+  const WorkspaceFactoryScope({
+    required this.inputs,
+    required this.platform,
+    required this.store,
+    required this.media,
+    required this.ui,
+  });
 
   final AppRuntimeInputs inputs;
-  final AppFoundation foundation;
+  final PlatformBridge platform;
+  final EnvironmentStore store;
+  final MediaInspector media;
+  final AppUiController ui;
 
   AppStateStore get stateStore => inputs.stateStore;
-  PlatformBridge get platform => foundation.platformBridge;
-  EnvironmentStore get store => foundation.environmentStore;
-  MediaInspector get media => foundation.mediaInspector;
-  AppUiController get ui => foundation.appUiController;
   EnvironmentStoreState get envState => stateStore.environmentStoreState;
   AppUiState get uiState => stateStore.appUiState;
   WindowInteractionState get interactionState => stateStore.windowInteractionState;

@@ -11,7 +11,10 @@ import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_
 AppWorkspaceServices createAppWorkspaceServices({required AppRuntimeInputs inputs, required AppFoundation foundation}) {
   final scope = WorkspaceFactoryScope(
     inputs: inputs,
-    foundation: foundation,
+    platform: foundation.platformBridge,
+    store: foundation.environmentStore,
+    media: foundation.mediaInspector,
+    ui: foundation.appUiController,
   );
 
   final thumbnailController = createThumbnailController(scope: scope);
