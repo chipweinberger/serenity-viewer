@@ -1,7 +1,11 @@
+import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
+
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/app/state/app_derived_state.dart';
 import 'package:serenity_viewer/src/app/state/app_state_store.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
+import 'package:serenity_viewer/src/app/runtime/app_runtime.dart';
 import 'package:serenity_viewer/src/environment/asset.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
 import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
@@ -123,26 +127,28 @@ AppMainViewActions _buildAppMainViewActions({
   AppMainViewModel model,
   AppMainViewServices services,
   AppMainViewActions actions,
-}) buildAppMainViewBindings({
-  required AppStateStore state,
-  required AppUiController appUiController,
-  required SharedVideoControllerPool sharedVideoControllerPool,
-  required Future<void> Function(Asset asset) revealAssetInFinder,
-  required WorkspaceController workspaceController,
-  required EnvironmentController environmentController,
-  required WorkspaceExposeLayoutController workspaceExposeLayoutController,
-  required WorkspaceLinksController workspaceLinksController,
-  required WorkspaceLinksLauncher workspaceLinksLauncher,
-  required WorkspaceLinksPrompts workspaceLinksPrompts,
-  required ThumbnailController thumbnailController,
-  required WorkspaceWindowHistoryController windowHistoryController,
-  required WorkspaceMediaImportController workspaceMediaImportController,
-  required WorkspaceWindowController workspaceWindowController,
-  required WorkspaceViewportSessionController workspaceViewportSessionController,
-  required WorkspaceCollateController workspaceCollateController,
+}) buildAppMainViewBindings(
+  BuildContext context, {
   required AppUiHandles uiHandles,
   required bool Function() mounted,
 }) {
+  final state = context.read<AppStateStore>();
+  final runtime = context.read<AppRuntime>();
+  final appUiController = context.read<AppUiController>();
+  final sharedVideoControllerPool = context.read<SharedVideoControllerPool>();
+  final environmentController = context.read<EnvironmentController>();
+  final workspaceExposeLayoutController = context.read<WorkspaceExposeLayoutController>();
+  final workspaceLinksController = context.read<WorkspaceLinksController>();
+  final workspaceLinksLauncher = context.read<WorkspaceLinksLauncher>();
+  final workspaceLinksPrompts = context.read<WorkspaceLinksPrompts>();
+  final thumbnailController = context.read<ThumbnailController>();
+  final windowHistoryController = context.read<WorkspaceWindowHistoryController>();
+  final workspaceMediaImportController = context.read<WorkspaceMediaImportController>();
+  final workspaceWindowController = context.read<WorkspaceWindowController>();
+  final workspaceViewportSessionController = context.read<WorkspaceViewportSessionController>();
+  final workspaceCollateController = context.read<WorkspaceCollateController>();
+  final workspaceController = context.read<WorkspaceController>();
+
   return (
     model: _buildAppMainViewModel(
       state: state,
@@ -162,7 +168,7 @@ AppMainViewActions _buildAppMainViewActions({
     ),
     actions: _buildAppMainViewActions(
       appUiController: appUiController,
-      revealAssetInFinder: revealAssetInFinder,
+      revealAssetInFinder: runtime.platformBridge.revealAssetInFinder,
       workspaceMediaImportController: workspaceMediaImportController,
       workspaceWindowController: workspaceWindowController,
       workspaceViewportSessionController: workspaceViewportSessionController,

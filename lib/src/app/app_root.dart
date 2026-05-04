@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:serenity_viewer/src/app/runtime/app_runtime.dart';
 import 'package:serenity_viewer/src/app/state/app_state_store.dart';
@@ -72,31 +73,54 @@ class _AppRootState extends State<AppRoot> {
     _runtime.environmentStore.updateEnvironment(environment);
   }
 
+  Widget _buildProviders({required Widget child}) {
+    return MultiProvider(
+      providers: [
+        Provider<AppStateStore>.value(value: _stateStore),
+        Provider<AppRuntime>.value(value: _runtime),
+        Provider<AppUiHandles>.value(value: _uiHandles),
+        Provider<AppFeedbackController>.value(value: _feedback),
+        Provider<AppSettingsController>.value(value: _settings),
+        Provider<DocumentPersistenceController>.value(value: _documentPersistence),
+        ChangeNotifierProvider.value(value: _stateStore.appUiState),
+        ChangeNotifierProvider.value(value: _stateStore.environmentStoreState),
+        ChangeNotifierProvider.value(value: _stateStore.windowInteractionState),
+        ChangeNotifierProvider.value(value: _stateStore.workspaceViewportState),
+        ChangeNotifierProvider.value(value: _stateStore.thumbnailRefreshState),
+        ChangeNotifierProvider.value(value: _stateStore.workspaceWindowHistoryState),
+        ChangeNotifierProvider.value(value: _stateStore.workspaceViewTrackingState),
+        Provider.value(value: _runtime.appUiController),
+        Provider.value(value: _runtime.sharedVideoControllerPool),
+        Provider.value(value: _runtime.platformBridge),
+        Provider.value(value: _runtime.environmentStore),
+        Provider.value(value: _runtime.environmentBookmarkSynchronizer),
+        Provider.value(value: _runtime.documentCoordinator),
+        Provider.value(value: _runtime.workspaceController),
+        Provider.value(value: _runtime.environmentController),
+        Provider.value(value: _runtime.workspaceExposeLayoutController),
+        Provider.value(value: _runtime.workspaceLinksController),
+        Provider.value(value: _runtime.workspaceLinksLauncher),
+        Provider.value(value: _runtime.workspaceLinksPrompts),
+        Provider.value(value: _runtime.thumbnailController),
+        Provider.value(value: _runtime.workspaceWindowHistoryController),
+        Provider.value(value: _runtime.workspaceMediaImportController),
+        Provider.value(value: _runtime.workspaceWindowController),
+        Provider.value(value: _runtime.workspaceViewportSessionController),
+        Provider.value(value: _runtime.workspaceCollateController),
+        Provider.value(value: _runtime.workspaceVideoConversionController),
+        Provider.value(value: _runtime.workspaceAssetPickerController),
+        Provider.value(value: _runtime.workspaceShortcutController),
+      ],
+      child: child,
+    );
+  }
+
   Widget _buildContent(BuildContext context) {
     if (_state.environmentStoreState.isLoading || _state.environmentStoreState.environment == null) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    final bindings = buildAppMainViewBindings(
-      state: _state,
-      appUiController: _runtime.appUiController,
-      sharedVideoControllerPool: _runtime.sharedVideoControllerPool,
-      revealAssetInFinder: _runtime.platformBridge.revealAssetInFinder,
-      workspaceController: _runtime.workspaceController,
-      environmentController: _runtime.environmentController,
-      workspaceExposeLayoutController: _runtime.workspaceExposeLayoutController,
-      workspaceLinksController: _runtime.workspaceLinksController,
-      workspaceLinksLauncher: _runtime.workspaceLinksLauncher,
-      workspaceLinksPrompts: _runtime.workspaceLinksPrompts,
-      thumbnailController: _runtime.thumbnailController,
-      windowHistoryController: _runtime.workspaceWindowHistoryController,
-      workspaceMediaImportController: _runtime.workspaceMediaImportController,
-      workspaceWindowController: _runtime.workspaceWindowController,
-      workspaceViewportSessionController: _runtime.workspaceViewportSessionController,
-      workspaceCollateController: _runtime.workspaceCollateController,
-      uiHandles: _uiHandles,
-      mounted: () => mounted,
-    );
+    final bindings = buildAppMainViewBindings(context, uiHandles: _uiHandles, mounted: () => mounted);
     return AppMainView(model: bindings.model, services: bindings.services, actions: bindings.actions);
   }
 
@@ -189,33 +213,25 @@ class _AppRootState extends State<AppRoot> {
     return ListenableBuilder(
       listenable: _stateStore.shellListenable,
       builder: (context, _) {
-        final menu = buildAppMenuBindings(
-          state: _state,
-          appUiController: _runtime.appUiController,
-          revealAssetInFinder: _runtime.platformBridge.revealAssetInFinder,
-          documentCoordinator: _runtime.documentCoordinator,
-          workspaceWindowController: _runtime.workspaceWindowController,
-          workspaceController: _runtime.workspaceController,
-          environmentController: _runtime.environmentController,
-          workspaceVideoConversionController: _runtime.workspaceVideoConversionController,
-          workspaceWindowHistoryController: _runtime.workspaceWindowHistoryController,
-          workspaceCollateController: _runtime.workspaceCollateController,
-          feedback: _feedback,
-          settings: _settings,
-          openAssets: _runtime.workspaceAssetPickerController.pickAndImportAssets,
-        );
-        return AppMenu(
-          state: menu.state,
-          app: menu.app,
-          file: menu.file,
-          asset: menu.asset,
-          workspace: menu.workspace,
-          window: menu.window,
-          child: Focus(
-            focusNode: _uiHandles.focusNode,
-            autofocus: true,
-            onKeyEvent: (_, event) => _runtime.workspaceShortcutController.onKeyEvent(event),
-            child: Scaffold(body: SafeArea(top: false, child: _buildContent(context))),
+        return _buildProviders(
+          child: Builder(
+            builder: (context) {
+              final menu = buildAppMenuBindings(context);
+              return AppMenu(
+                state: menu.state,
+                app: menu.app,
+                file: menu.file,
+                asset: menu.asset,
+                workspace: menu.workspace,
+                window: menu.window,
+                child: Focus(
+                  focusNode: _uiHandles.focusNode,
+                  autofocus: true,
+                  onKeyEvent: (_, event) => _runtime.workspaceShortcutController.onKeyEvent(event),
+                  child: Scaffold(body: SafeArea(top: false, child: _buildContent(context))),
+                ),
+              );
+            },
           ),
         );
       },

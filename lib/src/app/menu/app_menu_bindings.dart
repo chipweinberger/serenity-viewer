@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:serenity_viewer/src/app/controllers/app_feedback_controller.dart';
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
+import 'package:serenity_viewer/src/app/runtime/app_runtime.dart';
 import 'package:serenity_viewer/src/app/state/app_state_store.dart';
 import 'package:serenity_viewer/src/environment/asset.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
@@ -197,21 +199,20 @@ AppMenuWindowActions _buildAppMenuWindowActions({
   AppMenuAssetActions asset,
   AppMenuWorkspaceActions workspace,
   AppMenuWindowActions window,
-}) buildAppMenuBindings({
-  required AppStateStore state,
-  required AppUiController appUiController,
-  required Future<void> Function(Asset asset) revealAssetInFinder,
-  required DocumentCoordinator documentCoordinator,
-  required WorkspaceWindowController workspaceWindowController,
-  required WorkspaceController workspaceController,
-  required EnvironmentController environmentController,
-  required WorkspaceVideoConversionController workspaceVideoConversionController,
-  required WorkspaceWindowHistoryController workspaceWindowHistoryController,
-  required WorkspaceCollateController workspaceCollateController,
-  required AppFeedbackController feedback,
-  required AppSettingsController settings,
-  required Future<void> Function() openAssets,
-}) {
+}) buildAppMenuBindings(BuildContext context) {
+  final state = context.read<AppStateStore>();
+  final runtime = context.read<AppRuntime>();
+  final appUiController = context.read<AppUiController>();
+  final documentCoordinator = context.read<DocumentCoordinator>();
+  final workspaceWindowController = context.read<WorkspaceWindowController>();
+  final workspaceController = context.read<WorkspaceController>();
+  final environmentController = context.read<EnvironmentController>();
+  final workspaceVideoConversionController = context.read<WorkspaceVideoConversionController>();
+  final workspaceWindowHistoryController = context.read<WorkspaceWindowHistoryController>();
+  final workspaceCollateController = context.read<WorkspaceCollateController>();
+  final feedback = context.read<AppFeedbackController>();
+  final settings = context.read<AppSettingsController>();
+
   return (
     state: _buildAppMenuState(
       state: state,
@@ -219,9 +220,12 @@ AppMenuWindowActions _buildAppMenuWindowActions({
       workspaceController: workspaceController,
     ),
     app: _buildAppMenuAppActions(feedback: feedback, settings: settings),
-    file: _buildAppMenuFileActions(documentCoordinator: documentCoordinator, openAssets: openAssets),
+    file: _buildAppMenuFileActions(
+      documentCoordinator: documentCoordinator,
+      openAssets: runtime.workspaceAssetPickerController.pickAndImportAssets,
+    ),
     asset: _buildAppMenuAssetActions(
-      revealAssetInFinder: revealAssetInFinder,
+      revealAssetInFinder: runtime.platformBridge.revealAssetInFinder,
       environmentController: environmentController,
       workspaceWindowController: workspaceWindowController,
       workspaceVideoConversionController: workspaceVideoConversionController,
