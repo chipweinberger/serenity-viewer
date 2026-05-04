@@ -7,9 +7,9 @@ import 'package:serenity_viewer/src/app/assembly/app_runtime.dart';
 import 'package:serenity_viewer/src/app/assembly/app_runtime_config_builder.dart';
 import 'package:serenity_viewer/src/app/app_dependencies.dart';
 import 'package:serenity_viewer/src/app/app_view_state.dart';
+import 'package:serenity_viewer/src/app/builders/app_menu_builder.dart';
 import 'package:serenity_viewer/src/app/builders/app_screen_host_builder.dart';
 import 'package:serenity_viewer/src/app/builders/app_screen_host_scope.dart';
-import 'package:serenity_viewer/src/app/builders/menu_builder.dart';
 import 'package:serenity_viewer/src/app/controllers/app_feedback_controller.dart';
 import 'package:serenity_viewer/src/app/seed_environment.dart';
 import 'package:serenity_viewer/src/environment/document/document_persistence_controller.dart';
@@ -80,7 +80,7 @@ class _AppRootState extends State<AppRoot> {
     final focusedWindowIsSelected =
         focusedWindow != null && _workspaceRuntime.workspaceController.expose.contains(focusedWindow.asset.id);
 
-    return MenuBuilder(
+    return AppMenuBuilder(
       showAboutSerenity: _feedback.showAboutSerenity,
       openSettings: _feedback.openSettings,
       createEnvironment: _documents.documentCoordinator.createDocument,

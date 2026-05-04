@@ -9,8 +9,8 @@ import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/workspace/window/session/recently_closed_window_entry.dart';
 
-class MenuBuilder {
-  MenuBuilder({
+class AppMenuBuilder {
+  AppMenuBuilder({
     required this.showAboutSerenity,
     required this.openSettings,
     required this.createEnvironment,
