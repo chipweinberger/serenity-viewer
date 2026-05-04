@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/app_ui_state.dart';
-import 'package:serenity_viewer/src/environment/session/environment_store_state.dart';
+import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
-import 'package:serenity_viewer/src/environment/session/workspace_view_tracking_state.dart';
+import 'package:serenity_viewer/src/workspace/tracking/workspace_view_tracking_state.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresh_state.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 import 'package:serenity_viewer/src/workspace/history/workspace_window_history_state.dart';

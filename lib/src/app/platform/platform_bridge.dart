@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 
 import 'package:serenity_viewer/src/environment/asset.dart';
-import 'package:serenity_viewer/src/environment/session/environment_store_state.dart';
+import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 
 class PlatformBridge {

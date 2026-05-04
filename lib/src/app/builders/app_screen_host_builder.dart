@@ -62,14 +62,14 @@ class AppScreenHostBuilder {
       draggingTabWorkspaceId: state.uiState.draggingTabWorkspaceId,
       tabScrollController: state.tabScrollController,
       actions: AppTopBarOverlayActions(
-        onShowWorkspaceOverview: state.environmentSession.navigation.showOverview,
+        onShowWorkspaceOverview: state.environmentController.navigation.showOverview,
         onSetDraggingTabWorkspaceId: state.appUiController.setDraggingTabWorkspaceId,
-        onReorderOpenWorkspace: state.environmentSession.management.reorderOpen,
+        onReorderOpenWorkspace: state.environmentController.management.reorderOpen,
         onMoveSelectedExposeWindowsToWorkspace:
-            state.environmentSession.management.moveSelectedExposeWindowsToWorkspace,
-        onSetActiveWorkspace: state.environmentSession.navigation.setActiveWorkspace,
-        onConfirmCloseTab: state.environmentSession.management.confirmCloseTab,
-        onCreateWorkspace: state.environmentSession.management.create,
+            state.environmentController.management.moveSelectedExposeWindowsToWorkspace,
+        onSetActiveWorkspace: state.environmentController.navigation.setActiveWorkspace,
+        onConfirmCloseTab: state.environmentController.management.confirmCloseTab,
+        onCreateWorkspace: state.environmentController.management.create,
       ),
     );
   }

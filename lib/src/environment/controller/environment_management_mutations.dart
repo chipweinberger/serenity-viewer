@@ -2,16 +2,16 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/environment/session/environment_session_types.dart';
-import 'package:serenity_viewer/src/environment/session/environment_store_state.dart';
+import 'package:serenity_viewer/src/environment/controller/environment_controller_types.dart';
+import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/app/app_ui_state.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 
-class EnvironmentManagementActionDependencies {
-  const EnvironmentManagementActionDependencies({
+class EnvironmentManagementMutationDependencies {
+  const EnvironmentManagementMutationDependencies({
     required this.environmentStoreState,
     required this.appUiState,
     required this.workspaceController,
@@ -34,10 +34,10 @@ class EnvironmentManagementActionDependencies {
   final SerenityQueueWorkspaceRefresh queueWorkspaceRefresh;
 }
 
-class EnvironmentManagementActions {
-  const EnvironmentManagementActions(this._dependencies);
+class EnvironmentManagementMutations {
+  const EnvironmentManagementMutations(this._dependencies);
 
-  final EnvironmentManagementActionDependencies _dependencies;
+  final EnvironmentManagementMutationDependencies _dependencies;
 
   int _nextWorkspaceOrdinal() {
     var maxOrdinal = 0;

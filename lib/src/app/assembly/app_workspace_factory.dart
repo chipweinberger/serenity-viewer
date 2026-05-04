@@ -10,17 +10,17 @@ import 'package:serenity_viewer/src/media/import/workspace_media_import_controll
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_viewport_session_controller.dart';
-import 'package:serenity_viewer/src/environment/session/environment_session.dart';
-import 'package:serenity_viewer/src/environment/session/environment_management_actions.dart';
-import 'package:serenity_viewer/src/environment/session/environment_management_controller.dart';
-import 'package:serenity_viewer/src/environment/session/environment_expose_controller.dart';
-import 'package:serenity_viewer/src/environment/session/environment_view_controller.dart';
-import 'package:serenity_viewer/src/environment/session/environment_shortcut_controller.dart';
-import 'package:serenity_viewer/src/environment/session/workspace_view_tracking_controller.dart';
+import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
+import 'package:serenity_viewer/src/environment/controller/environment_management_controller.dart';
+import 'package:serenity_viewer/src/environment/controller/environment_management_mutations.dart';
+import 'package:serenity_viewer/src/environment/controller/environment_navigation_controller.dart';
 import 'package:serenity_viewer/src/media/video/video_frame_exporter.dart';
+import 'package:serenity_viewer/src/workspace/actions/workspace_expose_layout_controller.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_video_conversion_controller.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_video_conversion_prompts.dart';
 import 'package:serenity_viewer/src/workspace/history/workspace_window_history_controller.dart';
+import 'package:serenity_viewer/src/workspace/input/workspace_shortcut_controller.dart';
+import 'package:serenity_viewer/src/workspace/tracking/workspace_view_tracking_controller.dart';
 
 class AppWorkspaceFactory {
   const AppWorkspaceFactory(this.config);
@@ -102,8 +102,8 @@ class AppWorkspaceFactory {
       thumbnailController: thumbnailController,
       replaceWorkspace: foundation.environmentStore.replaceWorkspace,
     );
-    final environmentNavigationController = EnvironmentViewController(
-      EnvironmentViewDependencies(
+    final environmentNavigationController = EnvironmentNavigationController(
+      EnvironmentNavigationDependencies(
         environmentStoreState: environmentStoreState,
         appUiState: appUiState,
         workspaceController: workspaceController,
@@ -115,8 +115,8 @@ class AppWorkspaceFactory {
         refreshActiveWorkspaceThumbnail: thumbnailController.refreshActiveWorkspaceIfNeeded,
       ),
     );
-    final environmentExposeController = EnvironmentExposeController(
-      EnvironmentExposeDependencies(
+    final workspaceExposeLayoutController = WorkspaceExposeLayoutController(
+      WorkspaceExposeLayoutDependencies(
         appUiState: appUiState,
         workspaceViewportState: workspaceViewportState,
         context: config.shell.context,
@@ -126,8 +126,8 @@ class AppWorkspaceFactory {
         showWorkspaceScreen: config.workspace.showWorkspaceScreen,
       ),
     );
-    final environmentManagementActions = EnvironmentManagementActions(
-      EnvironmentManagementActionDependencies(
+    final environmentManagementMutations = EnvironmentManagementMutations(
+      EnvironmentManagementMutationDependencies(
         environmentStoreState: environmentStoreState,
         appUiState: appUiState,
         workspaceController: workspaceController,
@@ -149,11 +149,11 @@ class AppWorkspaceFactory {
         activeWorkspace: config.workspace.activeWorkspace,
         showMessage: config.shell.showMessage,
         navigation: environmentNavigationController,
-        mutations: environmentManagementActions,
+        mutations: environmentManagementMutations,
       ),
     );
-    final environmentShortcutController = EnvironmentShortcutController(
-      EnvironmentShortcutDependencies(
+    final workspaceShortcutController = WorkspaceShortcutController(
+      WorkspaceShortcutDependencies(
         appUiState: appUiState,
         workspaceLinksController: workspaceLinksController,
         focusedWindowOrNull: config.workspace.focusedWindowOrNull,
@@ -173,12 +173,9 @@ class AppWorkspaceFactory {
         updateEnvironment: config.environment.updateEnvironment,
       ),
     );
-    final environmentSession = EnvironmentSession(
+    final environmentController = EnvironmentController(
       navigation: environmentNavigationController,
-      expose: environmentExposeController,
       management: environmentManagementController,
-      shortcuts: environmentShortcutController,
-      tracking: workspaceViewTrackingController,
     );
     final workspaceVideoConversionController = WorkspaceVideoConversionController(
       showMessage: config.shell.showMessage,
@@ -219,7 +216,10 @@ class AppWorkspaceFactory {
       workspaceWindowController: workspaceWindowController,
       workspaceWindowHistoryController: workspaceWindowHistoryController,
       workspaceViewportSessionController: workspaceViewportSessionController,
-      environmentSession: environmentSession,
+      environmentController: environmentController,
+      workspaceExposeLayoutController: workspaceExposeLayoutController,
+      workspaceShortcutController: workspaceShortcutController,
+      workspaceViewTrackingController: workspaceViewTrackingController,
       workspaceVideoConversionController: workspaceVideoConversionController,
     );
   }

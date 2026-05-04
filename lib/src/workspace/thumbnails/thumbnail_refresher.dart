@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/environment/session/environment_store_state.dart';
+import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_renderer.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_store.dart';

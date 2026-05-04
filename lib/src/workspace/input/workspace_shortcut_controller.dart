@@ -3,15 +3,15 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:serenity_viewer/src/environment/session/environment_session_types.dart';
+import 'package:serenity_viewer/src/environment/controller/environment_controller_types.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.dart';
 import 'package:serenity_viewer/src/app/app_ui_state.dart';
-import 'package:serenity_viewer/src/environment/session/environment_view_controller.dart';
+import 'package:serenity_viewer/src/environment/controller/environment_navigation_controller.dart';
 
-class EnvironmentShortcutDependencies {
-  const EnvironmentShortcutDependencies({
+class WorkspaceShortcutDependencies {
+  const WorkspaceShortcutDependencies({
     required this.appUiState,
     required this.workspaceLinksController,
     required this.focusedWindowOrNull,
@@ -27,13 +27,13 @@ class EnvironmentShortcutDependencies {
   final SerenityShowWorkspaceScreen showWorkspaceScreen;
   final VoidCallback toggleExpose;
   final ValueChanged<String> toggleVideoPlayback;
-  final EnvironmentViewController navigation;
+  final EnvironmentNavigationController navigation;
 }
 
-class EnvironmentShortcutController {
-  EnvironmentShortcutController(this._dependencies);
+class WorkspaceShortcutController {
+  WorkspaceShortcutController(this._dependencies);
 
-  final EnvironmentShortcutDependencies _dependencies;
+  final WorkspaceShortcutDependencies _dependencies;
 
   void handleShortcut(LogicalKeyboardKey key) {
     if (key == LogicalKeyboardKey.arrowUp) {

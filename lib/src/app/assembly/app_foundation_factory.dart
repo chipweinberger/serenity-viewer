@@ -1,7 +1,7 @@
 import 'package:serenity_viewer/src/app/assembly/app_runtime.dart';
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
-import 'package:serenity_viewer/src/environment/session/environment_bookmark_synchronizer.dart';
-import 'package:serenity_viewer/src/environment/session/environment_store.dart';
+import 'package:serenity_viewer/src/environment/store/environment_bookmark_synchronizer.dart';
+import 'package:serenity_viewer/src/environment/store/environment_store.dart';
 import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
 import 'package:serenity_viewer/src/media/video/media_inspector.dart';
 import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';

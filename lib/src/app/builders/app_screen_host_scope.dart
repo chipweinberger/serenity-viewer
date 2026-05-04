@@ -14,10 +14,11 @@ import 'package:serenity_viewer/src/workspace/links/workspace_links_prompts.dart
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/app/app_ui_state.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
-import 'package:serenity_viewer/src/environment/session/environment_session.dart';
+import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
 import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 import 'package:serenity_viewer/src/workspace/history/workspace_window_history_controller.dart';
+import 'package:serenity_viewer/src/workspace/actions/workspace_expose_layout_controller.dart';
 
 class AppScreenHostState {
   const AppScreenHostState({
@@ -34,7 +35,8 @@ class AppScreenHostState {
     required this.workspaceViewportState,
     required this.appUiController,
     required this.sharedVideoControllerPool,
-    required this.environmentSession,
+    required this.environmentController,
+    required this.workspaceExposeLayoutController,
     required this.workspaceLinksController,
     required this.workspaceLinksLauncher,
     required this.workspaceLinksPrompts,
@@ -57,7 +59,8 @@ class AppScreenHostState {
   final WorkspaceViewportState workspaceViewportState;
   final AppUiController appUiController;
   final SharedVideoControllerPool sharedVideoControllerPool;
-  final EnvironmentSession environmentSession;
+  final EnvironmentController environmentController;
+  final WorkspaceExposeLayoutController workspaceExposeLayoutController;
   final WorkspaceLinksController workspaceLinksController;
   final WorkspaceLinksLauncher workspaceLinksLauncher;
   final WorkspaceLinksPrompts workspaceLinksPrompts;

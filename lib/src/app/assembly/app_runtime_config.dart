@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/environment/session/environment_session_types.dart';
+import 'package:serenity_viewer/src/environment/controller/environment_controller_types.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';

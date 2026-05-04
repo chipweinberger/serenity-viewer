@@ -62,7 +62,7 @@ class WorkspaceContentBuilder {
         setPinnedHoverWindow: actions.window.setPinnedHoverWindow,
         clearPinnedHoverWindow: actions.window.clearPinnedHoverWindow,
         flashWindow: actions.window.flashWindow,
-        toggleSelectedWindow: state.environmentSession.navigation.toggleSelectedWindow,
+        toggleSelectedWindow: state.environmentController.navigation.toggleSelectedWindow,
         removeWindow: state.windowHistoryController.removeWindow,
         setActiveGestureWindow: actions.window.setActiveGestureWindow,
         revealAssetInFinder: actions.app.revealAssetInFinder,
@@ -73,7 +73,7 @@ class WorkspaceContentBuilder {
           onToggleExpose: actions.workspace.toggleExpose,
           onFitWorkspaceViewportToContent: actions.workspace.fitWorkspaceViewportToContent,
           onConfirmCollateWorkspaceWindows: actions.workspace.confirmCollateWorkspaceWindows,
-          onConfirmApplyExposeGridToWorkspace: state.environmentSession.expose.confirmApplyExposeGridToWorkspace,
+          onConfirmApplyExposeGridToWorkspace: state.workspaceExposeLayoutController.confirmApplyExposeGridToWorkspace,
           onOpenLinks: () => showWorkspaceLinksDialog(
             context: state.context,
             initialWorkspace: state.activeWorkspace,
@@ -81,7 +81,7 @@ class WorkspaceContentBuilder {
             launcher: state.workspaceLinksLauncher,
             prompts: state.workspaceLinksPrompts,
           ),
-          onClearExposeSelection: state.environmentSession.navigation.clearExposeSelection,
+          onClearExposeSelection: state.environmentController.navigation.clearExposeSelection,
           onSetWorkspaceZoom: (workspaceId, zoom) =>
               actions.workspace.setWorkspaceViewport(workspaceId: workspaceId, zoom: zoom, queueThumbnail: false),
           onRefreshActiveWorkspaceThumbnail: state.thumbnailController.refreshActiveWorkspaceIfNeeded,

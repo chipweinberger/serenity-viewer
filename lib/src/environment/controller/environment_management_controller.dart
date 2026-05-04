@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/environment/session/environment_store_state.dart';
+import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
-import 'package:serenity_viewer/src/environment/session/environment_management_dialogs.dart';
-import 'package:serenity_viewer/src/environment/session/environment_management_actions.dart';
-import 'package:serenity_viewer/src/environment/session/environment_view_controller.dart';
+import 'package:serenity_viewer/src/environment/controller/environment_management_dialogs.dart';
+import 'package:serenity_viewer/src/environment/controller/environment_management_mutations.dart';
+import 'package:serenity_viewer/src/environment/controller/environment_navigation_controller.dart';
 
 class EnvironmentManagementDependencies {
   const EnvironmentManagementDependencies({
@@ -27,8 +27,8 @@ class EnvironmentManagementDependencies {
   final List<Workspace> Function() workspaces;
   final Workspace? Function() activeWorkspace;
   final ValueChanged<String> showMessage;
-  final EnvironmentViewController navigation;
-  final EnvironmentManagementActions mutations;
+  final EnvironmentNavigationController navigation;
+  final EnvironmentManagementMutations mutations;
 }
 
 class EnvironmentManagementController {
@@ -38,7 +38,7 @@ class EnvironmentManagementController {
 
   final EnvironmentManagementDependencies _dependencies;
   final EnvironmentManagementDialogs dialogs;
-  final EnvironmentManagementActions _mutations;
+  final EnvironmentManagementMutations _mutations;
 
   void create() {
     _mutations.create();

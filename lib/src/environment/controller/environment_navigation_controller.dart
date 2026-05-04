@@ -2,16 +2,16 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-import 'package:serenity_viewer/src/environment/session/environment_session_types.dart';
-import 'package:serenity_viewer/src/environment/session/environment_store_state.dart';
+import 'package:serenity_viewer/src/environment/controller/environment_controller_types.dart';
+import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/app/app_ui_state.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 
-class EnvironmentViewDependencies {
-  const EnvironmentViewDependencies({
+class EnvironmentNavigationDependencies {
+  const EnvironmentNavigationDependencies({
     required this.environmentStoreState,
     required this.appUiState,
     required this.workspaceController,
@@ -34,10 +34,10 @@ class EnvironmentViewDependencies {
   final Future<void> Function() refreshActiveWorkspaceThumbnail;
 }
 
-class EnvironmentViewController {
-  EnvironmentViewController(this._dependencies);
+class EnvironmentNavigationController {
+  EnvironmentNavigationController(this._dependencies);
 
-  final EnvironmentViewDependencies _dependencies;
+  final EnvironmentNavigationDependencies _dependencies;
 
   void toggleSelectedWindow(String windowId) {
     _dependencies.workspaceController.expose.toggle(windowId);

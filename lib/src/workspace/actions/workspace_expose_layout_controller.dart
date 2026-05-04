@@ -6,8 +6,8 @@ import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/workspace/layout/workspace_expose_layout.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 
-class EnvironmentExposeDependencies {
-  const EnvironmentExposeDependencies({
+class WorkspaceExposeLayoutDependencies {
+  const WorkspaceExposeLayoutDependencies({
     required this.appUiState,
     required this.workspaceViewportState,
     required this.context,
@@ -32,12 +32,12 @@ class EnvironmentExposeDependencies {
   showWorkspaceScreen;
 }
 
-class EnvironmentExposeController {
-  EnvironmentExposeController(this._dependencies);
+class WorkspaceExposeLayoutController {
+  WorkspaceExposeLayoutController(this._dependencies);
 
   static const double _appliedExposeViewportZoomFactor = 0.0625;
 
-  final EnvironmentExposeDependencies _dependencies;
+  final WorkspaceExposeLayoutDependencies _dependencies;
 
   void applyExposeGridToWorkspace() {
     final workspace = _dependencies.activeWorkspace();
