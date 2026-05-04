@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/state/app_state_store.dart';
-import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller_types.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
@@ -11,7 +10,6 @@ class AppRuntimeInputs {
   const AppRuntimeInputs({
     required this.isRunningInWidgetTest,
     required this.stateStore,
-    required this.uiHandles,
     required this.windowTitle,
     required this.context,
     required this.mounted,
@@ -35,7 +33,6 @@ class AppRuntimeInputs {
 
   final bool isRunningInWidgetTest;
   final AppStateStore stateStore;
-  final AppUiHandles uiHandles;
   final String Function() windowTitle;
   final BuildContext Function() context;
   final bool Function() mounted;

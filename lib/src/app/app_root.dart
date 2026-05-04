@@ -146,7 +146,6 @@ class _AppRootState extends State<AppRoot> {
     return AppRuntimeInputs(
       isRunningInWidgetTest: _isRunningInWidgetTest,
       stateStore: _stateStore,
-      uiHandles: _uiHandles,
       windowTitle: () => deriveWindowTitle(_stateStore),
       context: () => context,
       mounted: () => mounted,
