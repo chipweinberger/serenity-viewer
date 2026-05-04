@@ -2,13 +2,18 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/controllers/app_feedback_controller.dart';
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
-import 'package:serenity_viewer/src/app/runtime/app_runtime_groups.dart';
 import 'package:serenity_viewer/src/app/state/app_state_store.dart';
 import 'package:serenity_viewer/src/environment/asset.dart';
+import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
 import 'package:serenity_viewer/src/environment/document/document_coordinator.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/settings/behavior/app_settings_controller.dart';
+import 'package:serenity_viewer/src/workspace/actions/workspace_collate_controller.dart';
+import 'package:serenity_viewer/src/workspace/actions/workspace_video_conversion_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
 import 'package:serenity_viewer/src/workspace/history/workspace_window_history_entry.dart';
+import 'package:serenity_viewer/src/workspace/history/workspace_window_history_controller.dart';
 
 class AppMenuState {
   const AppMenuState({
@@ -121,11 +126,11 @@ class AppMenuBindings {
 
 AppMenuState _buildAppMenuState({
   required AppStateStore state,
-  required AppWorkspaceServices workspace,
+  required WorkspaceWindowController workspaceWindowController,
+  required WorkspaceController workspaceController,
 }) {
-  final focusedWindow = workspace.workspaceWindowController.focusedWindowOrNull();
-  final focusedWindowIsSelected =
-      focusedWindow != null && workspace.workspaceController.expose.contains(focusedWindow.asset.id);
+  final focusedWindow = workspaceWindowController.focusedWindowOrNull();
+  final focusedWindowIsSelected = focusedWindow != null && workspaceController.expose.contains(focusedWindow.asset.id);
 
   return AppMenuState(
     activeWorkspaceId: state.environmentStoreState.environment?.activeWorkspaceId,
@@ -157,42 +162,49 @@ AppMenuFileActions _buildAppMenuFileActions({
 
 AppMenuAssetActions _buildAppMenuAssetActions({
   required Future<void> Function(Asset asset) revealAssetInFinder,
-  required AppWorkspaceServices workspace,
+  required EnvironmentController environmentController,
+  required WorkspaceWindowController workspaceWindowController,
+  required WorkspaceVideoConversionController workspaceVideoConversionController,
+  required WorkspaceWindowHistoryController workspaceWindowHistoryController,
 }) {
   return AppMenuAssetActions(
     revealAssetInFinder: revealAssetInFinder,
-    toggleWindowSelected: workspace.environmentController.navigation.toggleSelectedWindow,
-    fitWindowToContent: workspace.workspaceWindowController.fitWindowToContent,
-    restorePreviousWindowZOrder: workspace.workspaceWindowController.restorePreviousWindowZOrder,
-    convertVideoWindowToJpeg: workspace.workspaceVideoConversionController.convertVideoWindowToJpeg,
-    closeWindow: workspace.workspaceWindowHistoryController.removeWindow,
+    toggleWindowSelected: environmentController.navigation.toggleSelectedWindow,
+    fitWindowToContent: workspaceWindowController.fitWindowToContent,
+    restorePreviousWindowZOrder: workspaceWindowController.restorePreviousWindowZOrder,
+    convertVideoWindowToJpeg: workspaceVideoConversionController.convertVideoWindowToJpeg,
+    closeWindow: workspaceWindowHistoryController.removeWindow,
   );
 }
 
 AppMenuWorkspaceActions _buildAppMenuWorkspaceActions({
   required AppUiController appUiController,
-  required AppWorkspaceServices workspace,
+  required EnvironmentController environmentController,
+  required WorkspaceWindowController workspaceWindowController,
+  required WorkspaceCollateController workspaceCollateController,
   required AppFeedbackController feedback,
 }) {
   return AppMenuWorkspaceActions(
     toggleExpose: appUiController.toggleExpose,
-    toggleWorkspaceOverview: workspace.environmentController.navigation.toggleOverview,
-    createWorkspace: workspace.environmentController.management.create,
-    switchToPreviousWorkspace: () => workspace.environmentController.navigation.switchWorkspace(-1),
-    switchToNextWorkspace: () => workspace.environmentController.navigation.switchWorkspace(1),
-    fitWorkspaceViewportToContent: workspace.workspaceWindowController.fitWorkspaceViewportToContent,
-    confirmCollateWorkspaceWindows: workspace.workspaceCollateController.confirmCollateWorkspaceWindows,
-    pauseAllVideos: workspace.workspaceWindowController.pauseAllVideos,
+    toggleWorkspaceOverview: environmentController.navigation.toggleOverview,
+    createWorkspace: environmentController.management.create,
+    switchToPreviousWorkspace: () => environmentController.navigation.switchWorkspace(-1),
+    switchToNextWorkspace: () => environmentController.navigation.switchWorkspace(1),
+    fitWorkspaceViewportToContent: workspaceWindowController.fitWorkspaceViewportToContent,
+    confirmCollateWorkspaceWindows: workspaceCollateController.confirmCollateWorkspaceWindows,
+    pauseAllVideos: workspaceWindowController.pauseAllVideos,
     showNoWorkspaceToRenameMessage: () => feedback.showMessage('There is no workspace to rename.'),
-    renameWorkspace: workspace.environmentController.management.renameWorkspace,
+    renameWorkspace: environmentController.management.renameWorkspace,
     showNoWorkspaceToDeleteMessage: () => feedback.showMessage('There is no workspace to delete.'),
-    confirmDeleteWorkspace: workspace.environmentController.management.confirmDeleteWorkspace,
+    confirmDeleteWorkspace: environmentController.management.confirmDeleteWorkspace,
   );
 }
 
-AppMenuWindowActions _buildAppMenuWindowActions({required AppWorkspaceServices workspace}) {
+AppMenuWindowActions _buildAppMenuWindowActions({
+  required WorkspaceWindowHistoryController workspaceWindowHistoryController,
+}) {
   return AppMenuWindowActions(
-    restoreRecentlyClosedWindow: workspace.workspaceWindowHistoryController.restoreRecentlyClosedWindow,
+    restoreRecentlyClosedWindow: workspaceWindowHistoryController.restoreRecentlyClosedWindow,
   );
 }
 
@@ -201,21 +213,38 @@ AppMenuBindings buildAppMenuBindings({
   required AppUiController appUiController,
   required Future<void> Function(Asset asset) revealAssetInFinder,
   required DocumentCoordinator documentCoordinator,
-  required AppWorkspaceServices workspace,
+  required WorkspaceWindowController workspaceWindowController,
+  required WorkspaceController workspaceController,
+  required EnvironmentController environmentController,
+  required WorkspaceVideoConversionController workspaceVideoConversionController,
+  required WorkspaceWindowHistoryController workspaceWindowHistoryController,
+  required WorkspaceCollateController workspaceCollateController,
   required AppFeedbackController feedback,
   required AppSettingsController settings,
   required Future<void> Function() openAssets,
 }) {
   return AppMenuBindings(
-    state: _buildAppMenuState(state: state, workspace: workspace),
+    state: _buildAppMenuState(
+      state: state,
+      workspaceWindowController: workspaceWindowController,
+      workspaceController: workspaceController,
+    ),
     app: _buildAppMenuAppActions(feedback: feedback, settings: settings),
     file: _buildAppMenuFileActions(documentCoordinator: documentCoordinator, openAssets: openAssets),
-    asset: _buildAppMenuAssetActions(revealAssetInFinder: revealAssetInFinder, workspace: workspace),
+    asset: _buildAppMenuAssetActions(
+      revealAssetInFinder: revealAssetInFinder,
+      environmentController: environmentController,
+      workspaceWindowController: workspaceWindowController,
+      workspaceVideoConversionController: workspaceVideoConversionController,
+      workspaceWindowHistoryController: workspaceWindowHistoryController,
+    ),
     workspace: _buildAppMenuWorkspaceActions(
       appUiController: appUiController,
-      workspace: workspace,
+      environmentController: environmentController,
+      workspaceWindowController: workspaceWindowController,
+      workspaceCollateController: workspaceCollateController,
       feedback: feedback,
     ),
-    window: _buildAppMenuWindowActions(workspace: workspace),
+    window: _buildAppMenuWindowActions(workspaceWindowHistoryController: workspaceWindowHistoryController),
   );
 }
