@@ -3,11 +3,11 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/app/app_shell/app_shell_runtime_bridge.dart';
-import 'package:serenity_viewer/src/app/app_shell/app_shell_runtime_document_factory.dart';
-import 'package:serenity_viewer/src/app/app_shell/app_shell_runtime_foundation_factory.dart';
-import 'package:serenity_viewer/src/app/app_shell/app_shell_runtime.dart';
-import 'package:serenity_viewer/src/app/app_shell/app_shell_runtime_workspace_factory.dart';
+import 'package:serenity_viewer/src/app/app_shell_runtime/app_shell_runtime_bridge.dart';
+import 'package:serenity_viewer/src/app/app_shell_runtime/app_shell_runtime_document_factory.dart';
+import 'package:serenity_viewer/src/app/app_shell_runtime/app_shell_runtime_foundation_factory.dart';
+import 'package:serenity_viewer/src/app/app_shell_runtime/app_shell_runtime.dart';
+import 'package:serenity_viewer/src/app/app_shell_runtime/app_shell_runtime_workspace_factory.dart';
 
 class AppShellRuntimeFactory {
   const AppShellRuntimeFactory(this.config);

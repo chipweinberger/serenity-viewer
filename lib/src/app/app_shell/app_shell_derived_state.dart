@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:serenity_viewer/src/app/app_shell/app_shell_runtime.dart';
+import 'package:serenity_viewer/src/app/app_shell_runtime/app_shell_runtime.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 
 class AppShellDerivedState {

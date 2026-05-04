@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 
-import 'package:serenity_viewer/src/app/app_shell/app_shell_runtime.dart';
+import 'package:serenity_viewer/src/app/app_shell_runtime/app_shell_runtime.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 
 class AppShellPersistenceController {

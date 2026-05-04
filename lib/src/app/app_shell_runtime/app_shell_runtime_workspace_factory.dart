@@ -1,5 +1,5 @@
-import 'package:serenity_viewer/src/app/app_shell/app_shell_runtime.dart';
-import 'package:serenity_viewer/src/app/app_shell/app_shell_runtime_foundation_factory.dart';
+import 'package:serenity_viewer/src/app/app_shell_runtime/app_shell_runtime.dart';
+import 'package:serenity_viewer/src/app/app_shell_runtime/app_shell_runtime_foundation_factory.dart';
 import 'package:serenity_viewer/src/links/workspace_links_controller.dart';
 import 'package:serenity_viewer/src/thumbnails/thumbnail_controller.dart';
 import 'package:serenity_viewer/src/thumbnails/thumbnail_refresher.dart';

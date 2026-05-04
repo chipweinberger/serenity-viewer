@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_controllers.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_derived_state.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_persistence_controller.dart';
-import 'package:serenity_viewer/src/app/app_shell/app_shell_runtime.dart';
+import 'package:serenity_viewer/src/app/app_shell_runtime/app_shell_runtime.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_seed_environment.dart';
 import 'package:serenity_viewer/src/app/dependencies/shell_dependencies.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';

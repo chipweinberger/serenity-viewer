@@ -3,16 +3,16 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import 'package:serenity_viewer/src/app/app_shell_runtime/app_shell_runtime.dart';
+import 'package:serenity_viewer/src/app/app_shell_runtime/app_shell_runtime_config_builder.dart';
 import 'package:serenity_viewer/src/app/dependencies/shell_dependencies.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_controllers.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_derived_state.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_persistence_controller.dart';
-import 'package:serenity_viewer/src/app/app_shell/app_shell_runtime_config_builder.dart';
 import 'package:serenity_viewer/src/app/app_shell/builders/app_shell_content_builder.dart';
 import 'package:serenity_viewer/src/app/app_shell/builders/app_shell_content_scope.dart';
 import 'package:serenity_viewer/src/app/app_shell/builders/app_shell_menu_builder.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_seed_environment.dart';
-import 'package:serenity_viewer/src/app/app_shell/app_shell_runtime.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/workspace/session/recently_closed_window_entry.dart';
 

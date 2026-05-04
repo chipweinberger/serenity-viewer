@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/app_shell/app_shell_derived_state.dart';
-import 'package:serenity_viewer/src/app/app_shell/app_shell_runtime.dart';
+import 'package:serenity_viewer/src/app/app_shell_runtime/app_shell_runtime.dart';
 import 'package:serenity_viewer/src/app/environment/app_environment_controller.dart';
 import 'package:serenity_viewer/src/app/app_shell/controllers/app_shell_media_import_controller.dart';
 import 'package:serenity_viewer/src/app/app_shell/controllers/app_shell_navigation_controller.dart';

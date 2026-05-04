@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/app/app_shell/app_shell_runtime_factory.dart';
+import 'package:serenity_viewer/src/app/app_shell_runtime/app_shell_runtime_factory.dart';
 import 'package:serenity_viewer/src/app/dependencies/shell_dependencies.dart';
 import 'package:serenity_viewer/src/app/environment/app_environment_bookmark_synchronizer.dart';
 import 'package:serenity_viewer/src/app/environment/app_environment_controller.dart';
