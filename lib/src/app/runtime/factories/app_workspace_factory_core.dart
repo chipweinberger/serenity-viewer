@@ -105,7 +105,7 @@ WorkspaceWindowHistoryController createWorkspaceWindowHistoryController({
     environment: () => scope.envState.environment,
     workspaces: scope.inputs.workspaces,
     activeWorkspace: scope.inputs.activeWorkspace,
-    workspaceWindowHistoryState: scope.stateStore.workspaceWindowHistoryState,
+    workspaceWindowHistoryState: scope.workspaceWindowHistoryState,
     workspaceController: workspaceController,
     updateEnvironment: scope.store.updateEnvironment,
     replaceWorkspace: scope.store.replaceWorkspace,

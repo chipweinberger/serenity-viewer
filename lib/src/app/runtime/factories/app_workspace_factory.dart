@@ -56,6 +56,13 @@ import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_
     store: environmentStore,
     media: mediaInspector,
     ui: appUiController,
+    envState: inputs.stateStore.environmentStoreState,
+    uiState: inputs.stateStore.appUiState,
+    interactionState: inputs.stateStore.windowInteractionState,
+    trackingState: inputs.stateStore.workspaceViewTrackingState,
+    viewportState: inputs.stateStore.workspaceViewportState,
+    thumbState: inputs.stateStore.thumbnailRefreshState,
+    workspaceWindowHistoryState: inputs.stateStore.workspaceWindowHistoryState,
   );
 
   final thumbnailController = createThumbnailController(scope: scope);
