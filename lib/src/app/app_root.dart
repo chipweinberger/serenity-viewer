@@ -13,10 +13,25 @@ import 'package:serenity_viewer/src/app/menu/app_menu.dart';
 import 'package:serenity_viewer/src/app/views/app_main_view.dart';
 import 'package:serenity_viewer/src/environment/document/document_persistence_controller.dart';
 import 'package:serenity_viewer/src/environment/document/document_coordinator.dart';
+import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
 import 'package:serenity_viewer/src/environment/store/environment_bookmark_synchronizer.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store.dart';
 import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
 import 'package:serenity_viewer/src/settings/behavior/app_settings_controller.dart';
+import 'package:serenity_viewer/src/media/import/workspace_media_import_controller.dart';
+import 'package:serenity_viewer/src/workspace/actions/workspace_collate_controller.dart';
+import 'package:serenity_viewer/src/workspace/actions/workspace_expose_layout_controller.dart';
+import 'package:serenity_viewer/src/workspace/actions/workspace_video_conversion_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_viewport_session_controller.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
+import 'package:serenity_viewer/src/workspace/history/workspace_window_history_controller.dart';
+import 'package:serenity_viewer/src/workspace/input/workspace_shortcut_controller.dart';
+import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.dart';
+import 'package:serenity_viewer/src/workspace/links/workspace_links_launcher.dart';
+import 'package:serenity_viewer/src/workspace/links/workspace_links_prompts.dart';
+import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
+import 'package:serenity_viewer/src/workspace/actions/workspace_asset_picker_controller.dart';
 
 class AppRoot extends StatefulWidget {
   const AppRoot({super.key});
@@ -35,13 +50,31 @@ class _AppRootState extends State<AppRoot> {
 
   AppStateStore get _state => _stateStore;
   DocumentCoordinator get _documentCoordinator => _runtime.documentCoordinator;
-  AppWorkspaceServices get _workspaceRuntime => _runtime.workspace;
   AppUiController get _appUiController => _runtime.foundation.appUiController;
   SharedVideoControllerPool get _sharedVideoControllerPool => _runtime.foundation.sharedVideoControllerPool;
   PlatformBridge get _platformBridge => _runtime.foundation.platformBridge;
   EnvironmentStore get _environmentStore => _runtime.foundation.environmentStore;
   EnvironmentBookmarkSynchronizer get _environmentBookmarkSynchronizer =>
       _runtime.foundation.environmentBookmarkSynchronizer;
+  WorkspaceController get _workspaceController => _runtime.workspace.workspaceController;
+  EnvironmentController get _environmentController => _runtime.workspace.environmentController;
+  WorkspaceExposeLayoutController get _workspaceExposeLayoutController =>
+      _runtime.workspace.workspaceExposeLayoutController;
+  WorkspaceLinksController get _workspaceLinksController => _runtime.workspace.workspaceLinksController;
+  WorkspaceLinksLauncher get _workspaceLinksLauncher => _runtime.workspace.workspaceLinksLauncher;
+  WorkspaceLinksPrompts get _workspaceLinksPrompts => _runtime.workspace.workspaceLinksPrompts;
+  ThumbnailController get _thumbnailController => _runtime.workspace.thumbnailController;
+  WorkspaceWindowHistoryController get _workspaceWindowHistoryController =>
+      _runtime.workspace.workspaceWindowHistoryController;
+  WorkspaceMediaImportController get _workspaceMediaImportController => _runtime.workspace.workspaceMediaImportController;
+  WorkspaceWindowController get _workspaceWindowController => _runtime.workspace.workspaceWindowController;
+  WorkspaceViewportSessionController get _workspaceViewportSessionController =>
+      _runtime.workspace.workspaceViewportSessionController;
+  WorkspaceCollateController get _workspaceCollateController => _runtime.workspace.workspaceCollateController;
+  WorkspaceVideoConversionController get _workspaceVideoConversionController =>
+      _runtime.workspace.workspaceVideoConversionController;
+  WorkspaceAssetPickerController get _workspaceAssetPickerController => _runtime.workspace.workspaceAssetPickerController;
+  WorkspaceShortcutController get _workspaceShortcutController => _runtime.workspace.workspaceShortcutController;
 
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), behavior: SnackBarBehavior.floating));
@@ -53,18 +86,18 @@ class _AppRootState extends State<AppRoot> {
       appUiController: _appUiController,
       sharedVideoControllerPool: _sharedVideoControllerPool,
       revealAssetInFinder: _platformBridge.revealAssetInFinder,
-      workspaceController: _workspaceRuntime.workspaceController,
-      environmentController: _workspaceRuntime.environmentController,
-      workspaceExposeLayoutController: _workspaceRuntime.workspaceExposeLayoutController,
-      workspaceLinksController: _workspaceRuntime.workspaceLinksController,
-      workspaceLinksLauncher: _workspaceRuntime.workspaceLinksLauncher,
-      workspaceLinksPrompts: _workspaceRuntime.workspaceLinksPrompts,
-      thumbnailController: _workspaceRuntime.thumbnailController,
-      windowHistoryController: _workspaceRuntime.workspaceWindowHistoryController,
-      workspaceMediaImportController: _workspaceRuntime.workspaceMediaImportController,
-      workspaceWindowController: _workspaceRuntime.workspaceWindowController,
-      workspaceViewportSessionController: _workspaceRuntime.workspaceViewportSessionController,
-      workspaceCollateController: _workspaceRuntime.workspaceCollateController,
+      workspaceController: _workspaceController,
+      environmentController: _environmentController,
+      workspaceExposeLayoutController: _workspaceExposeLayoutController,
+      workspaceLinksController: _workspaceLinksController,
+      workspaceLinksLauncher: _workspaceLinksLauncher,
+      workspaceLinksPrompts: _workspaceLinksPrompts,
+      thumbnailController: _thumbnailController,
+      windowHistoryController: _workspaceWindowHistoryController,
+      workspaceMediaImportController: _workspaceMediaImportController,
+      workspaceWindowController: _workspaceWindowController,
+      workspaceViewportSessionController: _workspaceViewportSessionController,
+      workspaceCollateController: _workspaceCollateController,
       uiHandles: _uiHandles,
       mounted: () => mounted,
     );
@@ -120,8 +153,8 @@ class _AppRootState extends State<AppRoot> {
       isRunningInWidgetTest: _isRunningInWidgetTest,
       environmentStore: () => _environmentStore,
       appUiController: () => _appUiController,
-      workspaceWindowController: () => _workspaceRuntime.workspaceWindowController,
-      workspaceViewportSessionController: () => _workspaceRuntime.workspaceViewportSessionController,
+      workspaceWindowController: () => _workspaceWindowController,
+      workspaceViewportSessionController: () => _workspaceViewportSessionController,
       documentPersistence: () => _documentPersistence,
     );
   }
@@ -137,15 +170,15 @@ class _AppRootState extends State<AppRoot> {
       appUiController: _appUiController,
       revealAssetInFinder: _platformBridge.revealAssetInFinder,
       documentCoordinator: _documentCoordinator,
-      workspaceWindowController: _workspaceRuntime.workspaceWindowController,
-      workspaceController: _workspaceRuntime.workspaceController,
-      environmentController: _workspaceRuntime.environmentController,
-      workspaceVideoConversionController: _workspaceRuntime.workspaceVideoConversionController,
-      workspaceWindowHistoryController: _workspaceRuntime.workspaceWindowHistoryController,
-      workspaceCollateController: _workspaceRuntime.workspaceCollateController,
+      workspaceWindowController: _workspaceWindowController,
+      workspaceController: _workspaceController,
+      environmentController: _environmentController,
+      workspaceVideoConversionController: _workspaceVideoConversionController,
+      workspaceWindowHistoryController: _workspaceWindowHistoryController,
+      workspaceCollateController: _workspaceCollateController,
       feedback: _feedback,
       settings: _settings,
-      openAssets: _workspaceRuntime.workspaceAssetPickerController.pickAndImportAssets,
+      openAssets: _workspaceAssetPickerController.pickAndImportAssets,
     );
   }
 
@@ -165,7 +198,7 @@ class _AppRootState extends State<AppRoot> {
           child: Focus(
             focusNode: _uiHandles.focusNode,
             autofocus: true,
-            onKeyEvent: (_, event) => _workspaceRuntime.workspaceShortcutController.onKeyEvent(event),
+            onKeyEvent: (_, event) => _workspaceShortcutController.onKeyEvent(event),
             child: Scaffold(body: SafeArea(top: false, child: _buildContent(context))),
           ),
         );
