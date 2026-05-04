@@ -15,17 +15,16 @@ class AppMainViewBindings {
 
 AppMainViewModel _buildAppMainViewModel({
   required AppStateStore state,
-  required AppDerivedState derivedState,
   required int selectedExposeWindowCount,
 }) {
   return AppMainViewModel(
     uiState: state.appUiState,
     environment: state.environmentStoreState.environment!,
-    windowTitle: derivedState.windowTitle,
-    workspaces: derivedState.workspaces,
-    openWorkspaces: derivedState.openWorkspaces,
-    activeWorkspace: derivedState.activeWorkspace,
-    activeWorkspaceOrNull: derivedState.activeWorkspaceOrNull,
+    windowTitle: deriveWindowTitle(state),
+    workspaces: deriveWorkspaces(state),
+    openWorkspaces: deriveOpenWorkspaces(state),
+    activeWorkspace: deriveActiveWorkspace(state),
+    activeWorkspaceOrNull: deriveActiveWorkspaceOrNull(state),
     selectedExposeWindowCount: selectedExposeWindowCount,
     windowInteractionState: state.windowInteractionState,
     workspaceViewportState: state.workspaceViewportState,
@@ -107,7 +106,6 @@ AppMainViewActions _buildAppMainViewActions({
 
 AppMainViewBindings buildAppMainViewBindings({
   required AppStateStore state,
-  required AppDerivedState derivedState,
   required AppFoundation foundation,
   required AppWorkspaceServices workspace,
   required AppUiHandles uiHandles,
@@ -116,7 +114,6 @@ AppMainViewBindings buildAppMainViewBindings({
   return AppMainViewBindings(
     model: _buildAppMainViewModel(
       state: state,
-      derivedState: derivedState,
       selectedExposeWindowCount: workspace.workspaceController.expose.count(),
     ),
     services: _buildAppMainViewServices(foundation: foundation, workspace: workspace, uiHandles: uiHandles),

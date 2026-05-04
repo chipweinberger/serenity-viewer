@@ -89,13 +89,13 @@ class AppRuntimeWorkspaceInputs {
 }
 
 AppRuntimeAppInputs _buildAppRuntimeAppInputs({
-  required AppDerivedState Function() derivedState,
+  required AppStateStore stateStore,
   required BuildContext Function() context,
   required bool Function() mounted,
   required ValueChanged<String> showMessage,
 }) {
   return AppRuntimeAppInputs(
-    windowTitle: () => derivedState().windowTitle,
+    windowTitle: () => deriveWindowTitle(stateStore),
     context: context,
     mounted: mounted,
     showMessage: showMessage,
@@ -116,16 +116,16 @@ AppRuntimeEnvironmentInputs _buildAppRuntimeEnvironmentInputs({
 }
 
 AppRuntimeWorkspaceInputs _buildAppRuntimeWorkspaceInputs({
-  required AppDerivedState Function() derivedState,
+  required AppStateStore stateStore,
   required AppFoundation Function() foundation,
   required AppWorkspaceServices Function() workspace,
 }) {
   return AppRuntimeWorkspaceInputs(
     newId: newSerenityId,
     colorFromDigest: assetColorValueFromDigest,
-    activeWorkspace: () => derivedState().activeWorkspaceOrNull,
-    workspaces: () => derivedState().workspaces,
-    openWorkspaces: () => derivedState().openWorkspaces,
+    activeWorkspace: () => deriveActiveWorkspaceOrNull(stateStore),
+    workspaces: () => deriveWorkspaces(stateStore),
+    openWorkspaces: () => deriveOpenWorkspaces(stateStore),
     focusedWindowOrNull: () => workspace().workspaceWindowController.focusedWindowOrNull(),
     setWorkspaceViewport:
         ({required String workspaceId, Offset? center, double? zoom, bool queueThumbnail = false}) =>
@@ -166,7 +166,6 @@ AppRuntimeInputs buildAppRuntimeInputs({
   required bool Function() mounted,
   required ValueChanged<String> showMessage,
   required bool isRunningInWidgetTest,
-  required AppDerivedState Function() derivedState,
   required AppFoundation Function() foundation,
   required AppWorkspaceServices Function() workspace,
   required DocumentPersistenceController Function() documentPersistence,
@@ -176,7 +175,7 @@ AppRuntimeInputs buildAppRuntimeInputs({
     stateStore: stateStore,
     uiHandles: uiHandles,
     app: _buildAppRuntimeAppInputs(
-      derivedState: derivedState,
+      stateStore: stateStore,
       context: context,
       mounted: mounted,
       showMessage: showMessage,
@@ -186,7 +185,7 @@ AppRuntimeInputs buildAppRuntimeInputs({
       documentPersistence: documentPersistence,
     ),
     workspace: _buildAppRuntimeWorkspaceInputs(
-      derivedState: derivedState,
+      stateStore: stateStore,
       foundation: foundation,
       workspace: workspace,
     ),

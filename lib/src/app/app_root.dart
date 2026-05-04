@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/runtime/app_runtime.dart';
-import 'package:serenity_viewer/src/app/state/app_derived_state.dart';
 import 'package:serenity_viewer/src/app/state/app_state_store.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
 import 'package:serenity_viewer/src/app/controllers/app_feedback_controller.dart';
@@ -30,7 +29,6 @@ class _AppRootState extends State<AppRoot> {
   late final DocumentPersistenceController _documentPersistence;
 
   AppStateStore get _state => _runtime.stateStore;
-  AppDerivedState get _derivedState => AppDerivedState(_state);
   AppFoundation get _foundation => _runtime.foundation;
   DocumentCoordinator get _documentCoordinator => _runtime.documentCoordinator;
   AppWorkspaceServices get _workspaceRuntime => _runtime.workspace;
@@ -42,7 +40,6 @@ class _AppRootState extends State<AppRoot> {
   AppMainViewBindings _buildAppMainViewBindings() {
     return buildAppMainViewBindings(
       state: _state,
-      derivedState: _derivedState,
       foundation: _foundation,
       workspace: _workspaceRuntime,
       uiHandles: _uiHandles,
@@ -95,7 +92,6 @@ class _AppRootState extends State<AppRoot> {
       mounted: () => mounted,
       showMessage: _showMessage,
       isRunningInWidgetTest: _isRunningInWidgetTest,
-      derivedState: () => _derivedState,
       foundation: () => _foundation,
       workspace: () => _workspaceRuntime,
       documentPersistence: () => _documentPersistence,
