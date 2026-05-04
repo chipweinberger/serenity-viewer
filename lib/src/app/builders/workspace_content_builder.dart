@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/builders/app_screen_host_scope.dart';
 import 'package:serenity_viewer/src/workspace/links/presentation/workspace_links_dialog.dart';
-import 'package:serenity_viewer/src/workspace/screen/workspace_hud_view_model.dart';
 import 'package:serenity_viewer/src/workspace/screen/workspace_hud.dart';
 import 'package:serenity_viewer/src/workspace/screen/workspace_screen_host.dart';
 import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';

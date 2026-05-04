@@ -22,10 +22,28 @@ import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
 import 'package:serenity_viewer/src/settings/behavior/app_ui_state.dart';
 import 'package:serenity_viewer/src/workspace/layout/workspace_expose_layout.dart';
-import 'package:serenity_viewer/src/workspace/screen/workspace_canvas_view_model.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_projection.dart';
 
 typedef SharedVideoLookup = SharedVideoState? Function(Window window, {required bool isLoaded});
+
+@immutable
+class _WorkspaceCanvasViewModel {
+  const _WorkspaceCanvasViewModel({
+    required this.workspace,
+    required this.isExposeMode,
+    required this.windows,
+    required this.focusedWindowId,
+    required this.loadPlan,
+    required this.isDropTargetActive,
+  });
+
+  final Workspace workspace;
+  final bool isExposeMode;
+  final List<Window> windows;
+  final String? focusedWindowId;
+  final MediaLoadPlan loadPlan;
+  final bool isDropTargetActive;
+}
 
 @immutable
 class WorkspaceScreenHostActions {
@@ -170,10 +188,10 @@ class WorkspaceScreenHost extends StatelessWidget {
     return windows.last.asset.id;
   }
 
-  WorkspaceCanvasViewModel _buildWorkspaceCanvasViewModel(Workspace workspace) {
+  _WorkspaceCanvasViewModel _buildWorkspaceCanvasViewModel(Workspace workspace) {
     final isExposeMode = _isExposeModeForWorkspace(workspace);
     final windows = _sortedWorkspaceWindows(workspace, isExposeMode: isExposeMode);
-    return WorkspaceCanvasViewModel(
+    return _WorkspaceCanvasViewModel(
       workspace: workspace,
       isExposeMode: isExposeMode,
       windows: windows,
@@ -220,7 +238,7 @@ class WorkspaceScreenHost extends StatelessWidget {
     );
   }
 
-  Widget _buildFreeformWindow(WorkspaceCanvasViewModel canvasViewModel, Window window, Size viewportSize) {
+  Widget _buildFreeformWindow(_WorkspaceCanvasViewModel canvasViewModel, Window window, Size viewportSize) {
     final workspace = canvasViewModel.workspace;
     final screenOffset = workspaceScreenOffsetForWindow(workspace, window, viewportSize);
     final isLoaded = _isWindowLoaded(canvasViewModel.loadPlan, window);
@@ -282,7 +300,7 @@ class WorkspaceScreenHost extends StatelessWidget {
     );
   }
 
-  Widget _buildFreeformWorkspaceViewport(WorkspaceCanvasViewModel canvasViewModel) {
+  Widget _buildFreeformWorkspaceViewport(_WorkspaceCanvasViewModel canvasViewModel) {
     return Positioned.fill(
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -379,7 +397,7 @@ class WorkspaceScreenHost extends StatelessWidget {
     );
   }
 
-  Widget _buildWorkspaceCanvasLayers(BuildContext context, WorkspaceCanvasViewModel canvasViewModel) {
+  Widget _buildWorkspaceCanvasLayers(BuildContext context, _WorkspaceCanvasViewModel canvasViewModel) {
     return Stack(
       children: [
         _buildWorkspaceCanvasBackground(),
