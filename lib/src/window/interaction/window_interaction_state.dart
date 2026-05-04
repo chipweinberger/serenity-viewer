@@ -1,6 +1,19 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+
+@immutable
+class WindowGestureDragAnchor {
+  const WindowGestureDragAnchor({
+    required this.windowId,
+    required this.globalStartPosition,
+    required this.windowStartPosition,
+  });
+
+  final String windowId;
+  final Offset globalStartPosition;
+  final Offset windowStartPosition;
+}
 
 class WindowInteractionState extends ChangeNotifier {
   final Map<String, bool> _pausedVideoWindows = {};
@@ -10,6 +23,7 @@ class WindowInteractionState extends ChangeNotifier {
   String? _activeGestureWindowId;
   String? _pinnedHoverWindowId;
   String? _flashedWindowId;
+  WindowGestureDragAnchor? _activeGestureDragAnchor;
   int _windowFlashNonce = 0;
   bool _isCommandPressed = false;
   bool _isOptionPressed = false;
@@ -23,6 +37,7 @@ class WindowInteractionState extends ChangeNotifier {
   String? get activeGestureWindowId => _activeGestureWindowId;
   String? get pinnedHoverWindowId => _pinnedHoverWindowId;
   String? get flashedWindowId => _flashedWindowId;
+  WindowGestureDragAnchor? get activeGestureDragAnchor => _activeGestureDragAnchor;
   int get windowFlashNonce => _windowFlashNonce;
   bool get isCommandPressed => _isCommandPressed;
   bool get isOptionPressed => _isOptionPressed;
@@ -55,8 +70,27 @@ class WindowInteractionState extends ChangeNotifier {
       return false;
     }
     _activeGestureWindowId = windowId;
+    if (_activeGestureDragAnchor?.windowId != windowId) {
+      _activeGestureDragAnchor = null;
+    }
     _notifyIfNeeded(true);
     return true;
+  }
+
+  void setActiveGestureDragAnchor({
+    required String windowId,
+    required Offset globalStartPosition,
+    required Offset windowStartPosition,
+  }) {
+    _activeGestureDragAnchor = WindowGestureDragAnchor(
+      windowId: windowId,
+      globalStartPosition: globalStartPosition,
+      windowStartPosition: windowStartPosition,
+    );
+  }
+
+  void clearActiveGestureDragAnchor() {
+    _activeGestureDragAnchor = null;
   }
 
   bool setPinnedHoverWindow(String? windowId) {

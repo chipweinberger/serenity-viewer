@@ -48,7 +48,7 @@ class WorkspaceWindow extends StatefulWidget {
   final VoidCallback onToggleSelected;
   final void Function(Offset delta, Offset globalPosition) onPanUpdate;
   final ValueChanged<Offset> onPanEnd;
-  final void Function(double scaleDelta, Offset localFocalPoint) onTrackpadWindowScale;
+  final void Function(double scaleDelta, Offset globalPointerPosition) onTrackpadWindowScale;
   final void Function(WindowResizeHandle handle, Offset delta) onResizeUpdate;
   final ValueChanged<WindowZoomUpdate> onZoomChanged;
   final ValueChanged<Size> onIntrinsicSizeResolved;

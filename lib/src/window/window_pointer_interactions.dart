@@ -200,7 +200,7 @@ extension on _WindowState {
   }
 
   void _handlePanZoomStart(PointerPanZoomStartEvent event) {
-    _isTrackpadWindowGestureActive = _isOptionGestureTargetActive;
+    _isTrackpadWindowGestureActive = false;
     _lastTrackpadScale = 1.0;
   }
 
@@ -210,7 +210,7 @@ extension on _WindowState {
     }
     final scaleDelta = event.scale / _lastTrackpadScale;
     _lastTrackpadScale = event.scale;
-    widget.onTrackpadWindowScale(scaleDelta, event.localPosition);
+    widget.onTrackpadWindowScale(scaleDelta, event.position);
   }
 
   void _handlePanZoomEnd(PointerPanZoomEndEvent event) {

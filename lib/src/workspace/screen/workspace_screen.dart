@@ -255,8 +255,8 @@ class WorkspaceScreen extends StatelessWidget {
               _updateWindowTabDropTarget(workspace.id, globalPosition);
             },
             onPanEnd: (globalPosition) => _handleWindowDragEnd(window, workspace.id, globalPosition),
-            onTrackpadWindowScale: (scaleDelta, localFocalPoint) => workspaceController.window
-                .transformWindowFromTrackpad(window.asset.id, scaleDelta, localFocalPoint / workspace.viewportZoom),
+            onTrackpadWindowScale: (scaleDelta, globalPointerPosition) => workspaceController.window
+                .transformWindowFromTrackpad(window.asset.id, scaleDelta, globalPointerPosition),
             onResizeUpdate: (handle, delta) =>
                 workspaceController.window.resizeWindow(window.asset.id, handle, delta / workspace.viewportZoom),
             onZoomChanged: (update) => workspaceController.window.setWindowZoom(window.asset.id, update),

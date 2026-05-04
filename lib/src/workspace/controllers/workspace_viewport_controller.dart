@@ -25,6 +25,7 @@ class WorkspaceViewportController {
     required this.replaceWorkspace,
     required this.activeWorkspaceOrNull,
     required this.refreshActiveWorkspaceThumbnail,
+    required this.transformWindowFromTrackpad,
   }) {
     gesture = WorkspaceViewportGestureController(
       appUiState: appUiState,
@@ -48,14 +49,25 @@ class WorkspaceViewportController {
   final SerenityWorkspaceReplace replaceWorkspace;
   final Workspace? Function() activeWorkspaceOrNull;
   final Future<void> Function() refreshActiveWorkspaceThumbnail;
+  final void Function(String windowId, double scaleDelta, Offset globalPointerPosition) transformWindowFromTrackpad;
   late final WorkspaceViewportGestureController gesture;
   late final WorkspaceViewportFitController fit;
+  bool _isWindowTrackpadGestureActive = false;
+  double _lastWindowTrackpadScale = 1.0;
 
   void fitWorkspaceViewportToContent() {
     fit.toContent(activeWorkspaceOrNull());
   }
 
   void handleWorkspacePanZoomStart(PointerPanZoomStartEvent event, Workspace workspace) {
+    final activeGestureWindowId = windowInteractionState.activeGestureWindowId;
+    if (isOptionPressed() && activeGestureWindowId != null) {
+      _isWindowTrackpadGestureActive = true;
+      _lastWindowTrackpadScale = 1.0;
+      workspaceViewportState.setGestureInactive();
+      return;
+    }
+
     gesture.handlePanZoomStart(
       event,
       workspace,
@@ -65,10 +77,30 @@ class WorkspaceViewportController {
   }
 
   void handleWorkspacePanZoomUpdate(PointerPanZoomUpdateEvent event, Workspace workspace, Size viewportSize) {
+    if (_isWindowTrackpadGestureActive) {
+      final activeGestureWindowId = windowInteractionState.activeGestureWindowId;
+      if (activeGestureWindowId == null) {
+        _isWindowTrackpadGestureActive = false;
+        _lastWindowTrackpadScale = 1.0;
+        return;
+      }
+
+      final scaleDelta = event.scale / _lastWindowTrackpadScale;
+      _lastWindowTrackpadScale = event.scale;
+      transformWindowFromTrackpad(activeGestureWindowId, scaleDelta, event.position);
+      return;
+    }
+
     gesture.handlePanZoomUpdate(event, workspace, viewportSize);
   }
 
   void handleWorkspacePanZoomEnd() {
+    if (_isWindowTrackpadGestureActive) {
+      _isWindowTrackpadGestureActive = false;
+      _lastWindowTrackpadScale = 1.0;
+      return;
+    }
+
     unawaited(gesture.handlePanZoomEnd());
   }
 

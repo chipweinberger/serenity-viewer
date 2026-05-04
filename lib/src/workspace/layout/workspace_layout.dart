@@ -69,6 +69,10 @@ class WorkspaceLayout {
     return _moveWindow(workspace, windowId, delta);
   }
 
+  static Workspace moveWindowTo(Workspace workspace, String windowId, Offset position) {
+    return _moveWindowTo(workspace, windowId, position);
+  }
+
   static Window scaleWindowAroundCenter(Window window, double scaleDelta, {required bool mirrorContentZoom}) {
     return _scaleWindowAroundCenter(window, scaleDelta, mirrorContentZoom: mirrorContentZoom);
   }

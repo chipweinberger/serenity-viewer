@@ -451,6 +451,11 @@ WorkspaceParts assembleWorkspace({required WorkspaceDependencies dependencies}) 
     windowInteractionState: dependencies.rootObjects.windowInteractionState,
     replaceWorkspace: dependencies.services.environmentStore.replaceWorkspace,
   );
+  final window = createWorkspaceWindowController(
+    dependencies: dependencies,
+    gestureController: gesture,
+    windowsController: windows,
+  );
   final viewport = WorkspaceViewportController(
     environmentStoreState: dependencies.services.environmentStore.environmentStoreState,
     appUiState: dependencies.rootObjects.appUiState,
@@ -460,6 +465,7 @@ WorkspaceParts assembleWorkspace({required WorkspaceDependencies dependencies}) 
     replaceWorkspace: dependencies.services.environmentStore.replaceWorkspace,
     activeWorkspaceOrNull: dependencies.queries.activeWorkspace,
     refreshActiveWorkspaceThumbnail: thumbnails.refreshActiveWorkspaceIfNeeded,
+    transformWindowFromTrackpad: window.transformWindowFromTrackpad,
   );
   final playback = WorkspacePlaybackController(
     windowInteractionState: dependencies.rootObjects.windowInteractionState,
@@ -470,12 +476,6 @@ WorkspaceParts assembleWorkspace({required WorkspaceDependencies dependencies}) 
     activeWorkspaceOrNull: dependencies.queries.activeWorkspace,
   );
   final workspaceEnvironment = WorkspaceEnvironmentController();
-
-  final window = createWorkspaceWindowController(
-    dependencies: dependencies,
-    gestureController: gesture,
-    windowsController: windows,
-  );
 
   final videoFrameExporter = VideoFrameExporter(mediaInspector: dependencies.services.mediaInspector);
   final videoConversionPrompts = WorkspaceVideoConversionPrompts(context: dependencies.runtime.context);

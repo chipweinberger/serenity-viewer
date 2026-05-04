@@ -80,8 +80,8 @@ class WorkspaceWindowController {
     windowsController.editing.resize(activeWorkspace(), windowId, handle, delta);
   }
 
-  void transformWindowFromTrackpad(String windowId, double scaleDelta, Offset localFocalPoint) {
-    windowsController.editing.transformFromTrackpad(activeWorkspace(), windowId, scaleDelta);
+  void transformWindowFromTrackpad(String windowId, double scaleDelta, Offset globalPointerPosition) {
+    windowsController.editing.transformFromTrackpad(activeWorkspace(), windowId, scaleDelta, globalPointerPosition);
   }
 
   void fitWindowToContent(String windowId) {

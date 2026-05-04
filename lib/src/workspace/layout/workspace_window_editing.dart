@@ -8,6 +8,14 @@ Workspace _moveWindow(Workspace workspace, String windowId, Offset delta) {
   );
 }
 
+Workspace _moveWindowTo(Workspace workspace, String windowId, Offset position) {
+  return WorkspaceWindowModelHelpers.updateWindowById(
+    workspace,
+    windowId,
+    (window) => window.copyWith(position: _clampWindowPosition(position, window.size)),
+  );
+}
+
 Workspace _resizeWindow(Workspace workspace, String windowId, WindowResizeHandle handle, Offset delta) {
   return WorkspaceWindowModelHelpers.updateWindowById(
     workspace,

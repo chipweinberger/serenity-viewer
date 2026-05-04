@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/window/frame/window_resize_helpers.dart';
 import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
 import 'package:serenity_viewer/src/window/interaction/window_zoom_update.dart';
@@ -22,18 +23,45 @@ class WorkspaceWindowEditingController {
   final WindowInteractionState windowInteractionState;
   final SerenityWorkspaceReplace replaceWorkspace;
 
+  Window? _windowById(Workspace workspace, String windowId) {
+    for (final window in workspace.windows) {
+      if (window.asset.id == windowId) {
+        return window;
+      }
+    }
+    return null;
+  }
+
   void move(Workspace workspace, String windowId, Offset delta) {
     replaceWorkspace(WorkspaceLayout.moveWindow(workspace, windowId, delta), queueThumbnail: true);
+  }
+
+  void moveTo(Workspace workspace, String windowId, Offset position) {
+    replaceWorkspace(WorkspaceLayout.moveWindowTo(workspace, windowId, position), queueThumbnail: true);
   }
 
   void resize(Workspace workspace, String windowId, WindowResizeHandle handle, Offset delta) {
     replaceWorkspace(WorkspaceLayout.resizeWindow(workspace, windowId, handle, delta), queueThumbnail: true);
   }
 
-  void transformFromTrackpad(Workspace workspace, String windowId, double scaleDelta) {
-    replaceWorkspace(
-      WorkspaceLayout.transformWindowFromTrackpad(workspace, windowId, scaleDelta),
-      queueThumbnail: true,
+  void transformFromTrackpad(Workspace workspace, String windowId, double scaleDelta, Offset globalPointerPosition) {
+    final nextWorkspace = WorkspaceLayout.transformWindowFromTrackpad(workspace, windowId, scaleDelta);
+    replaceWorkspace(nextWorkspace, queueThumbnail: true);
+
+    if (windowInteractionState.activeGestureWindowId != windowId) {
+      return;
+    }
+
+    final nextWindow = _windowById(nextWorkspace, windowId);
+    if (nextWindow == null) {
+      windowInteractionState.clearActiveGestureDragAnchor();
+      return;
+    }
+
+    windowInteractionState.setActiveGestureDragAnchor(
+      windowId: windowId,
+      globalStartPosition: globalPointerPosition,
+      windowStartPosition: nextWindow.position,
     );
   }
 
@@ -61,7 +89,28 @@ class WorkspaceWindowEditingController {
       return;
     }
 
-    move(workspace, targetWindowId, event.delta / workspace.viewportZoom);
+    final targetWindow = _windowById(workspace, targetWindowId);
+    if (targetWindow == null) {
+      windowInteractionState.clearActiveGestureDragAnchor();
+      return;
+    }
+
+    final dragAnchor = windowInteractionState.activeGestureDragAnchor;
+    if (dragAnchor == null || dragAnchor.windowId != targetWindowId) {
+      windowInteractionState.setActiveGestureDragAnchor(
+        windowId: targetWindowId,
+        globalStartPosition: event.position,
+        windowStartPosition: targetWindow.position,
+      );
+    }
+
+    final activeAnchor = windowInteractionState.activeGestureDragAnchor;
+    if (activeAnchor == null) {
+      return;
+    }
+
+    final totalWorkspaceDelta = (event.position - activeAnchor.globalStartPosition) / workspace.viewportZoom;
+    moveTo(workspace, targetWindowId, activeAnchor.windowStartPosition + totalWorkspaceDelta);
   }
 
   void setZoom(Workspace workspace, String windowId, WindowZoomUpdate update) {
