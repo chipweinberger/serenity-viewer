@@ -8,7 +8,6 @@ import 'package:provider/provider.dart';
 import 'package:serenity_viewer/src/app/controllers/app_feedback_controller.dart';
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
-import 'package:serenity_viewer/src/environment/asset.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
 import 'package:serenity_viewer/src/environment/document/document_coordinator.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
@@ -36,86 +35,6 @@ class _MenuState {
   final Window? focusedWindow;
   final bool focusedWindowIsSelected;
   final List<WorkspaceWindowHistoryEntry> recentlyClosedWindows;
-}
-
-class _AppActions {
-  const _AppActions({required this.showAboutSerenity, required this.openSettings});
-
-  final VoidCallback showAboutSerenity;
-  final Future<void> Function() openSettings;
-}
-
-class _FileActions {
-  const _FileActions({
-    required this.createEnvironment,
-    required this.openEnvironment,
-    required this.openAssets,
-    required this.saveEnvironment,
-    required this.saveEnvironmentAs,
-  });
-
-  final Future<void> Function() createEnvironment;
-  final Future<void> Function() openEnvironment;
-  final Future<void> Function() openAssets;
-  final Future<void> Function() saveEnvironment;
-  final Future<void> Function() saveEnvironmentAs;
-}
-
-class _AssetActions {
-  const _AssetActions({required this.revealAssetInFinder, required this.convertVideoWindowToJpeg});
-
-  final Future<void> Function(Asset asset) revealAssetInFinder;
-  final Future<void> Function(String windowId) convertVideoWindowToJpeg;
-}
-
-class _WindowActions {
-  const _WindowActions({
-    required this.toggleWindowSelected,
-    required this.fitWindowToContent,
-    required this.restorePreviousWindowZOrder,
-    required this.closeWindow,
-  });
-
-  final ValueChanged<String> toggleWindowSelected;
-  final ValueChanged<String> fitWindowToContent;
-  final ValueChanged<String> restorePreviousWindowZOrder;
-  final void Function(String workspaceId, String windowId) closeWindow;
-}
-
-class _WorkspaceActions {
-  const _WorkspaceActions({
-    required this.toggleExpose,
-    required this.toggleWorkspaceOverview,
-    required this.createWorkspace,
-    required this.switchToPreviousWorkspace,
-    required this.switchToNextWorkspace,
-    required this.fitWorkspaceViewportToContent,
-    required this.confirmCollateWorkspaceWindows,
-    required this.pauseAllVideos,
-    required this.showNoWorkspaceToRenameMessage,
-    required this.renameWorkspace,
-    required this.showNoWorkspaceToDeleteMessage,
-    required this.confirmDeleteWorkspace,
-  });
-
-  final VoidCallback toggleExpose;
-  final VoidCallback toggleWorkspaceOverview;
-  final VoidCallback createWorkspace;
-  final VoidCallback switchToPreviousWorkspace;
-  final VoidCallback switchToNextWorkspace;
-  final VoidCallback fitWorkspaceViewportToContent;
-  final Future<void> Function() confirmCollateWorkspaceWindows;
-  final VoidCallback pauseAllVideos;
-  final VoidCallback showNoWorkspaceToRenameMessage;
-  final Future<void> Function(String workspaceId) renameWorkspace;
-  final VoidCallback showNoWorkspaceToDeleteMessage;
-  final Future<void> Function(String workspaceId) confirmDeleteWorkspace;
-}
-
-class _HistoryActions {
-  const _HistoryActions({required this.restoreRecentlyClosedWindow});
-
-  final void Function([WorkspaceWindowHistoryEntry? entry]) restoreRecentlyClosedWindow;
 }
 
 class AppMenu extends StatelessWidget {
@@ -183,97 +102,38 @@ class AppMenu extends StatelessWidget {
     );
   }
 
-  _AppActions _buildAppActions({required AppFeedbackController feedback, required AppSettingsController settings}) {
-    return _AppActions(showAboutSerenity: feedback.showAboutSerenity, openSettings: settings.openSettings);
-  }
-
-  _FileActions _buildFileActions({
-    required DocumentCoordinator documentCoordinator,
-    required WorkspaceAssetPickerController workspaceAssetPickerController,
-  }) {
-    return _FileActions(
-      createEnvironment: documentCoordinator.createDocument,
-      openEnvironment: documentCoordinator.openDocument,
-      openAssets: workspaceAssetPickerController.pickAndImportAssets,
-      saveEnvironment: documentCoordinator.saveDocument,
-      saveEnvironmentAs: documentCoordinator.saveDocumentAs,
-    );
-  }
-
-  _AssetActions _buildAssetActions({
-    required PlatformBridge platformBridge,
-    required WorkspaceVideoConversionController workspaceVideoConversionController,
-  }) {
-    return _AssetActions(
-      revealAssetInFinder: platformBridge.revealAssetInFinder,
-      convertVideoWindowToJpeg: workspaceVideoConversionController.convertVideoWindowToJpeg,
-    );
-  }
-
-  _WindowActions _buildWindowActions({
-    required EnvironmentController environmentController,
-    required WorkspaceWindowController workspaceWindowController,
+  List<PlatformMenuItem> _buildHistoryMenuItems({
+    required _MenuState state,
     required WorkspaceWindowHistoryController workspaceWindowHistoryController,
   }) {
-    return _WindowActions(
-      toggleWindowSelected: environmentController.navigation.toggleSelectedWindow,
-      fitWindowToContent: workspaceWindowController.fitWindowToContent,
-      restorePreviousWindowZOrder: workspaceWindowController.restorePreviousWindowZOrder,
-      closeWindow: workspaceWindowHistoryController.removeWindow,
-    );
-  }
-
-  _WorkspaceActions _buildWorkspaceActions({
-    required AppUiController appUiController,
-    required EnvironmentController environmentController,
-    required WorkspaceWindowController workspaceWindowController,
-    required WorkspaceCollateController workspaceCollateController,
-    required AppFeedbackController feedback,
-  }) {
-    return _WorkspaceActions(
-      toggleExpose: appUiController.toggleExpose,
-      toggleWorkspaceOverview: environmentController.navigation.toggleOverview,
-      createWorkspace: environmentController.management.create,
-      switchToPreviousWorkspace: () => environmentController.navigation.switchWorkspace(-1),
-      switchToNextWorkspace: () => environmentController.navigation.switchWorkspace(1),
-      fitWorkspaceViewportToContent: workspaceWindowController.fitWorkspaceViewportToContent,
-      confirmCollateWorkspaceWindows: workspaceCollateController.confirmCollateWorkspaceWindows,
-      pauseAllVideos: workspaceWindowController.pauseAllVideos,
-      showNoWorkspaceToRenameMessage: () => feedback.showMessage('There is no workspace to rename.'),
-      renameWorkspace: environmentController.management.renameWorkspace,
-      showNoWorkspaceToDeleteMessage: () => feedback.showMessage('There is no workspace to delete.'),
-      confirmDeleteWorkspace: environmentController.management.confirmDeleteWorkspace,
-    );
-  }
-
-  _HistoryActions _buildHistoryActions({required WorkspaceWindowHistoryController workspaceWindowHistoryController}) {
-    return _HistoryActions(restoreRecentlyClosedWindow: workspaceWindowHistoryController.restoreRecentlyClosedWindow);
-  }
-
-  List<PlatformMenuItem> _buildHistoryMenuItems({required _MenuState state, required _HistoryActions window}) {
     final recentlyClosedItems = state.recentlyClosedWindows.take(8).map((entry) {
       return PlatformMenuItem(
         label: 'Restore ${entry.window.asset.filename}',
-        onSelected: () => window.restoreRecentlyClosedWindow(entry),
+        onSelected: () => workspaceWindowHistoryController.restoreRecentlyClosedWindow(entry),
       );
     }).toList();
 
     return [
       PlatformMenuItem(
         label: 'Restore Last Closed',
-        onSelected: state.recentlyClosedWindows.isEmpty ? null : window.restoreRecentlyClosedWindow,
+        onSelected: state.recentlyClosedWindows.isEmpty
+            ? null
+            : workspaceWindowHistoryController.restoreRecentlyClosedWindow,
         shortcut: const SingleActivator(LogicalKeyboardKey.keyT, meta: true, shift: true),
       ),
       ...recentlyClosedItems,
     ];
   }
 
-  List<PlatformMenuItem> _buildAppMenuItems({required _AppActions app}) {
+  List<PlatformMenuItem> _buildAppMenuItems({
+    required AppFeedbackController feedback,
+    required AppSettingsController settings,
+  }) {
     return [
-      PlatformMenuItem(label: 'About Serenity', onSelected: app.showAboutSerenity),
+      PlatformMenuItem(label: 'About Serenity', onSelected: feedback.showAboutSerenity),
       PlatformMenuItem(
         label: 'Settings',
-        onSelected: () => unawaited(app.openSettings()),
+        onSelected: () => unawaited(settings.openSettings()),
         shortcut: const SingleActivator(LogicalKeyboardKey.comma, meta: true),
       ),
       PlatformMenuItem(
@@ -284,37 +144,44 @@ class AppMenu extends StatelessWidget {
     ];
   }
 
-  List<PlatformMenuItem> _buildFileMenuItems({required _FileActions file}) {
+  List<PlatformMenuItem> _buildFileMenuItems({
+    required DocumentCoordinator documentCoordinator,
+    required WorkspaceAssetPickerController workspaceAssetPickerController,
+  }) {
     return [
       PlatformMenuItem(
         label: 'New Environment…',
-        onSelected: () => unawaited(file.createEnvironment()),
+        onSelected: () => unawaited(documentCoordinator.createDocument()),
         shortcut: const SingleActivator(LogicalKeyboardKey.keyN, meta: true, shift: true),
       ),
       PlatformMenuItem(
         label: 'Open Environment…',
-        onSelected: () => unawaited(file.openEnvironment()),
+        onSelected: () => unawaited(documentCoordinator.openDocument()),
         shortcut: const SingleActivator(LogicalKeyboardKey.keyO, meta: true, shift: true),
       ),
       PlatformMenuItem(
         label: 'Open Assets…',
-        onSelected: () => unawaited(file.openAssets()),
+        onSelected: () => unawaited(workspaceAssetPickerController.pickAndImportAssets()),
         shortcut: const SingleActivator(LogicalKeyboardKey.keyO, meta: true),
       ),
       PlatformMenuItem(
         label: 'Save',
-        onSelected: () => unawaited(file.saveEnvironment()),
+        onSelected: () => unawaited(documentCoordinator.saveDocument()),
         shortcut: const SingleActivator(LogicalKeyboardKey.keyS, meta: true),
       ),
       PlatformMenuItem(
         label: 'Save As…',
-        onSelected: () => unawaited(file.saveEnvironmentAs()),
+        onSelected: () => unawaited(documentCoordinator.saveDocumentAs()),
         shortcut: const SingleActivator(LogicalKeyboardKey.keyS, meta: true, shift: true),
       ),
     ];
   }
 
-  List<PlatformMenuItem> _buildAssetMenuItems({required _MenuState state, required _AssetActions asset}) {
+  List<PlatformMenuItem> _buildAssetMenuItems({
+    required _MenuState state,
+    required PlatformBridge platformBridge,
+    required WorkspaceVideoConversionController workspaceVideoConversionController,
+  }) {
     final focusedWindow = state.focusedWindow;
     final focusedVideoWindow = focusedWindow?.asset.type == AssetType.video ? focusedWindow : null;
     final focusedWindowLabel = focusedWindow == null
@@ -327,14 +194,18 @@ class AppMenu extends StatelessWidget {
         members: [
           PlatformMenuItem(
             label: 'Reveal in Finder',
-            onSelected: focusedWindow == null ? null : () => unawaited(asset.revealAssetInFinder(focusedWindow.asset)),
+            onSelected: focusedWindow == null
+                ? null
+                : () => unawaited(platformBridge.revealAssetInFinder(focusedWindow.asset)),
             shortcut: const SingleActivator(LogicalKeyboardKey.keyR, meta: true, shift: true),
           ),
           PlatformMenuItem(
             label: 'Convert to JPEG',
             onSelected: focusedVideoWindow == null
                 ? null
-                : () => unawaited(asset.convertVideoWindowToJpeg(focusedVideoWindow.asset.id)),
+                : () => unawaited(
+                    workspaceVideoConversionController.convertVideoWindowToJpeg(focusedVideoWindow.asset.id),
+                  ),
             shortcut: const SingleActivator(LogicalKeyboardKey.keyJ, meta: true, shift: true),
           ),
         ],
@@ -342,7 +213,12 @@ class AppMenu extends StatelessWidget {
     ];
   }
 
-  List<PlatformMenuItem> _buildWindowMenuItems({required _MenuState state, required _WindowActions window}) {
+  List<PlatformMenuItem> _buildWindowMenuItems({
+    required _MenuState state,
+    required EnvironmentController environmentController,
+    required WorkspaceWindowController workspaceWindowController,
+    required WorkspaceWindowHistoryController workspaceWindowHistoryController,
+  }) {
     final focusedWindow = state.focusedWindow;
 
     return [
@@ -350,24 +226,30 @@ class AppMenu extends StatelessWidget {
         members: [
           PlatformMenuItem(
             label: state.focusedWindowIsSelected ? 'Deselect' : 'Select',
-            onSelected: focusedWindow == null ? null : () => window.toggleWindowSelected(focusedWindow.asset.id),
+            onSelected: focusedWindow == null
+                ? null
+                : () => environmentController.navigation.toggleSelectedWindow(focusedWindow.asset.id),
             shortcut: const SingleActivator(LogicalKeyboardKey.keyE, meta: true),
           ),
           PlatformMenuItem(
             label: 'Fit to Content',
-            onSelected: focusedWindow == null ? null : () => window.fitWindowToContent(focusedWindow.asset.id),
+            onSelected: focusedWindow == null
+                ? null
+                : () => workspaceWindowController.fitWindowToContent(focusedWindow.asset.id),
             shortcut: const SingleActivator(LogicalKeyboardKey.digit2, meta: true),
           ),
           PlatformMenuItem(
             label: 'Send Back',
-            onSelected: focusedWindow == null ? null : () => window.restorePreviousWindowZOrder(focusedWindow.asset.id),
+            onSelected: focusedWindow == null
+                ? null
+                : () => workspaceWindowController.restorePreviousWindowZOrder(focusedWindow.asset.id),
             shortcut: const SingleActivator(LogicalKeyboardKey.keyB, meta: true, shift: true),
           ),
           PlatformMenuItem(
             label: 'Close',
             onSelected: focusedWindow == null || state.activeWorkspaceId == null
                 ? null
-                : () => window.closeWindow(state.activeWorkspaceId!, focusedWindow.asset.id),
+                : () => workspaceWindowHistoryController.removeWindow(state.activeWorkspaceId!, focusedWindow.asset.id),
             shortcut: const SingleActivator(LogicalKeyboardKey.backspace, meta: true),
           ),
         ],
@@ -375,107 +257,148 @@ class AppMenu extends StatelessWidget {
     ];
   }
 
-  List<PlatformMenuItem> _buildViewMenuItems({required _WorkspaceActions workspace}) {
+  List<PlatformMenuItem> _buildViewMenuItems({
+    required AppUiController appUiController,
+    required EnvironmentController environmentController,
+  }) {
     return [
       PlatformMenuItem(
         label: 'Expose',
-        onSelected: workspace.toggleExpose,
+        onSelected: appUiController.toggleExpose,
         shortcut: const SingleActivator(LogicalKeyboardKey.arrowUp),
       ),
       PlatformMenuItem(
         label: 'View All',
-        onSelected: workspace.toggleWorkspaceOverview,
+        onSelected: environmentController.navigation.toggleOverview,
         shortcut: const SingleActivator(LogicalKeyboardKey.arrowDown),
       ),
     ];
   }
 
-  List<PlatformMenuItem> _buildWorkspaceMenuItems({required _MenuState state, required _WorkspaceActions workspace}) {
+  List<PlatformMenuItem> _buildWorkspaceMenuItems({
+    required _MenuState state,
+    required EnvironmentController environmentController,
+    required WorkspaceWindowController workspaceWindowController,
+    required WorkspaceCollateController workspaceCollateController,
+    required AppFeedbackController feedback,
+  }) {
     return [
       PlatformMenuItem(
         label: 'New',
-        onSelected: workspace.createWorkspace,
+        onSelected: environmentController.management.create,
         shortcut: const SingleActivator(LogicalKeyboardKey.keyT, meta: true),
       ),
       PlatformMenuItem(
         label: 'Previous',
-        onSelected: workspace.switchToPreviousWorkspace,
+        onSelected: () => environmentController.navigation.switchWorkspace(-1),
         shortcut: const SingleActivator(LogicalKeyboardKey.arrowLeft),
       ),
       PlatformMenuItem(
         label: 'Next',
-        onSelected: workspace.switchToNextWorkspace,
+        onSelected: () => environmentController.navigation.switchWorkspace(1),
         shortcut: const SingleActivator(LogicalKeyboardKey.arrowRight),
       ),
       PlatformMenuItem(
         label: 'Fit to Assets',
-        onSelected: workspace.fitWorkspaceViewportToContent,
+        onSelected: workspaceWindowController.fitWorkspaceViewportToContent,
         shortcut: const SingleActivator(LogicalKeyboardKey.digit1, meta: true),
       ),
       PlatformMenuItem(
         label: 'Collate',
         onSelected: state.activeWorkspaceId == null
             ? null
-            : () => unawaited(workspace.confirmCollateWorkspaceWindows()),
+            : () => unawaited(workspaceCollateController.confirmCollateWorkspaceWindows()),
         shortcut: const SingleActivator(LogicalKeyboardKey.digit3, meta: true),
       ),
       PlatformMenuItem(
         label: 'Pause All',
-        onSelected: workspace.pauseAllVideos,
+        onSelected: workspaceWindowController.pauseAllVideos,
         shortcut: const SingleActivator(LogicalKeyboardKey.keyP, meta: true, shift: true),
       ),
       PlatformMenuItem(
         label: 'Rename…',
         onSelected: state.activeWorkspaceId == null
-            ? workspace.showNoWorkspaceToRenameMessage
-            : () => unawaited(workspace.renameWorkspace(state.activeWorkspaceId!)),
+            ? () => feedback.showMessage('There is no workspace to rename.')
+            : () => unawaited(environmentController.management.renameWorkspace(state.activeWorkspaceId!)),
       ),
       PlatformMenuItem(
         label: 'Delete…',
         onSelected: state.activeWorkspaceId == null
-            ? workspace.showNoWorkspaceToDeleteMessage
-            : () => unawaited(workspace.confirmDeleteWorkspace(state.activeWorkspaceId!)),
+            ? () => feedback.showMessage('There is no workspace to delete.')
+            : () => unawaited(environmentController.management.confirmDeleteWorkspace(state.activeWorkspaceId!)),
       ),
     ];
   }
 
   List<PlatformMenuItem> _buildMenus({
     required _MenuState state,
-    required _AppActions app,
-    required _FileActions file,
-    required _AssetActions asset,
-    required _WindowActions window,
-    required _WorkspaceActions workspace,
-    required _HistoryActions history,
+    required ({
+      AppUiController appUiController,
+      PlatformBridge platformBridge,
+      DocumentCoordinator documentCoordinator,
+      WorkspaceWindowController workspaceWindowController,
+      EnvironmentController environmentController,
+      WorkspaceVideoConversionController workspaceVideoConversionController,
+      WorkspaceWindowHistoryController workspaceWindowHistoryController,
+      WorkspaceCollateController workspaceCollateController,
+      WorkspaceAssetPickerController workspaceAssetPickerController,
+      AppFeedbackController feedback,
+      AppSettingsController settings,
+    })
+    dependencies,
   }) {
     return [
       PlatformMenu(
         label: 'Serenity',
-        menus: _buildAppMenuItems(app: app),
+        menus: _buildAppMenuItems(feedback: dependencies.feedback, settings: dependencies.settings),
       ),
       PlatformMenu(
         label: 'File',
-        menus: _buildFileMenuItems(file: file),
+        menus: _buildFileMenuItems(
+          documentCoordinator: dependencies.documentCoordinator,
+          workspaceAssetPickerController: dependencies.workspaceAssetPickerController,
+        ),
       ),
       PlatformMenu(
         label: 'Asset',
-        menus: _buildAssetMenuItems(state: state, asset: asset),
+        menus: _buildAssetMenuItems(
+          state: state,
+          platformBridge: dependencies.platformBridge,
+          workspaceVideoConversionController: dependencies.workspaceVideoConversionController,
+        ),
       ),
       PlatformMenu(
         label: 'Window',
-        menus: _buildWindowMenuItems(state: state, window: window),
+        menus: _buildWindowMenuItems(
+          state: state,
+          environmentController: dependencies.environmentController,
+          workspaceWindowController: dependencies.workspaceWindowController,
+          workspaceWindowHistoryController: dependencies.workspaceWindowHistoryController,
+        ),
       ),
       PlatformMenu(
         label: 'Workspace',
-        menus: _buildWorkspaceMenuItems(state: state, workspace: workspace),
+        menus: _buildWorkspaceMenuItems(
+          state: state,
+          environmentController: dependencies.environmentController,
+          workspaceWindowController: dependencies.workspaceWindowController,
+          workspaceCollateController: dependencies.workspaceCollateController,
+          feedback: dependencies.feedback,
+        ),
       ),
       PlatformMenu(
         label: 'View',
-        menus: _buildViewMenuItems(workspace: workspace),
+        menus: _buildViewMenuItems(
+          appUiController: dependencies.appUiController,
+          environmentController: dependencies.environmentController,
+        ),
       ),
       PlatformMenu(
         label: 'History',
-        menus: _buildHistoryMenuItems(state: state, window: history),
+        menus: _buildHistoryMenuItems(
+          state: state,
+          workspaceWindowHistoryController: dependencies.workspaceWindowHistoryController,
+        ),
       ),
     ];
   }
@@ -506,41 +429,9 @@ class AppMenu extends StatelessWidget {
       workspaceWindowHistoryState: state.workspaceWindowHistoryState,
       workspaceWindowController: dependencies.workspaceWindowController,
     );
-    final app = _buildAppActions(feedback: dependencies.feedback, settings: dependencies.settings);
-    final file = _buildFileActions(
-      documentCoordinator: dependencies.documentCoordinator,
-      workspaceAssetPickerController: dependencies.workspaceAssetPickerController,
-    );
-    final asset = _buildAssetActions(
-      platformBridge: dependencies.platformBridge,
-      workspaceVideoConversionController: dependencies.workspaceVideoConversionController,
-    );
-    final window = _buildWindowActions(
-      environmentController: dependencies.environmentController,
-      workspaceWindowController: dependencies.workspaceWindowController,
-      workspaceWindowHistoryController: dependencies.workspaceWindowHistoryController,
-    );
-    final workspace = _buildWorkspaceActions(
-      appUiController: dependencies.appUiController,
-      environmentController: dependencies.environmentController,
-      workspaceWindowController: dependencies.workspaceWindowController,
-      workspaceCollateController: dependencies.workspaceCollateController,
-      feedback: dependencies.feedback,
-    );
-    final history = _buildHistoryActions(
-      workspaceWindowHistoryController: dependencies.workspaceWindowHistoryController,
-    );
 
     return PlatformMenuBar(
-      menus: _buildMenus(
-        state: menuState,
-        app: app,
-        file: file,
-        window: window,
-        asset: asset,
-        workspace: workspace,
-        history: history,
-      ),
+      menus: _buildMenus(state: menuState, dependencies: dependencies),
       child: child,
     );
   }
