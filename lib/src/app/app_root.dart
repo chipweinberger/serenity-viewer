@@ -64,7 +64,11 @@ class _AppRootState extends State<AppRoot> {
   void initState() {
     super.initState();
     _runtime = AppRuntime.create(_buildRuntimeInputs());
-    _shellStateListenable = Listenable.merge([_state.environmentStoreState, _state.appUiState]);
+    _shellStateListenable = Listenable.merge([
+      _state.environmentStoreState,
+      _state.appUiState,
+      _state.thumbnailRefreshState,
+    ]);
     _feedback = AppFeedbackController(context: () => context);
     _settings = AppSettingsController(
       context: () => context,

@@ -13,8 +13,6 @@ class ThumbnailController {
     required this.activeScreen,
     required this.activeWorkspaceId,
     required this.viewportSize,
-    required this.commitStateChange,
-    required this.isMounted,
   });
 
   final ThumbnailRefreshState state;
@@ -22,22 +20,22 @@ class ThumbnailController {
   final SerenityScreen Function() activeScreen;
   final String? Function() activeWorkspaceId;
   final Size Function() viewportSize;
-  final void Function(VoidCallback update) commitStateChange;
-  final bool Function() isMounted;
 
   Set<String> get refreshingWorkspaceIds => state.refreshInFlight;
 
   void markWorkspaceDirty(String workspaceId) {
-    state.dirtyWorkspaces.add(workspaceId);
+    state.markWorkspaceDirty(workspaceId);
   }
 
   void queueWorkspaceRefresh(String workspaceId, {Duration delay = const Duration(milliseconds: 300)}) {
-    state.debounces[workspaceId]?.cancel();
-    state.debounces[workspaceId] = Timer(delay, () {
-      markWorkspaceDirty(workspaceId);
-      state.debounces.remove(workspaceId);
-      unawaited(refreshActiveWorkspaceIfNeeded());
-    });
+    state.replaceDebounce(
+      workspaceId,
+      Timer(delay, () {
+        markWorkspaceDirty(workspaceId);
+        state.clearDebounce(workspaceId);
+        unawaited(refreshActiveWorkspaceIfNeeded());
+      }),
+    );
   }
 
   Future<void> refreshActiveWorkspaceIfNeeded() async {
@@ -59,30 +57,16 @@ class ThumbnailController {
       return;
     }
 
-    _commitRefreshState(() {
-      state.refreshInFlight.add(workspaceId);
-    });
+    state.startRefresh(workspaceId);
 
     try {
       await refresher.refreshWorkspace(workspaceId, viewportSize: currentViewportSize);
     } finally {
-      _commitRefreshState(() {
-        state.dirtyWorkspaces.remove(workspaceId);
-        state.refreshInFlight.remove(workspaceId);
-      });
+      state.finishRefresh(workspaceId);
     }
   }
 
   void dispose() {
     state.dispose();
-  }
-
-  void _commitRefreshState(VoidCallback update) {
-    if (!isMounted()) {
-      update();
-      return;
-    }
-
-    commitStateChange(update);
   }
 }

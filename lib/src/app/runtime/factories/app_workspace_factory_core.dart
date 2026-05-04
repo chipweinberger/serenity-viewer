@@ -32,8 +32,6 @@ ThumbnailController _createThumbnailController({required _WorkspaceFactoryScope 
     activeScreen: () => scope.uiState.screen,
     activeWorkspaceId: () => scope.ws.activeWorkspace()?.id,
     viewportSize: () => scope.viewportState.viewportSize,
-    commitStateChange: scope.app.commitStateChange,
-    isMounted: scope.app.mounted,
   );
 }
 
