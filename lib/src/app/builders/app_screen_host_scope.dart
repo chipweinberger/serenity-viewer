@@ -9,6 +9,7 @@ import 'package:serenity_viewer/src/window/interaction/window_zoom_update.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.dart';
+import 'package:serenity_viewer/src/workspace/links/workspace_links_prompts.dart';
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/app/app_ui_state.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
@@ -34,6 +35,7 @@ class AppScreenHostState {
     required this.sharedVideoControllerPool,
     required this.environmentSession,
     required this.workspaceLinksController,
+    required this.workspaceLinksPrompts,
     required this.thumbnailController,
     required this.windowHistoryController,
     required this.searchController,
@@ -55,6 +57,7 @@ class AppScreenHostState {
   final SharedVideoControllerPool sharedVideoControllerPool;
   final EnvironmentSession environmentSession;
   final WorkspaceLinksController workspaceLinksController;
+  final WorkspaceLinksPrompts workspaceLinksPrompts;
   final ThumbnailController thumbnailController;
   final WorkspaceWindowHistoryController windowHistoryController;
   final TextEditingController searchController;

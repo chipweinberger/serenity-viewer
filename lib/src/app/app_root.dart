@@ -140,6 +140,7 @@ class _AppRootState extends State<AppRoot> {
         sharedVideoControllerPool: _foundation.sharedVideoControllerPool,
         environmentSession: _workspaceRuntime.environmentSession,
         workspaceLinksController: _workspaceRuntime.workspaceLinksController,
+        workspaceLinksPrompts: _workspaceRuntime.workspaceLinksPrompts,
         thumbnailController: _workspaceRuntime.thumbnailController,
         windowHistoryController: _workspaceRuntime.workspaceWindowHistoryController,
         searchController: _state.uiHandles.searchController,

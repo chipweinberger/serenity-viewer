@@ -77,6 +77,7 @@ class WorkspaceContentBuilder {
             context: state.context,
             initialWorkspace: state.activeWorkspace,
             controller: state.workspaceLinksController,
+            prompts: state.workspaceLinksPrompts,
           ),
           onClearExposeSelection: state.environmentSession.navigation.clearExposeSelection,
           onSetWorkspaceZoom: (workspaceId, zoom) =>

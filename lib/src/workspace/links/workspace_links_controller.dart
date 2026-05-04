@@ -16,7 +16,6 @@ class WorkspaceLinksController {
     required this.replaceWorkspace,
     required this.newId,
     required this.showMessage,
-    required this.context,
     required this.mounted,
   });
 
@@ -27,7 +26,6 @@ class WorkspaceLinksController {
   final ValueChanged<Workspace> replaceWorkspace;
   final String Function(String prefix) newId;
   final ValueChanged<String> showMessage;
-  final BuildContext Function() context;
   final bool Function() mounted;
 
   bool shouldHandlePasteLinksShortcut(KeyDownEvent event) {
@@ -159,24 +157,6 @@ class WorkspaceLinksController {
     return nextWorkspace;
   }
 
-  Future<bool> confirmRemoveLink(Link link) async {
-    final shouldRemove = await showDialog<bool>(
-      context: context(),
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Remove link?'),
-          content: Text(middleTruncatedLabel(link.displayName, maxLength: 72)),
-          actions: [
-            TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
-            FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Remove')),
-          ],
-        );
-      },
-    );
-
-    return shouldRemove == true;
-  }
-
   Workspace? renameLink(String workspaceId, String linkId, String customName) {
     final workspace = workspaceForId(workspaceId);
     if (workspace == null) {
@@ -200,30 +180,6 @@ class WorkspaceLinksController {
     final nextWorkspace = workspace.copyWith(links: nextLinks);
     replaceWorkspace(nextWorkspace);
     return nextWorkspace;
-  }
-
-  Future<String?> promptForLinkName(Link link) async {
-    final controller = TextEditingController(text: link.customName);
-    final result = await showDialog<String>(
-      context: context(),
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Name'),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            decoration: const InputDecoration(),
-            onSubmitted: (value) => Navigator.of(context).pop(value.trim()),
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
-            FilledButton(onPressed: () => Navigator.of(context).pop(controller.text.trim()), child: const Text('Done')),
-          ],
-        );
-      },
-    );
-    controller.dispose();
-    return result;
   }
 
   Workspace? workspaceForId(String workspaceId) {
