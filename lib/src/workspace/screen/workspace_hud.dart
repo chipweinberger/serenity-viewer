@@ -4,8 +4,13 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/app/app_theme.dart';
+import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
+import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
+import 'package:serenity_viewer/src/environment/workspace.dart';
+import 'package:serenity_viewer/src/foundation/app_constants.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
+import 'package:serenity_viewer/src/workspace/links/workspace_links_dialog.dart';
 
 @immutable
 class WorkspaceHudViewModel {
@@ -30,36 +35,23 @@ class WorkspaceHudViewModel {
   final double workspaceZoom;
 }
 
-@immutable
-class WorkspaceHudActions {
-  const WorkspaceHudActions({
-    required this.onToggleExpose,
-    required this.onFitWorkspaceViewportToContent,
-    required this.onConfirmCollateWorkspaceWindows,
-    required this.onConfirmApplyExposeGridToWorkspace,
-    required this.onOpenLinks,
-    required this.onClearExposeSelection,
-    required this.onSetWorkspaceZoom,
-    required this.onRefreshActiveWorkspaceThumbnail,
-  });
-
-  final VoidCallback onToggleExpose;
-  final VoidCallback onFitWorkspaceViewportToContent;
-  final Future<void> Function() onConfirmCollateWorkspaceWindows;
-  final Future<void> Function() onConfirmApplyExposeGridToWorkspace;
-  final Future<void> Function() onOpenLinks;
-  final VoidCallback onClearExposeSelection;
-  final void Function(String workspaceId, double zoom) onSetWorkspaceZoom;
-  final Future<void> Function() onRefreshActiveWorkspaceThumbnail;
-}
-
 class WorkspaceHud extends StatelessWidget {
-  const WorkspaceHud({super.key, required this.viewModel, required this.actions});
+  const WorkspaceHud({
+    super.key,
+    required this.viewModel,
+    required this.activeWorkspace,
+    required this.appUiController,
+    required this.environmentController,
+    required this.workspaceController,
+  });
 
   static const double gap = 10;
 
   final WorkspaceHudViewModel viewModel;
-  final WorkspaceHudActions actions;
+  final Workspace activeWorkspace;
+  final AppUiController appUiController;
+  final EnvironmentController environmentController;
+  final WorkspaceController workspaceController;
 
   Widget _buildHudAction({required String tooltip, required VoidCallback? onTap, required Widget child}) {
     return Tooltip(
@@ -115,9 +107,13 @@ class WorkspaceHud extends StatelessWidget {
                       min: 0,
                       max: 1,
                       onChanged: (value) {
-                        actions.onSetWorkspaceZoom(viewModel.workspaceId, _workspaceZoomForSliderValue(value));
+                        workspaceController.viewport.setWorkspaceViewport(
+                          workspaceId: viewModel.workspaceId,
+                          zoom: _workspaceZoomForSliderValue(value),
+                          queueThumbnail: false,
+                        );
                       },
-                      onChangeEnd: (_) => unawaited(actions.onRefreshActiveWorkspaceThumbnail()),
+                      onChangeEnd: (_) => unawaited(workspaceController.thumbnails.refreshActiveWorkspaceIfNeeded()),
                     ),
                   ),
                 ),
@@ -153,7 +149,7 @@ class WorkspaceHud extends StatelessWidget {
       if (!viewModel.isExposeMode) ...[
         _buildHudAction(
           tooltip: 'Zoom to fit',
-          onTap: actions.onFitWorkspaceViewportToContent,
+          onTap: workspaceController.viewport.fitWorkspaceViewportToContent,
           child: const SizedBox(
             width: 38,
             height: 38,
@@ -162,7 +158,7 @@ class WorkspaceHud extends StatelessWidget {
         ),
         _buildHudAction(
           tooltip: 'Collate',
-          onTap: () => unawaited(actions.onConfirmCollateWorkspaceWindows()),
+          onTap: () => unawaited(workspaceController.layout.confirmCollateWorkspaceWindows()),
           child: const SizedBox(
             width: 38,
             height: 38,
@@ -173,7 +169,7 @@ class WorkspaceHud extends StatelessWidget {
       ] else
         _buildHudAction(
           tooltip: 'Apply grid to freeform',
-          onTap: () => unawaited(actions.onConfirmApplyExposeGridToWorkspace()),
+          onTap: () => unawaited(workspaceController.layout.confirmApplyExposeGridToWorkspace()),
           child: const SizedBox(
             width: 38,
             height: 38,
@@ -182,7 +178,13 @@ class WorkspaceHud extends StatelessWidget {
         ),
       _buildHudAction(
         tooltip: 'Links',
-        onTap: () => unawaited(actions.onOpenLinks()),
+        onTap: () => unawaited(
+          showWorkspaceLinksDialog(
+            context: context,
+            initialWorkspace: activeWorkspace,
+            controller: workspaceController.links,
+          ),
+        ),
         child: const SizedBox(
           width: 38,
           height: 38,
@@ -196,7 +198,7 @@ class WorkspaceHud extends StatelessWidget {
       children: [
         _buildHudAction(
           tooltip: viewModel.isExposeMode ? 'Freeform' : 'Expose',
-          onTap: actions.onToggleExpose,
+          onTap: appUiController.toggleExpose,
           child: SizedBox(
             width: 38,
             height: 38,
@@ -264,7 +266,7 @@ class WorkspaceHud extends StatelessWidget {
                       Material(
                         color: Colors.transparent,
                         child: InkWell(
-                          onTap: actions.onClearExposeSelection,
+                          onTap: environmentController.navigation.clearExposeSelection,
                           borderRadius: BorderRadius.circular(999),
                           child: const Padding(
                             padding: EdgeInsets.all(2),

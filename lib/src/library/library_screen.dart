@@ -2,30 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/app/app_theme.dart';
+import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
 import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/library/workspace_card.dart';
 import 'package:serenity_viewer/src/media/loading/workspace_load_plan.dart';
 import 'package:serenity_viewer/src/shared_widgets/glass_chip.dart';
-
-@immutable
-class LibraryScreenActions {
-  const LibraryScreenActions({
-    required this.onWorkspaceSortChanged,
-    required this.onToggleWorkspaceOpen,
-    required this.onRenameWorkspace,
-    required this.onDeleteWorkspace,
-    required this.onSetActiveWorkspace,
-  });
-
-  final ValueChanged<WorkspaceSort> onWorkspaceSortChanged;
-  final ValueChanged<String> onToggleWorkspaceOpen;
-  final Future<void> Function(String workspaceId) onRenameWorkspace;
-  final Future<void> Function(String workspaceId) onDeleteWorkspace;
-  final Future<void> Function(String workspaceId) onSetActiveWorkspace;
-}
 
 class LibraryScreen extends StatelessWidget {
   const LibraryScreen({
@@ -36,7 +21,8 @@ class LibraryScreen extends StatelessWidget {
     required this.searchController,
     required this.workspaceSort,
     required this.refreshingWorkspaceIds,
-    required this.actions,
+    required this.appUiController,
+    required this.environmentController,
   });
 
   final List<Workspace> allWorkspaces;
@@ -45,7 +31,8 @@ class LibraryScreen extends StatelessWidget {
   final TextEditingController searchController;
   final WorkspaceSort workspaceSort;
   final Set<String> refreshingWorkspaceIds;
-  final LibraryScreenActions actions;
+  final AppUiController appUiController;
+  final EnvironmentController environmentController;
 
   static const double _thumbnailWidth = 224;
   static const double _thumbnailHeight = 192;
@@ -130,25 +117,25 @@ class LibraryScreen extends StatelessWidget {
       hoverActions: [
         _buildWorkspaceCardAction(
           tooltip: 'Close workspace',
-          onTap: () => actions.onToggleWorkspaceOpen(workspace.id),
+          onTap: () => environmentController.management.toggleOpen(workspace.id),
           icon: Icons.close_rounded,
         ),
         _buildWorkspaceCardAction(
           tooltip: 'Rename workspace',
-          onTap: () => unawaited(actions.onRenameWorkspace(workspace.id)),
+          onTap: () => unawaited(environmentController.management.renameWorkspace(workspace.id)),
           icon: Icons.edit_outlined,
         ),
         _buildWorkspaceCardAction(
           tooltip: 'Delete workspace',
-          onTap: () => unawaited(actions.onDeleteWorkspace(workspace.id)),
+          onTap: () => unawaited(environmentController.management.confirmDeleteWorkspace(workspace.id)),
           icon: Icons.delete_outline_rounded,
         ),
       ],
       onTap: () async {
         if (!workspace.isOpen) {
-          actions.onToggleWorkspaceOpen(workspace.id);
+          environmentController.management.toggleOpen(workspace.id);
         }
-        await actions.onSetActiveWorkspace(workspace.id);
+        await environmentController.navigation.setActiveWorkspace(workspace.id);
       },
     );
   }
@@ -161,20 +148,20 @@ class LibraryScreen extends StatelessWidget {
       hoverActions: [
         _buildWorkspaceCardAction(
           tooltip: 'Rename workspace',
-          onTap: () => unawaited(actions.onRenameWorkspace(workspace.id)),
+          onTap: () => unawaited(environmentController.management.renameWorkspace(workspace.id)),
           icon: Icons.edit_outlined,
         ),
         _buildWorkspaceCardAction(
           tooltip: 'Delete workspace',
-          onTap: () => unawaited(actions.onDeleteWorkspace(workspace.id)),
+          onTap: () => unawaited(environmentController.management.confirmDeleteWorkspace(workspace.id)),
           icon: Icons.delete_outline_rounded,
         ),
       ],
       onTap: workspace.isOpen
           ? null
           : () async {
-              actions.onToggleWorkspaceOpen(workspace.id);
-              await actions.onSetActiveWorkspace(workspace.id);
+              environmentController.management.toggleOpen(workspace.id);
+              await environmentController.navigation.setActiveWorkspace(workspace.id);
             },
     );
   }
@@ -186,22 +173,22 @@ class LibraryScreen extends StatelessWidget {
       children: [
         GlassChip(
           selected: workspaceSort == WorkspaceSort.recentlyCreated,
-          onTap: () => actions.onWorkspaceSortChanged(WorkspaceSort.recentlyCreated),
+          onTap: () => appUiController.setWorkspaceSort(WorkspaceSort.recentlyCreated),
           child: const Text('Date created'),
         ),
         GlassChip(
           selected: workspaceSort == WorkspaceSort.name,
-          onTap: () => actions.onWorkspaceSortChanged(WorkspaceSort.name),
+          onTap: () => appUiController.setWorkspaceSort(WorkspaceSort.name),
           child: const Text('Alphabetical'),
         ),
         GlassChip(
           selected: workspaceSort == WorkspaceSort.views,
-          onTap: () => actions.onWorkspaceSortChanged(WorkspaceSort.views),
+          onTap: () => appUiController.setWorkspaceSort(WorkspaceSort.views),
           child: const Text('Most views'),
         ),
         GlassChip(
           selected: workspaceSort == WorkspaceSort.recentlyViewed,
-          onTap: () => actions.onWorkspaceSortChanged(WorkspaceSort.recentlyViewed),
+          onTap: () => appUiController.setWorkspaceSort(WorkspaceSort.recentlyViewed),
           child: const Text('Recently viewed'),
         ),
       ],

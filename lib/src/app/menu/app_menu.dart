@@ -10,7 +10,6 @@ import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
 import 'package:serenity_viewer/src/environment/document/document_coordinator.dart';
-import 'package:serenity_viewer/src/environment/history/environment_window_history_controller.dart';
 import 'package:serenity_viewer/src/environment/history/environment_window_history_entry.dart';
 import 'package:serenity_viewer/src/environment/history/environment_window_history_state.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
@@ -62,7 +61,6 @@ class AppMenu extends StatelessWidget {
     DocumentCoordinator documentCoordinator,
     WorkspaceController workspaceController,
     EnvironmentController environmentController,
-    EnvironmentWindowHistoryController environmentWindowHistoryController,
     AppFeedbackController feedback,
     AppSettingsController settings,
   })
@@ -73,7 +71,6 @@ class AppMenu extends StatelessWidget {
       documentCoordinator: context.read<DocumentCoordinator>(),
       workspaceController: context.read<WorkspaceController>(),
       environmentController: context.read<EnvironmentController>(),
-      environmentWindowHistoryController: context.read<EnvironmentWindowHistoryController>(),
       feedback: context.read<AppFeedbackController>(),
       settings: context.read<AppSettingsController>(),
     );
@@ -98,12 +95,12 @@ class AppMenu extends StatelessWidget {
 
   List<PlatformMenuItem> _buildHistoryMenuItems({
     required _MenuState state,
-    required EnvironmentWindowHistoryController environmentWindowHistoryController,
+    required EnvironmentController environmentController,
   }) {
     final recentlyClosedItems = state.recentlyClosedWindows.take(8).map((entry) {
       return PlatformMenuItem(
         label: 'Restore ${entry.window.asset.filename}',
-        onSelected: () => environmentWindowHistoryController.restoreRecentlyClosedWindow(entry),
+        onSelected: () => environmentController.history.restoreRecentlyClosedWindow(entry),
       );
     }).toList();
 
@@ -112,7 +109,7 @@ class AppMenu extends StatelessWidget {
         label: 'Restore Last Closed',
         onSelected: state.recentlyClosedWindows.isEmpty
             ? null
-            : environmentWindowHistoryController.restoreRecentlyClosedWindow,
+            : environmentController.history.restoreRecentlyClosedWindow,
         shortcut: const SingleActivator(LogicalKeyboardKey.keyT, meta: true, shift: true),
       ),
       ...recentlyClosedItems,
@@ -208,7 +205,6 @@ class AppMenu extends StatelessWidget {
   List<PlatformMenuItem> _buildWindowMenuItems({
     required _MenuState state,
     required EnvironmentController environmentController,
-    required EnvironmentWindowHistoryController environmentWindowHistoryController,
     required WorkspaceController workspaceController,
   }) {
     final focusedWindow = state.focusedWindow;
@@ -241,8 +237,7 @@ class AppMenu extends StatelessWidget {
             label: 'Close',
             onSelected: focusedWindow == null || state.activeWorkspaceId == null
                 ? null
-                : () =>
-                      environmentWindowHistoryController.removeWindow(state.activeWorkspaceId!, focusedWindow.asset.id),
+                : () => environmentController.history.removeWindow(state.activeWorkspaceId!, focusedWindow.asset.id),
             shortcut: const SingleActivator(LogicalKeyboardKey.backspace, meta: true),
           ),
         ],
@@ -330,7 +325,6 @@ class AppMenu extends StatelessWidget {
       DocumentCoordinator documentCoordinator,
       WorkspaceController workspaceController,
       EnvironmentController environmentController,
-      EnvironmentWindowHistoryController environmentWindowHistoryController,
       AppFeedbackController feedback,
       AppSettingsController settings,
     })
@@ -361,7 +355,6 @@ class AppMenu extends StatelessWidget {
         menus: _buildWindowMenuItems(
           state: state,
           environmentController: dependencies.environmentController,
-          environmentWindowHistoryController: dependencies.environmentWindowHistoryController,
           workspaceController: dependencies.workspaceController,
         ),
       ),
@@ -383,10 +376,7 @@ class AppMenu extends StatelessWidget {
       ),
       PlatformMenu(
         label: 'History',
-        menus: _buildHistoryMenuItems(
-          state: state,
-          environmentWindowHistoryController: dependencies.environmentWindowHistoryController,
-        ),
+        menus: _buildHistoryMenuItems(state: state, environmentController: dependencies.environmentController),
       ),
     ];
   }

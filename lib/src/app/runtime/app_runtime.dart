@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/app_root.dart';
 import 'package:serenity_viewer/src/app/state/app_derived_state.dart';
-import 'package:serenity_viewer/src/environment/history/environment_window_history_controller.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/app/runtime/factories/app_document_factory.dart';
 import 'package:serenity_viewer/src/app/runtime/factories/app_foundation_factory.dart';
@@ -29,7 +28,6 @@ class AppRuntime {
     required this.documentCoordinator,
     required this.workspaceController,
     required this.environmentController,
-    required this.environmentWindowHistoryController,
     required this.autosaveTimer,
     required this.appLifecycleListener,
   });
@@ -42,7 +40,6 @@ class AppRuntime {
   final DocumentCoordinator documentCoordinator;
   final WorkspaceController workspaceController;
   final EnvironmentController environmentController;
-  final EnvironmentWindowHistoryController environmentWindowHistoryController;
   final Timer autosaveTimer;
   final AppLifecycleListener appLifecycleListener;
 
@@ -69,7 +66,7 @@ AppRuntime createAppRuntime({
   late final AppUiController appUiController;
   late final EnvironmentStore environmentStore;
   late final WorkspaceParts workspace;
-  
+
   final workspaceRuntime = WorkspaceRuntime(
     isRunningInWidgetTest: isRunningInWidgetTest,
     context: context,
@@ -167,7 +164,6 @@ AppRuntime createAppRuntime({
     documentCoordinator: documentCoordinator,
     workspaceController: workspace.workspaceController,
     environmentController: workspace.environmentController,
-    environmentWindowHistoryController: workspace.environmentWindowHistoryController,
     autosaveTimer: autosaveTimer,
     appLifecycleListener: appLifecycleListener,
   );

@@ -93,15 +93,10 @@ class WorkspaceDependencies {
 }
 
 class WorkspaceParts {
-  const WorkspaceParts({
-    required this.workspaceController,
-    required this.environmentController,
-    required this.environmentWindowHistoryController,
-  });
+  const WorkspaceParts({required this.workspaceController, required this.environmentController});
 
   final WorkspaceController workspaceController;
   final EnvironmentController environmentController;
-  final EnvironmentWindowHistoryController environmentWindowHistoryController;
 }
 
 ThumbnailController createThumbnailController({required WorkspaceDependencies dependencies}) {
@@ -500,7 +495,17 @@ WorkspaceParts assembleWorkspace({required WorkspaceDependencies dependencies}) 
     environmentController: workspaceEnvironment,
     exposeController: expose,
   );
-  final environment = EnvironmentController(navigation: navigation, management: management);
+  final environmentHistory = createEnvironmentWindowHistoryController(
+    dependencies: dependencies,
+    exposeController: expose,
+    windowsController: windows,
+    playbackController: playback,
+  );
+  final environment = EnvironmentController(
+    navigation: navigation,
+    management: management,
+    history: environmentHistory,
+  );
   final shortcuts = createWorkspaceShortcutController(
     dependencies: dependencies,
     navigationController: navigation,
@@ -508,12 +513,6 @@ WorkspaceParts assembleWorkspace({required WorkspaceDependencies dependencies}) 
     workspaceLinksController: links,
   );
   final tracking = createWorkspaceViewTrackingController(dependencies: dependencies);
-  final environmentHistory = createEnvironmentWindowHistoryController(
-    dependencies: dependencies,
-    exposeController: expose,
-    windowsController: windows,
-    playbackController: playback,
-  );
 
   final workspace = createWorkspaceController(
     gesture: gesture,
@@ -531,9 +530,5 @@ WorkspaceParts assembleWorkspace({required WorkspaceDependencies dependencies}) 
     tracking: tracking,
   );
 
-  return WorkspaceParts(
-    workspaceController: workspace,
-    environmentController: environment,
-    environmentWindowHistoryController: environmentHistory,
-  );
+  return WorkspaceParts(workspaceController: workspace, environmentController: environment);
 }

@@ -2,27 +2,27 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:desktop_drop/desktop_drop.dart';
-import 'package:file_selector/file_selector.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/window/workspace_window.dart';
-import 'package:serenity_viewer/src/window/frame/window_resize_helpers.dart';
 import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
-import 'package:serenity_viewer/src/window/interaction/window_zoom_update.dart';
 import 'package:serenity_viewer/src/window/presentation/expose_window_card.dart';
 import 'package:serenity_viewer/src/window/presentation/workspace_window_view_model.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/app/app_theme.dart';
+import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
-import 'package:serenity_viewer/src/environment/asset.dart';
+import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/layout/workspace_expose_layout.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_projection.dart';
+import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 
 typedef SharedVideoLookup = SharedVideoState? Function(Window window, {required bool isLoaded});
 
@@ -45,108 +45,34 @@ class _WorkspaceCanvasViewModel {
   final bool isDropTargetActive;
 }
 
-@immutable
-class WorkspaceScreenDropActions {
-  const WorkspaceScreenDropActions({required this.setDropTargetActive, required this.importFiles});
-
-  final ValueChanged<bool> setDropTargetActive;
-  final Future<void> Function(List<XFile> files) importFiles;
-}
-
-@immutable
-class WorkspaceScreenViewportActions {
-  const WorkspaceScreenViewportActions({
-    required this.trackViewportSize,
-    required this.handleOptionGestureHover,
-    required this.handleWorkspacePanZoomStart,
-    required this.handleWorkspacePanZoomUpdate,
-    required this.handleWorkspacePanZoomEnd,
-  });
-
-  final ValueChanged<Size> trackViewportSize;
-  final void Function(PointerHoverEvent event, Workspace workspace) handleOptionGestureHover;
-  final void Function(PointerPanZoomStartEvent event, Workspace workspace) handleWorkspacePanZoomStart;
-  final void Function(PointerPanZoomUpdateEvent event, Workspace workspace, Size viewportSize)
-  handleWorkspacePanZoomUpdate;
-  final VoidCallback handleWorkspacePanZoomEnd;
-}
-
-@immutable
-class WorkspaceScreenWindowActions {
-  const WorkspaceScreenWindowActions({
-    required this.focusWindow,
-    required this.restorePreviousWindowZOrder,
-    required this.moveWindow,
-    required this.resizeWindow,
-    required this.transformWindowFromTrackpad,
-    required this.fitWindowToContent,
-    required this.setWindowZoom,
-    required this.setVideoPosition,
-    required this.cycleVideoPlaybackSpeed,
-    required this.setWindowIntrinsicSize,
-    required this.isVideoWindowPaused,
-    required this.toggleVideoPlayback,
-    required this.toggleExpose,
-    required this.setPinnedHoverWindow,
-    required this.clearPinnedHoverWindow,
-    required this.flashWindow,
-    required this.toggleSelectedWindow,
-    required this.removeWindow,
-    required this.setActiveGestureWindow,
-    required this.revealAssetInFinder,
-  });
-
-  final ValueChanged<String> focusWindow;
-  final ValueChanged<String> restorePreviousWindowZOrder;
-  final void Function(String windowId, Offset delta) moveWindow;
-  final void Function(String windowId, WindowResizeHandle handle, Offset delta) resizeWindow;
-  final void Function(String windowId, double scaleDelta, Offset localFocalPoint) transformWindowFromTrackpad;
-  final ValueChanged<String> fitWindowToContent;
-  final void Function(String windowId, WindowZoomUpdate update) setWindowZoom;
-  final void Function(String windowId, int positionMs) setVideoPosition;
-  final ValueChanged<String> cycleVideoPlaybackSpeed;
-  final void Function(String windowId, Size intrinsicSize) setWindowIntrinsicSize;
-  final bool Function(String windowId) isVideoWindowPaused;
-  final ValueChanged<String> toggleVideoPlayback;
-  final VoidCallback toggleExpose;
-  final ValueChanged<String> setPinnedHoverWindow;
-  final VoidCallback clearPinnedHoverWindow;
-  final ValueChanged<String> flashWindow;
-  final ValueChanged<String> toggleSelectedWindow;
-  final void Function(String workspaceId, String windowId) removeWindow;
-  final ValueChanged<String?> setActiveGestureWindow;
-  final Future<void> Function(Asset asset) revealAssetInFinder;
-}
-
-@immutable
-class WorkspaceScreenActions {
-  const WorkspaceScreenActions({required this.drop, required this.viewport, required this.window});
-
-  final WorkspaceScreenDropActions drop;
-  final WorkspaceScreenViewportActions viewport;
-  final WorkspaceScreenWindowActions window;
-}
-
 class WorkspaceScreen extends StatelessWidget {
   const WorkspaceScreen({
     super.key,
     required this.environment,
-    required this.openWorkspaces,
     required this.appUiState,
     required this.windowInteractionState,
+    required this.workspaceViewportState,
     required this.loadPlan,
     required this.sharedVideoLookup,
-    required this.actions,
+    required this.workspaceController,
+    required this.environmentController,
+    required this.appUiController,
+    required this.platformBridge,
+    required this.mounted,
     required this.workspaceHud,
   });
 
   final Environment environment;
-  final List<Workspace> openWorkspaces;
   final AppUiState appUiState;
   final WindowInteractionState windowInteractionState;
+  final WorkspaceViewportState workspaceViewportState;
   final MediaLoadPlan loadPlan;
   final SharedVideoLookup sharedVideoLookup;
-  final WorkspaceScreenActions actions;
+  final WorkspaceController workspaceController;
+  final EnvironmentController environmentController;
+  final AppUiController appUiController;
+  final PlatformBridge platformBridge;
+  final bool Function() mounted;
   final Widget workspaceHud;
 
   Widget _buildEmptyWorkspaceCanvasState(BuildContext context) {
@@ -226,22 +152,22 @@ class WorkspaceScreen extends StatelessWidget {
   }
 
   VoidCallback? _showInFinderCallbackForWindow(Window window) {
-    return window.asset.filePath == null ? null : () => unawaited(actions.window.revealAssetInFinder(window.asset));
+    return window.asset.filePath == null ? null : () => unawaited(platformBridge.revealAssetInFinder(window.asset));
   }
 
   VoidCallback? _restorePreviousZOrderCallbackForWindow(Window window) {
     return windowInteractionState.previousWindowZOrders.containsKey(window.asset.id)
-        ? () => actions.window.restorePreviousWindowZOrder(window.asset.id)
+        ? () => workspaceController.window.restorePreviousWindowZOrder(window.asset.id)
         : null;
   }
 
   void _handleFreeformWindowTap(Window window) {
     if (windowInteractionState.pinnedHoverWindowId == window.asset.id) {
-      actions.window.clearPinnedHoverWindow();
+      workspaceController.window.clearPinnedHoverWindow();
       return;
     }
-    actions.window.clearPinnedHoverWindow();
-    actions.window.focusWindow(window.asset.id);
+    workspaceController.window.clearPinnedHoverWindow();
+    workspaceController.window.focusWindow(window.asset.id);
   }
 
   Widget _buildWorkspaceCanvasBackground() {
@@ -275,7 +201,7 @@ class WorkspaceScreen extends StatelessWidget {
       flashNonce: window.asset.id == windowInteractionState.flashedWindowId
           ? windowInteractionState.windowFlashNonce
           : 0,
-      isVideoPaused: actions.window.isVideoWindowPaused(window.asset.id),
+      isVideoPaused: workspaceController.playback.isVideoWindowPaused(window.asset.id),
       isOptionGestureTarget: windowInteractionState.activeGestureWindowId == window.asset.id,
     );
 
@@ -292,28 +218,27 @@ class WorkspaceScreen extends StatelessWidget {
           child: WorkspaceWindow(
             viewModel: windowViewModel,
             onTap: () => _handleFreeformWindowTap(window),
-            onPinnedHoverRequested: () => actions.window.setPinnedHoverWindow(window.asset.id),
-            onPinnedHoverDismissed: actions.window.clearPinnedHoverWindow,
-            onToggleSelected: () => actions.window.toggleSelectedWindow(window.asset.id),
-            onPanUpdate: (delta) => actions.window.moveWindow(window.asset.id, delta / workspace.viewportZoom),
-            onTrackpadWindowScale: (scaleDelta, localFocalPoint) => actions.window.transformWindowFromTrackpad(
-              window.asset.id,
-              scaleDelta,
-              localFocalPoint / workspace.viewportZoom,
-            ),
+            onPinnedHoverRequested: () => workspaceController.window.setPinnedHoverWindow(window.asset.id),
+            onPinnedHoverDismissed: workspaceController.window.clearPinnedHoverWindow,
+            onToggleSelected: () => environmentController.navigation.toggleSelectedWindow(window.asset.id),
+            onPanUpdate: (delta) =>
+                workspaceController.window.moveWindow(window.asset.id, delta / workspace.viewportZoom),
+            onTrackpadWindowScale: (scaleDelta, localFocalPoint) => workspaceController.window
+                .transformWindowFromTrackpad(window.asset.id, scaleDelta, localFocalPoint / workspace.viewportZoom),
             onResizeUpdate: (handle, delta) =>
-                actions.window.resizeWindow(window.asset.id, handle, delta / workspace.viewportZoom),
-            onZoomChanged: (update) => actions.window.setWindowZoom(window.asset.id, update),
-            onIntrinsicSizeResolved: (size) => actions.window.setWindowIntrinsicSize(window.asset.id, size),
-            onVideoPositionChanged: (positionMs) => actions.window.setVideoPosition(window.asset.id, positionMs),
-            onCycleVideoPlaybackSpeed: () => actions.window.cycleVideoPlaybackSpeed(window.asset.id),
-            onTogglePlayback: () => actions.window.toggleVideoPlayback(window.asset.id),
-            onFitToContent: () => actions.window.fitWindowToContent(window.asset.id),
+                workspaceController.window.resizeWindow(window.asset.id, handle, delta / workspace.viewportZoom),
+            onZoomChanged: (update) => workspaceController.window.setWindowZoom(window.asset.id, update),
+            onIntrinsicSizeResolved: (size) => workspaceController.window.setWindowIntrinsicSize(window.asset.id, size),
+            onVideoPositionChanged: (positionMs) =>
+                workspaceController.playback.setVideoPosition(window.asset.id, positionMs),
+            onCycleVideoPlaybackSpeed: () => workspaceController.playback.cycleVideoPlaybackSpeed(window.asset.id),
+            onTogglePlayback: () => workspaceController.playback.toggleVideoPlayback(window.asset.id),
+            onFitToContent: () => workspaceController.window.fitWindowToContent(window.asset.id),
             onShowInFinder: _showInFinderCallbackForWindow(window),
             onRestorePreviousZOrder: _restorePreviousZOrderCallbackForWindow(window),
-            onClose: () => actions.window.removeWindow(environment.activeWorkspaceId, window.asset.id),
-            onOptionGestureWindowRequested: () => actions.window.setActiveGestureWindow(window.asset.id),
-            onOptionGestureReleased: () => actions.window.setActiveGestureWindow(null),
+            onClose: () => environmentController.history.removeWindow(environment.activeWorkspaceId, window.asset.id),
+            onOptionGestureWindowRequested: () => workspaceController.window.setActiveGestureWindow(window.asset.id),
+            onOptionGestureReleased: () => workspaceController.window.setActiveGestureWindow(null),
           ),
         ),
       ),
@@ -325,22 +250,23 @@ class WorkspaceScreen extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final viewportSize = constraints.biggest;
-          actions.viewport.trackViewportSize(viewportSize);
+          workspaceViewportState.setViewportSize(viewportSize);
           final workspace = canvasViewModel.workspace;
 
           return Listener(
             behavior: HitTestBehavior.translucent,
-            onPointerHover: (event) => actions.viewport.handleOptionGestureHover(event, workspace),
-            onPointerPanZoomStart: (event) => actions.viewport.handleWorkspacePanZoomStart(event, workspace),
+            onPointerHover: (event) => workspaceController.window.handleOptionGestureHover(event, workspace),
+            onPointerPanZoomStart: (event) =>
+                workspaceController.viewport.handleWorkspacePanZoomStart(event, workspace),
             onPointerPanZoomUpdate: (event) =>
-                actions.viewport.handleWorkspacePanZoomUpdate(event, workspace, viewportSize),
-            onPointerPanZoomEnd: (_) => actions.viewport.handleWorkspacePanZoomEnd(),
+                workspaceController.viewport.handleWorkspacePanZoomUpdate(event, workspace, viewportSize),
+            onPointerPanZoomEnd: (_) => workspaceController.viewport.handleWorkspacePanZoomEnd(),
             child: Stack(
               children: [
                 Positioned.fill(
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
-                    onTap: actions.window.clearPinnedHoverWindow,
+                    onTap: workspaceController.window.clearPinnedHoverWindow,
                     child: const SizedBox.expand(),
                   ),
                 ),
@@ -366,17 +292,17 @@ class WorkspaceScreen extends StatelessWidget {
         isLoaded: isLoaded,
         sharedVideoController: sharedVideoState?.controller,
         sharedVideoInitialization: sharedVideoState?.initialization,
-        isVideoPaused: actions.window.isVideoWindowPaused(window.asset.id),
+        isVideoPaused: workspaceController.playback.isVideoWindowPaused(window.asset.id),
         isSelected: windowInteractionState.selectedExposeWindowIds.contains(window.asset.id),
         editMode: appUiState.editMode,
         onOpen: () {
-          actions.window.focusWindow(window.asset.id);
-          actions.window.toggleExpose();
-          actions.window.flashWindow(window.asset.id);
+          workspaceController.window.focusWindow(window.asset.id);
+          appUiController.toggleExpose();
+          workspaceController.window.flashWindow(window.asset.id, mounted: mounted());
         },
-        onToggleSelected: () => actions.window.toggleSelectedWindow(window.asset.id),
+        onToggleSelected: () => environmentController.navigation.toggleSelectedWindow(window.asset.id),
         onShowInFinder: _showInFinderCallbackForWindow(window),
-        onRemove: () => actions.window.removeWindow(environment.activeWorkspaceId, window.asset.id),
+        onRemove: () => environmentController.history.removeWindow(environment.activeWorkspaceId, window.asset.id),
       ),
     );
   }
@@ -386,7 +312,7 @@ class WorkspaceScreen extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final viewportSize = constraints.biggest;
-          actions.viewport.trackViewportSize(viewportSize);
+          workspaceViewportState.setViewportSize(viewportSize);
 
           if (windows.isEmpty) {
             return const SizedBox.shrink();
@@ -438,11 +364,11 @@ class WorkspaceScreen extends StatelessWidget {
     final canvasViewModel = _buildWorkspaceCanvasViewModel(workspace);
 
     return DropTarget(
-      onDragEntered: (_) => actions.drop.setDropTargetActive(true),
-      onDragExited: (_) => actions.drop.setDropTargetActive(false),
+      onDragEntered: (_) => appUiState.setDropTargetActive(true),
+      onDragExited: (_) => appUiState.setDropTargetActive(false),
       onDragDone: (details) async {
-        actions.drop.setDropTargetActive(false);
-        await actions.drop.importFiles(details.files);
+        appUiState.setDropTargetActive(false);
+        await workspaceController.media.importFiles(details.files);
       },
       child: _buildWorkspaceCanvasLayers(context, canvasViewModel),
     );
@@ -450,6 +376,7 @@ class WorkspaceScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final openWorkspaces = environment.workspaces.where((workspace) => workspace.isOpen).toList();
     if (openWorkspaces.isEmpty) {
       return const SizedBox.shrink();
     }

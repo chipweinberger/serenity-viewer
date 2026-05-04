@@ -51,13 +51,8 @@ class LibraryView extends StatelessWidget {
       searchController: dependencies.uiHandles.searchController,
       workspaceSort: state.workspaceSort,
       refreshingWorkspaceIds: dependencies.workspaceController.thumbnails.refreshingWorkspaceIds,
-      actions: LibraryScreenActions(
-        onWorkspaceSortChanged: dependencies.appUiController.setWorkspaceSort,
-        onToggleWorkspaceOpen: dependencies.environmentController.management.toggleOpen,
-        onRenameWorkspace: dependencies.environmentController.management.renameWorkspace,
-        onDeleteWorkspace: dependencies.environmentController.management.confirmDeleteWorkspace,
-        onSetActiveWorkspace: dependencies.environmentController.navigation.setActiveWorkspace,
-      ),
+      appUiController: dependencies.appUiController,
+      environmentController: dependencies.environmentController,
     );
   }
 }
