@@ -1,5 +1,6 @@
 import 'package:serenity_viewer/src/app/runtime/app_runtime_groups.dart';
 import 'package:serenity_viewer/src/app/state/app_derived_state.dart';
+import 'package:serenity_viewer/src/app/state/app_state_store.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
 
 import 'package:serenity_viewer/src/app/views/app_main_view_contract.dart';
@@ -13,7 +14,7 @@ class AppMainViewBindings {
 }
 
 AppMainViewModel _buildAppMainViewModel({
-  required AppRuntimeState state,
+  required AppStateStore state,
   required AppDerivedState derivedState,
   required int selectedExposeWindowCount,
 }) {
@@ -105,7 +106,7 @@ AppMainViewActions _buildAppMainViewActions({
 }
 
 AppMainViewBindings buildAppMainViewBindings({
-  required AppRuntimeState state,
+  required AppStateStore state,
   required AppDerivedState derivedState,
   required AppFoundation foundation,
   required AppWorkspaceServices workspace,

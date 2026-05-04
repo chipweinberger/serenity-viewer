@@ -1,14 +1,11 @@
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
-import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
 import 'package:serenity_viewer/src/environment/store/environment_bookmark_synchronizer.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store.dart';
-import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/media/import/workspace_media_import_controller.dart';
 import 'package:serenity_viewer/src/media/video/media_inspector.dart';
 import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
-import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_asset_picker_controller.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_collate_controller.dart';
 import 'package:serenity_viewer/src/workspace/actions/workspace_expose_layout_controller.dart';
@@ -17,36 +14,12 @@ import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.d
 import 'package:serenity_viewer/src/workspace/controllers/workspace_viewport_session_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_window_controller.dart';
 import 'package:serenity_viewer/src/workspace/history/workspace_window_history_controller.dart';
-import 'package:serenity_viewer/src/workspace/history/workspace_window_history_state.dart';
 import 'package:serenity_viewer/src/workspace/input/workspace_shortcut_controller.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_launcher.dart';
 import 'package:serenity_viewer/src/workspace/links/workspace_links_prompts.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
-import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresh_state.dart';
 import 'package:serenity_viewer/src/workspace/tracking/workspace_view_tracking_controller.dart';
-import 'package:serenity_viewer/src/workspace/tracking/workspace_view_tracking_state.dart';
-import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
-
-class AppRuntimeState {
-  const AppRuntimeState({
-    required this.environmentStoreState,
-    required this.appUiState,
-    required this.windowInteractionState,
-    required this.workspaceViewTrackingState,
-    required this.workspaceViewportState,
-    required this.thumbnailRefreshState,
-    required this.workspaceWindowHistoryState,
-  });
-
-  final EnvironmentStoreState environmentStoreState;
-  final AppUiState appUiState;
-  final WindowInteractionState windowInteractionState;
-  final WorkspaceViewTrackingState workspaceViewTrackingState;
-  final WorkspaceViewportState workspaceViewportState;
-  final ThumbnailRefreshState thumbnailRefreshState;
-  final WorkspaceWindowHistoryState workspaceWindowHistoryState;
-}
 
 class AppFoundation {
   const AppFoundation({

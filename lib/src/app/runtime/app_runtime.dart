@@ -17,7 +17,6 @@ export 'package:serenity_viewer/src/app/runtime/app_runtime_inputs.dart';
 class AppRuntime {
   AppRuntime.assembled({
     required this.stateStore,
-    required this.state,
     required this.foundation,
     required this.documentCoordinator,
     required this.workspace,
@@ -26,7 +25,6 @@ class AppRuntime {
   });
 
   final AppStateStore stateStore;
-  final AppRuntimeState state;
   final AppFoundation foundation;
   final DocumentCoordinator documentCoordinator;
   final AppWorkspaceServices workspace;
@@ -66,15 +64,6 @@ class AppRuntime {
 
     return AppRuntime.assembled(
       stateStore: stateStore,
-      state: AppRuntimeState(
-        environmentStoreState: stateStore.environmentStoreState,
-        appUiState: stateStore.appUiState,
-        windowInteractionState: stateStore.windowInteractionState,
-        workspaceViewTrackingState: stateStore.workspaceViewTrackingState,
-        workspaceViewportState: stateStore.workspaceViewportState,
-        thumbnailRefreshState: stateStore.thumbnailRefreshState,
-        workspaceWindowHistoryState: stateStore.workspaceWindowHistoryState,
-      ),
       foundation: foundation,
       documentCoordinator: documentCoordinator,
       workspace: workspace,

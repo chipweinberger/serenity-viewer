@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/controllers/app_feedback_controller.dart';
 import 'package:serenity_viewer/src/app/runtime/app_runtime_groups.dart';
+import 'package:serenity_viewer/src/app/state/app_state_store.dart';
 import 'package:serenity_viewer/src/environment/asset.dart';
 import 'package:serenity_viewer/src/environment/document/document_coordinator.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
@@ -118,7 +119,7 @@ class AppMenuBindings {
 }
 
 AppMenuState _buildAppMenuState({
-  required AppRuntimeState state,
+  required AppStateStore state,
   required AppWorkspaceServices workspace,
 }) {
   final focusedWindow = workspace.workspaceWindowController.focusedWindowOrNull();
@@ -195,7 +196,7 @@ AppMenuWindowActions _buildAppMenuWindowActions({required AppWorkspaceServices w
 }
 
 AppMenuBindings buildAppMenuBindings({
-  required AppRuntimeState state,
+  required AppStateStore state,
   required AppFoundation foundation,
   required DocumentCoordinator documentCoordinator,
   required AppWorkspaceServices workspace,

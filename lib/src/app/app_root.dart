@@ -29,7 +29,7 @@ class _AppRootState extends State<AppRoot> {
   late final AppSettingsController _settings;
   late final DocumentPersistenceController _documentPersistence;
 
-  AppRuntimeState get _state => _runtime.state;
+  AppStateStore get _state => _runtime.stateStore;
   AppDerivedState get _derivedState => AppDerivedState(_state);
   AppFoundation get _foundation => _runtime.foundation;
   DocumentCoordinator get _documentCoordinator => _runtime.documentCoordinator;

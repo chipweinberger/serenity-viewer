@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/widgets.dart';
 
 import 'package:serenity_viewer/src/app/runtime/app_runtime.dart';
+import 'package:serenity_viewer/src/app/state/app_state_store.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/document/document_coordinator.dart';
 
@@ -17,7 +18,7 @@ class DocumentPersistenceController {
     required this.isRunningInWidgetTest,
   });
 
-  final AppRuntimeState state;
+  final AppStateStore state;
   final AppFoundation foundation;
   final DocumentCoordinator documentCoordinator;
   final bool Function() mounted;
