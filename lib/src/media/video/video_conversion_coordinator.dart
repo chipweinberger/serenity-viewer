@@ -3,9 +3,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-import 'package:serenity_viewer/src/media/video/media_bridge.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
+import 'package:serenity_viewer/src/media/video/media_inspector.dart';
 import 'package:serenity_viewer/src/media/video/video_models.dart';
 import 'package:serenity_viewer/src/workspace/window/content/asset_zoom_utils.dart';
 
@@ -14,7 +14,7 @@ class VideoConversionCoordinator {
     required this.context,
     required this.mounted,
     required this.showMessage,
-    required this.mediaBridge,
+    required this.mediaInspector,
     required this.createFileBookmark,
     required this.activeWorkspace,
     required this.replaceWorkspace,
@@ -25,7 +25,7 @@ class VideoConversionCoordinator {
   final BuildContext Function() context;
   final bool Function() mounted;
   final ValueChanged<String> showMessage;
-  final MediaBridge mediaBridge;
+  final MediaInspector mediaInspector;
   final Future<String?> Function(String path) createFileBookmark;
   final Workspace? Function() activeWorkspace;
   final void Function(Workspace workspace) replaceWorkspace;
@@ -111,12 +111,12 @@ class VideoConversionCoordinator {
       if (result == null || !await outputFile.exists()) {
         return null;
       }
-      final digest = await mediaBridge.md5ForFile(outputFile);
+      final digest = await mediaInspector.md5ForFile(outputFile);
       final width = (result['width'] as num?)?.toDouble();
       final height = (result['height'] as num?)?.toDouble();
       final dimensions = width != null && height != null
           ? Size(width, height)
-          : await mediaBridge.imageDimensionsForFile(outputFile);
+          : await mediaInspector.imageDimensionsForFile(outputFile);
       if (dimensions == null) {
         return null;
       }
@@ -154,7 +154,7 @@ class VideoConversionCoordinator {
       return;
     }
 
-    final probe = await mediaBridge.probeVideoFile(File(sourcePath));
+    final probe = await mediaInspector.probeVideoFile(File(sourcePath));
     if (probe == null || probe.width == null || probe.height == null) {
       showMessage('Serenity could not inspect that video for conversion.');
       return;

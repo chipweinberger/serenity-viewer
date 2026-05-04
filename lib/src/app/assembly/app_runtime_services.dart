@@ -8,7 +8,8 @@ import 'package:serenity_viewer/src/environment/session/environment_store.dart';
 import 'package:serenity_viewer/src/environment/session/environment_store_state.dart';
 import 'package:serenity_viewer/src/environment/session/workspace_view_tracking_state.dart';
 import 'package:serenity_viewer/src/media/import/workspace_media_import_controller.dart';
-import 'package:serenity_viewer/src/media/video/media_bridge.dart';
+import 'package:serenity_viewer/src/media/video/media_inspector.dart';
+import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
 import 'package:serenity_viewer/src/media/video/video_conversion_coordinator.dart';
 import 'package:serenity_viewer/src/settings/behavior/app_ui_state.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
@@ -47,15 +48,17 @@ class AppStateServices {
 class AppFoundation {
   const AppFoundation({
     required this.appUiController,
-    required this.mediaBridge,
+    required this.mediaInspector,
     required this.platformBridge,
+    required this.sharedVideoControllerPool,
     required this.environmentBookmarkSynchronizer,
     required this.environmentStore,
   });
 
   final AppUiController appUiController;
-  final MediaBridge mediaBridge;
+  final MediaInspector mediaInspector;
   final PlatformBridge platformBridge;
+  final SharedVideoControllerPool sharedVideoControllerPool;
   final EnvironmentBookmarkSynchronizer environmentBookmarkSynchronizer;
   final EnvironmentStore environmentStore;
 }

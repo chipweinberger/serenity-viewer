@@ -37,7 +37,7 @@ class WorkspaceContentBuilder {
       appUiState: state.uiState,
       windowInteractionState: state.windowInteractionState,
       loadPlan: workspaceLoadPlan,
-      sharedVideoLookup: state.mediaBridge.sharedVideoForWindow,
+      sharedVideoLookup: state.sharedVideoControllerPool.sharedVideoForWindow,
       actions: WorkspaceScreenActions(
         setDropTargetActive: (isActive) => actions.commitStateChange(() => state.uiState.isDropTargetActive = isActive),
         importFiles: actions.importFiles,

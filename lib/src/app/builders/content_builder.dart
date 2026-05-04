@@ -19,7 +19,10 @@ class ContentBuilder {
       environment: state.environment,
       activeWorkspace: state.activeWorkspaceOrNull,
     );
-    state.mediaBridge.syncSharedVideoControllers(loadPlan: workspaceLoadPlan, environment: state.environment);
+    state.sharedVideoControllerPool.syncSharedVideoControllers(
+      loadPlan: workspaceLoadPlan,
+      environment: state.environment,
+    );
 
     return Stack(
       children: [

@@ -3,7 +3,8 @@ import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/environment/session/environment_bookmark_synchronizer.dart';
 import 'package:serenity_viewer/src/environment/session/environment_store.dart';
 import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
-import 'package:serenity_viewer/src/media/video/media_bridge.dart';
+import 'package:serenity_viewer/src/media/video/media_inspector.dart';
+import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
 
 class AppFoundationFactory {
   const AppFoundationFactory(this.config);
@@ -26,7 +27,7 @@ class AppFoundationFactory {
       commitStateChange: config.shell.commitStateChange,
       refreshWorkspaceTracking: refreshWorkspaceTracking,
     );
-    final mediaBridge = MediaBridge(isRunningInWidgetTest: config.isRunningInWidgetTest);
+    final mediaInspector = MediaInspector(isRunningInWidgetTest: config.isRunningInWidgetTest);
     final platformBridge = PlatformBridge(
       environmentStoreState: environmentStoreState,
       isRunningInWidgetTest: config.isRunningInWidgetTest,
@@ -48,8 +49,9 @@ class AppFoundationFactory {
 
     return AppFoundation(
       appUiController: appUiController,
-      mediaBridge: mediaBridge,
+      mediaInspector: mediaInspector,
       platformBridge: platformBridge,
+      sharedVideoControllerPool: SharedVideoControllerPool(),
       environmentStore: environmentStore,
       environmentBookmarkSynchronizer: environmentBookmarkSynchronizer,
     );

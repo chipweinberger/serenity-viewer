@@ -12,8 +12,8 @@ import 'package:serenity_viewer/src/workspace/links/workspace_links_controller.d
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/settings/behavior/app_ui_state.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
-import 'package:serenity_viewer/src/media/video/media_bridge.dart';
 import 'package:serenity_viewer/src/environment/session/environment_session.dart';
+import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 import 'package:serenity_viewer/src/workspace/window/session/workspace_window_history_controller.dart';
 
@@ -31,7 +31,7 @@ class ContentState {
     required this.windowInteractionState,
     required this.workspaceViewportState,
     required this.appUiController,
-    required this.mediaBridge,
+    required this.sharedVideoControllerPool,
     required this.environmentSession,
     required this.workspaceLinksController,
     required this.thumbnailController,
@@ -52,7 +52,7 @@ class ContentState {
   final WindowInteractionState windowInteractionState;
   final WorkspaceViewportState workspaceViewportState;
   final AppUiController appUiController;
-  final MediaBridge mediaBridge;
+  final SharedVideoControllerPool sharedVideoControllerPool;
   final EnvironmentSession environmentSession;
   final WorkspaceLinksController workspaceLinksController;
   final ThumbnailController thumbnailController;

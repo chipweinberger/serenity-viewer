@@ -8,7 +8,7 @@ import 'package:serenity_viewer/src/environment/session/environment_store_state.
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/foundation/serenity_identity.dart';
 import 'package:serenity_viewer/src/media/import/import_coordinator.dart';
-import 'package:serenity_viewer/src/media/video/media_bridge.dart';
+import 'package:serenity_viewer/src/media/video/media_inspector.dart';
 import 'package:serenity_viewer/src/media/video/video_conversion_coordinator.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_controller.dart';
 
@@ -20,7 +20,7 @@ class WorkspaceMediaImportController {
     required this.activeWorkspace,
     required this.videoConversionCoordinator,
     required this.createFileBookmark,
-    required this.mediaBridge,
+    required this.mediaInspector,
     required this.updateEnvironment,
     required this.thumbnailController,
     required this.showMessage,
@@ -32,7 +32,7 @@ class WorkspaceMediaImportController {
   final Workspace Function() activeWorkspace;
   final VideoConversionCoordinator videoConversionCoordinator;
   final Future<String?> Function(String path) createFileBookmark;
-  final MediaBridge mediaBridge;
+  final MediaInspector mediaInspector;
   final ValueChanged<Environment> updateEnvironment;
   final ThumbnailController thumbnailController;
   final ValueChanged<String> showMessage;
@@ -86,10 +86,10 @@ class WorkspaceMediaImportController {
         );
       },
       createFileBookmark: createFileBookmark,
-      md5ForFile: mediaBridge.md5ForFile,
-      imageDimensionsForFile: mediaBridge.imageDimensionsForFile,
-      videoDurationMsForFile: mediaBridge.videoDurationMsForFile,
-      probeVideoFile: mediaBridge.probeVideoFile,
+      md5ForFile: mediaInspector.md5ForFile,
+      imageDimensionsForFile: mediaInspector.imageDimensionsForFile,
+      videoDurationMsForFile: mediaInspector.videoDurationMsForFile,
+      probeVideoFile: mediaInspector.probeVideoFile,
       newId: newSerenityId,
       colorFromDigest: assetColorValueFromDigest,
     );

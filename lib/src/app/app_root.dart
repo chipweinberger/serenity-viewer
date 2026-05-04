@@ -135,7 +135,7 @@ class _AppRootState extends State<AppRoot> {
         windowInteractionState: _state.windowInteractionState,
         workspaceViewportState: _state.workspaceViewportState,
         appUiController: _foundation.appUiController,
-        mediaBridge: _foundation.mediaBridge,
+        sharedVideoControllerPool: _foundation.sharedVideoControllerPool,
         environmentSession: _workspaceRuntime.environmentSession,
         workspaceLinksController: _workspaceRuntime.workspaceLinksController,
         thumbnailController: _workspaceRuntime.thumbnailController,

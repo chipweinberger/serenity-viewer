@@ -87,7 +87,7 @@ class AppRuntime {
     dependencies.workspaceViewTrackingState.dispose();
     dependencies.windowInteractionState.dispose();
     workspace.thumbnailController.dispose();
-    foundation.mediaBridge.dispose();
+    foundation.sharedVideoControllerPool.dispose();
     state.handles.dispose();
   }
 }
