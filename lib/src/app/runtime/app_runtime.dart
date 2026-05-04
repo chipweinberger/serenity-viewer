@@ -8,7 +8,6 @@ import 'package:serenity_viewer/src/app/runtime/factories/app_foundation_factory
 import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory.dart';
 import 'package:serenity_viewer/src/app/runtime/app_runtime_groups.dart';
 import 'package:serenity_viewer/src/app/runtime/app_runtime_inputs.dart';
-import 'package:serenity_viewer/src/app/state/app_state_store.dart';
 import 'package:serenity_viewer/src/environment/document/document_coordinator.dart';
 
 export 'package:serenity_viewer/src/app/runtime/app_runtime_groups.dart';
@@ -16,7 +15,6 @@ export 'package:serenity_viewer/src/app/runtime/app_runtime_inputs.dart';
 
 class AppRuntime {
   AppRuntime.assembled({
-    required this.stateStore,
     required this.foundation,
     required this.documentCoordinator,
     required this.workspace,
@@ -24,7 +22,6 @@ class AppRuntime {
     required this.appLifecycleListener,
   });
 
-  final AppStateStore stateStore;
   final AppFoundation foundation;
   final DocumentCoordinator documentCoordinator;
   final AppWorkspaceServices workspace;
@@ -63,7 +60,6 @@ class AppRuntime {
     );
 
     return AppRuntime.assembled(
-      stateStore: stateStore,
       foundation: foundation,
       documentCoordinator: documentCoordinator,
       workspace: workspace,
@@ -78,6 +74,5 @@ class AppRuntime {
     workspace.workspaceViewTrackingController.cancel();
     workspace.thumbnailController.dispose();
     foundation.sharedVideoControllerPool.dispose();
-    stateStore.dispose();
   }
 }

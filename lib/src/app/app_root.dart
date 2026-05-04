@@ -28,7 +28,7 @@ class _AppRootState extends State<AppRoot> {
   late final AppSettingsController _settings;
   late final DocumentPersistenceController _documentPersistence;
 
-  AppStateStore get _state => _runtime.stateStore;
+  AppStateStore get _state => _stateStore;
   AppFoundation get _foundation => _runtime.foundation;
   DocumentCoordinator get _documentCoordinator => _runtime.documentCoordinator;
   AppWorkspaceServices get _workspaceRuntime => _runtime.workspace;
@@ -80,6 +80,7 @@ class _AppRootState extends State<AppRoot> {
   @override
   void dispose() {
     _runtime.dispose();
+    _stateStore.dispose();
     _uiHandles.dispose();
     super.dispose();
   }
