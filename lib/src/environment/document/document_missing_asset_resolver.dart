@@ -1,13 +1,13 @@
 import 'dart:io';
 
-import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
+import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 
 typedef BookmarkResolver = Future<String?> Function(String bookmark);
 typedef BookmarkCreator = Future<String?> Function(String path);
 
-Future<String?> locateMissingAssetFile({
+Future<String?> locateDocumentMissingAssetFile({
   required String filename,
   required String? originalPath,
   required List<String> rankedFolders,
@@ -28,7 +28,7 @@ Future<String?> locateMissingAssetFile({
   return null;
 }
 
-Future<Environment> resolveMissingAssetsInEnvironment({
+Future<Environment> resolveDocumentMissingAssets({
   required Environment environment,
   required BookmarkResolver resolveBookmark,
   required BookmarkCreator createBookmark,
@@ -82,7 +82,7 @@ Future<Environment> resolveMissingAssetsInEnvironment({
         }
       }
 
-      final resolvedPath = await locateMissingAssetFile(
+      final resolvedPath = await locateDocumentMissingAssetFile(
         filename: window.asset.filename,
         originalPath: path,
         rankedFolders: rankedFolders,

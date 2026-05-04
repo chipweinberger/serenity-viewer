@@ -24,7 +24,7 @@ class _DocumentLoader {
     try {
       final bytes = await XFile(path).readAsBytes();
       final decoded = decodeDocumentBytes(bytes);
-      final resolved = await resolveMissingAssetsInEnvironment(
+      final resolved = await resolveDocumentMissingAssets(
         environment: decoded.environment,
         resolveBookmark: coordinator.resolveFileBookmark,
         createBookmark: coordinator.createFileBookmark,

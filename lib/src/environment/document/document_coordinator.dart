@@ -8,8 +8,8 @@ import 'package:serenity_viewer/src/environment/session/environment_store.dart';
 import 'package:serenity_viewer/src/environment/session/environment_store_state.dart';
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
-import 'package:serenity_viewer/src/file_resolution/missing_asset_resolution.dart';
 import 'package:serenity_viewer/src/environment/document/document_codec.dart';
+import 'package:serenity_viewer/src/environment/document/document_missing_asset_resolver.dart';
 import 'package:serenity_viewer/src/media/video/settings_and_video_models.dart';
 
 part 'document_loader.dart';
