@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 
 import 'package:serenity_viewer/src/app/app_shell/app_shell_derived_state.dart';
 import 'package:serenity_viewer/src/app/app_shell/app_shell_runtime.dart';
-import 'package:serenity_viewer/src/app/app_shell/controllers/app_shell_environment_controller.dart';
+import 'package:serenity_viewer/src/app/environment/app_environment_controller.dart';
 import 'package:serenity_viewer/src/app/app_shell/controllers/app_shell_media_import_controller.dart';
 import 'package:serenity_viewer/src/app/app_shell/controllers/app_shell_navigation_controller.dart';
 import 'package:serenity_viewer/src/app/app_shell/controllers/app_shell_ui_controller.dart';
 import 'package:serenity_viewer/src/app/app_shell/controllers/app_shell_window_controller.dart';
 import 'package:serenity_viewer/src/app/app_shell/controllers/app_shell_window_history_controller.dart';
 import 'package:serenity_viewer/src/app/app_shell/controllers/app_shell_workspace_geometry_controller.dart';
+import 'package:serenity_viewer/src/settings/behavior/chrome_controller.dart';
 import 'package:serenity_viewer/src/workspace/session/recently_closed_window_entry.dart';
 
 class AppShellControllers {
@@ -40,11 +41,12 @@ class AppShellControllers {
   final AppShellRuntimeDocumentServices documents;
   final AppShellRuntimeWorkspaceServices workspace;
 
-  AppShellEnvironmentController get environment {
-    return AppShellEnvironmentController(
-      environmentController: foundation.environmentController,
-      chromeController: foundation.chromeController,
-    );
+  EnvironmentController get environment {
+    return foundation.environmentController;
+  }
+
+  ChromeController get chrome {
+    return foundation.chromeController;
   }
 
   AppShellNavigationController get navigation {
