@@ -7,10 +7,15 @@ import 'package:serenity_viewer/src/app/state/app_state_store.dart';
 import 'package:serenity_viewer/src/app/state/app_ui_handles.dart';
 import 'package:serenity_viewer/src/app/controllers/app_feedback_controller.dart';
 import 'package:serenity_viewer/src/app/seed_environment.dart';
+import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
+import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
 import 'package:serenity_viewer/src/app/menu/app_menu.dart';
 import 'package:serenity_viewer/src/app/views/app_main_view.dart';
 import 'package:serenity_viewer/src/environment/document/document_persistence_controller.dart';
 import 'package:serenity_viewer/src/environment/document/document_coordinator.dart';
+import 'package:serenity_viewer/src/environment/store/environment_bookmark_synchronizer.dart';
+import 'package:serenity_viewer/src/environment/store/environment_store.dart';
+import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
 import 'package:serenity_viewer/src/settings/behavior/app_settings_controller.dart';
 
 class AppRoot extends StatefulWidget {
@@ -29,9 +34,14 @@ class _AppRootState extends State<AppRoot> {
   late final DocumentPersistenceController _documentPersistence;
 
   AppStateStore get _state => _stateStore;
-  AppFoundation get _foundation => _runtime.foundation;
   DocumentCoordinator get _documentCoordinator => _runtime.documentCoordinator;
   AppWorkspaceServices get _workspaceRuntime => _runtime.workspace;
+  AppUiController get _appUiController => _runtime.foundation.appUiController;
+  SharedVideoControllerPool get _sharedVideoControllerPool => _runtime.foundation.sharedVideoControllerPool;
+  PlatformBridge get _platformBridge => _runtime.foundation.platformBridge;
+  EnvironmentStore get _environmentStore => _runtime.foundation.environmentStore;
+  EnvironmentBookmarkSynchronizer get _environmentBookmarkSynchronizer =>
+      _runtime.foundation.environmentBookmarkSynchronizer;
 
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), behavior: SnackBarBehavior.floating));
@@ -40,9 +50,9 @@ class _AppRootState extends State<AppRoot> {
   AppMainViewBindings _buildAppMainViewBindings() {
     return buildAppMainViewBindings(
       state: _state,
-      appUiController: _foundation.appUiController,
-      sharedVideoControllerPool: _foundation.sharedVideoControllerPool,
-      revealAssetInFinder: _foundation.platformBridge.revealAssetInFinder,
+      appUiController: _appUiController,
+      sharedVideoControllerPool: _sharedVideoControllerPool,
+      revealAssetInFinder: _platformBridge.revealAssetInFinder,
       workspaceController: _workspaceRuntime.workspaceController,
       environmentController: _workspaceRuntime.environmentController,
       workspaceExposeLayoutController: _workspaceRuntime.workspaceExposeLayoutController,
@@ -77,13 +87,13 @@ class _AppRootState extends State<AppRoot> {
     _settings = AppSettingsController(
       context: () => context,
       environmentStoreState: _state.environmentStoreState,
-      updateEnvironment: _foundation.environmentStore.updateEnvironment,
+      updateEnvironment: _environmentStore.updateEnvironment,
     );
     _documentPersistence = DocumentPersistenceController(
       state: _state,
-      environmentStore: _foundation.environmentStore,
-      platformBridge: _foundation.platformBridge,
-      environmentBookmarkSynchronizer: _foundation.environmentBookmarkSynchronizer,
+      environmentStore: _environmentStore,
+      platformBridge: _platformBridge,
+      environmentBookmarkSynchronizer: _environmentBookmarkSynchronizer,
       documentCoordinator: _documentCoordinator,
       mounted: () => mounted,
       seedEnvironment: buildSeedEnvironment,
@@ -108,8 +118,8 @@ class _AppRootState extends State<AppRoot> {
       mounted: () => mounted,
       showMessage: _showMessage,
       isRunningInWidgetTest: _isRunningInWidgetTest,
-      environmentStore: () => _foundation.environmentStore,
-      appUiController: () => _foundation.appUiController,
+      environmentStore: () => _environmentStore,
+      appUiController: () => _appUiController,
       workspaceWindowController: () => _workspaceRuntime.workspaceWindowController,
       workspaceViewportSessionController: () => _workspaceRuntime.workspaceViewportSessionController,
       documentPersistence: () => _documentPersistence,
@@ -124,8 +134,8 @@ class _AppRootState extends State<AppRoot> {
   AppMenuBindings _buildAppMenuBindings() {
     return buildAppMenuBindings(
       state: _state,
-      appUiController: _foundation.appUiController,
-      revealAssetInFinder: _foundation.platformBridge.revealAssetInFinder,
+      appUiController: _appUiController,
+      revealAssetInFinder: _platformBridge.revealAssetInFinder,
       documentCoordinator: _documentCoordinator,
       workspaceWindowController: _workspaceRuntime.workspaceWindowController,
       workspaceController: _workspaceRuntime.workspaceController,
