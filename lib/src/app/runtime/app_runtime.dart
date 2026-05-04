@@ -14,14 +14,12 @@ import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/app/runtime/factories/app_document_factory.dart';
 import 'package:serenity_viewer/src/app/runtime/factories/app_foundation_factory.dart';
 import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory.dart';
-import 'package:serenity_viewer/src/app/runtime/factories/app_workspace_factory_scope.dart';
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
 import 'package:serenity_viewer/src/environment/document/document_coordinator.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
 import 'package:serenity_viewer/src/environment/store/environment_bookmark_synchronizer.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store.dart';
-import 'package:serenity_viewer/src/media/video/media_inspector.dart';
 import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/thumbnails/thumbnail_refresh_state.dart';
@@ -95,41 +93,37 @@ AppRuntime createAppRuntime({
   required VoidCallback toggleExpose,
   required ValueChanged<String> toggleVideoPlayback,
 }) {
-  late final ({
-    AppUiController appUiController,
-    MediaInspector mediaInspector,
-    PlatformBridge platformBridge,
-    SharedVideoControllerPool sharedVideoControllerPool,
-    EnvironmentBookmarkSynchronizer environmentBookmarkSynchronizer,
-    EnvironmentStore environmentStore,
-  })
-  foundation;
-  late final ({
-    WorkspaceController workspaceController,
-    EnvironmentController environmentController,
-    EnvironmentWindowHistoryController environmentWindowHistoryController,
-  })
-  workspace;
+  late final AppFoundation foundation;
+  late final AppUiController appUiController;
+  late final EnvironmentStore environmentStore;
+  late final WorkspaceParts workspace;
 
   foundation = createAppFoundation(
     isRunningInWidgetTest: isRunningInWidgetTest,
     environmentStoreState: environmentStoreState,
-    appUiState: appUiState,
-    windowInteractionState: windowInteractionState,
     windowTitle: windowTitle,
     showMessage: showMessage,
     mounted: mounted,
-    refreshWorkspaceTracking: () async => workspace.workspaceController.tracking.refresh(),
+  );
+  appUiController = AppUiController(
+    appUiState: appUiState,
+    windowInteractionState: windowInteractionState,
+    refreshWorkspaceTracking: () => workspace.workspaceController.tracking.refresh(),
+  );
+  environmentStore = EnvironmentStore(
+    environmentStoreState: environmentStoreState,
+    appUiState: appUiState,
     markWorkspaceThumbnailDirty: (workspaceId) =>
         workspace.workspaceController.thumbnails.markWorkspaceDirty(workspaceId),
-    syncWindowTitle: () async => foundation.platformBridge.syncWindowTitle(),
+    refreshWorkspaceTracking: () => workspace.workspaceController.tracking.refresh(),
+    syncWindowTitle: foundation.platformBridge.syncWindowTitle,
   );
-  workspace = createAppWorkspaceServices(
-    inputs: WorkspaceFactoryInputs(
+  workspace = assembleWorkspace(
+    dependencies: WorkspaceDependencies(
       platformBridge: foundation.platformBridge,
-      environmentStore: foundation.environmentStore,
+      environmentStore: environmentStore,
       mediaInspector: foundation.mediaInspector,
-      appUiController: foundation.appUiController,
+      appUiController: appUiController,
       isRunningInWidgetTest: isRunningInWidgetTest,
       context: context,
       mounted: mounted,
@@ -158,7 +152,7 @@ AppRuntime createAppRuntime({
   );
   final documentCoordinator = createAppDocumentCoordinator(
     environmentStoreState: environmentStoreState,
-    environmentStore: foundation.environmentStore,
+    environmentStore: environmentStore,
     context: context,
     mounted: mounted,
     seedEnvironment: seedEnvironment,
@@ -187,10 +181,10 @@ AppRuntime createAppRuntime({
   );
 
   return AppRuntime(
-    appUiController: foundation.appUiController,
+    appUiController: appUiController,
     platformBridge: foundation.platformBridge,
     sharedVideoControllerPool: foundation.sharedVideoControllerPool,
-    environmentStore: foundation.environmentStore,
+    environmentStore: environmentStore,
     environmentBookmarkSynchronizer: foundation.environmentBookmarkSynchronizer,
     documentCoordinator: documentCoordinator,
     workspaceController: workspace.workspaceController,
