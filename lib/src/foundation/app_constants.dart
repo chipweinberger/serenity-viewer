@@ -4,6 +4,7 @@ const MethodChannel bookmarkChannel = MethodChannel('serenity/file_bookmarks');
 const MethodChannel cursorChannel = MethodChannel('serenity/mouse_cursor');
 const MethodChannel dockImportChannel = MethodChannel('serenity/dock_import');
 const MethodChannel fileActionsChannel = MethodChannel('serenity/file_actions');
+const MethodChannel applicationChannel = MethodChannel('serenity/application');
 const MethodChannel preferencesChannel = MethodChannel('serenity/preferences');
 const MethodChannel videoToolsChannel = MethodChannel('serenity/video_tools');
 const MethodChannel windowChannel = MethodChannel('serenity/window');

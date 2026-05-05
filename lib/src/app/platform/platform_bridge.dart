@@ -75,6 +75,18 @@ class PlatformBridge {
     }
   }
 
+  Future<void> relaunchApplication() async {
+    if (isRunningInWidgetTest || !Platform.isMacOS) {
+      return;
+    }
+
+    try {
+      await applicationChannel.invokeMethod<void>('relaunchApplication');
+    } catch (_) {
+      _showMessageIfMounted('Serenity could not reload right now.');
+    }
+  }
+
   Future<String?> loadLastEnvironmentPath() async {
     if (isRunningInWidgetTest || !Platform.isMacOS) {
       return null;

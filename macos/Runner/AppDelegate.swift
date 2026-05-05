@@ -2,6 +2,8 @@ import Cocoa
 import AVFoundation
 import FlutterMacOS
 
+private let relaunchWindowFrameDefaultsKey = "serenity.relaunchWindowFrame"
+
 @main
 class AppDelegate: FlutterAppDelegate {
   private var activeSecurityScopedUrls: [URL] = []
@@ -32,6 +34,10 @@ class AppDelegate: FlutterAppDelegate {
     )
     let fileActionsChannel = FlutterMethodChannel(
       name: "serenity/file_actions",
+      binaryMessenger: controller.engine.binaryMessenger
+    )
+    let applicationChannel = FlutterMethodChannel(
+      name: "serenity/application",
       binaryMessenger: controller.engine.binaryMessenger
     )
     let videoToolsChannel = FlutterMethodChannel(
@@ -131,6 +137,20 @@ class AppDelegate: FlutterAppDelegate {
       }
 
       result(self.revealInFinder(path: path))
+    }
+
+    applicationChannel.setMethodCallHandler { [weak self] call, result in
+      guard let self else {
+        result(nil)
+        return
+      }
+
+      guard call.method == "relaunchApplication" else {
+        result(FlutterMethodNotImplemented)
+        return
+      }
+
+      result(self.relaunchApplication())
     }
 
     videoToolsChannel.setMethodCallHandler { [weak self] call, result in
@@ -397,6 +417,31 @@ class AppDelegate: FlutterAppDelegate {
 
     NSWorkspace.shared.activateFileViewerSelecting([url])
     return true
+  }
+
+  private func relaunchApplication() -> Bool {
+    let bundlePath = Bundle.main.bundlePath
+    if let windowFrame = mainFlutterWindow?.frame {
+      UserDefaults.standard.set(NSStringFromRect(windowFrame), forKey: relaunchWindowFrameDefaultsKey)
+    }
+
+    let process = Process()
+    process.executableURL = URL(fileURLWithPath: "/bin/sh")
+    process.arguments = [
+      "-c",
+      "while kill -0 \(ProcessInfo.processInfo.processIdentifier) 2>/dev/null; do sleep 0.1; done; open '\(bundlePath)'",
+    ]
+
+    do {
+      try process.run()
+      DispatchQueue.main.async {
+        NSApp.terminate(nil)
+      }
+      return true
+    } catch {
+      UserDefaults.standard.removeObject(forKey: relaunchWindowFrameDefaultsKey)
+      return false
+    }
   }
 
   private func probeVideo(path: String) -> [String: Any]? {

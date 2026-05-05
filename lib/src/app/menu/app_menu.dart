@@ -156,6 +156,7 @@ class AppMenu extends StatelessWidget {
 
   List<PlatformMenuItem> _buildAppMenuItems({
     required AppFeedbackController feedback,
+    required PlatformBridge platformBridge,
     required AppSettingsController settings,
   }) {
     return [
@@ -164,6 +165,11 @@ class AppMenu extends StatelessWidget {
         label: 'Settings',
         onSelected: () => unawaited(settings.openSettings()),
         shortcut: const SingleActivator(LogicalKeyboardKey.comma, meta: true),
+      ),
+      PlatformMenuItem(
+        label: 'Reload Serenity',
+        onSelected: () => unawaited(platformBridge.relaunchApplication()),
+        shortcut: const SingleActivator(LogicalKeyboardKey.keyQ, meta: true, shift: true),
       ),
       PlatformMenuItem(
         label: 'Quit Serenity',
@@ -398,7 +404,11 @@ class AppMenu extends StatelessWidget {
     final menus = <PlatformMenu>[
       PlatformMenu(
         label: 'Serenity',
-        menus: _buildAppMenuItems(feedback: dependencies.feedback, settings: dependencies.settings),
+        menus: _buildAppMenuItems(
+          feedback: dependencies.feedback,
+          platformBridge: dependencies.platformBridge,
+          settings: dependencies.settings,
+        ),
       ),
       PlatformMenu(
         label: 'File',
