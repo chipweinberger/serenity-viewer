@@ -8,6 +8,7 @@ import 'package:serenity_viewer/src/foundation/app_constants.dart';
 class WindowOverlay extends StatelessWidget {
   const WindowOverlay({
     super.key,
+    required this.windowSize,
     required this.workspaceZoom,
     required this.filename,
     required this.isSelected,
@@ -30,6 +31,7 @@ class WindowOverlay extends StatelessWidget {
     required this.onTogglePlayback,
   });
 
+  final Size windowSize;
   final double workspaceZoom;
   final String filename;
   final bool isSelected;
@@ -53,7 +55,7 @@ class WindowOverlay extends StatelessWidget {
 
   double get _uiScale {
     final safeZoom = workspaceZoom <= 0 ? 1.0 : workspaceZoom;
-    return (1 / safeZoom).clamp(0.85, 2.1);
+    return (1 / safeZoom).clamp(0.25, 1.2);
   }
 
   bool get _showsAnyVideoControl {
@@ -63,83 +65,57 @@ class WindowOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final uiScale = _uiScale;
-    final edgeInset = 10.0 * uiScale;
-    final selectSize = 7.0 * uiScale;
-    final closeSize = 8.0 * uiScale;
-    final smallActionSize = 7.0 * uiScale;
-    final iconSize = 16.0 * uiScale;
-    final bottomIconSize = 14.0 * uiScale;
-    final controlGap = 8.0 * uiScale;
-    final bottomGap = 6.0 * uiScale;
-    final titleVertical = 7.0 * uiScale;
-    final titleHorizontal = 10.0 * uiScale;
+    final metrics = _WindowOverlayMetrics(uiScale: uiScale, showsVideoControls: _showsAnyVideoControl);
+    final layoutMode = metrics.layoutModeForWindow(windowSize);
     final titleStyle = Theme.of(
       context,
     ).textTheme.labelMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 12 * uiScale);
 
     return Positioned.fill(
       child: Padding(
-        padding: EdgeInsets.all(edgeInset),
+        padding: EdgeInsets.all(metrics.edgeInset),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Material(
-                  color: isSelected ? const Color(0xFF3B82F6) : Colors.black.withValues(alpha: 0.38),
-                  borderRadius: BorderRadius.circular(999),
-                  child: InkWell(
-                    onTap: onToggleSelected,
-                    borderRadius: BorderRadius.circular(999),
-                    child: Padding(
-                      padding: EdgeInsets.all(selectSize),
-                      child: Icon(
-                        isSelected ? Icons.check_rounded : Icons.circle_outlined,
-                        size: iconSize,
-                        color: Colors.white,
+                if (layoutMode != _WindowOverlayLayoutMode.closeOnly) ...[
+                  _buildSelectButton(metrics),
+                  if (layoutMode == _WindowOverlayLayoutMode.full) ...[
+                    SizedBox(width: metrics.controlGap),
+                    Expanded(
+                      child: Material(
+                        color: Colors.black.withValues(alpha: 0.48),
+                        borderRadius: BorderRadius.circular(999),
+                        child: InkWell(
+                          onTap: onShowInFinder,
+                          borderRadius: BorderRadius.circular(999),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: metrics.titleHorizontal,
+                              vertical: metrics.titleVertical,
+                            ),
+                            child: Text(filename, overflow: TextOverflow.ellipsis, style: titleStyle),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-                SizedBox(width: controlGap),
-                Expanded(
-                  child: Material(
-                    color: Colors.black.withValues(alpha: 0.48),
-                    borderRadius: BorderRadius.circular(999),
-                    child: InkWell(
-                      onTap: onShowInFinder,
-                      borderRadius: BorderRadius.circular(999),
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: titleHorizontal, vertical: titleVertical),
-                        child: Text(filename, overflow: TextOverflow.ellipsis, style: titleStyle),
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: controlGap),
-                Material(
-                  color: Colors.black.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(999),
-                  child: InkWell(
-                    onTap: onClose,
-                    borderRadius: BorderRadius.circular(999),
-                    child: Padding(
-                      padding: EdgeInsets.all(closeSize),
-                      child: Icon(Icons.close_rounded, size: iconSize, color: Colors.white),
-                    ),
-                  ),
-                ),
+                    SizedBox(width: metrics.controlGap),
+                  ],
+                ],
+                if (layoutMode != _WindowOverlayLayoutMode.full) const Spacer(),
+                _buildCloseButton(metrics),
               ],
             ),
             const Spacer(),
-            if (_showsAnyVideoControl) ...[
+            if (layoutMode == _WindowOverlayLayoutMode.full && _showsAnyVideoControl) ...[
               _WindowVideoControls(
                 controller: sharedVideoController,
                 initialization: sharedVideoInitialization,
                 isPaused: isVideoPaused,
                 positionMs: videoPositionMs,
                 playbackSpeed: playbackSpeed,
-                workspaceZoom: workspaceZoom,
+                uiScale: uiScale,
                 showControls: showVideoControls,
                 showPausedPlaybackButton: showPausedPlaybackButton,
                 onControlInteractionChanged: onVideoControlInteractionChanged,
@@ -147,46 +123,144 @@ class WindowOverlay extends StatelessWidget {
                 onCyclePlaybackSpeed: onCycleVideoPlaybackSpeed,
                 onTogglePlayback: onTogglePlayback,
               ),
-              SizedBox(height: bottomGap),
+              SizedBox(height: metrics.bottomGap),
             ],
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (onFitToContent != null) ...[
+            if (layoutMode != _WindowOverlayLayoutMode.closeOnly)
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (onFitToContent != null) ...[
+                    Material(
+                      color: Colors.black.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(999),
+                      child: InkWell(
+                        onTap: onFitToContent,
+                        borderRadius: BorderRadius.circular(999),
+                        child: Padding(
+                          padding: EdgeInsets.all(metrics.smallActionSize),
+                          child: Icon(Icons.fit_screen_rounded, size: metrics.bottomIconSize, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: metrics.bottomGap),
+                  ],
                   Material(
                     color: Colors.black.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(999),
                     child: InkWell(
-                      onTap: onFitToContent,
+                      onTap: onRestorePreviousZOrder,
                       borderRadius: BorderRadius.circular(999),
                       child: Padding(
-                        padding: EdgeInsets.all(smallActionSize),
-                        child: Icon(Icons.fit_screen_rounded, size: bottomIconSize, color: Colors.white),
+                        padding: EdgeInsets.all(metrics.smallActionSize),
+                        child: Icon(Icons.flip_to_back_rounded, size: metrics.bottomIconSize, color: Colors.white),
                       ),
                     ),
                   ),
-                  SizedBox(width: bottomGap),
                 ],
-                Material(
-                  color: Colors.black.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(999),
-                  child: InkWell(
-                    onTap: onRestorePreviousZOrder,
-                    borderRadius: BorderRadius.circular(999),
-                    child: Padding(
-                      padding: EdgeInsets.all(smallActionSize),
-                      child: Icon(Icons.flip_to_back_rounded, size: bottomIconSize, color: Colors.white),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
           ],
         ),
       ),
     );
   }
+
+  Widget _buildSelectButton(_WindowOverlayMetrics metrics) {
+    return Material(
+      color: isSelected ? const Color(0xFF3B82F6) : Colors.black.withValues(alpha: 0.38),
+      borderRadius: BorderRadius.circular(999),
+      child: InkWell(
+        onTap: onToggleSelected,
+        borderRadius: BorderRadius.circular(999),
+        child: Padding(
+          padding: EdgeInsets.all(metrics.selectSize),
+          child: Icon(
+            isSelected ? Icons.check_rounded : Icons.circle_outlined,
+            size: metrics.iconSize,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCloseButton(_WindowOverlayMetrics metrics) {
+    return Material(
+      color: Colors.black.withValues(alpha: 0.5),
+      borderRadius: BorderRadius.circular(999),
+      child: InkWell(
+        onTap: onClose,
+        borderRadius: BorderRadius.circular(999),
+        child: Padding(
+          padding: EdgeInsets.all(metrics.closeSize),
+          child: Icon(Icons.close_rounded, size: metrics.iconSize, color: Colors.white),
+        ),
+      ),
+    );
+  }
 }
+
+class _WindowOverlayMetrics {
+  const _WindowOverlayMetrics({required this.uiScale, required this.showsVideoControls});
+
+  final double uiScale;
+  final bool showsVideoControls;
+
+  double get edgeInset => 10.0 * uiScale;
+  double get selectSize => 7.0 * uiScale;
+  double get closeSize => 8.0 * uiScale;
+  double get smallActionSize => 7.0 * uiScale;
+  double get iconSize => 16.0 * uiScale;
+  double get bottomIconSize => 14.0 * uiScale;
+  double get controlGap => 8.0 * uiScale;
+  double get bottomGap => 6.0 * uiScale;
+  double get titleVertical => 7.0 * uiScale;
+  double get titleHorizontal => 10.0 * uiScale;
+  double get minTitleWidth => 72.0 * uiScale;
+  double get minVideoControlsWidth => 132.0 * uiScale;
+  double get topButtonDiameter => (selectSize * 2) + iconSize;
+  double get closeButtonDiameter => (closeSize * 2) + iconSize;
+  double get bottomButtonDiameter => (smallActionSize * 2) + bottomIconSize;
+  double get topRowHeight => topButtonDiameter;
+  double get bottomRowWidth => bottomButtonDiameter * 2 + bottomGap;
+  double get bottomRowHeight => bottomButtonDiameter;
+  double get videoControlsHeight => 62.0 * uiScale;
+  double get videoControlsBlockHeight => showsVideoControls ? videoControlsHeight + bottomGap : 0;
+  double get compactTopRowWidth => (edgeInset * 2) + topButtonDiameter + controlGap + closeButtonDiameter;
+  double get compactMinHeight => (edgeInset * 2) + topRowHeight + bottomRowHeight + 24.0;
+  double get closeOnlyMinWidth => (edgeInset * 2) + closeButtonDiameter;
+  double get closeOnlyMinHeight => (edgeInset * 2) + closeButtonDiameter;
+
+  double get minFullWidth {
+    final topRowWidth =
+        (edgeInset * 2) + topButtonDiameter + controlGap + minTitleWidth + controlGap + closeButtonDiameter;
+    final minBottomWidth = (edgeInset * 2) + bottomRowWidth;
+    final minVideoWidth = showsVideoControls ? (edgeInset * 2) + minVideoControlsWidth : 0;
+    return [topRowWidth, minBottomWidth, minVideoWidth].reduce((a, b) => a > b ? a : b).toDouble();
+  }
+
+  double get minFullHeight => (edgeInset * 2) + topRowHeight + bottomRowHeight + videoControlsBlockHeight + 24.0;
+
+  _WindowOverlayLayoutMode layoutModeForWindow(Size size) {
+    final canRenderFullOverlay = size.width >= minFullWidth && size.height >= minFullHeight;
+    if (canRenderFullOverlay) {
+      return _WindowOverlayLayoutMode.full;
+    }
+
+    final canRenderCompactOverlay = size.width >= compactTopRowWidth && size.height >= compactMinHeight;
+    if (canRenderCompactOverlay) {
+      return _WindowOverlayLayoutMode.compact;
+    }
+
+    final canRenderCloseOnly = size.width >= closeOnlyMinWidth && size.height >= closeOnlyMinHeight;
+    if (canRenderCloseOnly) {
+      return _WindowOverlayLayoutMode.closeOnly;
+    }
+
+    return _WindowOverlayLayoutMode.closeOnly;
+  }
+}
+
+enum _WindowOverlayLayoutMode { full, compact, closeOnly }
 
 class _WindowVideoControls extends StatelessWidget {
   const _WindowVideoControls({
@@ -195,7 +269,7 @@ class _WindowVideoControls extends StatelessWidget {
     required this.isPaused,
     required this.positionMs,
     required this.playbackSpeed,
-    required this.workspaceZoom,
+    required this.uiScale,
     required this.showControls,
     required this.showPausedPlaybackButton,
     required this.onControlInteractionChanged,
@@ -209,18 +283,13 @@ class _WindowVideoControls extends StatelessWidget {
   final bool isPaused;
   final int? positionMs;
   final double playbackSpeed;
-  final double workspaceZoom;
+  final double uiScale;
   final bool showControls;
   final bool showPausedPlaybackButton;
   final ValueChanged<bool> onControlInteractionChanged;
   final ValueChanged<int> onPositionChanged;
   final VoidCallback onCyclePlaybackSpeed;
   final ValueChanged<int?> onTogglePlayback;
-
-  double get _uiScale {
-    final safeZoom = workspaceZoom <= 0 ? 1.0 : workspaceZoom;
-    return (1 / safeZoom).clamp(0.85, 2.1);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -258,7 +327,6 @@ class _WindowVideoControls extends StatelessWidget {
           return const SizedBox.shrink();
         }
 
-        final uiScale = _uiScale;
         final currentPositionMs = value.position.inMilliseconds.clamp(0, durationMs);
         final elapsedLabel = _formatDuration(value.position);
         final totalLabel = _formatDuration(value.duration);

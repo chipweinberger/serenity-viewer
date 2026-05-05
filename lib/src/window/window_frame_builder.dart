@@ -75,6 +75,7 @@ extension on _WindowState {
     }
 
     return WindowOverlay(
+      windowSize: widget.viewModel.window.size,
       workspaceZoom: widget.viewModel.workspaceZoom,
       filename: widget.viewModel.window.asset.filename,
       isSelected: widget.viewModel.isSelected,
