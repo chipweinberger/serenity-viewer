@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 
+import 'package:serenity_viewer/src/app/controllers/snackbar_message_gate.dart';
+
 class AppFeedbackController {
-  const AppFeedbackController({required this.context});
+  AppFeedbackController({required this.context, required this.snackbarMessageGate});
 
   final BuildContext Function() context;
+  final SnackbarMessageGate snackbarMessageGate;
 
   void showAboutSerenity() {
     showAboutDialog(
@@ -33,6 +36,9 @@ class AppFeedbackController {
   }
 
   void showMessage(String message) {
+    if (!snackbarMessageGate.shouldShow(message)) {
+      return;
+    }
     ScaffoldMessenger.of(context()).showSnackBar(SnackBar(content: Text(message), behavior: SnackBarBehavior.floating));
   }
 }

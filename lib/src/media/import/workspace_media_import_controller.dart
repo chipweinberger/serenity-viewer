@@ -11,6 +11,7 @@ import 'package:serenity_viewer/src/environment/store/environment_store_state.da
 import 'package:serenity_viewer/src/environment/workspace.dart';
 import 'package:serenity_viewer/src/foundation/serenity_identity.dart';
 import 'package:serenity_viewer/src/media/import/import_coordinator.dart';
+import 'package:serenity_viewer/src/media/import/import_path_expander.dart';
 import 'package:serenity_viewer/src/media/import/import_result.dart';
 import 'package:serenity_viewer/src/media/video/media_inspector.dart';
 import 'package:serenity_viewer/src/media/video/video_frame_exporter.dart';
@@ -51,19 +52,65 @@ class WorkspaceMediaImportController {
     ];
   }
 
+  Future<String?> _folderImportWorkspaceName(List<XFile> files, Workspace workspace) async {
+    if (workspace.windows.isNotEmpty || files.length != 1) {
+      return null;
+    }
+
+    final selectedPath = files.single.path;
+    final entityType = await FileSystemEntity.type(selectedPath, followLinks: false);
+    if (entityType != FileSystemEntityType.directory) {
+      return null;
+    }
+
+    final normalizedPath = Directory(selectedPath).absolute.path;
+    final folderName = normalizedPath.split(Platform.pathSeparator).last.trim();
+    return folderName.isEmpty ? null : folderName;
+  }
+
+  Environment _renamedWorkspaceEnvironment(Environment environment, Workspace workspace, String nextName) {
+    return environment.copyWith(
+      workspaces: environment.workspaces
+          .map((entry) => entry.id == workspace.id ? entry.copyWith(name: nextName) : entry)
+          .toList(growable: false),
+    );
+  }
+
+  Future<List<XFile>> _expandImportFiles(List<XFile> files) async {
+    final expandedPaths = await expandImportPaths(files.map((file) => file.path));
+    return expandedPaths.map(XFile.new).toList(growable: false);
+  }
+
+  ImportCoordinator _buildImportCoordinator() {
+    return ImportCoordinator(
+      imageExtensions: imageExtensions,
+      videoExtensions: videoExtensions,
+      confirmSingleFrameConversion: confirmSingleFrameConversion,
+      exportVideoFrameToJpeg: videoFrameExporter.exportVideoFrameToJpeg,
+      createFileBookmark: createFileBookmark,
+      md5ForFile: mediaInspector.md5ForFile,
+      imageDimensionsForFile: mediaInspector.imageDimensionsForFile,
+      videoDurationMsForFile: mediaInspector.videoDurationMsForFile,
+      probeVideoFile: mediaInspector.probeVideoFile,
+      newId: newSerenityId,
+      colorFromDigest: assetColorValueFromDigest,
+    );
+  }
+
   Future<void> importFiles(List<XFile> files) async {
     final environment = environmentStoreState.environment;
     if (files.isEmpty || environment == null) {
       return;
     }
 
+    final workspace = activeWorkspace();
+    final renamedWorkspaceName = await _folderImportWorkspaceName(files, workspace);
     final expandedFiles = await _expandImportFiles(files);
     if (expandedFiles.isEmpty) {
       showMessage('No supported image or video files were found in that selection.');
       return;
     }
 
-    final workspace = activeWorkspace();
     appUiState.beginWorkspaceImport(expandedFiles.length);
     late final ImportResult result;
     try {
@@ -82,7 +129,10 @@ class WorkspaceMediaImportController {
     }
 
     if (result.importedCount > 0) {
-      updateEnvironment(result.environment);
+      final nextEnvironment = renamedWorkspaceName == null
+          ? result.environment
+          : _renamedWorkspaceEnvironment(result.environment, workspace, renamedWorkspaceName);
+      updateEnvironment(nextEnvironment);
       thumbnailController.queueWorkspaceRefresh(workspace.id);
     }
     if (result.skippedDuplicateCount > 0) {
@@ -91,56 +141,5 @@ class WorkspaceMediaImportController {
         '${result.skippedDuplicateCount == 1 ? '' : 's'} already in this workspace.',
       );
     }
-  }
-
-  Future<List<XFile>> _expandImportFiles(List<XFile> files) async {
-    final expandedFiles = <XFile>[];
-    final seenPaths = <String>{};
-
-    Future<void> addFilePath(String path) async {
-      final absolutePath = File(path).absolute.path;
-      if (!seenPaths.add(absolutePath)) {
-        return;
-      }
-      expandedFiles.add(XFile(absolutePath));
-    }
-
-    for (final file in files) {
-      final path = file.path;
-      final entityType = await FileSystemEntity.type(path, followLinks: false);
-      switch (entityType) {
-        case FileSystemEntityType.file:
-          await addFilePath(path);
-        case FileSystemEntityType.directory:
-          await for (final entity in Directory(path).list(recursive: true, followLinks: false)) {
-            if (entity is File) {
-              await addFilePath(entity.path);
-            }
-          }
-        case FileSystemEntityType.link:
-        case FileSystemEntityType.notFound:
-        case FileSystemEntityType.pipe:
-        case FileSystemEntityType.unixDomainSock:
-          break;
-      }
-    }
-
-    return expandedFiles;
-  }
-
-  ImportCoordinator _buildImportCoordinator() {
-    return ImportCoordinator(
-      imageExtensions: imageExtensions,
-      videoExtensions: videoExtensions,
-      confirmSingleFrameConversion: confirmSingleFrameConversion,
-      exportVideoFrameToJpeg: videoFrameExporter.exportVideoFrameToJpeg,
-      createFileBookmark: createFileBookmark,
-      md5ForFile: mediaInspector.md5ForFile,
-      imageDimensionsForFile: mediaInspector.imageDimensionsForFile,
-      videoDurationMsForFile: mediaInspector.videoDurationMsForFile,
-      probeVideoFile: mediaInspector.probeVideoFile,
-      newId: newSerenityId,
-      colorFromDigest: assetColorValueFromDigest,
-    );
   }
 }

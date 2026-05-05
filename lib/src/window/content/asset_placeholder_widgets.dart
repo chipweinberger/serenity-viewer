@@ -175,26 +175,33 @@ class VideoLoadPlaceholder extends StatelessWidget {
             else
               Padding(
                 padding: const EdgeInsets.all(28),
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 380),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.video_library_rounded, size: 48, color: Colors.white),
-                        const SizedBox(height: 38),
-                        FilledButton.tonal(
-                          onPressed: onLoadVideos,
-                          style: FilledButton.styleFrom(
-                            backgroundColor: Colors.white.withValues(alpha: 0.16),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 380),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.video_library_rounded, size: 48, color: Colors.white),
+                              const SizedBox(height: 38),
+                              FilledButton.tonal(
+                                onPressed: onLoadVideos,
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: Colors.white.withValues(alpha: 0.16),
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                                ),
+                                child: const Text('Load videos'),
+                              ),
+                            ],
                           ),
-                          child: const Text('Load videos'),
                         ),
-                      ],
-                    ),
-                  ),
+                      ),
+                    );
+                  },
                 ),
               ),
           ],

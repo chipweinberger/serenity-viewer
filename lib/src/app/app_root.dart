@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
 import 'package:serenity_viewer/src/app/controllers/app_feedback_controller.dart';
+import 'package:serenity_viewer/src/app/controllers/snackbar_message_gate.dart';
 import 'package:serenity_viewer/src/app/controllers/app_ui_controller.dart';
 import 'package:serenity_viewer/src/app/platform/platform_bridge.dart';
 import 'package:serenity_viewer/src/app/runtime/app_runtime.dart';
@@ -40,7 +41,8 @@ class AppRootObjects {
       workspaceViewportState = WorkspaceViewportState(),
       thumbnailRefreshState = ThumbnailRefreshState(),
       environmentWindowHistoryState = EnvironmentWindowHistoryState(),
-      uiHandles = AppUiHandles();
+      uiHandles = AppUiHandles(),
+      snackbarMessageGate = SnackbarMessageGate();
 
   final AppUiState appUiState;
   final WindowWorkspaceDragState windowWorkspaceDragState;
@@ -51,6 +53,7 @@ class AppRootObjects {
   final ThumbnailRefreshState thumbnailRefreshState;
   final EnvironmentWindowHistoryState environmentWindowHistoryState;
   final AppUiHandles uiHandles;
+  final SnackbarMessageGate snackbarMessageGate;
 
   void dispose() {
     environmentStoreState.dispose();
@@ -80,6 +83,9 @@ class _AppRootState extends State<AppRoot> {
   StreamSubscription<List<String>>? _dockDroppedPathsSubscription;
 
   void _showMessage(String message) {
+    if (!_rootObjects.snackbarMessageGate.shouldShow(message)) {
+      return;
+    }
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), behavior: SnackBarBehavior.floating));
   }
 
@@ -143,7 +149,10 @@ class _AppRootState extends State<AppRoot> {
   List<SingleChildWidget> _buildProviders() {
     return [
       Provider<AppUiHandles>.value(value: _rootObjects.uiHandles),
-      Provider<AppFeedbackController>(create: (context) => AppFeedbackController(context: () => context)),
+      Provider<AppFeedbackController>(
+        create: (context) =>
+            AppFeedbackController(context: () => context, snackbarMessageGate: _rootObjects.snackbarMessageGate),
+      ),
       Provider<AppSettingsController>(
         create: (context) => AppSettingsController(
           context: () => context,
