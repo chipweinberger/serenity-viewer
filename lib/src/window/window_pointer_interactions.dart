@@ -37,7 +37,14 @@ extension on _WindowState {
   }
 
   WindowResizeHandle? _resizeHandleForPosition(Offset localPosition) {
-    return assetWindowResizeHandleForPosition(windowSize: widget.viewModel.window.size, localPosition: localPosition);
+    var scale = widget.viewModel.workspaceZoom.clamp(0.25, 1.0);
+    return assetWindowResizeHandleForPosition(
+      windowSize: widget.viewModel.window.size,
+      localPosition: localPosition,
+      borderRadius: 16,
+      edgeHitThickness: 4 / scale,
+      cornerHitDiameter: 20 / scale,
+    );
   }
 
   MouseCursor _cursorForHandle(WindowResizeHandle? handle) {

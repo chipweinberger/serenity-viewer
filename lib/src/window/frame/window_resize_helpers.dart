@@ -2,48 +2,130 @@ import 'package:flutter/material.dart';
 
 enum WindowResizeHandle { left, right, top, bottom, topLeft, topRight, bottomLeft, bottomRight }
 
+const double _resizeHitTestEpsilon = 0.5;
+
 WindowResizeHandle? assetWindowResizeHandleForPosition({
   required Size windowSize,
   required Offset localPosition,
-  double edgeInset = 8,
-  double cornerInset = 26,
+  double borderRadius = 16,
+  double edgeHitThickness = 8,
+  double cornerHitDiameter = 26,
 }) {
-  final isInTopLeftCorner = localPosition.dx <= cornerInset && localPosition.dy <= cornerInset;
-  final isInTopRightCorner = localPosition.dx >= windowSize.width - cornerInset && localPosition.dy <= cornerInset;
-  final isInBottomLeftCorner = localPosition.dx <= cornerInset && localPosition.dy >= windowSize.height - cornerInset;
-  final isInBottomRightCorner =
-      localPosition.dx >= windowSize.width - cornerInset && localPosition.dy >= windowSize.height - cornerInset;
+  if (windowSize.width <= 0 || windowSize.height <= 0) {
+    return null;
+  }
 
-  final isLeft = localPosition.dx <= edgeInset;
-  final isRight = localPosition.dx >= windowSize.width - edgeInset;
-  final isTop = localPosition.dy <= edgeInset;
-  final isBottom = localPosition.dy >= windowSize.height - edgeInset;
+  final outerRadiusValue = borderRadius.clamp(0, windowSize.shortestSide / 2).toDouble();
+  final outerRadius = Radius.circular(outerRadiusValue);
+  final outerRect = Rect.fromLTWH(
+    -_resizeHitTestEpsilon,
+    -_resizeHitTestEpsilon,
+    windowSize.width + (_resizeHitTestEpsilon * 2),
+    windowSize.height + (_resizeHitTestEpsilon * 2),
+  );
+  final outerRRect = RRect.fromRectAndRadius(outerRect, outerRadius);
+  if (!outerRRect.contains(localPosition)) {
+    return null;
+  }
 
-  if (isInTopLeftCorner) {
-    return WindowResizeHandle.topLeft;
+  final clampedEdgeThickness = edgeHitThickness.clamp(0, windowSize.shortestSide / 2).toDouble();
+  final innerRect = Rect.fromLTWH(
+    clampedEdgeThickness,
+    clampedEdgeThickness,
+    windowSize.width - (clampedEdgeThickness * 2),
+    windowSize.height - (clampedEdgeThickness * 2),
+  );
+  final innerRadiusValue = (outerRadius.x - clampedEdgeThickness).clamp(0, windowSize.shortestSide / 2).toDouble();
+  final innerRRect = innerRect.width > 0 && innerRect.height > 0
+      ? RRect.fromRectAndRadius(innerRect, Radius.circular(innerRadiusValue))
+      : null;
+  final isInEdgeRing = innerRRect == null || !innerRRect.contains(localPosition);
+  if (!isInEdgeRing) {
+    return null;
   }
-  if (isInTopRightCorner) {
-    return WindowResizeHandle.topRight;
+
+  final cornerHandle = _cornerResizeHandleForPosition(
+    outerRRect: outerRRect,
+    localPosition: localPosition,
+    cornerHitDiameter: cornerHitDiameter,
+  );
+  if (cornerHandle != null) {
+    return cornerHandle;
   }
-  if (isInBottomLeftCorner) {
-    return WindowResizeHandle.bottomLeft;
-  }
-  if (isInBottomRightCorner) {
-    return WindowResizeHandle.bottomRight;
-  }
-  if (isLeft) {
+
+  final leftDistance = localPosition.dx;
+  final rightDistance = windowSize.width - localPosition.dx;
+  final topDistance = localPosition.dy;
+  final bottomDistance = windowSize.height - localPosition.dy;
+  final nearestDistance = [leftDistance, rightDistance, topDistance, bottomDistance].reduce((a, b) => a < b ? a : b);
+
+  if (nearestDistance == leftDistance) {
     return WindowResizeHandle.left;
   }
-  if (isRight) {
+  if (nearestDistance == rightDistance) {
     return WindowResizeHandle.right;
   }
-  if (isTop) {
+  if (nearestDistance == topDistance) {
     return WindowResizeHandle.top;
   }
-  if (isBottom) {
-    return WindowResizeHandle.bottom;
+  return WindowResizeHandle.bottom;
+}
+
+WindowResizeHandle? _cornerResizeHandleForPosition({
+  required RRect outerRRect,
+  required Offset localPosition,
+  required double cornerHitDiameter,
+}) {
+  final circleRadius = cornerHitDiameter / 2;
+  final topLeftCenter = _cornerHitCenter(outerRRect.outerRect.topLeft, outerRRect.tlRadiusX, outerRRect.tlRadiusY);
+  final topRightCenter = _cornerHitCenter(outerRRect.outerRect.topRight, -outerRRect.trRadiusX, outerRRect.trRadiusY);
+  final bottomLeftCenter = _cornerHitCenter(
+    outerRRect.outerRect.bottomLeft,
+    outerRRect.blRadiusX,
+    -outerRRect.blRadiusY,
+  );
+  final bottomRightCenter = _cornerHitCenter(
+    outerRRect.outerRect.bottomRight,
+    -outerRRect.brRadiusX,
+    -outerRRect.brRadiusY,
+  );
+
+  if (_isWithinCircle(localPosition, topLeftCenter, circleRadius)) {
+    return WindowResizeHandle.topLeft;
   }
+  if (_isWithinCircle(localPosition, topRightCenter, circleRadius)) {
+    return WindowResizeHandle.topRight;
+  }
+  if (_isWithinCircle(localPosition, bottomLeftCenter, circleRadius)) {
+    return WindowResizeHandle.bottomLeft;
+  }
+  if (_isWithinCircle(localPosition, bottomRightCenter, circleRadius)) {
+    return WindowResizeHandle.bottomRight;
+  }
+
   return null;
+}
+
+bool _isWithinCircle(Offset point, Offset center, double radius) {
+  final dx = point.dx - center.dx;
+  final dy = point.dy - center.dy;
+  return (dx * dx) + (dy * dy) <= radius * radius;
+}
+
+Offset _cornerArcCenter(Offset cornerPoint, double radiusDx, double radiusDy) {
+  return Offset(cornerPoint.dx + radiusDx, cornerPoint.dy + radiusDy);
+}
+
+Offset _cornerHitCenter(Offset cornerPoint, double radiusDx, double radiusDy) {
+  final arcCenter = _cornerArcCenter(cornerPoint, radiusDx, radiusDy);
+  const diagonalUnit = 0.7071067811865476;
+  final xDirection = radiusDx.isNegative ? -1.0 : 1.0;
+  final yDirection = radiusDy.isNegative ? -1.0 : 1.0;
+
+  return Offset(
+    arcCenter.dx - (radiusDx.abs() * diagonalUnit * xDirection),
+    arcCenter.dy - (radiusDy.abs() * diagonalUnit * yDirection),
+  );
 }
 
 MouseCursor mouseCursorForWindowResizeHandle(WindowResizeHandle? handle) {
