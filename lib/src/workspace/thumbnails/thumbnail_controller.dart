@@ -67,6 +67,6 @@ class ThumbnailController {
   }
 
   void dispose() {
-    state.dispose();
+    // The app root owns the shared refresh state lifecycle.
   }
 }

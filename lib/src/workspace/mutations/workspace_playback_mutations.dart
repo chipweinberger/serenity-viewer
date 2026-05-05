@@ -12,6 +12,19 @@ class WorkspacePlaybackMutations {
     );
   }
 
+  static Workspace setVideoPositions(Workspace workspace, Map<String, int> positionsByWindowId) {
+    if (positionsByWindowId.isEmpty) {
+      return workspace;
+    }
+
+    return WorkspaceWindowModelHelpers.mapWindows(
+      workspace,
+      (window) => positionsByWindowId.containsKey(window.asset.id)
+          ? window.copyWith(videoPositionMs: positionsByWindowId[window.asset.id])
+          : window,
+    );
+  }
+
   static Workspace clearVideoPosition(Workspace workspace, String windowId) {
     return WorkspaceWindowModelHelpers.updateWindowById(
       workspace,

@@ -25,7 +25,7 @@ import 'package:serenity_viewer/src/workspace/layout/workspace_expose_layout.dar
 import 'package:serenity_viewer/src/workspace/viewport/workspace_projection.dart';
 import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 
-typedef SharedVideoLookup = SharedVideoState? Function(Window window, {required bool isLoaded});
+typedef SharedVideoLookup = SharedVideoState? Function(Window window, {required bool shouldCreate});
 
 @immutable
 class _WorkspaceCanvasViewModel {
@@ -211,11 +211,28 @@ class WorkspaceScreen extends StatelessWidget {
     return !_isWorkspaceVisible(workspace) || workspaceController.playback.isVideoWindowPaused(windowId);
   }
 
+  bool _shouldCreateSharedVideoController(_WorkspaceCanvasViewModel canvasViewModel, Window window) {
+    if (!_isWindowLoaded(canvasViewModel.loadPlan, window) || window.asset.type != AssetType.video) {
+      return false;
+    }
+
+    final isPaused = _isVideoTemporarilyPaused(canvasViewModel.workspace, window.asset.id);
+    if (!isPaused) {
+      return true;
+    }
+
+    return window.asset.id == canvasViewModel.focusedWindowId ||
+        window.asset.id == windowInteractionState.pinnedHoverWindowId;
+  }
+
   Widget _buildFreeformWindow(_WorkspaceCanvasViewModel canvasViewModel, Window window, Size viewportSize) {
     final workspace = canvasViewModel.workspace;
     final screenOffset = workspaceScreenOffsetForWindow(workspace, window, viewportSize);
     final isLoaded = _isWindowLoaded(canvasViewModel.loadPlan, window);
-    final sharedVideoState = sharedVideoLookup(window, isLoaded: isLoaded);
+    final sharedVideoState = sharedVideoLookup(
+      window,
+      shouldCreate: _shouldCreateSharedVideoController(canvasViewModel, window),
+    );
     final windowViewModel = WorkspaceWindowViewModel(
       window: window,
       isLoaded: isLoaded,
@@ -316,7 +333,10 @@ class WorkspaceScreen extends StatelessWidget {
   Widget _buildExposeWindowCard(Workspace workspace, WorkspaceExposeWindowLayout layout, MediaLoadPlan loadPlan) {
     final window = layout.window;
     final isLoaded = _isWindowLoaded(loadPlan, window);
-    final sharedVideoState = sharedVideoLookup(window, isLoaded: isLoaded);
+    final sharedVideoState = sharedVideoLookup(
+      window,
+      shouldCreate: !_isVideoTemporarilyPaused(workspace, window.asset.id),
+    );
 
     return Positioned.fromRect(
       rect: layout.rect,

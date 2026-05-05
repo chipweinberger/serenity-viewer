@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
+import 'package:serenity_viewer/src/foundation/app_constants.dart';
 import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
 import 'package:serenity_viewer/src/workspace/controllers/workspace_playback_runtime_controller.dart';
@@ -63,6 +64,23 @@ class WorkspacePlaybackController {
   }
 
   void pauseAllVideos() {
+    final workspaceState = activeWorkspaceOrNull();
+    if (workspaceState != null) {
+      final currentPositions = <String, int>{};
+      for (final window in workspaceState.windows) {
+        if (window.asset.type != AssetType.video || runtime.isPaused(window.asset.id)) {
+          continue;
+        }
+
+        final positionMs = currentVideoPositionMs(window.asset.id);
+        if (positionMs != null) {
+          currentPositions[window.asset.id] = positionMs;
+        }
+      }
+
+      workspace.setPositions(workspaceState, currentPositions);
+    }
+
     runtime.stopAll(environment());
   }
 

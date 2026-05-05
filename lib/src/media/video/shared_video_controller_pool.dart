@@ -4,10 +4,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
-import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/environment/window.dart';
 import 'package:serenity_viewer/src/foundation/app_constants.dart';
-import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
 
 @immutable
 class SharedVideoState {
@@ -18,6 +16,8 @@ class SharedVideoState {
 }
 
 class SharedVideoControllerPool {
+  static const Duration _controllerReleaseGrace = Duration(milliseconds: 350);
+
   final Map<String, _SharedVideoControllerEntry> _sharedVideoControllers = {};
 
   int? currentPositionMsForWindow(String windowId) {
@@ -34,8 +34,8 @@ class SharedVideoControllerPool {
     return positionMs.clamp(0, durationMs);
   }
 
-  SharedVideoState? sharedVideoForWindow(Window window, {required bool isLoaded}) {
-    if (!isLoaded || window.asset.type != AssetType.video) {
+  SharedVideoState? sharedVideoForWindow(Window window, {required bool shouldCreate}) {
+    if (window.asset.type != AssetType.video) {
       return null;
     }
 
@@ -47,10 +47,19 @@ class SharedVideoControllerPool {
     final existing = _sharedVideoControllers[window.asset.id];
     if (existing != null) {
       if (existing.path == path) {
-        return SharedVideoState(controller: existing.controller, initialization: existing.initialization);
+        if (shouldCreate) {
+          existing.cancelPendingRelease();
+        }
+        if (shouldCreate || existing.isPendingRelease) {
+          return SharedVideoState(controller: existing.controller, initialization: existing.initialization);
+        }
+        return null;
       }
-      _sharedVideoControllers.remove(window.asset.id);
-      unawaited(existing.controller.dispose());
+      _disposeEntry(window.asset.id, existing);
+    }
+
+    if (!shouldCreate) {
+      return null;
     }
 
     final controller = VideoPlayerController.file(File(path));
@@ -63,38 +72,37 @@ class SharedVideoControllerPool {
     return SharedVideoState(controller: controller, initialization: initialization);
   }
 
-  void syncSharedVideoControllers({required MediaLoadPlan loadPlan, required Environment? environment}) {
-    if (environment == null) {
-      return;
-    }
-
-    final retainedVideoIds = <String>{};
-    for (final workspace in environment.workspaces) {
-      for (final window in workspace.windows) {
-        final path = window.asset.filePath;
-        if (window.asset.type == AssetType.video &&
-            loadPlan.loadedAssetIds.contains(window.asset.id) &&
-            path != null &&
-            path.isNotEmpty) {
-          retainedVideoIds.add(window.asset.id);
-        }
+  void syncSharedVideoControllers({required Set<String> retainedVideoWindowIds}) {
+    for (final entry in _sharedVideoControllers.entries) {
+      if (retainedVideoWindowIds.contains(entry.key)) {
+        entry.value.cancelPendingRelease();
+        continue;
       }
-    }
 
-    final staleIds = _sharedVideoControllers.keys.where((id) => !retainedVideoIds.contains(id)).toList();
-    for (final id in staleIds) {
-      final removed = _sharedVideoControllers.remove(id);
-      if (removed != null) {
-        unawaited(removed.controller.dispose());
-      }
+      entry.value.scheduleRelease(
+        after: _controllerReleaseGrace,
+        onExpire: () => _disposeEntry(entry.key, entry.value),
+      );
     }
   }
 
   void dispose() {
     for (final entry in _sharedVideoControllers.values) {
+      entry.cancelPendingRelease();
       unawaited(entry.controller.dispose());
     }
     _sharedVideoControllers.clear();
+  }
+
+  void _disposeEntry(String windowId, _SharedVideoControllerEntry entry) {
+    final current = _sharedVideoControllers[windowId];
+    if (!identical(current, entry)) {
+      return;
+    }
+
+    entry.cancelPendingRelease();
+    _sharedVideoControllers.remove(windowId);
+    unawaited(entry.controller.dispose());
   }
 }
 
@@ -104,4 +112,23 @@ class _SharedVideoControllerEntry {
   final String path;
   final VideoPlayerController controller;
   final Future<void> initialization;
+  Timer? _releaseTimer;
+
+  bool get isPendingRelease => _releaseTimer != null;
+
+  void cancelPendingRelease() {
+    _releaseTimer?.cancel();
+    _releaseTimer = null;
+  }
+
+  void scheduleRelease({required Duration after, required VoidCallback onExpire}) {
+    if (_releaseTimer != null) {
+      return;
+    }
+
+    _releaseTimer = Timer(after, () {
+      _releaseTimer = null;
+      onExpire();
+    });
+  }
 }

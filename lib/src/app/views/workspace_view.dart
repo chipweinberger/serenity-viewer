@@ -9,13 +9,15 @@ import 'package:serenity_viewer/src/app/state/app_ui_state.dart';
 import 'package:serenity_viewer/src/environment/controller/environment_controller.dart';
 import 'package:serenity_viewer/src/environment/store/environment_store_state.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
+import 'package:serenity_viewer/src/foundation/app_constants.dart';
+import 'package:serenity_viewer/src/media/loading/media_load_plan.dart';
+import 'package:serenity_viewer/src/media/loading/workspace_load_plan.dart';
 import 'package:serenity_viewer/src/media/video/shared_video_controller_pool.dart';
 import 'package:serenity_viewer/src/window/interaction/window_interaction_state.dart';
-import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
-import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 import 'package:serenity_viewer/src/workspace/screen/workspace_hud.dart';
 import 'package:serenity_viewer/src/workspace/screen/workspace_screen.dart';
-import 'package:serenity_viewer/src/media/loading/workspace_load_plan.dart';
+import 'package:serenity_viewer/src/workspace/controllers/workspace_controller.dart';
+import 'package:serenity_viewer/src/workspace/viewport/workspace_viewport_state.dart';
 
 class WorkspaceView extends StatelessWidget {
   const WorkspaceView({super.key});
@@ -72,6 +74,52 @@ class WorkspaceView extends StatelessWidget {
     );
   }
 
+  String? _focusedWindowId(Workspace workspace, {required bool isExposeMode}) {
+    if (isExposeMode || workspace.windows.isEmpty) {
+      return null;
+    }
+
+    final windows = [...workspace.windows]..sort((a, b) => a.zIndex.compareTo(b.zIndex));
+    return windows.last.asset.id;
+  }
+
+  Set<String> _retainedSharedVideoWindowIds({
+    required AppUiState appUiState,
+    required EnvironmentStoreState environmentStoreState,
+    required WindowInteractionState windowInteractionState,
+    required MediaLoadPlan loadPlan,
+  }) {
+    final environment = environmentStoreState.environment;
+    if (environment == null) {
+      return const <String>{};
+    }
+
+    final pinnedWindowId = windowInteractionState.pinnedHoverWindowId;
+    final isWorkspaceScreen = appUiState.screen == SerenityScreen.workspace;
+    final retainedWindowIds = <String>{};
+
+    for (final workspace in environment.workspaces) {
+      final isActiveWorkspace = isWorkspaceScreen && workspace.id == environment.activeWorkspaceId;
+      final isExposeMode = isActiveWorkspace && appUiState.workspaceLayoutMode == WorkspaceLayoutMode.expose;
+      final focusedWindowId = _focusedWindowId(workspace, isExposeMode: isExposeMode);
+
+      for (final window in workspace.windows) {
+        if (window.asset.type != AssetType.video || !loadPlan.loadedAssetIds.contains(window.asset.id)) {
+          continue;
+        }
+
+        final isPaused = !isActiveWorkspace || (windowInteractionState.pausedVideoWindows[window.asset.id] ?? true);
+        final shouldRetainController =
+            !isPaused || window.asset.id == focusedWindowId || window.asset.id == pinnedWindowId;
+        if (shouldRetainController) {
+          retainedWindowIds.add(window.asset.id);
+        }
+      }
+    }
+
+    return retainedWindowIds;
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = _watchState(context);
@@ -84,10 +132,15 @@ class WorkspaceView extends StatelessWidget {
       appUiController: dependencies.appUiController,
       selectedExposeWindowCount: state.windowInteractionState.selectedExposeWindowIds.length,
     );
+    final retainedSharedVideoWindowIds = _retainedSharedVideoWindowIds(
+      appUiState: state.appUiState,
+      environmentStoreState: state.environmentStoreState,
+      windowInteractionState: state.windowInteractionState,
+      loadPlan: workspaceLoadPlan,
+    );
 
     dependencies.sharedVideoControllerPool.syncSharedVideoControllers(
-      loadPlan: workspaceLoadPlan,
-      environment: environment,
+      retainedVideoWindowIds: retainedSharedVideoWindowIds,
     );
 
     return WorkspaceScreen(

@@ -295,7 +295,7 @@ class _WindowVideoControls extends StatelessWidget {
   Widget build(BuildContext context) {
     final videoController = controller;
     if (videoController == null) {
-      return const SizedBox.shrink();
+      return _buildFallbackPlaybackButton();
     }
 
     if (videoController.value.isInitialized) {
@@ -304,17 +304,31 @@ class _WindowVideoControls extends StatelessWidget {
 
     final future = initialization;
     if (future == null) {
-      return const SizedBox.shrink();
+      return _buildFallbackPlaybackButton();
     }
 
     return FutureBuilder<void>(
       future: future,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done || !videoController.value.isInitialized) {
-          return const SizedBox.shrink();
+          return _buildFallbackPlaybackButton();
         }
         return _buildForController(context, videoController);
       },
+    );
+  }
+
+  Widget _buildFallbackPlaybackButton() {
+    if (!showPausedPlaybackButton || !isPaused) {
+      return const SizedBox.shrink();
+    }
+
+    return _buildPlaybackButton(
+      uiScale: uiScale,
+      icon: Icons.play_arrow_rounded,
+      padding: 4 * uiScale,
+      iconSize: 12 * uiScale,
+      positionMs: positionMs ?? 0,
     );
   }
 

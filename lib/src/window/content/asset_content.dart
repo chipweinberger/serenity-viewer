@@ -245,9 +245,10 @@ class _AssetContentState extends State<AssetContent> {
         errorBuilder: (context) => _buildMissingPlaceholder(context),
       ),
       (true, true, true, AssetType.video) => VideoSurface(
-        controller: widget.sharedVideoController!,
-        initialization: widget.sharedVideoInitialization!,
+        controller: widget.sharedVideoController,
+        initialization: widget.sharedVideoInitialization,
         path: filePath!,
+        aspectRatio: widget.window.asset.aspectRatio,
         zoom: widget.window.zoom,
         zoomBaseSize: widget.window.zoomBaseSize,
         contentOffset: widget.window.contentOffset,
