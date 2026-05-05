@@ -173,13 +173,14 @@ class _AppTabBarState extends State<AppTabBar> {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
+            _buildAddWorkspaceChip(),
+            const SizedBox(width: 10),
             _buildOverviewChip(),
             for (final workspace in widget.openWorkspaces)
               Padding(
                 padding: const EdgeInsets.only(left: 10),
                 child: _buildWorkspaceTabDragTarget(context, workspace),
               ),
-            Padding(padding: const EdgeInsets.only(left: 10), child: _buildAddWorkspaceChip()),
           ],
         ),
       ),
