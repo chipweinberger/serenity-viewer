@@ -37,12 +37,12 @@ extension on _WindowState {
   }
 
   WindowResizeHandle? _resizeHandleForPosition(Offset localPosition) {
-    var scale = widget.viewModel.workspaceZoom.clamp(0.25, 1.0);
+    var scale = widget.viewModel.workspaceZoom.clamp(0.40, 1.0);
     return assetWindowResizeHandleForPosition(
       windowSize: widget.viewModel.window.size,
       localPosition: localPosition,
       borderRadius: 16,
-      edgeHitThickness: 4 / scale,
+      edgeHitThickness: 6 / scale,
       cornerHitDiameter: 20 / scale,
     );
   }

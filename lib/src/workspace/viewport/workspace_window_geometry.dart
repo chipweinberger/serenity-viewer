@@ -139,6 +139,8 @@ Window _resizeWindowState(Window window, WindowResizeHandle handle, Offset delta
 
 Window _scaleWindowAroundCenter(Window window, double scaleDelta, {required bool mirrorContentZoom}) {
   final clampedScaleDelta = scaleDelta.clamp(0.5, 2.0);
+  final fitSize = fitSizeForViewportToAspect(window.size, window.asset.aspectRatio);
+  final currentBaseSize = window.zoom > 1.0 && window.zoomBaseSize != null ? window.zoomBaseSize! : fitSize;
   final focalWorldPoint = Offset(
     window.position.dx + (window.size.width / 2),
     window.position.dy + (window.size.height / 2),
@@ -160,12 +162,7 @@ Window _scaleWindowAroundCenter(Window window, double scaleDelta, {required bool
       : window.zoom;
   final snappedZoom = (nextZoom - 1).abs() < 0.02 ? 1.0 : nextZoom;
   final nextContentOffset = snappedZoom > 1.0 ? window.contentOffset * clampedScaleDelta : Offset.zero;
-  final nextZoomBaseSize = snappedZoom > 1.0
-      ? Size(
-          (window.zoomBaseSize?.width ?? window.size.width) * clampedScaleDelta,
-          (window.zoomBaseSize?.height ?? window.size.height) * clampedScaleDelta,
-        )
-      : null;
+  final nextZoomBaseSize = snappedZoom > 1.0 ? currentBaseSize : null;
 
   return window.copyWith(
     position: nextPosition,
