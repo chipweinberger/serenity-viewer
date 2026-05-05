@@ -17,6 +17,7 @@ class WorkspaceWindowContent extends StatelessWidget {
     required this.onZoomChanged,
     required this.onIntrinsicSizeResolved,
     required this.onTogglePlayback,
+    required this.onLoadVideos,
     required this.onVideoPositionChanged,
     required this.onCycleVideoPlaybackSpeed,
   });
@@ -29,6 +30,7 @@ class WorkspaceWindowContent extends StatelessWidget {
   final ValueChanged<WindowZoomUpdate> onZoomChanged;
   final ValueChanged<Size> onIntrinsicSizeResolved;
   final ValueChanged<int?> onTogglePlayback;
+  final VoidCallback onLoadVideos;
   final ValueChanged<int> onVideoPositionChanged;
   final VoidCallback onCycleVideoPlaybackSpeed;
 
@@ -63,7 +65,9 @@ class WorkspaceWindowContent extends StatelessWidget {
           onZoomChanged: (update) => onZoomChanged(_zoomUpdateForWindowState(update)),
           onIntrinsicSizeResolved: onIntrinsicSizeResolved,
           isVideoPaused: viewModel.isVideoPaused,
+          shouldLoadVideos: viewModel.shouldLoadVideos,
           onTogglePlayback: onTogglePlayback,
+          onLoadVideos: onLoadVideos,
           showControls: showControls,
           workspaceZoom: viewModel.workspaceZoom,
           onVideoPositionChanged: onVideoPositionChanged,

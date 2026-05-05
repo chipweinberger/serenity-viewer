@@ -18,11 +18,13 @@ class ExposeWindowCard extends StatefulWidget {
     required this.sharedVideoController,
     required this.sharedVideoInitialization,
     required this.isVideoPaused,
+    required this.shouldLoadVideos,
     required this.isSelected,
     required this.isCommandPressed,
     required this.editMode,
     required this.onOpen,
     required this.onToggleSelected,
+    required this.onLoadVideos,
     this.onShowInFinder,
     required this.onRemove,
   });
@@ -32,11 +34,13 @@ class ExposeWindowCard extends StatefulWidget {
   final VideoPlayerController? sharedVideoController;
   final Future<void>? sharedVideoInitialization;
   final bool isVideoPaused;
+  final bool shouldLoadVideos;
   final bool isSelected;
   final bool isCommandPressed;
   final bool editMode;
   final VoidCallback onOpen;
   final VoidCallback onToggleSelected;
+  final VoidCallback onLoadVideos;
   final VoidCallback? onShowInFinder;
   final VoidCallback onRemove;
 
@@ -68,7 +72,9 @@ class _ExposeWindowCardState extends State<ExposeWindowCard> {
             onZoomChanged: (_) {},
             onIntrinsicSizeResolved: (_) {},
             isVideoPaused: widget.isVideoPaused,
+            shouldLoadVideos: widget.shouldLoadVideos,
             onTogglePlayback: (_) {},
+            onLoadVideos: widget.onLoadVideos,
             showControls: false,
             workspaceZoom: 1,
             onVideoPositionChanged: (_) {},

@@ -20,6 +20,7 @@ class _SeedEnvironmentBuilder {
       activeWorkspaceId: 'ws-story',
       knownFolders: const [],
       folderPopularity: const {},
+      autoLoadVideos: false,
       imageLoadLimit: 300,
       shortVideoLoadLimit: 36,
       longVideoLoadLimit: 12,

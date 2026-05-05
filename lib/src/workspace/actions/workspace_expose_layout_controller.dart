@@ -83,7 +83,7 @@ class WorkspaceExposeLayoutController {
         return AlertDialog(
           title: const Text('Apply Grid?'),
           content: Text(
-            'Replace the current freeform layout in "${workspace.name}" with this expose grid arrangement?',
+            'Apply this grid to the workspace?',
           ),
           actions: [
             TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),

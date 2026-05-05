@@ -10,6 +10,7 @@ class AppUiState extends ChangeNotifier {
   WorkspaceSort _workspaceSort = WorkspaceSort.recentlyViewed;
   bool _editMode = false;
   bool _isDropTargetActive = false;
+  bool _shouldLoadVideos = false;
   String? _draggingTabWorkspaceId;
   final List<int> _activeWorkspaceImportAssetCounts = [];
 
@@ -18,6 +19,7 @@ class AppUiState extends ChangeNotifier {
   WorkspaceSort get workspaceSort => _workspaceSort;
   bool get editMode => _editMode;
   bool get isDropTargetActive => _isDropTargetActive;
+  bool get shouldLoadVideos => _shouldLoadVideos;
   String? get draggingTabWorkspaceId => _draggingTabWorkspaceId;
   bool get isWorkspaceImporting => _activeWorkspaceImportAssetCounts.isNotEmpty;
   int get workspaceImportAssetCount =>
@@ -29,6 +31,7 @@ class AppUiState extends ChangeNotifier {
     WorkspaceSort? workspaceSort,
     bool? editMode,
     bool? isDropTargetActive,
+    bool? shouldLoadVideos,
     Object? draggingTabWorkspaceId = _noChange,
   }) {
     final nextScreen = screen ?? _screen;
@@ -36,6 +39,7 @@ class AppUiState extends ChangeNotifier {
     final nextWorkspaceSort = workspaceSort ?? _workspaceSort;
     final nextEditMode = editMode ?? _editMode;
     final nextIsDropTargetActive = isDropTargetActive ?? _isDropTargetActive;
+    final nextShouldLoadVideos = shouldLoadVideos ?? _shouldLoadVideos;
     final nextDraggingTabWorkspaceId = draggingTabWorkspaceId == _noChange
         ? _draggingTabWorkspaceId
         : draggingTabWorkspaceId as String?;
@@ -45,6 +49,7 @@ class AppUiState extends ChangeNotifier {
         nextWorkspaceSort != _workspaceSort ||
         nextEditMode != _editMode ||
         nextIsDropTargetActive != _isDropTargetActive ||
+        nextShouldLoadVideos != _shouldLoadVideos ||
         nextDraggingTabWorkspaceId != _draggingTabWorkspaceId;
     if (!changed) {
       return false;
@@ -55,6 +60,7 @@ class AppUiState extends ChangeNotifier {
     _workspaceSort = nextWorkspaceSort;
     _editMode = nextEditMode;
     _isDropTargetActive = nextIsDropTargetActive;
+    _shouldLoadVideos = nextShouldLoadVideos;
     _draggingTabWorkspaceId = nextDraggingTabWorkspaceId;
     notifyListeners();
     return true;
@@ -74,6 +80,10 @@ class AppUiState extends ChangeNotifier {
 
   bool setDropTargetActive(bool isActive) {
     return update(isDropTargetActive: isActive);
+  }
+
+  bool setShouldLoadVideos(bool shouldLoadVideos) {
+    return update(shouldLoadVideos: shouldLoadVideos);
   }
 
   void beginWorkspaceImport(int assetCount) {

@@ -33,6 +33,7 @@ class WorkspaceWindow extends StatefulWidget {
     required this.onVideoPositionChanged,
     required this.onCycleVideoPlaybackSpeed,
     required this.onTogglePlayback,
+    required this.onLoadVideos,
     this.onFitToContent,
     this.onShowInFinder,
     this.onRestorePreviousZOrder,
@@ -55,6 +56,7 @@ class WorkspaceWindow extends StatefulWidget {
   final ValueChanged<int> onVideoPositionChanged;
   final VoidCallback onCycleVideoPlaybackSpeed;
   final ValueChanged<int?> onTogglePlayback;
+  final VoidCallback onLoadVideos;
   final VoidCallback? onFitToContent;
   final VoidCallback? onShowInFinder;
   final VoidCallback? onRestorePreviousZOrder;

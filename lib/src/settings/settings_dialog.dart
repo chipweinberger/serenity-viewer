@@ -13,6 +13,7 @@ class SettingsDialog extends StatefulWidget {
     required this.imageLoadLimit,
     required this.shortVideoLoadLimit,
     required this.longVideoLoadLimit,
+    required this.autoLoadVideos,
     required this.knownFolders,
     required this.folderPopularity,
   });
@@ -20,6 +21,7 @@ class SettingsDialog extends StatefulWidget {
   final int imageLoadLimit;
   final int shortVideoLoadLimit;
   final int longVideoLoadLimit;
+  final bool autoLoadVideos;
   final List<String> knownFolders;
   final Map<String, int> folderPopularity;
 
@@ -31,6 +33,8 @@ class _SerenitySettingsDialogState extends State<SettingsDialog> {
   late final TextEditingController _imageController;
   late final TextEditingController _shortVideoController;
   late final TextEditingController _longVideoController;
+  late final ScrollController _scrollController;
+  late bool _autoLoadVideos;
   late List<String> _knownFolders;
   late Map<String, int> _folderPopularity;
 
@@ -40,6 +44,8 @@ class _SerenitySettingsDialogState extends State<SettingsDialog> {
     _imageController = TextEditingController(text: widget.imageLoadLimit.toString());
     _shortVideoController = TextEditingController(text: widget.shortVideoLoadLimit.toString());
     _longVideoController = TextEditingController(text: widget.longVideoLoadLimit.toString());
+    _scrollController = ScrollController();
+    _autoLoadVideos = widget.autoLoadVideos;
     _knownFolders = [...widget.knownFolders];
     _folderPopularity = Map<String, int>.from(widget.folderPopularity);
   }
@@ -49,6 +55,7 @@ class _SerenitySettingsDialogState extends State<SettingsDialog> {
     _imageController.dispose();
     _shortVideoController.dispose();
     _longVideoController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -61,6 +68,7 @@ class _SerenitySettingsDialogState extends State<SettingsDialog> {
         imageLoadLimit: widget.imageLoadLimit,
         shortVideoLoadLimit: widget.shortVideoLoadLimit,
         longVideoLoadLimit: widget.longVideoLoadLimit,
+        autoLoadVideos: _autoLoadVideos,
         knownFolders: _knownFolders,
         folderPopularity: _folderPopularity,
       );
@@ -70,6 +78,7 @@ class _SerenitySettingsDialogState extends State<SettingsDialog> {
       imageLoadLimit: imageLimit.clamp(1, 5000),
       shortVideoLoadLimit: shortVideoLimit.clamp(1, 5000),
       longVideoLoadLimit: longVideoLimit.clamp(1, 5000),
+      autoLoadVideos: _autoLoadVideos,
       knownFolders: _knownFolders,
       folderPopularity: _folderPopularity,
     );
@@ -104,41 +113,67 @@ class _SerenitySettingsDialogState extends State<SettingsDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: Theme.of(
-            context,
-          ).textTheme.titleSmall?.copyWith(color: AppTheme.textPrimary, fontWeight: FontWeight.w800),
-        ),
-        const SizedBox(height: 4),
-        Text(help, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppTheme.textMuted, height: 1.3)),
-        const SizedBox(height: 8),
-        SizedBox(
-          width: 160,
-          child: TextField(
-            controller: controller,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              isDense: true,
-              filled: true,
-              fillColor: Colors.white.withValues(alpha: 0.82),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(color: AppTheme.border.withValues(alpha: 0.16)),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(color: AppTheme.border.withValues(alpha: 0.16)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(color: AppTheme.accent.withValues(alpha: 0.42)),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleSmall?.copyWith(color: AppTheme.textPrimary, fontWeight: FontWeight.w500),
+                  ),
+                  if (help.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      help,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppTheme.textMuted, height: 1.3),
+                    ),
+                  ],
+                ],
               ),
             ),
-          ),
+            const SizedBox(width: 16),
+            SizedBox(
+              width: 160,
+              child: TextField(
+                controller: controller,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  isDense: true,
+                  filled: true,
+                  fillColor: Colors.white.withValues(alpha: 0.82),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(color: AppTheme.border.withValues(alpha: 0.16)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(color: AppTheme.border.withValues(alpha: 0.16)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(color: AppTheme.accent.withValues(alpha: 0.42)),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ],
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: Theme.of(
+        context,
+      ).textTheme.titleMedium?.copyWith(color: AppTheme.textPrimary, fontWeight: FontWeight.w800),
     );
   }
 
@@ -167,130 +202,146 @@ class _SerenitySettingsDialogState extends State<SettingsDialog> {
               border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
               boxShadow: const [BoxShadow(color: AppTheme.shadow, blurRadius: 28, offset: Offset(0, 18))],
             ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(22, 20, 22, 18),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 640),
+              child: Scrollbar(
+                controller: _scrollController,
+                thumbVisibility: true,
+                child: SingleChildScrollView(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.fromLTRB(22, 20, 22, 18),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Maximum loaded assets',
-                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                color: AppTheme.textPrimary,
-                                fontWeight: FontWeight.w800,
-                              ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Maximum loaded assets',
+                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: AppTheme.textPrimary,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'How many items stay loaded at once.',
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.bodyMedium?.copyWith(color: AppTheme.textMuted, height: 1.35),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Serenity unloads assets from less recent workspaces first when these limits are reached.',
-                              style: Theme.of(
-                                context,
-                              ).textTheme.bodyMedium?.copyWith(color: AppTheme.textMuted, height: 1.35),
-                            ),
-                          ],
+                          ),
+                          IconButton(
+                            onPressed: _closeAndSave,
+                            icon: const Icon(Icons.close_rounded),
+                            tooltip: 'Close settings',
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      _buildLimitRow(label: 'Images', help: 'Of any size.', controller: _imageController),
+                      const SizedBox(height: 16),
+                      _buildLimitRow(
+                        label: 'Short videos',
+                        help: 'Under 2 minutes.',
+                        controller: _shortVideoController,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildLimitRow(
+                        label: 'Long videos',
+                        help: '2 minutes or longer.',
+                        controller: _longVideoController,
+                      ),
+                      const SizedBox(height: 18),
+                      SwitchListTile.adaptive(
+                        value: _autoLoadVideos,
+                        onChanged: (value) => setState(() => _autoLoadVideos = value),
+                        contentPadding: EdgeInsets.zero,
+                        activeColor: AppTheme.accent,
+                        title: Text(
+                          'Load videos automatically',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleSmall?.copyWith(color: AppTheme.textPrimary, fontWeight: FontWeight.w800),
+                        ),
+                        subtitle: Text(
+                          'Without needing to click Load videos.',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.copyWith(color: AppTheme.textMuted, height: 1.3),
                         ),
                       ),
-                      IconButton(
-                        onPressed: _closeAndSave,
-                        icon: const Icon(Icons.close_rounded),
-                        tooltip: 'Close settings',
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildSectionTitle('Known folders'),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Used to find missing files.',
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.bodySmall?.copyWith(color: AppTheme.textMuted, height: 1.3),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          TextButton.icon(
+                            onPressed: () => unawaited(_addFolder()),
+                            icon: const Icon(Icons.add_rounded, size: 16),
+                            label: const Text('Add folder'),
+                          ),
+                        ],
                       ),
+                      const SizedBox(height: 10),
+                      if (sortedFolders.isEmpty)
+                        Text(
+                          'No known folders yet.',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppTheme.textMuted),
+                        )
+                      else
+                        for (final folder in sortedFolders)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        folder,
+                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                          color: AppTheme.textPrimary,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: () => _removeFolder(folder),
+                                  icon: const Icon(Icons.close_rounded, size: 18),
+                                  tooltip: 'Remove folder',
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                              ],
+                            ),
+                          ),
                     ],
                   ),
-                  const SizedBox(height: 20),
-                  _buildLimitRow(label: 'Images', help: 'Maximum loaded images.', controller: _imageController),
-                  const SizedBox(height: 16),
-                  _buildLimitRow(
-                    label: 'Short videos',
-                    help: 'Videos under 2 minutes.',
-                    controller: _shortVideoController,
-                  ),
-                  const SizedBox(height: 16),
-                  _buildLimitRow(
-                    label: 'Long videos',
-                    help: 'Videos 2 minutes or longer.',
-                    controller: _longVideoController,
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Known folders',
-                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                color: AppTheme.textPrimary,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Serenity searches these folders for missing files.',
-                              style: Theme.of(
-                                context,
-                              ).textTheme.bodySmall?.copyWith(color: AppTheme.textMuted, height: 1.3),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      TextButton.icon(
-                        onPressed: () => unawaited(_addFolder()),
-                        icon: const Icon(Icons.add_rounded, size: 16),
-                        label: const Text('Add folder'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  if (sortedFolders.isEmpty)
-                    Text(
-                      'No known folders yet.',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppTheme.textMuted),
-                    )
-                  else
-                    for (final folder in sortedFolders)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    folder,
-                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      color: AppTheme.textPrimary,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    'Recovery score ${_folderPopularity[folder] ?? 0}',
-                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppTheme.textMuted),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            IconButton(
-                              onPressed: () => _removeFolder(folder),
-                              icon: const Icon(Icons.close_rounded, size: 18),
-                              tooltip: 'Remove folder',
-                              visualDensity: VisualDensity.compact,
-                            ),
-                          ],
-                        ),
-                      ),
-                ],
+                ),
               ),
             ),
           ),

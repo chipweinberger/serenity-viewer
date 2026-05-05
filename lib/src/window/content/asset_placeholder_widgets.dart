@@ -143,3 +143,63 @@ class UnloadedMediaPlaceholder extends StatelessWidget {
     );
   }
 }
+
+class VideoLoadPlaceholder extends StatelessWidget {
+  const VideoLoadPlaceholder({
+    super.key,
+    required this.asset,
+    required this.windowSize,
+    required this.compact,
+    required this.onLoadVideos,
+  });
+
+  final Asset asset;
+  final Size windowSize;
+  final bool compact;
+  final VoidCallback onLoadVideos;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox.expand(
+      child: ClipRect(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            DemoArtWidget(asset: asset),
+            BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: compact ? 10 : 18, sigmaY: compact ? 10 : 18),
+              child: ColoredBox(color: Colors.black.withValues(alpha: compact ? 0.46 : 0.56)),
+            ),
+            if (compact)
+              const Center(child: Icon(Icons.video_library_rounded, size: 40, color: Colors.white))
+            else
+              Padding(
+                padding: const EdgeInsets.all(28),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 380),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.video_library_rounded, size: 48, color: Colors.white),
+                        const SizedBox(height: 38),
+                        FilledButton.tonal(
+                          onPressed: onLoadVideos,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: Colors.white.withValues(alpha: 0.16),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                          ),
+                          child: const Text('Load videos'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}

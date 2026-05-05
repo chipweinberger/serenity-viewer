@@ -6,6 +6,7 @@ class SettingsResult {
     required this.imageLoadLimit,
     required this.shortVideoLoadLimit,
     required this.longVideoLoadLimit,
+    required this.autoLoadVideos,
     required this.knownFolders,
     required this.folderPopularity,
   });
@@ -13,6 +14,7 @@ class SettingsResult {
   final int imageLoadLimit;
   final int shortVideoLoadLimit;
   final int longVideoLoadLimit;
+  final bool autoLoadVideos;
   final List<String> knownFolders;
   final Map<String, int> folderPopularity;
 }

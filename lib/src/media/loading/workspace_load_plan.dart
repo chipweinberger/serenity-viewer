@@ -5,7 +5,11 @@ import 'package:serenity_viewer/src/environment/environment.dart';
 import 'package:serenity_viewer/src/media/loading/workspace_media_counts.dart';
 import 'package:serenity_viewer/src/environment/workspace.dart';
 
-MediaLoadPlan buildWorkspaceLoadPlan({required Environment environment, required Workspace? activeWorkspace}) {
+MediaLoadPlan buildWorkspaceLoadPlan({
+  required Environment environment,
+  required Workspace? activeWorkspace,
+  required bool shouldLoadVideos,
+}) {
   final loadedAssetIds = <String>{};
   var loadedImages = 0;
   var loadedShortVideos = 0;
@@ -36,6 +40,9 @@ MediaLoadPlan buildWorkspaceLoadPlan({required Environment environment, required
 
   final activeWorkspaceId = activeWorkspace.id;
   for (final window in activeWorkspace.windows) {
+    if (!shouldLoadVideos && window.asset.type == AssetType.video) {
+      continue;
+    }
     retainWindow(window);
   }
 
@@ -44,6 +51,10 @@ MediaLoadPlan buildWorkspaceLoadPlan({required Environment environment, required
 
   for (final workspace in hiddenWorkspaces) {
     for (final window in workspace.windows) {
+      if (!shouldLoadVideos && window.asset.type == AssetType.video) {
+        continue;
+      }
+
       if (window.asset.type == AssetType.image) {
         if (loadedImages >= environment.imageLoadLimit) {
           continue;

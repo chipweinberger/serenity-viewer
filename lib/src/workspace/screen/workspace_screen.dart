@@ -62,6 +62,7 @@ class WorkspaceScreen extends StatelessWidget {
     required this.platformBridge,
     required this.mounted,
     required this.workspaceHud,
+    required this.shouldLoadVideos,
   });
 
   final Environment environment;
@@ -77,6 +78,7 @@ class WorkspaceScreen extends StatelessWidget {
   final PlatformBridge platformBridge;
   final bool Function() mounted;
   final Widget workspaceHud;
+  final bool shouldLoadVideos;
 
   Widget _buildEmptyWorkspaceCanvasState(BuildContext context) {
     return IgnorePointer(
@@ -212,7 +214,9 @@ class WorkspaceScreen extends StatelessWidget {
   }
 
   bool _shouldCreateSharedVideoController(_WorkspaceCanvasViewModel canvasViewModel, Window window) {
-    if (!_isWindowLoaded(canvasViewModel.loadPlan, window) || window.asset.type != AssetType.video) {
+    if (!shouldLoadVideos ||
+        !_isWindowLoaded(canvasViewModel.loadPlan, window) ||
+        window.asset.type != AssetType.video) {
       return false;
     }
 
@@ -246,6 +250,7 @@ class WorkspaceScreen extends StatelessWidget {
           ? windowInteractionState.windowFlashNonce
           : 0,
       isVideoPaused: _isVideoTemporarilyPaused(workspace, window.asset.id),
+      shouldLoadVideos: shouldLoadVideos,
       isCommandPressed: windowInteractionState.isCommandPressed,
       isOptionPressed: windowInteractionState.isOptionPressed,
       isOptionGestureTarget: windowInteractionState.activeGestureWindowId == window.asset.id,
@@ -283,6 +288,7 @@ class WorkspaceScreen extends StatelessWidget {
             onCycleVideoPlaybackSpeed: () => workspaceController.playback.cycleVideoPlaybackSpeed(window.asset.id),
             onTogglePlayback: (positionMs) =>
                 workspaceController.playback.toggleVideoPlayback(window.asset.id, positionMs: positionMs),
+            onLoadVideos: appUiController.loadVideos,
             onFitToContent: () => workspaceController.window.fitWindowToContent(window.asset.id),
             onShowInFinder: _showInFinderCallbackForWindow(window),
             onRestorePreviousZOrder: _restorePreviousZOrderCallbackForWindow(window),
@@ -335,7 +341,7 @@ class WorkspaceScreen extends StatelessWidget {
     final isLoaded = _isWindowLoaded(loadPlan, window);
     final sharedVideoState = sharedVideoLookup(
       window,
-      shouldCreate: !_isVideoTemporarilyPaused(workspace, window.asset.id),
+      shouldCreate: shouldLoadVideos && !_isVideoTemporarilyPaused(workspace, window.asset.id),
     );
 
     return Positioned.fromRect(
@@ -346,6 +352,7 @@ class WorkspaceScreen extends StatelessWidget {
         sharedVideoController: sharedVideoState?.controller,
         sharedVideoInitialization: sharedVideoState?.initialization,
         isVideoPaused: _isVideoTemporarilyPaused(workspace, window.asset.id),
+        shouldLoadVideos: shouldLoadVideos,
         isSelected: windowInteractionState.selectedExposeWindowIds.contains(window.asset.id),
         isCommandPressed: windowInteractionState.isCommandPressed,
         editMode: appUiState.editMode,
@@ -355,6 +362,7 @@ class WorkspaceScreen extends StatelessWidget {
           workspaceController.window.flashWindow(window.asset.id, mounted: mounted());
         },
         onToggleSelected: () => environmentController.navigation.toggleSelectedWindow(window.asset.id),
+        onLoadVideos: appUiController.loadVideos,
         onShowInFinder: _showInFinderCallbackForWindow(window),
         onRemove: () => environmentController.history.removeWindow(environment.activeWorkspaceId, window.asset.id),
       ),

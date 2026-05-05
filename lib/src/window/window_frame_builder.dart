@@ -64,6 +64,7 @@ extension on _WindowState {
       onZoomChanged: widget.onZoomChanged,
       onIntrinsicSizeResolved: widget.onIntrinsicSizeResolved,
       onTogglePlayback: widget.onTogglePlayback,
+      onLoadVideos: widget.onLoadVideos,
       onVideoPositionChanged: widget.onVideoPositionChanged,
       onCycleVideoPlaybackSpeed: widget.onCycleVideoPlaybackSpeed,
     );

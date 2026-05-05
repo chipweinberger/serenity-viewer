@@ -40,6 +40,7 @@ Environment normalizeDecodedEnvironment(Environment environment) {
     activeWorkspaceId: nextActiveWorkspaceId,
     knownFolders: environment.knownFolders,
     folderPopularity: environment.folderPopularity,
+    autoLoadVideos: environment.autoLoadVideos,
     imageLoadLimit: environment.imageLoadLimit,
     shortVideoLoadLimit: environment.shortVideoLoadLimit,
     longVideoLoadLimit: environment.longVideoLoadLimit,

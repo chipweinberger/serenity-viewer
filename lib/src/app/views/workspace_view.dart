@@ -126,7 +126,12 @@ class WorkspaceView extends StatelessWidget {
     final dependencies = _readDependencies(context);
     final environment = state.environmentStoreState.environment!;
     final activeWorkspace = deriveActiveWorkspace(state.environmentStoreState);
-    final workspaceLoadPlan = buildWorkspaceLoadPlan(environment: environment, activeWorkspace: activeWorkspace);
+    final shouldLoadVideos = environment.autoLoadVideos || state.appUiState.shouldLoadVideos;
+    final workspaceLoadPlan = buildWorkspaceLoadPlan(
+      environment: environment,
+      activeWorkspace: activeWorkspace,
+      shouldLoadVideos: shouldLoadVideos,
+    );
     final workspaceHudViewModel = _buildWorkspaceHudViewModel(
       activeWorkspace: activeWorkspace,
       appUiController: dependencies.appUiController,
@@ -163,6 +168,7 @@ class WorkspaceView extends StatelessWidget {
         environmentController: dependencies.environmentController,
         workspaceController: dependencies.workspaceController,
       ),
+      shouldLoadVideos: shouldLoadVideos,
     );
   }
 }

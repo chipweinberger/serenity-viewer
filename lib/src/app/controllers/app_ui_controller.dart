@@ -116,6 +116,10 @@ class AppUiController {
     appUiState.setWorkspaceSort(sort);
   }
 
+  void loadVideos() {
+    appUiState.setShouldLoadVideos(true);
+  }
+
   WorkspaceSwitchTarget workspaceSwitchTarget({
     required List<Workspace> openWorkspaces,
     required String activeWorkspaceId,

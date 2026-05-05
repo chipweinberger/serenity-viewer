@@ -92,6 +92,9 @@ class WorkspaceShortcutController {
     if (key == LogicalKeyboardKey.space) {
       final focusedWindow = _dependencies.focusedWindowOrNull();
       if (focusedWindow?.asset.type == AssetType.video) {
+        if (!_dependencies.appUiState.shouldLoadVideos) {
+          _dependencies.appUiController.loadVideos();
+        }
         _dependencies.playbackController.toggleVideoPlayback(focusedWindow!.asset.id);
       }
     }

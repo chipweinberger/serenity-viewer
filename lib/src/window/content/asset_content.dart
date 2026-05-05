@@ -27,7 +27,9 @@ class AssetContent extends StatefulWidget {
     required this.onZoomChanged,
     required this.onIntrinsicSizeResolved,
     required this.isVideoPaused,
+    required this.shouldLoadVideos,
     required this.onTogglePlayback,
+    required this.onLoadVideos,
     required this.showControls,
     this.workspaceZoom = 1,
     required this.onVideoPositionChanged,
@@ -45,7 +47,9 @@ class AssetContent extends StatefulWidget {
   final ValueChanged<WindowZoomUpdate> onZoomChanged;
   final ValueChanged<Size> onIntrinsicSizeResolved;
   final bool isVideoPaused;
+  final bool shouldLoadVideos;
   final ValueChanged<int?> onTogglePlayback;
+  final VoidCallback onLoadVideos;
   final bool showControls;
   final double workspaceZoom;
   final ValueChanged<int> onVideoPositionChanged;
@@ -107,6 +111,15 @@ class _AssetContentState extends State<AssetContent> {
 
   Widget _buildUnloadedPlaceholder() {
     return UnloadedMediaPlaceholder(asset: widget.window.asset, windowSize: widget.window.size);
+  }
+
+  Widget _buildVideoLoadPlaceholder() {
+    return VideoLoadPlaceholder(
+      asset: widget.window.asset,
+      windowSize: widget.window.size,
+      compact: widget.videoPreviewMode,
+      onLoadVideos: widget.onLoadVideos,
+    );
   }
 
   Offset _offsetForFocalZoom({
@@ -224,6 +237,10 @@ class _AssetContentState extends State<AssetContent> {
     final filePath = widget.window.asset.filePath;
     final hasLinkedFile = filePath != null && filePath.isNotEmpty;
     final exists = _fileExists(filePath);
+
+    if (widget.window.asset.type == AssetType.video && !widget.shouldLoadVideos) {
+      return _buildVideoLoadPlaceholder();
+    }
 
     final media = switch ((widget.isLoaded, hasLinkedFile, exists, widget.window.asset.type)) {
       (false, _, _, _) => _buildUnloadedPlaceholder(),

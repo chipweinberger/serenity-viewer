@@ -28,6 +28,7 @@ class AppSettingsController {
         imageLoadLimit: environment.imageLoadLimit,
         shortVideoLoadLimit: environment.shortVideoLoadLimit,
         longVideoLoadLimit: environment.longVideoLoadLimit,
+        autoLoadVideos: environment.autoLoadVideos,
         knownFolders: environment.knownFolders,
         folderPopularity: environment.folderPopularity,
       ),
@@ -41,6 +42,7 @@ class AppSettingsController {
       environment.copyWith(
         knownFolders: result.knownFolders,
         folderPopularity: result.folderPopularity,
+        autoLoadVideos: result.autoLoadVideos,
         imageLoadLimit: result.imageLoadLimit,
         shortVideoLoadLimit: result.shortVideoLoadLimit,
         longVideoLoadLimit: result.longVideoLoadLimit,

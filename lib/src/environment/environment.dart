@@ -9,6 +9,7 @@ class Environment {
     required this.activeWorkspaceId,
     required this.knownFolders,
     required this.folderPopularity,
+    required this.autoLoadVideos,
     required this.imageLoadLimit,
     required this.shortVideoLoadLimit,
     required this.longVideoLoadLimit,
@@ -18,6 +19,7 @@ class Environment {
   final String activeWorkspaceId;
   final List<String> knownFolders;
   final Map<String, int> folderPopularity;
+  final bool autoLoadVideos;
   final int imageLoadLimit;
   final int shortVideoLoadLimit;
   final int longVideoLoadLimit;
@@ -27,6 +29,7 @@ class Environment {
     String? activeWorkspaceId,
     List<String>? knownFolders,
     Map<String, int>? folderPopularity,
+    bool? autoLoadVideos,
     int? imageLoadLimit,
     int? shortVideoLoadLimit,
     int? longVideoLoadLimit,
@@ -36,6 +39,7 @@ class Environment {
       activeWorkspaceId: activeWorkspaceId ?? this.activeWorkspaceId,
       knownFolders: knownFolders ?? this.knownFolders,
       folderPopularity: folderPopularity ?? this.folderPopularity,
+      autoLoadVideos: autoLoadVideos ?? this.autoLoadVideos,
       imageLoadLimit: imageLoadLimit ?? this.imageLoadLimit,
       shortVideoLoadLimit: shortVideoLoadLimit ?? this.shortVideoLoadLimit,
       longVideoLoadLimit: longVideoLoadLimit ?? this.longVideoLoadLimit,
@@ -48,6 +52,7 @@ class Environment {
       'activeWorkspaceId': activeWorkspaceId,
       'knownFolders': knownFolders,
       'folderPopularity': folderPopularity,
+      'autoLoadVideos': autoLoadVideos,
       'imageLoadLimit': imageLoadLimit,
       'shortVideoLoadLimit': shortVideoLoadLimit,
       'longVideoLoadLimit': longVideoLoadLimit,
@@ -60,6 +65,7 @@ class Environment {
       'activeWorkspaceId': activeWorkspaceId,
       'knownFolders': knownFolders,
       'folderPopularity': folderPopularity,
+      'autoLoadVideos': autoLoadVideos,
       'imageLoadLimit': imageLoadLimit,
       'shortVideoLoadLimit': shortVideoLoadLimit,
       'longVideoLoadLimit': longVideoLoadLimit,
@@ -76,6 +82,7 @@ class Environment {
       folderPopularity: (json['folderPopularity'] as Map<String, dynamic>? ?? const {}).map(
         (key, value) => MapEntry(key, value as int),
       ),
+      autoLoadVideos: json['autoLoadVideos'] as bool? ?? false,
       imageLoadLimit: json['imageLoadLimit'] as int? ?? 300,
       shortVideoLoadLimit: json['shortVideoLoadLimit'] as int? ?? 36,
       longVideoLoadLimit: json['longVideoLoadLimit'] as int? ?? 12,
@@ -90,6 +97,7 @@ class Environment {
       folderPopularity: (json['folderPopularity'] as Map<String, dynamic>? ?? const {}).map(
         (key, value) => MapEntry(key, value as int),
       ),
+      autoLoadVideos: json['autoLoadVideos'] as bool? ?? false,
       imageLoadLimit: json['imageLoadLimit'] as int? ?? 300,
       shortVideoLoadLimit: json['shortVideoLoadLimit'] as int? ?? 36,
       longVideoLoadLimit: json['longVideoLoadLimit'] as int? ?? 12,
