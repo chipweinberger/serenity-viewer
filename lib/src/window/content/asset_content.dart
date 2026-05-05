@@ -197,7 +197,6 @@ class _AssetContentState extends State<AssetContent> {
 
     final nextZoom = (_gestureStartZoom * math.pow(event.scale, 1.45)).clamp(1.0, _maxZoom);
     final snappedZoom = (nextZoom - 1).abs() < 0.02 ? 1.0 : nextZoom;
-    final acceleratedPan = _gestureAccumulatedPan * 1.45;
     final nextOffset = snappedZoom > 1.0
         ? _offsetForFocalZoom(
                 viewportSize: viewportSize,
@@ -206,7 +205,7 @@ class _AssetContentState extends State<AssetContent> {
                 nextZoom: snappedZoom,
                 startOffset: _gestureStartContentOffset,
               ) +
-              acceleratedPan
+              _gestureAccumulatedPan
         : Offset.zero;
 
     widget.onZoomChanged(
