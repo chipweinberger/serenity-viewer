@@ -60,13 +60,13 @@ class _PlaybackCoordinator {
       return;
     }
 
-    final bucket = (position.inMilliseconds / 100).round();
-    if (_lastReportedPositionBucket == bucket) {
+    final positionMs = position.inMilliseconds;
+    if (_lastReportedPositionBucket == positionMs) {
       return;
     }
 
-    _lastReportedPositionBucket = bucket;
-    onPositionChanged(bucket * 100);
+    _lastReportedPositionBucket = positionMs;
+    onPositionChanged(positionMs);
   }
 
   void reportIntrinsicSize(VideoPlayerController controller) {
@@ -84,24 +84,29 @@ class _PlaybackCoordinator {
     required Future<void> initialization,
     required VideoPlayerController controller,
     required int? positionMs,
+    required bool shouldSyncPosition,
     required bool isPaused,
     required double playbackSpeed,
     required bool forceSeek,
+    required bool Function() isCurrent,
     required VoidCallback refreshUi,
   }) async {
     _isApplyingInitialPosition = true;
     try {
       await initialization;
-      if (!controller.value.isInitialized) {
+      if (!isCurrent() || !controller.value.isInitialized) {
         return;
       }
 
       reportIntrinsicSize(controller);
-      final targetPosition = boundedPosition(controller.value.duration, positionMs);
+      final targetPosition = shouldSyncPosition ? boundedPosition(controller.value.duration, positionMs) : null;
       if (targetPosition != null) {
         final deltaMs = (controller.value.position.inMilliseconds - targetPosition.inMilliseconds).abs();
         if (forceSeek || deltaMs > 150) {
           await controller.seekTo(targetPosition);
+          if (!isCurrent()) {
+            return;
+          }
         }
       }
 
@@ -110,7 +115,13 @@ class _PlaybackCoordinator {
       } else {
         await controller.play();
       }
+      if (!isCurrent()) {
+        return;
+      }
       await controller.setPlaybackSpeed(playbackSpeed);
+      if (!isCurrent()) {
+        return;
+      }
 
       reportPlaybackPosition(controller.value.position);
       refreshUi();
@@ -298,6 +309,7 @@ class VideoSurface extends StatefulWidget {
 class _SerenityVideoSurfaceState extends State<VideoSurface> {
   late final _PlaybackCoordinator _playbackCoordinator;
   int? _pausedThumbnailPositionMs;
+  int _controllerSyncGeneration = 0;
 
   @override
   void initState() {
@@ -309,12 +321,17 @@ class _SerenityVideoSurfaceState extends State<VideoSurface> {
     );
     _syncPausedThumbnailState();
     _syncPlaybackListener();
-    unawaited(_syncControllerToWidget(forceSeek: true));
+    unawaited(_syncControllerToWidget(shouldSyncPosition: true, forceSeek: true));
   }
 
   @override
   void didUpdateWidget(covariant VideoSurface oldWidget) {
     super.didUpdateWidget(oldWidget);
+    final isPauseTransition =
+        oldWidget.path == widget.path &&
+        oldWidget.controller == widget.controller &&
+        !oldWidget.isPaused &&
+        widget.isPaused;
     if (oldWidget.path != widget.path ||
         oldWidget.controller != widget.controller ||
         oldWidget.isPaused != widget.isPaused) {
@@ -336,6 +353,7 @@ class _SerenityVideoSurfaceState extends State<VideoSurface> {
         oldWidget.controller != widget.controller) {
       unawaited(
         _syncControllerToWidget(
+          shouldSyncPosition: !isPauseTransition,
           forceSeek:
               oldWidget.path != widget.path ||
               oldWidget.positionMs != widget.positionMs ||
@@ -345,20 +363,23 @@ class _SerenityVideoSurfaceState extends State<VideoSurface> {
     }
   }
 
-  Future<void> _syncControllerToWidget({required bool forceSeek}) async {
+  Future<void> _syncControllerToWidget({required bool shouldSyncPosition, required bool forceSeek}) async {
     final controller = widget.controller;
     final initialization = widget.initialization;
     if (controller == null || initialization == null) {
       return;
     }
+    final syncGeneration = ++_controllerSyncGeneration;
 
     await _playbackCoordinator.syncToWidget(
       initialization: initialization,
       controller: controller,
       positionMs: widget.positionMs,
+      shouldSyncPosition: shouldSyncPosition,
       isPaused: widget.isPaused,
       playbackSpeed: widget.playbackSpeed,
       forceSeek: forceSeek,
+      isCurrent: () => mounted && syncGeneration == _controllerSyncGeneration,
       refreshUi: () {
         if (mounted) {
           setState(() {});
@@ -366,7 +387,10 @@ class _SerenityVideoSurfaceState extends State<VideoSurface> {
       },
     );
 
-    if (!mounted || !widget.isPaused || !controller.value.isInitialized) {
+    if (!mounted ||
+        syncGeneration != _controllerSyncGeneration ||
+        !widget.isPaused ||
+        !controller.value.isInitialized) {
       return;
     }
 
@@ -403,7 +427,12 @@ class _SerenityVideoSurfaceState extends State<VideoSurface> {
     );
   }
 
-  Widget _buildPausedVideo() {
+  Widget _buildPausedVideo(BuildContext context) {
+    final controller = widget.controller;
+    if (controller != null && controller.value.isInitialized) {
+      return _buildInitializedVideo(context, controller);
+    }
+
     return _PausedVideoFrame(
       path: widget.path,
       aspectRatio: widget.aspectRatio,
@@ -413,10 +442,6 @@ class _SerenityVideoSurfaceState extends State<VideoSurface> {
       zoomBaseSize: widget.zoomBaseSize,
       contentOffset: widget.contentOffset,
     );
-  }
-
-  bool get _shouldShowPausedThumbnail {
-    return widget.controller == null || _pausedThumbnailPositionMs != null;
   }
 
   void _syncPausedThumbnailState() {
@@ -443,14 +468,7 @@ class _SerenityVideoSurfaceState extends State<VideoSurface> {
   @override
   Widget build(BuildContext context) {
     if (widget.isPaused) {
-      if (!_shouldShowPausedThumbnail) {
-        final controller = widget.controller;
-        if (controller != null && controller.value.isInitialized) {
-          return _buildInitializedVideo(context, controller);
-        }
-      }
-
-      return _buildPausedVideo();
+      return _buildPausedVideo(context);
     }
 
     final controller = widget.controller;

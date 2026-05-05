@@ -53,7 +53,7 @@ class WorkspacePlaybackController {
     if (wasPaused) {
       workspace.clearPosition(activeWorkspaceOrNull(), windowId);
     } else {
-      final nextPositionMs = positionMs ?? currentVideoPositionMs(windowId);
+      final nextPositionMs = currentVideoPositionMs(windowId) ?? positionMs;
       if (nextPositionMs != null) {
         workspace.setPosition(activeWorkspaceOrNull(), windowId, nextPositionMs);
       }

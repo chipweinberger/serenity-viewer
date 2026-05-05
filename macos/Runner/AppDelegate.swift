@@ -451,11 +451,8 @@ class AppDelegate: FlutterAppDelegate {
     imageGenerator.requestedTimeToleranceAfter = .zero
 
     do {
-      let cgImage = try copyBestVideoFrameImage(
-        asset: asset,
-        imageGenerator: imageGenerator,
-        positionMs: positionMs
-      )
+      let time = CMTime(value: CMTimeValue(max(0, positionMs)), timescale: 1000)
+      let cgImage = try imageGenerator.copyCGImage(at: time, actualTime: nil)
       let cropRect = cropRectForImage(cgImage, normalizedCrop: normalizedCrop)
       let outputImage = cgImage.cropping(to: cropRect) ?? cgImage
 
@@ -500,11 +497,8 @@ class AppDelegate: FlutterAppDelegate {
     }
 
     do {
-      let cgImage = try copyBestVideoFrameImage(
-        asset: asset,
-        imageGenerator: imageGenerator,
-        positionMs: positionMs
-      )
+      let time = CMTime(value: CMTimeValue(max(0, positionMs)), timescale: 1000)
+      let cgImage = try imageGenerator.copyCGImage(at: time, actualTime: nil)
       let cropRect = cropRectForImage(cgImage, normalizedCrop: normalizedCrop)
       let outputImage = cgImage.cropping(to: cropRect) ?? cgImage
 
@@ -517,62 +511,6 @@ class AppDelegate: FlutterAppDelegate {
     } catch {
       return nil
     }
-  }
-
-  private func copyBestVideoFrameImage(
-    asset: AVURLAsset,
-    imageGenerator: AVAssetImageGenerator,
-    positionMs: Int
-  ) throws -> CGImage {
-    let requestedMs = max(0, positionMs)
-    let durationMs = max(0, Int((asset.duration.seconds.isFinite ? asset.duration.seconds : 0) * 1000))
-    let stepMs = max(8, frameStepMs(for: asset))
-    let lastValidMs = max(0, durationMs - 1)
-    let candidatePositions = [
-      requestedMs,
-      min(lastValidMs, requestedMs + stepMs),
-      min(lastValidMs, requestedMs + (stepMs * 2)),
-    ]
-
-    var bestImage: CGImage?
-    var bestActualMs = Int.min
-
-    for candidateMs in candidatePositions {
-      let time = CMTime(value: CMTimeValue(candidateMs), timescale: 1000)
-      var actualTime = CMTime.zero
-      do {
-        let cgImage = try imageGenerator.copyCGImage(at: time, actualTime: &actualTime)
-        let actualMs = Int((actualTime.seconds.isFinite ? actualTime.seconds : 0) * 1000)
-        if actualMs >= requestedMs - 1 {
-          return cgImage
-        }
-        if actualMs > bestActualMs {
-          bestActualMs = actualMs
-          bestImage = cgImage
-        }
-      } catch {
-        continue
-      }
-    }
-
-    if let bestImage {
-      return bestImage
-    }
-
-    let fallbackTime = CMTime(value: CMTimeValue(requestedMs), timescale: 1000)
-    return try imageGenerator.copyCGImage(at: fallbackTime, actualTime: nil)
-  }
-
-  private func frameStepMs(for asset: AVURLAsset) -> Int {
-    guard
-      let track = asset.tracks(withMediaType: .video).first,
-      track.nominalFrameRate.isFinite,
-      track.nominalFrameRate > 0
-    else {
-      return 16
-    }
-
-    return max(1, Int((1000.0 / Double(track.nominalFrameRate)).rounded()))
   }
 
   private func cropRectForImage(_ image: CGImage, normalizedCrop: [String: Any]?) -> CGRect {
