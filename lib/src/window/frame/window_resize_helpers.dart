@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 enum WindowResizeHandle { left, right, top, bottom, topLeft, topRight, bottomLeft, bottomRight }
 
+enum CornerResizeHitTestMode { circle, edge }
+
 const double _resizeHitTestEpsilon = 0.5;
 
 WindowResizeHandle? assetWindowResizeHandleForPosition({
@@ -10,6 +12,7 @@ WindowResizeHandle? assetWindowResizeHandleForPosition({
   double borderRadius = 16,
   double edgeHitThickness = 8,
   double cornerHitDiameter = 26,
+  CornerResizeHitTestMode cornerHitTestMode = CornerResizeHitTestMode.circle,
 }) {
   if (windowSize.width <= 0 || windowSize.height <= 0) {
     return null;
@@ -24,6 +27,15 @@ WindowResizeHandle? assetWindowResizeHandleForPosition({
     windowSize.height + (_resizeHitTestEpsilon * 2),
   );
   final outerRRect = RRect.fromRectAndRadius(outerRect, outerRadius);
+  final cornerHandle = _cornerResizeHandleForPosition(
+    outerRRect: outerRRect,
+    localPosition: localPosition,
+    cornerHitDiameter: cornerHitDiameter,
+  );
+  if (cornerHandle != null && cornerHitTestMode == CornerResizeHitTestMode.circle) {
+    return cornerHandle;
+  }
+
   if (!outerRRect.contains(localPosition)) {
     return null;
   }
@@ -44,11 +56,6 @@ WindowResizeHandle? assetWindowResizeHandleForPosition({
     return null;
   }
 
-  final cornerHandle = _cornerResizeHandleForPosition(
-    outerRRect: outerRRect,
-    localPosition: localPosition,
-    cornerHitDiameter: cornerHitDiameter,
-  );
   if (cornerHandle != null) {
     return cornerHandle;
   }

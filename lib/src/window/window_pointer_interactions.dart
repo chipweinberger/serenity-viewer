@@ -43,7 +43,8 @@ extension on _WindowState {
       localPosition: localPosition,
       borderRadius: 16,
       edgeHitThickness: 6 / scale,
-      cornerHitDiameter: 20 / scale,
+      cornerHitDiameter: 30 / scale,
+      cornerHitTestMode: CornerResizeHitTestMode.circle,
     );
   }
 
