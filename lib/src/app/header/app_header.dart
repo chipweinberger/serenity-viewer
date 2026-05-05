@@ -60,7 +60,7 @@ class AppHeader extends StatelessWidget {
       top: 0,
       left: 0,
       right: 0,
-      height: 84,
+      height: 20,
       child: AbsorbPointer(absorbing: true, child: ColoredBox(color: Colors.transparent)),
     );
   }
