@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
@@ -148,10 +147,6 @@ class VideoSurface extends StatefulWidget {
     required this.playbackSpeed,
     required this.onPositionChanged,
     required this.onCyclePlaybackSpeed,
-    required this.showControls,
-    this.showPausedPlaybackButton = false,
-    this.workspaceZoom = 1,
-    required this.onControlInteractionChanged,
     this.previewMode = false,
   });
 
@@ -168,10 +163,6 @@ class VideoSurface extends StatefulWidget {
   final double playbackSpeed;
   final ValueChanged<int> onPositionChanged;
   final VoidCallback onCyclePlaybackSpeed;
-  final bool showControls;
-  final bool showPausedPlaybackButton;
-  final double workspaceZoom;
-  final ValueChanged<bool> onControlInteractionChanged;
   final bool previewMode;
 
   @override
@@ -208,18 +199,6 @@ class _SerenityVideoSurfaceState extends State<VideoSurface> {
         oldWidget.playbackSpeed != widget.playbackSpeed) {
       unawaited(_syncControllerToWidget(forceSeek: oldWidget.path != widget.path));
     }
-  }
-
-  String _playbackSpeedLabel(double speed) {
-    if ((speed - 1.0).abs() < 0.001) {
-      return '1.0x';
-    }
-    return '${speed.toString()}x';
-  }
-
-  double get _uiScale {
-    final safeZoom = widget.workspaceZoom <= 0 ? 1.0 : widget.workspaceZoom;
-    return (1 / safeZoom).clamp(0.85, 2.1);
   }
 
   Future<void> _syncControllerToWidget({required bool forceSeek}) async {
@@ -269,218 +248,13 @@ class _SerenityVideoSurfaceState extends State<VideoSurface> {
   Widget _buildInitializedVideo(BuildContext context, VideoPlayerController controller) {
     return ValueListenableBuilder<VideoPlayerValue>(
       valueListenable: controller,
-      builder: (context, value, child) {
-        final uiScale = _uiScale;
-        final durationMs = value.duration.inMilliseconds;
-        final positionMs = value.position.inMilliseconds.clamp(0, durationMs <= 0 ? 0 : durationMs);
-        final elapsedLabel = _formatDuration(value.position);
-        final totalLabel = _formatDuration(value.duration);
-        final speedLabel = _playbackSpeedLabel(widget.playbackSpeed);
-
-        return Stack(
-          fit: StackFit.expand,
-          children: [
-            ZoomBox(
-              aspectRatio: controller.value.aspectRatio,
-              zoom: widget.zoom,
-              zoomBaseSize: widget.zoomBaseSize,
-              contentOffset: widget.contentOffset,
-              child: VideoPlayer(controller),
-            ),
-            if (widget.showControls && durationMs > 0)
-              Positioned(
-                left: 10 * uiScale,
-                right: 10 * uiScale,
-                bottom: 10 * uiScale,
-                child: _buildControlsRow(
-                  context,
-                  positionMs: positionMs,
-                  durationMs: durationMs,
-                  elapsedLabel: elapsedLabel,
-                  totalLabel: totalLabel,
-                  speedLabel: speedLabel,
-                  uiScale: uiScale,
-                ),
-              ),
-            if (widget.showPausedPlaybackButton && widget.isPaused && durationMs > 0)
-              Positioned(
-                left: 4 * uiScale,
-                bottom: 4 * uiScale,
-                child: _buildPausedPlayButton(uiScale: uiScale, positionMs: positionMs),
-              ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildControlsRow(
-    BuildContext context, {
-    required int positionMs,
-    required int durationMs,
-    required String elapsedLabel,
-    required String totalLabel,
-    required String speedLabel,
-    required double uiScale,
-  }) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(999),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(999),
-                child: BackdropFilter(
-                  filter: ui.ImageFilter.blur(sigmaX: 12 * uiScale, sigmaY: 12 * uiScale),
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10 * uiScale, vertical: 4 * uiScale),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.42),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Text(
-                      '$elapsedLabel / $totalLabel',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.1,
-                        fontSize: 11 * uiScale,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(width: 6 * uiScale),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(999),
-                child: BackdropFilter(
-                  filter: ui.ImageFilter.blur(sigmaX: 12 * uiScale, sigmaY: 12 * uiScale),
-                  child: Material(
-                    color: Colors.black.withValues(alpha: 0.42),
-                    child: InkWell(
-                      onTap: widget.onCyclePlaybackSpeed,
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10 * uiScale, vertical: 4 * uiScale),
-                        child: Text(
-                          speedLabel,
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.1,
-                            fontSize: 11 * uiScale,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 6 * uiScale),
-          Row(
-            children: [
-              _buildPlaybackButton(
-                uiScale: uiScale,
-                icon: widget.isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
-                padding: 6 * uiScale,
-                iconSize: 14 * uiScale,
-                positionMs: positionMs,
-              ),
-              SizedBox(width: 8 * uiScale),
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(999),
-                  child: BackdropFilter(
-                    filter: ui.ImageFilter.blur(sigmaX: 12 * uiScale, sigmaY: 12 * uiScale),
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8 * uiScale, vertical: 2 * uiScale),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.42),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Listener(
-                        onPointerDown: (_) => widget.onControlInteractionChanged(true),
-                        onPointerUp: (_) => widget.onControlInteractionChanged(false),
-                        onPointerCancel: (_) => widget.onControlInteractionChanged(false),
-                        child: SliderTheme(
-                          data: SliderTheme.of(context).copyWith(
-                            trackHeight: 3 * uiScale,
-                            thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6 * uiScale),
-                            overlayShape: RoundSliderOverlayShape(overlayRadius: 12 * uiScale),
-                            activeTrackColor: Colors.white,
-                            inactiveTrackColor: Colors.white.withValues(alpha: 0.28),
-                            thumbColor: Colors.white,
-                            overlayColor: Colors.white.withValues(alpha: 0.14),
-                          ),
-                          child: Slider(
-                            value: positionMs.toDouble().clamp(0, durationMs.toDouble()),
-                            min: 0,
-                            max: durationMs.toDouble(),
-                            onChanged: (nextValue) async {
-                              await widget.controller.seekTo(Duration(milliseconds: nextValue.round()));
-                            },
-                            onChangeEnd: (_) => widget.onControlInteractionChanged(false),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
+      builder: (context, value, child) => ZoomBox(
+        aspectRatio: controller.value.aspectRatio,
+        zoom: widget.zoom,
+        zoomBaseSize: widget.zoomBaseSize,
+        contentOffset: widget.contentOffset,
+        child: VideoPlayer(controller),
       ),
     );
-  }
-
-  Widget _buildPausedPlayButton({required double uiScale, required int positionMs}) {
-    return _buildPlaybackButton(
-      uiScale: uiScale,
-      icon: Icons.play_arrow_rounded,
-      padding: 4 * uiScale,
-      iconSize: 12 * uiScale,
-      positionMs: positionMs,
-    );
-  }
-
-  Widget _buildPlaybackButton({
-    required double uiScale,
-    required IconData icon,
-    required double padding,
-    required double iconSize,
-    required int positionMs,
-  }) {
-    return ClipOval(
-      child: BackdropFilter(
-        filter: ui.ImageFilter.blur(sigmaX: 12 * uiScale, sigmaY: 12 * uiScale),
-        child: Material(
-          color: Colors.black.withValues(alpha: 0.42),
-          child: InkWell(
-            onTap: () => widget.onTogglePlayback(positionMs),
-            child: Padding(
-              padding: EdgeInsets.all(padding),
-              child: Icon(icon, size: iconSize, color: Colors.white),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  String _formatDuration(Duration duration) {
-    final totalSeconds = duration.inSeconds;
-    final hours = totalSeconds ~/ 3600;
-    final minutes = (totalSeconds % 3600) ~/ 60;
-    final seconds = totalSeconds % 60;
-    if (hours > 0) {
-      return '$hours:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-    }
-    return '$minutes:${seconds.toString().padLeft(2, '0')}';
   }
 }

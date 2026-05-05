@@ -17,7 +17,6 @@ extension on _WindowState {
     }
 
     if (!wasOptionPressed && isOptionPressed && _isHovered) {
-      _claimedOptionGestureTarget = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           widget.onOptionGestureWindowRequested();
@@ -29,7 +28,6 @@ extension on _WindowState {
     if (wasOptionPressed && !isOptionPressed) {
       _isTrackpadWindowGestureActive = false;
       _lastTrackpadScale = 1.0;
-      _claimedOptionGestureTarget = false;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           widget.onOptionGestureReleased();

@@ -7,12 +7,6 @@ extension on _WindowState {
 
   bool get _showControlsFromCommand => widget.viewModel.isCommandPressed && (_isHovered || _isResizing);
 
-  bool get _isOptionGestureTargetActive {
-    return widget.viewModel.isOptionPressed &&
-        !widget.viewModel.isCommandPressed &&
-        (widget.viewModel.isOptionGestureTarget || _claimedOptionGestureTarget);
-  }
-
   bool get _shouldShowCommandOverlay {
     return widget.viewModel.isSelected || _areControlsPinned || _showControlsFromCommand;
   }
@@ -64,24 +58,12 @@ extension on _WindowState {
     return WorkspaceWindowContent(
       viewModel: widget.viewModel,
       showControls: _showControls,
-      showPausedPlaybackButton: _showPausedPlaybackButton,
       shrinkContent: shrinkContent,
       inset: inset,
       onTap: _handleContentTap,
       onZoomChanged: widget.onZoomChanged,
       onIntrinsicSizeResolved: widget.onIntrinsicSizeResolved,
       onTogglePlayback: widget.onTogglePlayback,
-      onVideoControlInteractionChanged: (isInteracting) {
-        if (_isInteractingWithVideoControls == isInteracting) {
-          return;
-        }
-        if (!mounted) {
-          return;
-        }
-        setState(() {
-          _isInteractingWithVideoControls = isInteracting;
-        });
-      },
       onVideoPositionChanged: widget.onVideoPositionChanged,
       onCycleVideoPlaybackSpeed: widget.onCycleVideoPlaybackSpeed,
     );
@@ -101,6 +83,28 @@ extension on _WindowState {
       onClose: widget.onClose,
       onFitToContent: widget.onFitToContent,
       onRestorePreviousZOrder: widget.onRestorePreviousZOrder,
+      assetType: widget.viewModel.window.asset.type,
+      sharedVideoController: widget.viewModel.sharedVideoController,
+      sharedVideoInitialization: widget.viewModel.sharedVideoInitialization,
+      isVideoPaused: widget.viewModel.isVideoPaused,
+      videoPositionMs: widget.viewModel.window.videoPositionMs,
+      playbackSpeed: widget.viewModel.window.videoPlaybackSpeed,
+      showVideoControls: _showControls,
+      showPausedPlaybackButton: _showPausedPlaybackButton,
+      onVideoControlInteractionChanged: (isInteracting) {
+        if (_isInteractingWithVideoControls == isInteracting) {
+          return;
+        }
+        if (!mounted) {
+          return;
+        }
+        setState(() {
+          _isInteractingWithVideoControls = isInteracting;
+        });
+      },
+      onVideoPositionChanged: widget.onVideoPositionChanged,
+      onCycleVideoPlaybackSpeed: widget.onCycleVideoPlaybackSpeed,
+      onTogglePlayback: widget.onTogglePlayback,
     );
   }
 

@@ -77,7 +77,6 @@ class _WindowState extends State<WorkspaceWindow> with SingleTickerProviderState
   bool _isInteractingWithVideoControls = false;
   bool _isTrackpadWindowGestureActive = false;
   bool _isDraggingWindow = false;
-  bool _claimedOptionGestureTarget = false;
   double _lastTrackpadScale = 1.0;
   Offset? _hoverPosition;
   WindowResizeHandle? _activeResizeHandle;

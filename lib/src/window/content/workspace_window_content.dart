@@ -11,28 +11,24 @@ class WorkspaceWindowContent extends StatelessWidget {
     super.key,
     required this.viewModel,
     required this.showControls,
-    required this.showPausedPlaybackButton,
     required this.shrinkContent,
     required this.inset,
     required this.onTap,
     required this.onZoomChanged,
     required this.onIntrinsicSizeResolved,
     required this.onTogglePlayback,
-    required this.onVideoControlInteractionChanged,
     required this.onVideoPositionChanged,
     required this.onCycleVideoPlaybackSpeed,
   });
 
   final WorkspaceWindowViewModel viewModel;
   final bool showControls;
-  final bool showPausedPlaybackButton;
   final bool shrinkContent;
   final double inset;
   final VoidCallback onTap;
   final ValueChanged<WindowZoomUpdate> onZoomChanged;
   final ValueChanged<Size> onIntrinsicSizeResolved;
   final ValueChanged<int?> onTogglePlayback;
-  final ValueChanged<bool> onVideoControlInteractionChanged;
   final ValueChanged<int> onVideoPositionChanged;
   final VoidCallback onCycleVideoPlaybackSpeed;
 
@@ -69,9 +65,7 @@ class WorkspaceWindowContent extends StatelessWidget {
           isVideoPaused: viewModel.isVideoPaused,
           onTogglePlayback: onTogglePlayback,
           showControls: showControls,
-          showPausedPlaybackButton: showPausedPlaybackButton,
           workspaceZoom: viewModel.workspaceZoom,
-          onVideoControlInteractionChanged: onVideoControlInteractionChanged,
           onVideoPositionChanged: onVideoPositionChanged,
           onCycleVideoPlaybackSpeed: onCycleVideoPlaybackSpeed,
           allowDirectContentGestures: viewModel.areControlsPinned,

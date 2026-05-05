@@ -29,9 +29,7 @@ class AssetContent extends StatefulWidget {
     required this.isVideoPaused,
     required this.onTogglePlayback,
     required this.showControls,
-    this.showPausedPlaybackButton = false,
     this.workspaceZoom = 1,
-    required this.onVideoControlInteractionChanged,
     required this.onVideoPositionChanged,
     required this.onCycleVideoPlaybackSpeed,
     this.allowDirectContentGestures = false,
@@ -49,9 +47,7 @@ class AssetContent extends StatefulWidget {
   final bool isVideoPaused;
   final ValueChanged<int?> onTogglePlayback;
   final bool showControls;
-  final bool showPausedPlaybackButton;
   final double workspaceZoom;
-  final ValueChanged<bool> onVideoControlInteractionChanged;
   final ValueChanged<int> onVideoPositionChanged;
   final VoidCallback onCycleVideoPlaybackSpeed;
   final bool allowDirectContentGestures;
@@ -262,10 +258,6 @@ class _AssetContentState extends State<AssetContent> {
         playbackSpeed: widget.window.videoPlaybackSpeed,
         onPositionChanged: widget.onVideoPositionChanged,
         onCyclePlaybackSpeed: widget.onCycleVideoPlaybackSpeed,
-        showControls: widget.showControls,
-        showPausedPlaybackButton: widget.showPausedPlaybackButton,
-        workspaceZoom: widget.workspaceZoom,
-        onControlInteractionChanged: widget.onVideoControlInteractionChanged,
         previewMode: widget.videoPreviewMode,
       ),
     };
